@@ -42,19 +42,14 @@ export const AdminHeader = ({ children }) => {
             <div className="sidebar-heading">Modulos</div>
 
             {/* <!-- Usuarios --> */}
+            {/* Usuarios */}
             <li className="nav-item">
-
-              <Link to={"/admin/usuarios"}>
-              <a className="nav-link" href="Usuarios.html">
-                {/* <!-- <i className='bx bx-store-alt'></i> --> */}
+              <Link to={"/admin/usuarios"} className="nav-link">
                 <i className="fas fa-fw fa-user"></i>
                 <span>Usuarios</span>
-              </a>
-              
               </Link>
-
-
             </li>
+
 
             {/* <!-- PROVEEDOR --> */}
             <li className="nav-item">
@@ -86,7 +81,7 @@ export const AdminHeader = ({ children }) => {
             {/* <!-- DISEÑOS --> */}
             <li className="nav-item">
 
-              <a className="nav-link"  href="Disenios.html">
+              <a className="nav-link" href="Disenios.html">
                 {/* <!-- <i className='bx bx-store-alt'></i> --> */}
                 <i className="fas fa-fw fa-paint-brush"></i>
                 <span>Diseños</span>

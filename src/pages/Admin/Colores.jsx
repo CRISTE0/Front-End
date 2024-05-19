@@ -1,204 +1,228 @@
-import React from "react";
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
+// Importación de módulos y componentes de React
+import React, { useEffect, useState } from "react";
+import axios from "axios"; // Biblioteca para realizar solicitudes HTTP
+import Swal from "sweetalert2"; // Biblioteca para mensajes de alerta
+import withReactContent from "sweetalert2-react-content"; // SweetAlert2 con soporte para React
+import { show_alerta } from "../../assets/js/functions"; // Función personalizada
+import { ChromePicker } from 'react-color'; // Componente de react-color
 
 export const Colores = () => {
+  let url = "http://localhost:3000/api/colores";
+  const [Colores, setColores] = useState([]);
+  const [IdColor, setIdColor] = useState("");
+  const [Color, setColor] = useState("");
+  const [Referencia, setReferencia] = useState("");
+  const [operation, setOperation] = useState(1);
+  const [title, setTitle] = useState("");
+
+  // useEffect para realizar acciones después de la renderización
+  useEffect(() => {
+    getColores(); // Llama a la función getColores al montar el componente
+  }, []);
+
+
+  // Función asíncrona para obtener los colores desde el servidor
+  const getColores = async () => {
+    const respuesta = await axios.get(url); // Realiza una solicitud GET utilizando axios
+    setColores(respuesta.data); // Actualiza el estado con los datos recibidos
+    console.log(respuesta.data); // Imprime los datos recibidos en la consola
+  };
+  // Función para abrir el modal de registro o edición de colores
+  const openModal = (op, idColor, color, referencia) => {
+    // Actualiza el estado con los valores necesarios para el modal
+    setIdColor("");
+    setColor("");
+    setReferencia("");
+    setOperation(op);
+    if (op === 1) {
+      setTitle("Registrar Colores");
+    } else if (op === 2) {
+      setTitle("Editar Color");
+      setIdColor(idColor);
+      setColor(color);
+      setReferencia(referencia);
+    }
+  };
+
+
+  // Función para validar y enviar la solicitud al servidor
+  const validar = () => {
+    // Definición de expresiones regulares para validar entradas
+    // Expresión regular para validar solo letras y espacios
+    const letrasRegex = /^[A-Za-z\s]+$/;
+    const colorHexRegex = /^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/; // Color hexadecimal
+
+    if (Color === "") {
+      show_alerta("Escribe el color", "warning");
+    } else if (!letrasRegex.test(Color)) {
+      show_alerta("El color solo puede contener letras", "warning");
+    } else if (Referencia === "") {
+      show_alerta("Escribe la referencia", "warning");
+    } else if (!colorHexRegex.test(Referencia)) {
+      show_alerta("La referencia debe ser un color hexadecimal válido", "warning");
+    } else {
+      // Construcción de los parámetros y método HTTP según la operación
+      let parametros, metodo;
+      if (operation === 1) {
+        parametros = {
+          Color: Color,
+          Referencia: Referencia,
+        };
+        metodo = "POST";
+      } else {
+        parametros = {
+          IdColor: IdColor,
+          Color: Color,
+          Referencia: Referencia,
+        };
+        metodo = "PUT";
+      }
+      enviarSolicitud(metodo, parametros); // Llama a la función para enviar la solicitud
+    }
+  };
+
+  // Función para enviar la solicitud al servidor
+  const enviarSolicitud = async (metodo, parametros) => {
+    // Lógica para manejar diferentes métodos HTTP
+    if (metodo === "PUT") {
+      // Construye la URL para la solicitud PUT
+      let urlPut = `${url}/${parametros.IdColor}`;
+      // Realiza la solicitud PUT utilizando axios
+      await axios({ method: metodo, url: urlPut, data: parametros })
+        .then(function (respuesta) {
+          // Manejo de la respuesta del servidor
+          console.log(respuesta);
+          var tipo = respuesta.data[0];
+          var msj = respuesta.data.message;
+          show_alerta(msj, "success");
+          document.getElementById("btnCerrar").click(); // Cierra el modal
+          getColores(); // Actualiza la lista de colores
+        })
+        .catch(function (error) {
+          show_alerta("Error en la solicitud", "error");
+          console.log(error);
+        });
+    } else if (metodo === "DELETE") {
+      // Construye la URL para la solicitud DELETE
+      let urlDelete = `${url}/${parametros.IdColor}`;
+      // Realiza la solicitud DELETE utilizando axios
+      await axios({ method: metodo, url: urlDelete, data: parametros })
+        .then(function (respuesta) {
+          // Manejo de la respuesta del servidor
+          console.log(respuesta);
+          var tipo = respuesta.data[0];
+          var msj = respuesta.data.message;
+          show_alerta(msj, "success");
+          document.getElementById("btnCerrar").click(); // Cierra el modal
+          getColores(); // Actualiza la lista de colores
+        })
+        .catch(function (error) {
+          show_alerta("Error en la solicitud", "error");
+          console.log(error);
+        });
+    } else {
+      // Realiza la solicitud POST utilizando axios
+      await axios({ method: metodo, url: url, data: parametros })
+        .then(function (respuesta) {
+          // Manejo de la respuesta del servidor
+          console.log(respuesta);
+          var tipo = respuesta.data[0];
+          var msj = respuesta.data.message;
+          show_alerta(msj, "success");
+          document.getElementById("btnCerrar").click(); // Cierra el modal
+          getColores(); // Actualiza la lista de colores
+        })
+        .catch(function (error) {
+          show_alerta("Error en la solicitud", "error");
+          console.log(error);
+        });
+    }
+  };
+
+  // Función para eliminar un color
+  const deleteColor = (id, color) => {
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      // Crea un modal de confirmación utilizando SweetAlert2
+      title: `¿Seguro de eliminar el color ${color}?`,
+      icon: "question",
+      text: "No se podrá dar marcha atrás",
+      showCancelButton: true,
+      confirmButtonText: "Si, eliminar",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        enviarSolicitud("DELETE", { IdColor: id }); // Si se confirma, llama a la función para eliminar el color
+      } else {
+        show_alerta("El color NO fue eliminado", "info");
+      }
+    });
+  };
+
   return (
     <>
-      {/* <!-- Modal para crear talla --> */}
+      {/* <!-- Modal para crear colores --> */}
 
-      <div
-        className="modal fade"
-        id="ModalCrearProveedor"
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="ModalAñadirProveedorLabel"
-        aria-hidden="true"
-      >
+      <div className="modal fade" id="modalColores" tabIndex="-1" role="dialog" aria-labelledby="ModalAñadirColorLabel" aria-hidden="true">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="ModalAñadirProveedorLabel">
-                Crear Talla
-              </h5>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
+              <h5 className="modal-title" id="ModalAñadirColorLabel">{title}</h5>
+              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div className="modal-body">
-              {/* <!-- Contenido del formulario para crear Proveedor --> */}
-              <form id="crearProveedorForm" className="justify-content-end">
-                <div className="form-group">
-                  <label htmlFor="nombreProveedor">Nombre del Proveedor:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="nombreProveedor"
-                    placeholder="Ingrese el nombre del Proveedor"
-                    required
-                    pattern="[A-Za-zÁ-ú\s]+"
-                    title="Solo se permiten letras y espacios"
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="cedulaProveedor">Cédula del Proveedor:</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="cedulaProveedor"
-                    placeholder="Ingrese la cédula del Proveedor"
-                    required
-                  />
-                  <small id="cedulaHelp" className="form-text text-muted">
-                    Ingrese un documento válido (entre 7 y 10 dígitos
-                    numéricos).
-                  </small>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="telefonoProveedor">
-                    Teléfono del Proveedor:
-                  </label>
-                  <input
-                    type="tel"
-                    className="form-control"
-                    id="telefonoProveedor"
-                    placeholder="Ingrese el teléfono del Proveedor"
-                    required
-                    pattern="\d*"
-                    inputMode="numeric"
-                    title="Solo se permiten números"
-                  />
-                  <small id="telefonoHelp" className="form-text text-muted">
-                    Ingrese un número de teléfono válido (10 dígitos).
-                  </small>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="direccionProveedor">
-                    Dirección del Proveedor:
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="direccionProveedor"
-                    placeholder="Ingrese la dirección del Proveedor"
-                    required
-                  />
-                </div>
+              <input type="hidden" id="IdColor"></input>
+              <div className="input-group mb-3">
+                <span className="input-group-text">
+                  <i className="fa fa-paint-brush" aria-hidden="true"></i>
+                </span>
+                <input
+                  type="text"
+                  id="color"
+                  className="form-control"
+                  placeholder="Color"
+                  value={Color}
+                  onChange={(e) => setColor(e.target.value)}
+                />
+              </div>
+              <div className="input-group mb-3">
+                <span className="input-group-text">
+                  <i className="fa fa-hashtag" aria-hidden="true"></i>
+                </span>
+                <ChromePicker
+                  color={Referencia}
+                  onChange={(color) => setReferencia(color.hex)}
+                />
+              </div>
+              <div className="text-right">
+                <button
+                  type="button"
+                  id="btnCerrar"
+                  className="btn btn-secondary"
+                  data-dismiss="modal"
+                >
+                  Cerrar
+                </button>
+                <button onClick={() => validar()} className="btn btn-success">
+                  <i className="fa-solid fa-floppy-disk"></i>
+                  Guardar Color
+                </button>
 
-                {/* <!-- Línea divisoria --> */}
-                <hr className="my-4" />
+              </div>
 
-                {/* <!-- Botones dentro del formulario --> */}
-                <div className="text-right">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    data-dismiss="modal"
-                  >
-                    Cancelar
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    Guardar Proveedor
-                  </button>
-                </div>
-              </form>
             </div>
           </div>
         </div>
       </div>
-      {/* Fin modal crear proveedor */}
+      {/* Fin modal crear colores */}
 
 
-      {/* <!-- Modal de visualización --> */}
-      <div
-        className="modal fade"
-        id="ModalVisualizarProveedor"
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="visualizarModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="visualizarModalLabel">
-                Detalles del Proveedor
-              </h5>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
 
-            {/* <!-- Campos del modal para Visualizar --> */}
-            <div className="modal-body">
-              <div className="form-group">
-                <label htmlFor="nombreProveedor" style={{ color: "black" }}>
-                  Nombre del Proveedor:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="nombreProveedor"
-                  placeholder="Nombre del proveedor aquí"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="cedulaProveedor" style={{ color: "black" }}>
-                  Cédula del proveedor:
-                </label>
-                <input
-                  type="number"
-                  className="form-control"
-                  id="cedulaProveedor"
-                  placeholder="Cédula del proveedor aquí "
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="telefonoProveedor" style={{ color: "black" }}>
-                  Télefono del proveedor:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="télefonoProveedor"
-                  placeholder="Télefono del proveedor aquí"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="direccionProveedor" style={{ color: "black" }}>
-                  Dirección del proveedor:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="télefonoProveedor"
-                  placeholder="Dirección del proveedor aquí"
-                />
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-dismiss="modal"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* <!-- Fin modal de visualización --> */}
-
-      {/* <!-- Inicio de Proveedor --> */}
+      {/* <!-- Inicio de Colores --> */}
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
@@ -206,20 +230,22 @@ export const Colores = () => {
 
           <div className="text-center p-3">
             <button
+              onClick={() => openModal(1)}
+
               type="button"
               className="btn btn-dark"
               data-toggle="modal"
-              data-target="#ModalCrearProveedor"
+              data-target="#modalColores"
             >
-              <i className="fas fa-pencil-alt"></i> Crear Proveedor
+              <i className="fas fa-pencil-alt"></i> Crear Color
             </button>
           </div>
         </div>
 
-        {/* <!-- Tabla Proveedor --> */}
+        {/* <!-- Tabla Color --> */}
         <div className="card shadow mb-4">
           <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Proveedores</h6>
+            <h6 className="m-0 font-weight-bold text-primary">Colores</h6>
           </div>
           <div className="card-body">
             <div className="table-responsive">
@@ -231,119 +257,59 @@ export const Colores = () => {
               >
                 <thead>
                   <tr>
-                    <th>Nombre</th>
-                    <th>Cédula</th>
-                    <th>Teléfono</th>
-                    <th>Dirección</th>
+                    <th>Color</th>
+                    <th>Referencia</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tfoot>
                   <tr>
-                    <th>Nombre</th>
-                    <th>Cédula</th>
-                    <th>Teléfono</th>
-                    <th>Dirección</th>
+                    <th>Color</th>
+                    <th>Referencia</th>
                     <th>Acciones</th>
                   </tr>
                 </tfoot>
                 <tbody>
-                  <tr>
-                    <td>Alejandro</td>
-                    <td>567890123</td>
-                    <td>555-1234</td>
-                    <td>Calle de la Luna 789</td>
-                    <td>
-                      {/* <!-- Botón de Visualizar con manejo de modal mediante JavaScript --> */}
-                      <button
-                        type="button"
-                        className="btn btn-info"
-                        data-toggle="modal"
-                        data-target="#ModalVisualizarProveedor"
-                      >
-                        <i className="fas fa-eye" title="Ver Detalles"></i>
-                      </button>
-
-                      <button
-                        style={{ display: "none" }}
-                        type="button"
-                        className="btn btn-success"
-                        // onClick="imprimirDocumento()"
-                      >
-                        <i className="fas fa-print" title="Imprimir"></i>
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Isabella</td>
-                    <td>890123456</td>
-                    <td>555-5678</td>
-                    <td>Calle de la Luna 783</td>
-                    <td>63</td>
-                  </tr>
-                  <tr>
-                    <td>Mateo</td>
-                    <td>345678901</td>
-                    <td>555-7890</td>
-                    <td>Calle de la Luna 589</td>
-                    <td>66</td>
-                  </tr>
-                  <tr>
-                    <td>Sophia</td>
-                    <td>901234567</td>
-                    <td>555-2345</td>
-                    <td>Calle de la Luna 789</td>
-                    <td>42</td>
-                  </tr>
-                  <tr>
-                    <td>Diego</td>
-                    <td>678901234</td>
-                    <td>555-6789</td>
-                    <td>Calle de la Luna 789</td>
-                    <td>33</td>
-                  </tr>
-                  <tr>
-                    <td>Olivia</td>
-                    <td>112233445</td>
-                    <td>555-8901</td>
-                    <td>Calle de la Luna 783</td>
-                    <td>61</td>
-                  </tr>
-                  <tr>
-                    <td>Sebastián</td>
-                    <td>998877665</td>
-                    <td>555-3456</td>
-                    <td>Calle de la Luna 781</td>
-                    <td>59</td>
-                  </tr>
-                  <tr>
-                    <td>Samuel</td>
-                    <td>445566778</td>
-                    <td>555-4567</td>
-                    <td>Calle de la Luna 786</td>
-                    <td>55</td>
-                  </tr>
-                  <tr>
-                    <td>Fernando</td>
-                    <td>334455667</td>
-                    <td>555-6780</td>
-                    <td>Calle de la Luna 784</td>
-                    <td>39</td>
-                  </tr>
-                  <tr>
-                    <td>Kevin</td>
-                    <td>556677889</td>
-                    <td>555-9012</td>
-                    <td>Carrera de las Flores 456</td>
-                    <td>23</td>
-                  </tr>
-                  <tr>
-                    <td>Cristian</td>
-                    <td>765432109</td>
-                    <td>555-9012</td>
-                    <td>Calle del Sol 123</td>
-                    <td>30</td>
-                  </tr>
+                  {Colores.map((color) => (
+                    <tr key={color.IdColor}>
+                      <td>{color.Color}</td>
+                      <td>
+                        {color.Referencia}
+                        {/* Muestra un cuadro de color con el valor hexadecimal */}
+                        <div style={{ backgroundColor: color.Referencia, width: '20px', height: '20px', display: 'inline-block', marginLeft: '5px' }}></div>
+                      </td>
+                      <td>
+                        {/* Contenedor para los botones de editar y eliminar */}
+                        <div className="d-flex">
+                          {/* Botón para editar un color */}
+                          <button
+                            onClick={() =>
+                              openModal(
+                                2,
+                                color.IdColor,
+                                color.Color,
+                                color.Referencia
+                              )
+                            }
+                            className="btn btn-warning mr-1"
+                            data-toggle="modal"
+                            data-target="#modalColores"
+                          >
+                            <i className="fa-solid fa-edit"></i>
+                          </button>
+                          {/* Botón para eliminar un color */}
+                          <button
+                            onClick={() =>
+                              deleteColor(color.IdColor, color.Color)
+                            }
+                            className="btn btn-danger"
+                          >
+                            <i className="fa-solid fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
