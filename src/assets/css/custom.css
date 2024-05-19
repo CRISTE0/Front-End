@@ -1,0 +1,61 @@
+/*
+Custom Css
+*/
+
+#linck {
+  color: darkblue;
+}
+
+/*diseñador */
+
+h1 {
+  text-align: center;
+}
+
+form {
+  width: 300px;
+  margin: 0 auto;
+}
+
+label,
+input,
+button {
+  display: block;
+  margin-bottom: 10px;
+}
+
+#canvas-container {
+  width: 460px;
+  height: 460px;
+  border: 1px solid #ccc;
+  margin: 20px auto;
+}
+
+#export-btn,
+#descargar-btn {
+  display: block;
+  width: 150px;
+  margin: 10px auto;
+  text-align: center;
+}
+
+/* #canvas {
+  width: 500px;
+  height: 500px;
+} */
+
+#section-clientes {
+  border-radius: 50%;
+  width: 100px; /* Ajusta el tamaño de la imagen circular según tus necesidades */
+  height: 100px; /* Ajusta el tamaño de la imagen circular según tus necesidades */
+  object-fit: cover;
+}
+
+.accordion-button:focus {
+  box-shadow: none;
+  color: inherit;
+}
+
+#btn-plus ,#btn-minus{
+  height: 35px;
+}
