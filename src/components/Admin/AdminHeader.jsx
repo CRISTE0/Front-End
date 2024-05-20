@@ -1,6 +1,7 @@
 import React from "react";
 import { AdminFooter } from "./AdminFooter";
 import { Link } from "react-router-dom";
+import { SideBar } from "./SideBar";
 
 export const AdminHeader = ({ children }) => {
   return (
@@ -8,122 +9,11 @@ export const AdminHeader = ({ children }) => {
       <div id="page-top">
         {/* <!-- Page Wrapper --> */}
         <div id="wrapper">
+          
           {/* <!-- Sidebar --> */}
-          <ul
-            className="navbar-nav bg-gradient-success sidebar sidebar-dark accordion"
-            id="accordionSidebar"
-          >
-            {/* <!-- Sidebar - Brand --> */}
-            <a
-              className="sidebar-brand d-flex align-items-center justify-content-center"
-              href="index.html"
-            >
-              <div className="sidebar-brand-icon rotate-n-15">
-                <i className="fas fa-laugh-wink"></i>
-              </div>
-              <div className="sidebar-brand-text mx-3">SOFT-SHIRT</div>
-            </a>
 
-            {/* <!-- Divider --> */}
-            <hr className="sidebar-divider my-0" />
-
-            {/* <!-- Nav Item - Dashboard --> */}
-            <li className="nav-item active">
-              <a className="nav-link" href="index.html">
-                <i className="fas fa-fw fa-tachometer-alt"></i>
-                <span>Dashboard</span>
-              </a>
-            </li>
-
-            {/* <!-- Divider --> */}
-            <hr className="sidebar-divider" />
-
-            {/* <!-- Heading --> */}
-            <div className="sidebar-heading">Modulos</div>
-
-            {/* <!-- Usuarios --> */}
-            {/* Usuarios */}
-            <li className="nav-item">
-              <Link to={"/admin/usuarios"} className="nav-link">
-                <i className="fas fa-fw fa-user"></i>
-                <span>Usuarios</span>
-              </Link>
-            </li>
-
-
-            {/* <!-- PROVEEDOR --> */}
-            <li className="nav-item">
-              <a className="nav-link" href="Proveedor.html">
-                {/* <!-- <i className='bx bx-store-alt'></i> --> */}
-                <i className="fas fa-solid fa-user"></i>
-                <span>Proveedores</span>
-              </a>
-            </li>
-
-            {/* <!-- COMPRAS --> */}
-            <li className="nav-item">
-              <a className="nav-link" href="Compras.html">
-                {/* <!-- <i className='bx bx-store-alt'></i> --> */}
-                <i className="fas fa-solid fa-cart-plus"></i>
-                <span>Compras</span>
-              </a>
-            </li>
-
-            {/* <!-- PRODUCTOS --> */}
-            <li className="nav-item">
-              <a className="nav-link" href="Productos.html">
-                {/* <!-- <i className='bx bx-store-alt'></i> --> */}
-                <i className="fas fa-fw fa-tshirt"></i>
-                <span>Productos</span>
-              </a>
-            </li>
-
-            {/* <!-- DISEÑOS --> */}
-            <li className="nav-item">
-
-              <a className="nav-link" href="Disenios.html">
-                {/* <!-- <i className='bx bx-store-alt'></i> --> */}
-                <i className="fas fa-fw fa-paint-brush"></i>
-                <span>Diseños</span>
-              </a>
-            </li>
-
-            {/* <!-- Clientes --> */}
-            <li className="nav-item">
-              <a className="nav-link" href="Clientes.html">
-                {/* <!-- <i className='bx bx-store-alt'></i> --> */}
-                <i className="fas fa-fw fa-user"></i>
-                <span>Clientes</span>
-              </a>
-            </li>
-
-            {/* <!-- VENTAS --> */}
-            <li className="nav-item">
-              <a className="nav-link" href="Ventas.html">
-                {/* <!-- <i className='bx bx-store-alt'></i> --> */}
-                <i className="fas fa-fw fa-store"></i>
-                <span>Ventas</span>
-              </a>
-            </li>
-
-            {/* <!-- PEDIDOS --> */}
-            <li className="nav-item">
-              <a className="nav-link" href="Pedidos.html">
-                {/* <!-- <i className='bx bx-store-alt'></i> --> */}
-                <i className="fas fa-shipping-fast"></i> <span>Pedidos</span>
-              </a>
-            </li>
-
-            {/* <!-- Divider --> */}
-            <hr className="sidebar-divider d-none d-md-block" />
-
-            {/* <!-- Sidebar Toggler (Sidebar) --> */}
-            <div className="text-center d-none d-md-inline">
-              <button
-                className="rounded-circle border-0"
-                id="sidebarToggle"></button>
-            </div>
-          </ul>
+            <SideBar/>
+          
           {/* <!-- End of Sidebar --> */}
 
           {/* <!-- Content Wrapper --> */}
@@ -164,7 +54,8 @@ export const AdminHeader = ({ children }) => {
                       </span>
                       <img
                         className="img-profile rounded-circle"
-                        src="img/undraw_profile.svg"
+                        src=""
+                        alt="User"
                       />
                     </a>
                     {/* <!-- Dropdown - User Information --> */}

@@ -172,19 +172,19 @@ export const Pedidos = () => {
                       </td>
                       <td>
                         <div className="btn-group" role="group" aria-label="Acciones">
-                          <button id="toggleButton" className="btn btn-success mr-1" onclick="toggleEstado()">
+                          {/* <button id="toggleButton" className="btn btn-success mr-1" onclick="toggleEstado()">
                             Finalizado
-                          </button>
+                          </button> */}
                           <div className="dropdown">
                             <button className="btn btn-light dropdown-toggle" type="button" id="estadoDropdown"
                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                               <span className="caret"></span>
                             </button>
-                            <div className="dropdown-menu" aria-labelledby="estadoDropdown">
+                            {/* <div className="dropdown-menu" aria-labelledby="estadoDropdown">
                               <a className="dropdown-item" href="#" onclick="cambiarEstado('Finalizado')">Finalizado</a>
                               <a className="dropdown-item" href="#" onclick="cambiarEstado('Pendiente')">Pendiente</a>
                               <a className="dropdown-item" href="#" onclick="cambiarEstado('Anulado')">Anulado</a>
-                            </div>
+                            </div> */}
                           </div>
                         </div>
                       </td>
