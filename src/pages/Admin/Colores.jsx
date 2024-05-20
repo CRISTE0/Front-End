@@ -251,7 +251,7 @@ export const Colores = () => {
             <div className="table-responsive">
               <table
                 className="table table-bordered"
-                id="dataTable"
+                id=""
                 width="100%"
                 cellSpacing="0"
               >
