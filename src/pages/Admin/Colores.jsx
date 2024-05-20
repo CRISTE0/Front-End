@@ -1,4 +1,4 @@
-import '@fortawesome/fontawesome-free/css/all.min.css';
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
 // Importación de módulos y componentes de React
 import React, { useEffect, useState } from "react";
@@ -7,7 +7,6 @@ import Swal from "sweetalert2"; // Biblioteca para mensajes de alerta
 import withReactContent from "sweetalert2-react-content"; // SweetAlert2 con soporte para React
 import { show_alerta } from "../../assets/js/functions"; // Función personalizada
 import { ChromePicker } from "react-color"; // Componente de react-color
-
 
 export const Colores = () => {
   let url = "http://localhost:3000/api/colores";
@@ -22,7 +21,6 @@ export const Colores = () => {
   useEffect(() => {
     getColores(); // Llama a la función getColores al montar el componente
   }, []);
-
 
   // Función asíncrona para obtener los colores desde el servidor
   const getColores = async () => {
@@ -47,7 +45,6 @@ export const Colores = () => {
     }
   };
 
-
   // Función para validar y enviar la solicitud al servidor
   const validar = () => {
     // Definición de expresiones regulares para validar entradas
@@ -62,7 +59,10 @@ export const Colores = () => {
     } else if (Referencia === "") {
       show_alerta("Escribe la referencia", "warning");
     } else if (!colorHexRegex.test(Referencia)) {
-      show_alerta("La referencia debe ser un color hexadecimal válido", "warning");
+      show_alerta(
+        "La referencia debe ser un color hexadecimal válido",
+        "warning"
+      );
     } else {
       // Construcción de los parámetros y método HTTP según la operación
       let parametros, metodo;
@@ -166,12 +166,26 @@ export const Colores = () => {
     <>
       {/* <!-- Modal para crear colores --> */}
 
-      <div className="modal fade" id="modalColores" tabIndex="-1" role="dialog" aria-labelledby="ModalAñadirColorLabel" aria-hidden="true">
+      <div
+        className="modal fade"
+        id="modalColores"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="ModalAñadirColorLabel"
+        aria-hidden="true"
+      >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="ModalAñadirColorLabel">{title}</h5>
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+              <h5 className="modal-title" id="ModalAñadirColorLabel">
+                {title}
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
@@ -212,16 +226,12 @@ export const Colores = () => {
                   <i className="fa-solid fa-floppy-disk"></i>
                   Guardar Color
                 </button>
-
               </div>
-
             </div>
           </div>
         </div>
       </div>
       {/* Fin modal crear colores */}
-
-
 
       {/* <!-- Inicio de Colores --> */}
       <div className="container-fluid">
@@ -232,7 +242,6 @@ export const Colores = () => {
           <div className="text-center p-3">
             <button
               onClick={() => openModal(1)}
-
               type="button"
               className="btn btn-dark"
               data-toggle="modal"
@@ -277,7 +286,15 @@ export const Colores = () => {
                       <td>
                         {color.Referencia}
                         {/* Muestra un cuadro de color con el valor hexadecimal */}
-                        <div style={{ backgroundColor: color.Referencia, width: '20px', height: '20px', display: 'inline-block', marginLeft: '5px' }}></div>
+                        <div
+                          style={{
+                            backgroundColor: color.Referencia,
+                            width: "20px",
+                            height: "20px",
+                            display: "inline-block",
+                            marginLeft: "5px",
+                          }}
+                        ></div>
                       </td>
                       <td>
                         {/* Contenedor para los botones de editar y eliminar */}
@@ -296,7 +313,7 @@ export const Colores = () => {
                             data-toggle="modal"
                             data-target="#modalColores"
                           >
-                            <i className="fa-solid fa-edit"></i>
+                            <i className="fas fa-sync-alt"></i>
                           </button>
                           {/* Botón para eliminar un color */}
                           <button
@@ -305,7 +322,7 @@ export const Colores = () => {
                             }
                             className="btn btn-danger"
                           >
-                            <i className="fa-solid fa-trash"></i>
+                            <i className="fas fa-trash-alt"></i>
                           </button>
                         </div>
                       </td>
