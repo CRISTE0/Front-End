@@ -521,36 +521,43 @@ export const Proveedores = () => {
                           role="group"
                           aria-label="Acciones"
                         >
-                          <button
-                            className="btn btn-warning btn-sm mr-2"
-                            title="Actualizar"
-                            data-toggle="modal"
-                            data-target="#actualizarModalProveedor"
-                            onClick={() =>
-                              openModal(
-                                2,
-                                proveedor.IdProveedor,
-                                proveedor.TipoDocumento,
-                                proveedor.NroDocumento,
-                                proveedor.NombreApellido,
-                                proveedor.Telefono,
-                                proveedor.Direccion
-                              )
-                            }
-                          >
-                            <i className="fas fa-sync-alt"></i>
-                          </button>
-                          <button
-                            className="btn btn-danger btn-sm mr-2"
-                            onClick={() =>
-                              deleteProveedor(
-                                proveedor.IdProveedor,
-                                proveedor.NombreApellido
-                              )
-                            }
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
+                          {/* Botón de actualizar */}
+                          {proveedor.Estado === "Activo" && (
+                            <button
+                              className="btn btn-warning btn-sm mr-2"
+                              title="Actualizar"
+                              data-toggle="modal"
+                              data-target="#actualizarModalProveedor"
+                              onClick={() =>
+                                openModal(
+                                  2,
+                                  proveedor.IdProveedor,
+                                  proveedor.TipoDocumento,
+                                  proveedor.NroDocumento,
+                                  proveedor.NombreApellido,
+                                  proveedor.Telefono,
+                                  proveedor.Direccion
+                                )
+                              }
+                            >
+                              <i className="fas fa-sync-alt"></i>
+                            </button>
+                          )}
+                          {/* Botón de eliminar */}
+                          {proveedor.Estado === "Activo" && (
+                            <button
+                              className="btn btn-danger btn-sm mr-2"
+                              onClick={() =>
+                                deleteProveedor(
+                                  proveedor.IdProveedor,
+                                  proveedor.NombreApellido
+                                )
+                              }
+                            >
+                              <i className="fas fa-trash-alt"></i>
+                            </button>
+                          )}
+                          {/* Botón de cambio de estado */}
                           <button
                             className={`btn btn-${
                               proveedor.Estado === "Activo"

@@ -6,7 +6,8 @@ import axios from "axios"; // Biblioteca para realizar solicitudes HTTP
 import Swal from "sweetalert2"; // Biblioteca para mensajes de alerta
 import withReactContent from "sweetalert2-react-content"; // SweetAlert2 con soporte para React
 import { show_alerta } from "../../assets/js/functions"; // Función personalizada
-import { ChromePicker } from 'react-color'; // Componente de react-color
+import { ChromePicker } from "react-color"; // Componente de react-color
+
 
 export const Colores = () => {
   let url = "http://localhost:3000/api/colores";
