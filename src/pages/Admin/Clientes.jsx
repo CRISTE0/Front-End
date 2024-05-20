@@ -243,213 +243,191 @@ export const Clientes = () => {
   return (
     <>
       {/* Modal para crear cliente */}
-      <div
-        className="modal fade"
-        id="ModalCrearCliente"
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="ModalAñadirClienteLabel"
-        aria-hidden="true"
-      >
+      <div className="modal fade" id="modalClientes" tabIndex="-1" role="dialog" aria-labelledby="ModalAñadirClienteLabel" aria-hidden="true">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="ModalAñadirClienteLabel">
-                {title}
-              </h5>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
+              <h5 className="modal-title" id="ModalAñadirClienteLabel">{title}</h5>
+              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div className="modal-body">
-              <form id="crearClienteForm" className="justify-content-end">
+              <form id="crearClienteForm">
                 <div className="form-group">
-                  <label htmlFor="nombreCliente">Nombre y Apellido:</label>
+                  <label htmlFor="nombreCliente">Nombre del Cliente:</label>
                   <input
                     type="text"
                     className="form-control"
                     id="nombreCliente"
-                    placeholder="Ingrese el nombre y apellido"
+                    placeholder="Ingrese el nombre del cliente"
                     required
-                    pattern="[A-Za-zÁ-ú\s]+"
-                    title="Solo se permiten letras y espacios"
-                    value={NombreApellido}
-                    onChange={(e) => setNombreApellido(e.target.value)}
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="nroDocumentoCliente">
-                    Número de Documento:
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="nroDocumentoCliente"
-                    placeholder="Ingrese el número de documento"
-                    required
-                    pattern="\d{10}"
-                    title="El número de documento debe tener 10 dígitos"
-                    value={NroDocumento}
-                    onChange={(e) => setNroDocumento(e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="tipoDocumentoCliente">
-                    Tipo de Documento:
-                  </label>
-                  <select
-                    className="form-control"
-                    id="tipoDocumentoCliente"
-                    value={TipoDocumento}
-                    onChange={(e) => setTipoDocumento(e.target.value)}
-                  >
-                    <option value="Cédula">Cédula</option>
-                    <option value="RUC">RUC</option>
-                    <option value="Pasaporte">Pasaporte</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="telefonoCliente">Teléfono:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="telefonoCliente"
-                    placeholder="Ingrese el teléfono"
-                    required
-                    pattern="\d{10}"
-                    title="El teléfono debe tener 10 dígitos"
-                    value={Telefono}
-                    onChange={(e) => setTelefono(e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="direccionCliente">Dirección:</label>
+                  <label htmlFor="direccionCliente">Dirección del Cliente:</label>
                   <input
                     type="text"
                     className="form-control"
                     id="direccionCliente"
-                    placeholder="Ingrese la dirección"
+                    placeholder="Ingrese la dirección del cliente"
                     required
-                    value={Direccion}
-                    onChange={(e) => setDireccion(e.target.value)}
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="correoCliente">Correo:</label>
+                  <label htmlFor="telefonoCliente">Teléfono del Cliente:</label>
                   <input
-                    type="email"
+                    type="tel"
                     className="form-control"
-                    id="correoCliente"
-                    placeholder="Ingrese el correo"
+                    id="telefonoCliente"
+                    placeholder="Ingrese el teléfono del cliente"
                     required
-                    value={Correo}
-                    onChange={(e) => setCorreo(e.target.value)}
+                    pattern="[0-9]{10}"
                   />
+                  <small className="form-text text-muted">
+                    Ingrese un número de teléfono válido (10 dígitos).
+                  </small>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="documentoCliente">Documento del Cliente:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="documentoCliente"
+                    placeholder="Ingrese el documento del cliente"
+                    required
+                    pattern="[0-9]{7,10}"
+                  />
+                  <small className="form-text text-muted">
+                    Ingrese un documento válido (entre 7 y 10 dígitos numéricos).
+                  </small>
                 </div>
               </form>
             </div>
             <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-dismiss="modal"
-                id="btnCerrar"
-              >
-                Cerrar
+              <button type="button" className="btn btn-secondary" data-dismiss="modal">
+                Cancelar
               </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => validar()}
-              >
-                Guardar
+              <button type="submit" className="btn btn-primary">
+                Guardar Cliente
               </button>
             </div>
           </div>
         </div>
       </div>
-
+  
       {/* Contenido principal */}
-      <div className="container">
-        <h1 className="my-4">Clientes</h1>
-        <button
-          className="btn btn-primary mb-4"
-          data-toggle="modal"
-          data-target="#ModalCrearCliente"
-          onClick={() => openModal(1)}
-        >
-          Añadir Cliente
-        </button>
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Nro Documento</th>
-              <th>Tipo Documento</th>
-              <th>Teléfono</th>
-              <th>Dirección</th>
-              <th>Correo</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Clientes.map((cliente) => (
-              <tr key={cliente.IdCliente}>
-                <td>{cliente.IdCliente}</td>
-                <td>{cliente.NombreApellido}</td>
-                <td>{cliente.NroDocumento}</td>
-                <td>{cliente.TipoDocumento}</td>
-                <td>{cliente.Telefono}</td>
-                <td>{cliente.Direccion}</td>
-                <td>{cliente.Correo}</td>
-                <td>{cliente.Estado}</td>
-                <td>
-                  <button
-                    className="btn btn-warning btn-sm"
-                    onClick={() =>
-                      openModal(
-                        2,
-                        cliente.IdCliente,
-                        cliente.TipoDocumento,
-                        cliente.NroDocumento,
-                        cliente.NombreApellido,
-                        cliente.Telefono,
-                        cliente.Direccion,
-                        cliente.Correo
-                      )
-                    }
-                  >
-                    Editar
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm ml-2"
-                    onClick={() =>
-                      deleteCliente(cliente.IdCliente, cliente.NombreApellido)
-                    }
-                  >
-                    Eliminar
-                  </button>
-                  <button
-                    className={`btn btn-sm ${
-                      cliente.Estado === "Activo" ? "btn-success" : "btn-danger"
-                    }`}
-                    onClick={() => cambiarEstadoCliente(cliente.IdCliente)}
-                  >
-                    {cliente.Estado === "Activo" ? "Activo" : "Inactivo"}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="container-fluid">
+        {/* Encabezado */}
+        <div className="d-flex align-items-center justify-content-between">
+          <h1 className="h3 mb-4 text-center text-dark">Clientes</h1>
+          <div className="text-center p-3">
+            <button
+              onClick={() => openModal(1)}
+              type="button"
+              className="btn btn-dark"
+              data-toggle="modal"
+              data-target="#modalClientes"
+            >
+              <i className="fas fa-pencil-alt"></i> Crear Cliente
+            </button>
+          </div>
+        </div>
+  
+        {/* Tabla de clientes */}
+        <div className="card shadow mb-4">
+          <div className="card-header py-3">
+            <h6 className="m-0 font-weight-bold text-primary">Clientes</h6>
+          </div>
+          <div className="card-body">
+            <div className="table-responsive">
+              <table className="table table-bordered" id="" width="100%" cellSpacing="0">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Dirección</th>
+                    <th>Teléfono</th>
+                    <th>Documento</th>
+                    <th>Acciones</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tfoot>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Dirección</th>
+                    <th>Teléfono</th>
+                    <th>Documento</th>
+                    <th>Acciones</th>
+                    <th>Estado</th>
+                  </tr>
+                </tfoot>
+                <tbody>
+                  {/* Lógica para mostrar los clientes */}
+                  <tr>
+                    <td>Johan</td>
+                    <td>Calle 98</td>
+                    <td>3015497670</td>
+                    <td>1025645352</td>
+                    <td>
+                      <button
+                        type="button"
+                        className="btn btn-warning"
+                        title="Actualizar"
+                        data-toggle="modal"
+                        data-target="#actualizarModal"
+                      >
+                        <i className="fas fa-sync-alt"></i>
+                      </button>
+                    </td>
+                    <td>
+                      <div className="btn-group" role="group" aria-label="Acciones">
+                        <button
+                          id="toggleClienteButton"
+                          className="btn btn-success mr-1"
+                          //onclick="toggleEstadoCliente()"
+                        >
+                          Activo
+                        </button>
+                        <div className="dropdown">
+                          <button
+                            className="btn btn-light dropdown-toggle"
+                            type="button"
+                            id="estadoClienteDropdown"
+                            data-toggle="dropdown"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                          >
+                            <span className="caret"></span>
+                          </button>
+                          <div className="dropdown-menu" aria-labelledby="estadoClienteDropdown">
+                            <a
+                              className="dropdown-item"
+                              href="#"
+                              // onclick="cambiarEstadoCliente('Activo')"
+                            >
+                              Activo
+                            </a>
+                            <a
+                              className="dropdown-item"
+                              href="#"
+                              // onclick="cambiarEstadoCliente('Inactivo')"
+                            >
+                              Inactivo
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  {/* Más filas de clientes */}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );
+  
 };
