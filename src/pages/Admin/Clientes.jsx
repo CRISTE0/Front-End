@@ -140,7 +140,6 @@ export const Clientes = () => {
     enviarSolicitud(metodo, parametros);
   };
 
-
   const enviarSolicitud = async (metodo, parametros) => {
     if (metodo === "PUT") {
       let urlPut = `${url}/${parametros.IdCliente}`;
@@ -267,7 +266,7 @@ export const Clientes = () => {
               </button>
             </div>
             <div className="modal-body">
-              <form id="crearClienteForm" className="justify-content-end">
+              <form id="ModalCrearCliente" className="justify-content-end">
                 <div className="form-group">
                   <label htmlFor="nombreCliente">Nombre y Apellido:</label>
                   <input
@@ -374,81 +373,261 @@ export const Clientes = () => {
         </div>
       </div>
 
-      {/* Contenido principal */}
-      <div className="container">
-        <h1 className="my-4">Clientes</h1>
-        <button
-          className="btn btn-primary mb-4"
-          data-toggle="modal"
-          data-target="#ModalCrearCliente"
-          onClick={() => openModal(1)}
-        >
-          Añadir Cliente
-        </button>
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Nro Documento</th>
-              <th>Tipo Documento</th>
-              <th>Teléfono</th>
-              <th>Dirección</th>
-              <th>Correo</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Clientes.map((cliente) => (
-              <tr key={cliente.IdCliente}>
-                <td>{cliente.IdCliente}</td>
-                <td>{cliente.NombreApellido}</td>
-                <td>{cliente.NroDocumento}</td>
-                <td>{cliente.TipoDocumento}</td>
-                <td>{cliente.Telefono}</td>
-                <td>{cliente.Direccion}</td>
-                <td>{cliente.Correo}</td>
-                <td>{cliente.Estado}</td>
-                <td>
-                  <button
-                    className="btn btn-warning btn-sm"
-                    onClick={() =>
-                      openModal(
-                        2,
-                        cliente.IdCliente,
-                        cliente.TipoDocumento,
-                        cliente.NroDocumento,
-                        cliente.NombreApellido,
-                        cliente.Telefono,
-                        cliente.Direccion,
-                        cliente.Correo
-                      )
-                    }
+      <div
+        className="modal fade"
+        id="actualizarModalCliente"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="actualizarModalClienteLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="actualizarModalClienteLabel">
+                Actualizar Datos
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <form id="actualizarClienteForm">
+                <div className="form-group">
+                  <label htmlFor="nuevoNombreCliente">Nuevo Nombre:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="nuevoNombreCliente"
+                    placeholder="Ingresa nuevo nombre"
+                    required
+                    value={NombreApellido}
+                    onChange={(e) => setNombreApellido(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nuevoTipoDocumentoCliente">
+                    Tipo de Documento:
+                  </label>
+                  <select
+                    className="form-control"
+                    id="nuevoTipoDocumentoCliente"
+                    value={TipoDocumento}
+                    onChange={(e) => setTipoDocumento(e.target.value)}
                   >
-                    Editar
+                    <option value="Cédula">Cédula</option>
+                    <option value="RUC">RUC</option>
+                    <option value="Pasaporte">Pasaporte</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nuevoNroDocumentoCliente">
+                    Número de Documento:
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="nuevoNroDocumentoCliente"
+                    placeholder="Ingrese el número de documento"
+                    required
+                    value={NroDocumento}
+                    onChange={(e) => setNroDocumento(e.target.value)}
+                  />
+                  <small className="form-text text-muted">
+                    Ingrese un documento válido (entre 6 y 10 dígitos
+                    numéricos).
+                  </small>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nuevoTelefonoCliente">Teléfono:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="nuevoTelefonoCliente"
+                    placeholder="Ingresa nuevo teléfono"
+                    required
+                    value={Telefono}
+                    onChange={(e) => setTelefono(e.target.value)}
+                  />
+                  <small className="form-text text-muted">
+                    Ingrese un número de teléfono válido (10 dígitos).
+                  </small>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nuevoCorreoCliente">
+                    Correo Electrónico:
+                  </label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    id="nuevoCorreoCliente"
+                    placeholder="Ingresa nuevo correo electrónico"
+                    required
+                    value={Correo}
+                    onChange={(e) => setCorreo(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nuevaDireccionCliente">
+                    Nueva Dirección:
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="nuevaDireccionCliente"
+                    placeholder="Ingresa nueva dirección"
+                    required
+                    value={Direccion}
+                    onChange={(e) => setDireccion(e.target.value)}
+                  />
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    data-dismiss="modal"
+                    id="btnCerrarActualizar"
+                  >
+                    Cancelar
                   </button>
                   <button
-                    className="btn btn-danger btn-sm ml-2"
-                    onClick={() =>
-                      deleteCliente(cliente.IdCliente, cliente.NombreApellido)
-                    }
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={validar}
                   >
-                    Eliminar
+                    Guardar Cambios
                   </button>
-                  <button
-                    className={`btn btn-sm ${
-                      cliente.Estado === "Activo" ? "btn-success" : "btn-danger"
-                    }`}
-                    onClick={() => cambiarEstadoCliente(cliente.IdCliente)}
-                  >
-                    {cliente.Estado === "Activo" ? "Activo" : "Inactivo"}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container-fluid">
+        {/* <!-- Page Heading --> */}
+        <div className="d-flex align-items-center justify-content-between">
+          <h1 className="h3 mb-4 text-center text-dark">Clientes</h1>
+
+          <div className="text-center p-3">
+            <button
+              type="button"
+              className="btn btn-dark"
+              data-toggle="modal"
+              data-target="ModalCrearCliente"
+              onClick={() => openModal(1, "", "Cédula", "", "", "", "")}
+            >
+              <i className="fas fa-pencil-alt"></i> Crear Cliente
+            </button>
+          </div>
+        </div>
+
+        {/* <!-- Tabla de Clientes --> */}
+        <div className="card shadow mb-4">
+          <div className="card-header py-3">
+            <h6 className="m-0 font-weight-bold text-primary">Clientes</h6>
+          </div>
+          <div className="card-body">
+            <div className="table-responsive">
+              <table
+                className="table table-bordered"
+                id="dataTable"
+                width="100%"
+                cellSpacing="0"
+              >
+                <thead>
+                  <tr>
+                    <th>Tipo de Documento</th>
+                    <th>Número de Documento</th>
+                    <th>Nombre y Apellido</th>
+                    <th>Teléfono</th>
+                    <th>Dirección</th>
+                    <th>Correo Electrónico</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tfoot>
+                  <tr>
+                    <th>Tipo de Documento</th>
+                    <th>Número de Documento</th>
+                    <th>Nombre y Apellido</th>
+                    <th>Teléfono</th>
+                    <th>Dirección</th>
+                    <th>Correo Electrónico</th>
+                    <th>Acciones</th>
+                  </tr>
+                </tfoot>
+                <tbody>
+                  {Clientes.map((cliente) => (
+                    <tr key={cliente.NroDocumento}>
+                      <td>{cliente.TipoDocumento}</td>
+                      <td>{cliente.NroDocumento}</td>
+                      <td>{cliente.NombreApellido}</td>
+                      <td>{cliente.Telefono}</td>
+                      <td>{cliente.Direccion}</td>
+                      <td>{cliente.Correo}</td>
+                      <td>
+                        <div
+                          className="btn-group"
+                          role="group"
+                          aria-label="Acciones"
+                        >
+                          <button
+                            className="btn btn-warning btn-sm mr-2"
+                            title="Actualizar"
+                            data-toggle="modal"
+                            data-target="#actualizarModalCliente"
+                            onClick={() =>
+                              openModal(
+                                2,
+                                cliente.IdCliente,
+                                cliente.TipoDocumento,
+                                cliente.NroDocumento,
+                                cliente.NombreApellido,
+                                cliente.Telefono,
+                                cliente.Direccion,
+                                cliente.Correo
+                              )
+                            }
+                          >
+                            <i className="fas fa-sync-alt"></i>
+                          </button>
+                          <button
+                            className="btn btn-danger btn-sm mr-2"
+                            onClick={() =>
+                              deleteCliente(
+                                cliente.IdCliente,
+                                cliente.NombreApellido
+                              )
+                            }
+                          >
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+                          <button
+                            className={`btn btn-${
+                              cliente.Estado === "Activo" ? "success" : "danger"
+                            } btn-sm`}
+                            onClick={() =>
+                              cambiarEstadoCliente(cliente.IdCliente)
+                            }
+                          >
+                            {cliente.Estado}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        {/* Fin tabla de clientes */}
       </div>
     </>
   );
