@@ -1,5 +1,3 @@
-import "@fortawesome/fontawesome-free/css/all.min.css";
-
 // Importación de módulos y componentes de React
 import React, { useEffect, useState } from "react";
 import axios from "axios"; // Biblioteca para realizar solicitudes HTTP

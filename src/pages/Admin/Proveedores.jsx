@@ -1,6 +1,3 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import "@fortawesome/fontawesome-free/css/all.min.css";
-import "bootstrap/dist/js/bootstrap.bundle";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
