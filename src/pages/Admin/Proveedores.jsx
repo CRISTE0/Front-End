@@ -1,10 +1,214 @@
-import React from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "@fortawesome/fontawesome-free/css/all.min.css";
+import "bootstrap/dist/js/bootstrap.bundle";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import { show_alerta } from "../../assets/js/functions";
 
 export const Proveedores = () => {
+  let url = "http://localhost:3000/api/proveedores";
+  const [Proveedores, setProveedores] = useState([]);
+  const [IdProveedor, setIdProveedor] = useState("");
+  const [TipoDocumento, setTipoDocumento] = useState("Cédula");
+  const [NroDocumento, setNroDocumento] = useState("");
+  const [NombreApellido, setNombreApellido] = useState("");
+  const [Telefono, setTelefono] = useState("");
+  const [Direccion, setDireccion] = useState("");
+  const [operation, setOperation] = useState(1);
+  const [title, setTitle] = useState("");
+
+  useEffect(() => {
+    getProveedores();
+  }, []);
+
+  const getProveedores = async () => {
+    const respuesta = await axios.get(url);
+    setProveedores(respuesta.data);
+  };
+
+  const openModal = (
+    op,
+    IdProveedor = "",
+    TipoDocumento = "Cédula",
+    NroDocumento = "",
+    NombreApellido = "",
+    Telefono = "",
+    Direccion = ""
+  ) => {
+    setIdProveedor(IdProveedor);
+    setTipoDocumento(TipoDocumento);
+    setNroDocumento(NroDocumento);
+    setNombreApellido(NombreApellido);
+    setTelefono(Telefono);
+    setDireccion(Direccion);
+    setOperation(op);
+    setTitle(op === 1 ? "Crear Proveedor" : "Actualizar Datos");
+  };
+
+  const validarDireccion = (direccion) => {
+    return /^[a-zA-Z0-9#-\s]*$/.test(direccion);
+  };
+
+  const handleChangeDireccion = (e) => {
+    const direccion = e.target.value;
+    if (validarDireccion(direccion)) {
+      setDireccion(direccion);
+    } else {
+      show_alerta(
+        "La dirección solo puede contener letras, números, # y -",
+        "warning"
+      );
+    }
+  };
+
+  const validar = async () => {
+    if (!NroDocumento) {
+      show_alerta("Escribe el número de documento", "warning");
+      return;
+    }
+    if (!NombreApellido) {
+      show_alerta("Escribe el nombre y apellido", "warning");
+      return;
+    }
+    if (!Telefono) {
+      show_alerta("Escribe el teléfono", "warning");
+      return;
+    }
+    if (!Direccion) {
+      show_alerta("Escribe la dirección", "warning");
+      return;
+    }
+    if (!TipoDocumento) {
+      show_alerta("Selecciona el tipo de documento", "warning");
+      return;
+    }
+
+    if (NroDocumento.length < 6 || NroDocumento.length > 10) {
+      show_alerta(
+        "El número de documento debe tener entre 6 y 10 dígitos",
+        "warning"
+      );
+      return;
+    }
+    if (Telefono.length !== 10) {
+      show_alerta("El teléfono debe tener exactamente 10 dígitos", "warning");
+      return;
+    }
+
+    if (!/^\d+$/.test(NroDocumento)) {
+      show_alerta(
+        "El número de documento solo puede contener dígitos",
+        "warning"
+      );
+      return;
+    }
+
+    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/.test(NombreApellido)) {
+      show_alerta(
+        "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ'",
+        "warning"
+      );
+      return;
+    }
+
+    var parametros;
+    var metodo;
+    if (operation === 1) {
+      parametros = {
+        TipoDocumento,
+        NroDocumento,
+        NombreApellido,
+        Telefono,
+        Direccion,
+        Estado: "Activo",
+      };
+      metodo = "POST";
+    } else {
+      parametros = {
+        IdProveedor,
+        TipoDocumento,
+        NroDocumento,
+        NombreApellido,
+        Telefono,
+        Direccion,
+      };
+      metodo = "PUT";
+    }
+    enviarSolicitud(metodo, parametros);
+  };
+
+  const enviarSolicitud = async (metodo, parametros) => {
+    let urlRequest =
+      metodo === "PUT" || metodo === "DELETE"
+        ? `${url}/${parametros.IdProveedor}`
+        : url;
+
+    await axios({ method: metodo, url: urlRequest, data: parametros })
+      .then(function (respuesta) {
+        var msj = respuesta.data.message;
+        show_alerta(msj, "success");
+        document.getElementById("btnCerrar").click();
+        getProveedores();
+      })
+      .catch(function (error) {
+        show_alerta("Error en la solicitud", "error");
+        console.log(error);
+      });
+  };
+
+  const deleteProveedor = (IdProveedor, NombreApellido) => {
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: `¿Seguro de eliminar al proveedor ${NombreApellido}?`,
+      icon: "question",
+      text: "No se podrá dar marcha atrás",
+      showCancelButton: true,
+      confirmButtonText: "Si, eliminar",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setIdProveedor(IdProveedor);
+        enviarSolicitud("DELETE", { IdProveedor });
+      } else {
+        show_alerta("El proveedor NO fue eliminado", "info");
+      }
+    });
+  };
+
+  const cambiarEstadoProveedor = async (IdProveedor) => {
+    try {
+      const proveedor = Proveedores.find(
+        (proveedor) => proveedor.IdProveedor === IdProveedor
+      );
+      const nuevoEstado = proveedor.Estado === "Activo" ? "Inactivo" : "Activo";
+
+      await axios.put(`${url}/${IdProveedor}`, { Estado: nuevoEstado });
+
+      setProveedores((prevProveedores) =>
+        prevProveedores.map((proveedor) =>
+          proveedor.IdProveedor === IdProveedor
+            ? { ...proveedor, Estado: nuevoEstado }
+            : proveedor
+        )
+      );
+
+      const MySwal = withReactContent(Swal);
+      MySwal.fire({
+        title: "¡Estado cambiado!",
+        text: `El estado del proveedor ha sido actualizado correctamente.`,
+        icon: "success",
+        confirmButtonText: "Ok",
+      });
+    } catch (error) {
+      console.error("Error updating state:", error);
+    }
+  };
+
   return (
     <>
-      {/* <!-- Modal para crear proveedor --> */}
-
+      {/* <!-- Inicio modal crear proveedor --> */}
       <div
         className="modal fade"
         id="ModalCrearProveedor"
@@ -17,7 +221,7 @@ export const Proveedores = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="ModalAñadirProveedorLabel">
-                Crear Proveedor
+                {title}
               </h5>
               <button
                 type="button"
@@ -29,8 +233,40 @@ export const Proveedores = () => {
               </button>
             </div>
             <div className="modal-body">
-              {/* <!-- Contenido del formulario para crear Proveedor --> */}
-              <form id="crearProveedorForm" className="justify-content-end">
+              <form id="crearProveedorForm">
+                <div className="form-group">
+                  <label htmlFor="tipoDocumentoProveedor">
+                    Tipo de Documento:
+                  </label>
+                  <select
+                    className="form-control"
+                    id="tipoDocumentoProveedor"
+                    value={TipoDocumento}
+                    onChange={(e) => setTipoDocumento(e.target.value)}
+                  >
+                    <option value="Cédula">Cédula</option>
+                    <option value="RUC">RUC</option>
+                    <option value="Pasaporte">Pasaporte</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nroDocumentoProveedor">
+                    Número de Documento:
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="nroDocumentoProveedor"
+                    placeholder="Ingrese el número de documento"
+                    required
+                    value={NroDocumento}
+                    onChange={(e) => setNroDocumento(e.target.value)}
+                  />
+                  <small className="form-text text-muted">
+                    Ingrese un documento válido (entre 6 y 10 dígitos
+                    numéricos).
+                  </small>
+                </div>
                 <div className="form-group">
                   <label htmlFor="nombreProveedor">Nombre del Proveedor:</label>
                   <input
@@ -39,68 +275,51 @@ export const Proveedores = () => {
                     id="nombreProveedor"
                     placeholder="Ingrese el nombre del Proveedor"
                     required
-                    pattern="[A-Za-zÁ-ú\s]+"
-                    title="Solo se permiten letras y espacios"
+                    value={NombreApellido}
+                    onChange={(e) => setNombreApellido(e.target.value)}
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="cedulaProveedor">Cédula del Proveedor:</label>
+                  <label htmlFor="telefonoProveedor">Teléfono:</label>
                   <input
-                    type="number"
-                    className="form-control"
-                    id="cedulaProveedor"
-                    placeholder="Ingrese la cédula del Proveedor"
-                    required
-                  />
-                  <small id="cedulaHelp" className="form-text text-muted">
-                    Ingrese un documento válido (entre 7 y 10 dígitos
-                    numéricos).
-                  </small>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="telefonoProveedor">
-                    Teléfono del Proveedor:
-                  </label>
-                  <input
-                    type="tel"
+                    type="text"
                     className="form-control"
                     id="telefonoProveedor"
-                    placeholder="Ingrese el teléfono del Proveedor"
+                    placeholder="Ingrese el teléfono"
                     required
-                    pattern="\d*"
-                    inputMode="numeric"
-                    title="Solo se permiten números"
+                    value={Telefono}
+                    onChange={(e) => setTelefono(e.target.value)}
                   />
-                  <small id="telefonoHelp" className="form-text text-muted">
+                  <small className="form-text text-muted">
                     Ingrese un número de teléfono válido (10 dígitos).
                   </small>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="direccionProveedor">
-                    Dirección del Proveedor:
-                  </label>
+                  <label htmlFor="direccionProveedor">Dirección:</label>
                   <input
                     type="text"
                     className="form-control"
                     id="direccionProveedor"
-                    placeholder="Ingrese la dirección del Proveedor"
+                    placeholder="Ingrese la dirección"
                     required
+                    value={Direccion}
+                    onChange={handleChangeDireccion}
                   />
                 </div>
-
-                {/* <!-- Línea divisoria --> */}
-                <hr className="my-4" />
-
-                {/* <!-- Botones dentro del formulario --> */}
-                <div className="text-right">
+                <div className="modal-footer">
                   <button
                     type="button"
                     className="btn btn-secondary"
                     data-dismiss="modal"
+                    id="btnCerrar"
                   >
                     Cancelar
                   </button>
-                  <button type="submit" className="btn btn-primary">
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={validar}
+                  >
                     Guardar Proveedor
                   </button>
                 </div>
@@ -109,22 +328,23 @@ export const Proveedores = () => {
           </div>
         </div>
       </div>
-      {/* Fin modal para crear proveedor */}
 
-      {/* <!-- Modal de visualización --> */}
+      {/* <!-- Fin modal crear proveedor --> */}
+
+      {/* <!-- Modal actualizar datos proveedor --> */}
       <div
         className="modal fade"
-        id="ModalVisualizarProveedor"
+        id="actualizarModalProveedor"
         tabIndex="-1"
         role="dialog"
-        aria-labelledby="visualizarModalLabel"
+        aria-labelledby="actualizarModalProveedorLabel"
         aria-hidden="true"
       >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="visualizarModalLabel">
-                Detalles del Proveedor
+              <h5 className="modal-title" id="actualizarModalProveedorLabel">
+                Actualizar Datos
               </h5>
               <button
                 type="button"
@@ -135,70 +355,107 @@ export const Proveedores = () => {
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-
-            {/* <!-- Campos del modal para Visualizar --> */}
             <div className="modal-body">
-              <div className="form-group">
-                <label htmlFor="nombreProveedor" style={{ color: "black" }}>
-                  Nombre del Proveedor:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="nombreProveedor"
-                  placeholder="Nombre del proveedor aquí"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="cedulaProveedor" style={{ color: "black" }}>
-                  Cédula del proveedor:
-                </label>
-                <input
-                  type="number"
-                  className="form-control"
-                  id="cedulaProveedor"
-                  placeholder="Cédula del proveedor aquí "
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="telefonoProveedor" style={{ color: "black" }}>
-                  Télefono del proveedor:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="télefonoProveedor"
-                  placeholder="Télefono del proveedor aquí"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="direccionProveedor" style={{ color: "black" }}>
-                  Dirección del proveedor:
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="télefonoProveedor"
-                  placeholder="Dirección del proveedor aquí"
-                />
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-dismiss="modal"
-              >
-                Cerrar
-              </button>
+              <form id="actualizarProveedorForm">
+                <div className="form-group">
+                  <label htmlFor="nuevoNombreProveedor">Nuevo Nombre:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="nuevoNombreProveedor"
+                    placeholder="Ingresa nuevo nombre"
+                    required
+                    value={NombreApellido}
+                    onChange={(e) => setNombreApellido(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nuevoTipoDocumentoProveedor">
+                    Tipo de Documento:
+                  </label>
+                  <select
+                    className="form-control"
+                    id="nuevoTipoDocumentoProveedor"
+                    value={TipoDocumento}
+                    onChange={(e) => setTipoDocumento(e.target.value)}
+                  >
+                    <option value="Cédula">Cédula</option>
+                    <option value="RUC">RUC</option>
+                    <option value="Pasaporte">Pasaporte</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nuevoNroDocumentoProveedor">
+                    Número de Documento:
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="nuevoNroDocumentoProveedor"
+                    placeholder="Ingrese el número de documento"
+                    required
+                    value={NroDocumento}
+                    onChange={(e) => setNroDocumento(e.target.value)}
+                  />
+                  <small className="form-text text-muted">
+                    Ingrese un documento válido (entre 6 y 10 dígitos
+                    numéricos).
+                  </small>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nuevoTelefonoProveedor">Teléfono:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="nuevoTelefonoProveedor"
+                    placeholder="Ingresa nuevo teléfono"
+                    required
+                    value={Telefono}
+                    onChange={(e) => setTelefono(e.target.value)}
+                  />
+                  <small className="form-text text-muted">
+                    Ingrese un número de teléfono válido (10 dígitos).
+                  </small>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nuevaDireccionProveedor">
+                    Nueva Dirección:
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="nuevaDireccionProveedor"
+                    placeholder="Ingresa nueva dirección"
+                    required
+                    value={Direccion}
+                    onChange={handleChangeDireccion}
+                  />
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    data-dismiss="modal"
+                    id="btnCerrarActualizar"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={validar}
+                  >
+                    Guardar Cambios
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
       </div>
-      {/* <!-- Fin modal de visualización --> */}
-      
+      {/* <!-- Fin modal actualizar proveedor --> */}
 
-      {/* <!-- Inicio de proveedor --> */}
+      {/* <!-- Inicio de Proveedores --> */}
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
@@ -210,13 +467,14 @@ export const Proveedores = () => {
               className="btn btn-dark"
               data-toggle="modal"
               data-target="#ModalCrearProveedor"
+              onClick={() => openModal(1, "", "Cédula", "", "", "", "")}
             >
               <i className="fas fa-pencil-alt"></i> Crear Proveedor
             </button>
           </div>
         </div>
 
-        {/* <!-- Tabla Proveedor --> */}
+        {/* <!-- Tabla Proveedores --> */}
         <div className="card shadow mb-4">
           <div className="card-header py-3">
             <h6 className="m-0 font-weight-bold text-primary">Proveedores</h6>
@@ -231,8 +489,9 @@ export const Proveedores = () => {
               >
                 <thead>
                   <tr>
-                    <th>Nombre</th>
-                    <th>Cédula</th>
+                    <th>Tipo de Documento</th>
+                    <th>Número de Documento</th>
+                    <th>Nombre y Apellido</th>
                     <th>Teléfono</th>
                     <th>Dirección</th>
                     <th>Acciones</th>
@@ -240,110 +499,74 @@ export const Proveedores = () => {
                 </thead>
                 <tfoot>
                   <tr>
-                    <th>Nombre</th>
-                    <th>Cédula</th>
+                    <th>Tipo de Documento</th>
+                    <th>Número de Documento</th>
+                    <th>Nombre y Apellido</th>
                     <th>Teléfono</th>
-                    <th>Dirección</th>
                     <th>Acciones</th>
+                    <th>Estado</th>
                   </tr>
                 </tfoot>
                 <tbody>
-                  <tr>
-                    <td>Alejandro</td>
-                    <td>567890123</td>
-                    <td>555-1234</td>
-                    <td>Calle de la Luna 789</td>
-                    <td>
-                      {/* <!-- Botón de Visualizar con manejo de modal mediante JavaScript --> */}
-                      <button
-                        type="button"
-                        className="btn btn-info"
-                        data-toggle="modal"
-                        data-target="#ModalVisualizarProveedor"
-                      >
-                        <i className="fas fa-eye" title="Ver Detalles"></i>
-                      </button>
-
-                      <button
-                        style={{ display: "none" }}
-                        type="button"
-                        className="btn btn-success"
-                        // onClick="imprimirDocumento()"
-                      >
-                        <i className="fas fa-print" title="Imprimir"></i>
-                      </button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Isabella</td>
-                    <td>890123456</td>
-                    <td>555-5678</td>
-                    <td>Calle de la Luna 783</td>
-                    <td>63</td>
-                  </tr>
-                  <tr>
-                    <td>Mateo</td>
-                    <td>345678901</td>
-                    <td>555-7890</td>
-                    <td>Calle de la Luna 589</td>
-                    <td>66</td>
-                  </tr>
-                  <tr>
-                    <td>Sophia</td>
-                    <td>901234567</td>
-                    <td>555-2345</td>
-                    <td>Calle de la Luna 789</td>
-                    <td>42</td>
-                  </tr>
-                  <tr>
-                    <td>Diego</td>
-                    <td>678901234</td>
-                    <td>555-6789</td>
-                    <td>Calle de la Luna 789</td>
-                    <td>33</td>
-                  </tr>
-                  <tr>
-                    <td>Olivia</td>
-                    <td>112233445</td>
-                    <td>555-8901</td>
-                    <td>Calle de la Luna 783</td>
-                    <td>61</td>
-                  </tr>
-                  <tr>
-                    <td>Sebastián</td>
-                    <td>998877665</td>
-                    <td>555-3456</td>
-                    <td>Calle de la Luna 781</td>
-                    <td>59</td>
-                  </tr>
-                  <tr>
-                    <td>Samuel</td>
-                    <td>445566778</td>
-                    <td>555-4567</td>
-                    <td>Calle de la Luna 786</td>
-                    <td>55</td>
-                  </tr>
-                  <tr>
-                    <td>Fernando</td>
-                    <td>334455667</td>
-                    <td>555-6780</td>
-                    <td>Calle de la Luna 784</td>
-                    <td>39</td>
-                  </tr>
-                  <tr>
-                    <td>Kevin</td>
-                    <td>556677889</td>
-                    <td>555-9012</td>
-                    <td>Carrera de las Flores 456</td>
-                    <td>23</td>
-                  </tr>
-                  <tr>
-                    <td>Cristian</td>
-                    <td>765432109</td>
-                    <td>555-9012</td>
-                    <td>Calle del Sol 123</td>
-                    <td>30</td>
-                  </tr>
+                  {Proveedores.map((proveedor) => (
+                    <tr key={proveedor.NroDocumento}>
+                      <td>{proveedor.TipoDocumento}</td>
+                      <td>{proveedor.NroDocumento}</td>
+                      <td>{proveedor.NombreApellido}</td>
+                      <td>{proveedor.Telefono}</td>
+                      <td>{proveedor.Direccion}</td>
+                      <td>
+                        <div
+                          className="btn-group"
+                          role="group"
+                          aria-label="Acciones"
+                        >
+                          <button
+                            className="btn btn-warning btn-sm mr-2"
+                            title="Actualizar"
+                            data-toggle="modal"
+                            data-target="#actualizarModalProveedor"
+                            onClick={() =>
+                              openModal(
+                                2,
+                                proveedor.IdProveedor,
+                                proveedor.TipoDocumento,
+                                proveedor.NroDocumento,
+                                proveedor.NombreApellido,
+                                proveedor.Telefono,
+                                proveedor.Direccion
+                              )
+                            }
+                          >
+                            <i className="fas fa-sync-alt"></i>
+                          </button>
+                          <button
+                            className="btn btn-danger btn-sm mr-2"
+                            onClick={() =>
+                              deleteProveedor(
+                                proveedor.IdProveedor,
+                                proveedor.NombreApellido
+                              )
+                            }
+                          >
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+                          <button
+                            className={`btn btn-${
+                              proveedor.Estado === "Activo"
+                                ? "success"
+                                : "danger"
+                            } btn-sm`}
+                            onClick={() =>
+                              cambiarEstadoProveedor(proveedor.IdProveedor)
+                            }
+                          >
+                            {proveedor.Estado}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
