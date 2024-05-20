@@ -372,7 +372,7 @@ export const Proveedores = () => {
               data-target="#modalProveedor"
               onClick={() => openModal(1, "", "Cédula", "", "", "", "")}
             >
-              <i className="fas fa-pencil-alt"></i> Crear Cliente
+              <i className="fas fa-pencil-alt"></i> Crear Proveedor
             </button>
           </div>
         </div>
