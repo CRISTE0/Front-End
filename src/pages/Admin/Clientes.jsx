@@ -30,92 +30,36 @@ export const Clientes = () => {
     console.log(respuesta.data);
   };
 
-  const openModal = (
-    op,
-    IdCliente,
-    TipoDocumento,
-    NroDocumento,
-    NombreApellido,
-    Telefono,
-    Direccion,
-    Correo
-  ) => {
-    setIdCliente("");
-    setTipoDocumento("Cédula");
-    setNroDocumento("");
-    setNombreApellido("");
-    setTelefono("");
-    setDireccion("");
-    setCorreo("");
-    setOperation(op);
+  const openModal = (op, cliente = null) => {
     if (op === 1) {
-      setTitle("Registrar cliente");
-    } else if (op === 2) {
-      setTitle("Editar cliente");
-      setIdCliente(IdCliente);
-      setTipoDocumento(TipoDocumento);
-      setNroDocumento(NroDocumento);
-      setNombreApellido(NombreApellido);
-      setTelefono(Telefono);
-      setDireccion(Direccion);
-      setCorreo(Correo);
+      // Crear cliente
+      setIdCliente("");
+      setTipoDocumento("Cédula");
+      setNroDocumento("");
+      setNombreApellido("");
+      setTelefono("");
+      setDireccion("");
+      setCorreo("");
+      setOperation(1);
+      setTitle("Crear Cliente");
+    } else if (op === 2 && cliente) {
+      // Actualizar Proveedor
+      setIdCliente(cliente.IdCliente);
+      setTipoDocumento(cliente.TipoDocumento);
+      setNroDocumento(cliente.NroDocumento);
+      setNombreApellido(cliente.NombreApellido);
+      setTelefono(cliente.Telefono);
+      setDireccion(cliente.Direccion);
+      setCorreo(cliente.Correo);
+      setOperation(2);
+      setTitle("Actualizar Datos");
     }
   };
 
-  const validar = async () => {
-    if (!NroDocumento) {
-      show_alerta("Escribe el número de documento", "warning");
-      return;
-    }
-    if (!NombreApellido) {
-      show_alerta("Escribe el nombre y apellido", "warning");
-      return;
-    }
-    if (!Telefono) {
-      show_alerta("Escribe el teléfono", "warning");
-      return;
-    }
-    if (!Direccion) {
-      show_alerta("Escribe la dirección", "warning");
-      return;
-    }
-    if (!TipoDocumento) {
-      show_alerta("Selecciona el tipo de documento", "warning");
-      return;
-    }
-
-    if (NroDocumento.length < 6 || NroDocumento.length > 10) {
-      show_alerta(
-        "El número de documento debe tener entre 6 y 10 dígitos",
-        "warning"
-      );
-      return;
-    }
-    if (Telefono.length !== 10) {
-      show_alerta("El teléfono debe tener exactamente 10 dígitos", "warning");
-      return;
-    }
-
-    if (!/^\d+$/.test(NroDocumento)) {
-      show_alerta(
-        "El número de documento solo puede contener dígitos",
-        "warning"
-      );
-      return;
-    }
-
-    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/.test(NombreApellido)) {
-      show_alerta(
-        "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ'",
-        "warning"
-      );
-      return;
-    }
-
-    let parametros;
-    let metodo;
+  const guardarCliente = async () => {
     if (operation === 1) {
-      parametros = {
+      // Crear Cliente
+      await enviarSolicitud("POST", {
         TipoDocumento,
         NroDocumento,
         NombreApellido,
@@ -123,10 +67,10 @@ export const Clientes = () => {
         Direccion,
         Correo,
         Estado: "Activo",
-      };
-      metodo = "POST";
-    } else {
-      parametros = {
+      });
+    } else if (operation === 2) {
+      // Actualizar Cliente
+      await enviarSolicitud("PUT", {
         IdCliente,
         TipoDocumento,
         NroDocumento,
@@ -134,52 +78,105 @@ export const Clientes = () => {
         Telefono,
         Direccion,
         Correo,
-      };
-      metodo = "PUT";
+      });
     }
-    enviarSolicitud(metodo, parametros);
   };
 
+  const validar = () => {
+    if (!NroDocumento) {
+      show_alerta("Escribe el número de documento", "warning");
+      return false;
+    }
+    if (!NombreApellido) {
+      show_alerta("Escribe el nombre y apellido", "warning");
+      return false;
+    }
+    if (!Telefono) {
+      show_alerta("Escribe el teléfono", "warning");
+      return false;
+    }
+    if (!Direccion) {
+      show_alerta("Escribe la dirección", "warning");
+      return false;
+    }
+    if (!Correo) {
+      show_alerta("Escribe el correo electrónico", "warning");
+      return false;
+    }
+    if (!TipoDocumento) {
+      show_alerta("Selecciona el tipo de documento", "warning");
+      return false;
+    }
+
+    if (NroDocumento.length < 6 || NroDocumento.length > 10) {
+      show_alerta(
+        "El número de documento debe tener entre 6 y 10 dígitos",
+        "warning"
+      );
+      return false;
+    }
+    if (Telefono.length !== 10) {
+      show_alerta("El teléfono debe tener exactamente 10 dígitos", "warning");
+      return false;
+    }
+
+    if (!/^\d+$/.test(NroDocumento)) {
+      show_alerta(
+        "El número de documento solo puede contener dígitos",
+        "warning"
+      );
+      return false;
+    }
+
+    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/.test(NombreApellido)) {
+      show_alerta(
+        "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ'",
+        "warning"
+      );
+      return false;
+    }
+
+    // Validar el formato del correo electrónico
+    if (!/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(Correo)) {
+      show_alerta("El correo electrónico ingresado no es válido", "warning");
+      return false;
+    }
+
+    return true;
+  };
 
   const enviarSolicitud = async (metodo, parametros) => {
-    if (metodo === "PUT") {
-      let urlPut = `${url}/${parametros.IdCliente}`;
-      await axios({ method: metodo, url: urlPut, data: parametros })
-        .then(function (respuesta) {
-          const msj = respuesta.data.message;
-          show_alerta(msj, "success");
-          document.getElementById("btnCerrar").click();
-          getClientes();
-        })
-        .catch(function (error) {
-          show_alerta("Error en la solicitud", "error");
-          console.log(error);
-        });
-    } else if (metodo === "DELETE") {
-      let urlDelete = `${url}/${parametros.IdCliente}`;
-      await axios({ method: metodo, url: urlDelete, data: parametros })
-        .then(function (respuesta) {
-          const msj = respuesta.data.message;
-          show_alerta(msj, "success");
-          document.getElementById("btnCerrar").click();
-          getClientes();
-        })
-        .catch(function (error) {
-          show_alerta("Error en la solicitud", "error");
-          console.log(error);
-        });
-    } else {
-      await axios({ method: metodo, url: url, data: parametros })
-        .then(function (respuesta) {
-          const msj = respuesta.data.message;
-          show_alerta(msj, "success");
-          document.getElementById("btnCerrar").click();
-          getClientes();
-        })
-        .catch(function (error) {
-          show_alerta("Error en la solicitud", "error");
-          console.log(error);
-        });
+    let urlRequest =
+      metodo === "PUT" || metodo === "DELETE"
+        ? `${url}/${parametros.IdCliente}`
+        : url;
+
+    try {
+      const respuesta = await axios({
+        method: metodo,
+        url: urlRequest,
+        data: parametros,
+      });
+      var msj = respuesta.data.message;
+      show_alerta(msj, "success");
+      document.getElementById("btnCerrarCliente").click();
+      getClientes();
+      // Mostrar la alerta específica
+      if (metodo === "POST") {
+        show_alerta("Cliente creado con éxito", "success");
+      }
+    } catch (error) {
+      if (error.response) {
+        // Error en la respuesta del servidor
+        show_alerta(error.response.data.message, "error");
+      } else if (error.request) {
+        // Error en la solicitud
+        show_alerta("Error en la solicitud", "error");
+      } else {
+        // Otros errores
+        show_alerta("Error desconocido", "error");
+      }
+      console.log(error);
     }
   };
 
@@ -242,19 +239,18 @@ export const Clientes = () => {
 
   return (
     <>
-      {/* Modal para crear cliente */}
       <div
         className="modal fade"
-        id="ModalCrearCliente"
+        id="modalCliente"
         tabIndex="-1"
         role="dialog"
-        aria-labelledby="ModalAñadirClienteLabel"
+        aria-labelledby="modalClienteLabel"
         aria-hidden="true"
       >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="ModalAñadirClienteLabel">
+              <h5 className="modal-title" id="modalClienteLabel">
                 {title}
               </h5>
               <button
@@ -267,37 +263,7 @@ export const Clientes = () => {
               </button>
             </div>
             <div className="modal-body">
-              <form id="crearClienteForm" className="justify-content-end">
-                <div className="form-group">
-                  <label htmlFor="nombreCliente">Nombre y Apellido:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="nombreCliente"
-                    placeholder="Ingrese el nombre y apellido"
-                    required
-                    pattern="[A-Za-zÁ-ú\s]+"
-                    title="Solo se permiten letras y espacios"
-                    value={NombreApellido}
-                    onChange={(e) => setNombreApellido(e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="nroDocumentoCliente">
-                    Número de Documento:
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="nroDocumentoCliente"
-                    placeholder="Ingrese el número de documento"
-                    required
-                    pattern="\d{10}"
-                    title="El número de documento debe tener 10 dígitos"
-                    value={NroDocumento}
-                    onChange={(e) => setNroDocumento(e.target.value)}
-                  />
-                </div>
+              <form id="crearClienteForm">
                 <div className="form-group">
                   <label htmlFor="tipoDocumentoCliente">
                     Tipo de Documento:
@@ -314,6 +280,36 @@ export const Clientes = () => {
                   </select>
                 </div>
                 <div className="form-group">
+                  <label htmlFor="nroDocumentoCliente">
+                    Número de Documento:
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="nroDocumentoCliente"
+                    placeholder="Ingrese el número de documento"
+                    required
+                    value={NroDocumento}
+                    onChange={(e) => setNroDocumento(e.target.value)}
+                  />
+                  <small className="form-text text-muted">
+                    Ingrese un documento válido (entre 6 y 10 dígitos
+                    numéricos).
+                  </small>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nombreCliente">Nombre del Cliente:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="nombreCliente"
+                    placeholder="Ingrese el nombre del Cliente"
+                    required
+                    value={NombreApellido}
+                    onChange={(e) => setNombreApellido(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
                   <label htmlFor="telefonoCliente">Teléfono:</label>
                   <input
                     type="text"
@@ -321,11 +317,12 @@ export const Clientes = () => {
                     id="telefonoCliente"
                     placeholder="Ingrese el teléfono"
                     required
-                    pattern="\d{10}"
-                    title="El teléfono debe tener 10 dígitos"
                     value={Telefono}
                     onChange={(e) => setTelefono(e.target.value)}
                   />
+                  <small className="form-text text-muted">
+                    Ingrese un número de teléfono válido (10 dígitos).
+                  </small>
                 </div>
                 <div className="form-group">
                   <label htmlFor="direccionCliente">Dirección:</label>
@@ -340,16 +337,19 @@ export const Clientes = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="correoCliente">Correo:</label>
+                  <label htmlFor="correoCliente">Correo Electrónico:</label>
                   <input
                     type="email"
                     className="form-control"
                     id="correoCliente"
-                    placeholder="Ingrese el correo"
+                    placeholder="Ingrese el correo electrónico"
                     required
                     value={Correo}
                     onChange={(e) => setCorreo(e.target.value)}
                   />
+                  <small className="form-text text-muted">
+                    Ingrese un correo electrónico válido.
+                  </small>
                 </div>
               </form>
             </div>
@@ -358,14 +358,18 @@ export const Clientes = () => {
                 type="button"
                 className="btn btn-secondary"
                 data-dismiss="modal"
-                id="btnCerrar"
+                id="btnCerrarCliente"
               >
-                Cerrar
+                Cancelar
               </button>
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => validar()}
+                onClick={() => {
+                  if (validar()) {
+                    guardarCliente();
+                  }
+                }}
               >
                 Guardar
               </button>
@@ -374,81 +378,117 @@ export const Clientes = () => {
         </div>
       </div>
 
-      {/* Contenido principal */}
-      <div className="container">
-        <h1 className="my-4">Clientes</h1>
-        <button
-          className="btn btn-primary mb-4"
-          data-toggle="modal"
-          data-target="#ModalCrearCliente"
-          onClick={() => openModal(1)}
-        >
-          Añadir Cliente
-        </button>
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Nro Documento</th>
-              <th>Tipo Documento</th>
-              <th>Teléfono</th>
-              <th>Dirección</th>
-              <th>Correo</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Clientes.map((cliente) => (
-              <tr key={cliente.IdCliente}>
-                <td>{cliente.IdCliente}</td>
-                <td>{cliente.NombreApellido}</td>
-                <td>{cliente.NroDocumento}</td>
-                <td>{cliente.TipoDocumento}</td>
-                <td>{cliente.Telefono}</td>
-                <td>{cliente.Direccion}</td>
-                <td>{cliente.Correo}</td>
-                <td>{cliente.Estado}</td>
-                <td>
-                  <button
-                    className="btn btn-warning btn-sm"
-                    onClick={() =>
-                      openModal(
-                        2,
-                        cliente.IdCliente,
-                        cliente.TipoDocumento,
-                        cliente.NroDocumento,
-                        cliente.NombreApellido,
-                        cliente.Telefono,
-                        cliente.Direccion,
-                        cliente.Correo
-                      )
-                    }
-                  >
-                    Editar
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm ml-2"
-                    onClick={() =>
-                      deleteCliente(cliente.IdCliente, cliente.NombreApellido)
-                    }
-                  >
-                    Eliminar
-                  </button>
-                  <button
-                    className={`btn btn-sm ${
-                      cliente.Estado === "Activo" ? "btn-success" : "btn-danger"
-                    }`}
-                    onClick={() => cambiarEstadoCliente(cliente.IdCliente)}
-                  >
-                    {cliente.Estado === "Activo" ? "Activo" : "Inactivo"}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="container-fluid">
+        {/* <!-- Page Heading --> */}
+        <div className="d-flex align-items-center justify-content-between">
+          <h1 className="h3 mb-4 text-center text-dark">Clientes</h1>
+          <div className="text-right">
+            <button
+              type="button"
+              className="btn btn-dark"
+              data-toggle="modal"
+              data-target="#modalCliente"
+              onClick={() => openModal(1, "", "Cédula", "", "", "", "")}
+            >
+              <i className="fas fa-pencil-alt"></i> Crear Cliente
+            </button>
+          </div>
+        </div>
+
+        {/* <!-- Tabla de Clientes --> */}
+        <div className="card shadow mb-4">
+          <div className="card-header py-3">
+            <h6 className="m-0 font-weight-bold text-primary">Clientes</h6>
+          </div>
+          <div className="card-body">
+            <div className="table-responsive">
+              <table
+                className="table table-bordered"
+                id="dataTable"
+                width="100%"
+                cellSpacing="0"
+              >
+                <thead>
+                  <tr>
+                    <th>Tipo de Documento</th>
+                    <th>Número de Documento</th>
+                    <th>Nombre y Apellido</th>
+                    <th>Teléfono</th>
+                    <th>Dirección</th>
+                    <th>Correo Electrónico</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tfoot>
+                  <tr>
+                    <th>Tipo de Documento</th>
+                    <th>Número de Documento</th>
+                    <th>Nombre y Apellido</th>
+                    <th>Teléfono</th>
+                    <th>Dirección</th>
+                    <th>Correo Electrónico</th>
+                    <th>Acciones</th>
+                  </tr>
+                </tfoot>
+                <tbody>
+                  {Clientes.map((cliente) => (
+                    <tr key={cliente.NroDocumento}>
+                      <td>{cliente.TipoDocumento}</td>
+                      <td>{cliente.NroDocumento}</td>
+                      <td>{cliente.NombreApellido}</td>
+                      <td>{cliente.Telefono}</td>
+                      <td>{cliente.Direccion}</td>
+                      <td>{cliente.Correo}</td>
+                      <td>
+                        <div
+                          className="btn-group"
+                          role="group"
+                          aria-label="Acciones"
+                        >
+                          {cliente.Estado === "Activo" && (
+                            <button
+                              className="btn btn-warning btn-sm mr-2"
+                              title="Actualizar"
+                              data-toggle="modal"
+                              data-target="#modalCliente"
+                              onClick={() => openModal(2, cliente)}
+                            >
+                              <i className="fas fa-sync-alt"></i>
+                            </button>
+                          )}
+                          {cliente.Estado === "Activo" && (
+                            <button
+                              className="btn btn-danger btn-sm mr-2"
+                              onClick={() =>
+                                deleteCliente(
+                                  cliente.IdCliente,
+                                  cliente.NombreApellido
+                                )
+                              }
+                            >
+                              <i className="fas fa-trash-alt"></i>
+                            </button>
+                          )}
+                          <button
+                            className={`btn btn-${
+                              cliente.Estado === "Activo" ? "success" : "danger"
+                            } btn-sm`}
+                            onClick={() =>
+                              cambiarEstadoCliente(cliente.IdCliente)
+                            }
+                          >
+                            {cliente.Estado}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        {/* Fin tabla de clientes */}
       </div>
     </>
   );

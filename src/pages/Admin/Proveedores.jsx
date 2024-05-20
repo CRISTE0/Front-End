@@ -28,23 +28,52 @@ export const Proveedores = () => {
     setProveedores(respuesta.data);
   };
 
-  const openModal = (
-    op,
-    IdProveedor = "",
-    TipoDocumento = "Cédula",
-    NroDocumento = "",
-    NombreApellido = "",
-    Telefono = "",
-    Direccion = ""
-  ) => {
-    setIdProveedor(IdProveedor);
-    setTipoDocumento(TipoDocumento);
-    setNroDocumento(NroDocumento);
-    setNombreApellido(NombreApellido);
-    setTelefono(Telefono);
-    setDireccion(Direccion);
-    setOperation(op);
-    setTitle(op === 1 ? "Crear Proveedor" : "Actualizar Datos");
+  const openModal = (op, proveedor = null) => {
+    if (op === 1) {
+      // Crear Proveedor
+      setIdProveedor("");
+      setTipoDocumento("Cédula");
+      setNroDocumento("");
+      setNombreApellido("");
+      setTelefono("");
+      setDireccion("");
+      setOperation(1);
+      setTitle("Crear Proveedor");
+    } else if (op === 2 && proveedor) {
+      // Actualizar Proveedor
+      setIdProveedor(proveedor.IdProveedor);
+      setTipoDocumento(proveedor.TipoDocumento);
+      setNroDocumento(proveedor.NroDocumento);
+      setNombreApellido(proveedor.NombreApellido);
+      setTelefono(proveedor.Telefono);
+      setDireccion(proveedor.Direccion);
+      setOperation(2);
+      setTitle("Actualizar Datos");
+    }
+  };
+
+  const guardarProveedor = async () => {
+    if (operation === 1) {
+      // Crear Proveedor
+      await enviarSolicitud("POST", {
+        TipoDocumento,
+        NroDocumento,
+        NombreApellido,
+        Telefono,
+        Direccion,
+        Estado: "Activo",
+      });
+    } else if (operation === 2) {
+      // Actualizar Proveedor
+      await enviarSolicitud("PUT", {
+        IdProveedor,
+        TipoDocumento,
+        NroDocumento,
+        NombreApellido,
+        Telefono,
+        Direccion,
+      });
+    }
   };
 
   const validarDireccion = (direccion) => {
@@ -63,100 +92,96 @@ export const Proveedores = () => {
     }
   };
 
-  const validar = async () => {
+  const validar = () => {
     if (!NroDocumento) {
       show_alerta("Escribe el número de documento", "warning");
-      return;
+      return false;
     }
     if (!NombreApellido) {
       show_alerta("Escribe el nombre y apellido", "warning");
-      return;
+      return false;
     }
     if (!Telefono) {
       show_alerta("Escribe el teléfono", "warning");
-      return;
+      return false;
     }
     if (!Direccion) {
       show_alerta("Escribe la dirección", "warning");
-      return;
+      return false;
     }
     if (!TipoDocumento) {
       show_alerta("Selecciona el tipo de documento", "warning");
-      return;
+      return false;
     }
-
+  
     if (NroDocumento.length < 6 || NroDocumento.length > 10) {
       show_alerta(
         "El número de documento debe tener entre 6 y 10 dígitos",
         "warning"
       );
-      return;
+      return false;
     }
     if (Telefono.length !== 10) {
       show_alerta("El teléfono debe tener exactamente 10 dígitos", "warning");
-      return;
+      return false;
     }
-
+  
     if (!/^\d+$/.test(NroDocumento)) {
       show_alerta(
         "El número de documento solo puede contener dígitos",
         "warning"
       );
-      return;
+      return false;
     }
-
+  
     if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/.test(NombreApellido)) {
       show_alerta(
         "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ'",
         "warning"
       );
-      return;
+      return false;
     }
-
-    var parametros;
-    var metodo;
-    if (operation === 1) {
-      parametros = {
-        TipoDocumento,
-        NroDocumento,
-        NombreApellido,
-        Telefono,
-        Direccion,
-        Estado: "Activo",
-      };
-      metodo = "POST";
-    } else {
-      parametros = {
-        IdProveedor,
-        TipoDocumento,
-        NroDocumento,
-        NombreApellido,
-        Telefono,
-        Direccion,
-      };
-      metodo = "PUT";
-    }
-    enviarSolicitud(metodo, parametros);
+  
+    return true;
   };
+  
+
 
   const enviarSolicitud = async (metodo, parametros) => {
     let urlRequest =
       metodo === "PUT" || metodo === "DELETE"
         ? `${url}/${parametros.IdProveedor}`
         : url;
-
-    await axios({ method: metodo, url: urlRequest, data: parametros })
-      .then(function (respuesta) {
-        var msj = respuesta.data.message;
-        show_alerta(msj, "success");
-        document.getElementById("btnCerrar").click();
-        getProveedores();
-      })
-      .catch(function (error) {
-        show_alerta("Error en la solicitud", "error");
-        console.log(error);
+  
+    try {
+      const respuesta = await axios({
+        method: metodo,
+        url: urlRequest,
+        data: parametros,
       });
+      var msj = respuesta.data.message;
+      show_alerta(msj, "success");
+      document.getElementById("btnCerrar").click();
+      getProveedores();
+      // Mostrar la alerta específica
+      if (metodo === "POST") {
+        show_alerta("Proveedor creado con éxito", "success");
+      }
+    } catch (error) {
+      if (error.response) {
+        // Error en la respuesta del servidor
+        show_alerta(error.response.data.message, "error");
+      } else if (error.request) {
+        // Error en la solicitud
+        show_alerta("Error en la solicitud", "error");
+      } else {
+        // Otros errores
+        show_alerta("Error desconocido", "error");
+      }
+      console.log(error);
+    }
   };
+  
 
   const deleteProveedor = (IdProveedor, NombreApellido) => {
     const MySwal = withReactContent(Swal);
@@ -208,19 +233,18 @@ export const Proveedores = () => {
 
   return (
     <>
-      {/* <!-- Inicio modal crear proveedor --> */}
       <div
         className="modal fade"
-        id="ModalCrearProveedor"
+        id="modalProveedor"
         tabIndex="-1"
         role="dialog"
-        aria-labelledby="ModalAñadirProveedorLabel"
+        aria-labelledby="modalProveedorLabel"
         aria-hidden="true"
       >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="ModalAñadirProveedorLabel">
+              <h5 className="modal-title" id="modalProveedorLabel">
                 {title}
               </h5>
               <button
@@ -306,167 +330,46 @@ export const Proveedores = () => {
                     onChange={handleChangeDireccion}
                   />
                 </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    data-dismiss="modal"
-                    id="btnCerrar"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={validar}
-                  >
-                    Guardar Proveedor
-                  </button>
-                </div>
               </form>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* <!-- Fin modal crear proveedor --> */}
-
-      {/* <!-- Modal actualizar datos proveedor --> */}
-      <div
-        className="modal fade"
-        id="actualizarModalProveedor"
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="actualizarModalProveedorLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="actualizarModalProveedorLabel">
-                Actualizar Datos
-              </h5>
+            <div className="modal-footer">
               <button
                 type="button"
-                className="close"
+                className="btn btn-secondary"
                 data-dismiss="modal"
-                aria-label="Close"
+                id="btnCerrar"
               >
-                <span aria-hidden="true">&times;</span>
+                Cancelar
               </button>
-            </div>
-            <div className="modal-body">
-              <form id="actualizarProveedorForm">
-                <div className="form-group">
-                  <label htmlFor="nuevoNombreProveedor">Nuevo Nombre:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="nuevoNombreProveedor"
-                    placeholder="Ingresa nuevo nombre"
-                    required
-                    value={NombreApellido}
-                    onChange={(e) => setNombreApellido(e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="nuevoTipoDocumentoProveedor">
-                    Tipo de Documento:
-                  </label>
-                  <select
-                    className="form-control"
-                    id="nuevoTipoDocumentoProveedor"
-                    value={TipoDocumento}
-                    onChange={(e) => setTipoDocumento(e.target.value)}
-                  >
-                    <option value="Cédula">Cédula</option>
-                    <option value="RUC">RUC</option>
-                    <option value="Pasaporte">Pasaporte</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="nuevoNroDocumentoProveedor">
-                    Número de Documento:
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="nuevoNroDocumentoProveedor"
-                    placeholder="Ingrese el número de documento"
-                    required
-                    value={NroDocumento}
-                    onChange={(e) => setNroDocumento(e.target.value)}
-                  />
-                  <small className="form-text text-muted">
-                    Ingrese un documento válido (entre 6 y 10 dígitos
-                    numéricos).
-                  </small>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="nuevoTelefonoProveedor">Teléfono:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="nuevoTelefonoProveedor"
-                    placeholder="Ingresa nuevo teléfono"
-                    required
-                    value={Telefono}
-                    onChange={(e) => setTelefono(e.target.value)}
-                  />
-                  <small className="form-text text-muted">
-                    Ingrese un número de teléfono válido (10 dígitos).
-                  </small>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="nuevaDireccionProveedor">
-                    Nueva Dirección:
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="nuevaDireccionProveedor"
-                    placeholder="Ingresa nueva dirección"
-                    required
-                    value={Direccion}
-                    onChange={handleChangeDireccion}
-                  />
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    data-dismiss="modal"
-                    id="btnCerrarActualizar"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={validar}
-                  >
-                    Guardar Cambios
-                  </button>
-                </div>
-              </form>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  if (validar()) {
+                    guardarProveedor();
+                  }
+                }}
+              >
+                Guardar
+              </button>
             </div>
           </div>
         </div>
       </div>
-      {/* <!-- Fin modal actualizar proveedor --> */}
 
-      {/* <!-- Inicio de Proveedores --> */}
+      {/* <!-- Fin modal crear/actualizar proveedor --> */}
+
+      {/* Botón para abrir el modal de crear proveedor */}
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
           <h1 className="h3 mb-4 text-center text-dark">Proveedores</h1>
-
-          <div className="text-center p-3">
+          <div className="text-right">
             <button
               type="button"
               className="btn btn-dark"
               data-toggle="modal"
-              data-target="#ModalCrearProveedor"
+              data-target="#modalProveedor"
               onClick={() => openModal(1, "", "Cédula", "", "", "", "")}
             >
               <i className="fas fa-pencil-alt"></i> Crear Proveedor
@@ -521,36 +424,33 @@ export const Proveedores = () => {
                           role="group"
                           aria-label="Acciones"
                         >
-                          <button
-                            className="btn btn-warning btn-sm mr-2"
-                            title="Actualizar"
-                            data-toggle="modal"
-                            data-target="#actualizarModalProveedor"
-                            onClick={() =>
-                              openModal(
-                                2,
-                                proveedor.IdProveedor,
-                                proveedor.TipoDocumento,
-                                proveedor.NroDocumento,
-                                proveedor.NombreApellido,
-                                proveedor.Telefono,
-                                proveedor.Direccion
-                              )
-                            }
-                          >
-                            <i className="fas fa-sync-alt"></i>
-                          </button>
-                          <button
-                            className="btn btn-danger btn-sm mr-2"
-                            onClick={() =>
-                              deleteProveedor(
-                                proveedor.IdProveedor,
-                                proveedor.NombreApellido
-                              )
-                            }
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
+                          {/* Botón de actualizar */}
+                          {proveedor.Estado === "Activo" && (
+                            <button
+                              className="btn btn-warning btn-sm mr-2"
+                              title="Actualizar"
+                              data-toggle="modal"
+                              data-target="#modalProveedor"
+                              onClick={() => openModal(2, proveedor)}
+                            >
+                              <i className="fas fa-sync-alt"></i>
+                            </button>
+                          )}
+                          {/* Botón de eliminar */}
+                          {proveedor.Estado === "Activo" && (
+                            <button
+                              className="btn btn-danger btn-sm mr-2"
+                              onClick={() =>
+                                deleteProveedor(
+                                  proveedor.IdProveedor,
+                                  proveedor.NombreApellido
+                                )
+                              }
+                            >
+                              <i className="fas fa-trash-alt"></i>
+                            </button>
+                          )}
+                          {/* Botón de cambio de estado */}
                           <button
                             className={`btn btn-${
                               proveedor.Estado === "Activo"
