@@ -126,7 +126,7 @@ export const Ventas = () => {
             </div>
             <div className="card-body">
               <div className="table-responsive">
-                <table className="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <table className="table table-bordered" id="dataTable" width="100%" cellSpacing="0">
                   <thead>
                     <tr>
                       <th>Nombre</th>
@@ -163,18 +163,18 @@ export const Ventas = () => {
                       </td>
                       <td>
                         <div className="btn-group" role="group" aria-label="Acciones">
-                          <button id="toggleButton" className="btn btn-success mr-1" onclick="toggleEstado()">
+                          {/* <button id="toggleButton" className="btn btn-success mr-1" onclick="toggleEstado()">
                             Activo
-                          </button>
+                          </button> */}
                           <div className="dropdown">
                             <button className="btn btn-light dropdown-toggle" type="button" id="estadoDropdown"
                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                               <span className="caret"></span>
                             </button>
                             <div className="dropdown-menu" aria-labelledby="estadoDropdown">
-                              <a className="dropdown-item" href="#" onclick="cambiarEstado('Activo')">Activo</a>
+                              {/* <a className="dropdown-item" href="#" onclick="cambiarEstado('Activo')">Activo</a>
                               <a className="dropdown-item" href="#" onclick="cambiarEstado('Pendiente')">Pendiente</a>
-                              <a className="dropdown-item" href="#" onclick="cambiarEstado('Inhabilitado')">Inhabilitado</a>
+                              <a className="dropdown-item" href="#" onclick="cambiarEstado('Inhabilitado')">Inhabilitado</a> */}
                             </div>
                           </div>
                         </div>

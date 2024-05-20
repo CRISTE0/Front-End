@@ -58,14 +58,14 @@ export const Usuarios = () => {
                   </small>
                 </div>
                 <div className="form-group">
-                  <label for="contrasena">Contraseña del Usuario:</label>
+                  <label htmlFor="contrasena">Contraseña del Usuario:</label>
                   <input
                     type="password"
                     className="form-control"
                     id="contrasena"
                     placeholder="Ingresa la contraseña del Usuario"
                     required
-                    minlength="6"
+                    minLength="6"
                   />
                   <small id="passwordHelp" className="form-text text-muted">
                     La contraseña debe tener al menos 6 caracteres.
@@ -123,7 +123,7 @@ export const Usuarios = () => {
                 className="table table-bordered"
                 id="dataTable"
                 width="100%"
-                cellspacing="0"
+                cellSpacing="0"
               >
                 <thead>
                   <tr>
@@ -151,7 +151,7 @@ export const Usuarios = () => {
                         <button
                           id="toggleClienteButton"
                           className="btn btn-success mr-1"
-                          onclick="toggleEstadoCliente()"
+                          // onclick="toggleEstadoCliente()"
                         >
                           Activo
                         </button>
@@ -173,14 +173,14 @@ export const Usuarios = () => {
                             <a
                               className="dropdown-item"
                               href="#"
-                              onclick="cambiarEstadoCliente('Activo')"
+                              // onclick="cambiarEstadoCliente('Activo')"
                             >
                               Activo
                             </a>
                             <a
                               className="dropdown-item"
                               href="#"
-                              onclick="cambiarEstadoCliente('Inactivo')"
+                              // onclick="cambiarEstadoCliente('Inactivo')"
                             >
                               Inactivo
                             </a>

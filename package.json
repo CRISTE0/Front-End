@@ -10,10 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+<<<<<<< HEAD
     "axios": "^1.6.8",
+=======
+    "@fortawesome/fontawesome-free": "^6.5.2",
+    "axios": "^1.7.0",
+>>>>>>> 996ccd040b907801df84daddd34fed5421b06eab
     "chart.js": "^4.4.3",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
+    "react-color": "^2.19.3",
     "react-dom": "^18.2.0",
     "react-router": "^6.23.1",
     "react-router-dom": "^6.23.1",
