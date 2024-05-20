@@ -48,7 +48,7 @@ export const ProductosA = () => {
                   type="text"
                   className="form-control"
                   id="nombreCliente"
-                  value="Camiseta Espacio"
+                  defaultValue="Camiseta Espacio"
                 />
               </div>
               <div className="form-group">
@@ -59,7 +59,7 @@ export const ProductosA = () => {
                   type="text"
                   className="form-control"
                   id="fechaVenta"
-                  value="M"
+                  defaultValue="M"
                 />
               </div>
               <div className="form-group">
@@ -70,7 +70,7 @@ export const ProductosA = () => {
                   type="text"
                   className="form-control"
                   id="montoVenta"
-                  value="Negro"
+                  defaultValue="Negro"
                 />
               </div>
               <div className="form-group">
@@ -81,7 +81,7 @@ export const ProductosA = () => {
                   type="text"
                   className="form-control"
                   id="montoVenta"
-                  value="35.000"
+                  defaultValue="35.000"
                 />
               </div>
               <div className="form-group">
@@ -92,7 +92,7 @@ export const ProductosA = () => {
                   type="text"
                   className="form-control"
                   id="montoVenta"
-                  value="4"
+                  defaultValue="4"
                 />
               </div>
             </div>
@@ -167,18 +167,18 @@ export const ProductosA = () => {
                 </div>
 
                 <div className="d-flex justify-content-between my-4">
-                  <select name="Colores" id="" value="nvcbx">
-                    <option value="">------Elige un color------</option>
-                    <option value="Blanco">Blanco</option>
-                    <option value="Negro">Negro</option>
+                  <select name="Colores" id="" defaultValue="nvcbx">
+                    <option defaultValue="">------Elige un color------</option>
+                    <option defaultValue="Blanco">Blanco</option>
+                    <option defaultValue="Negro">Negro</option>
                   </select>
 
-                  <select name="Colores" id="" value="nvcbx">
-                    <option value="">-----Elige una Talla----</option>
-                    <option value="Blanco">M</option>
-                    <option value="Negro">L</option>
-                    <option value="Blanco">S</option>
-                    <option value="Negro">XL</option>
+                  <select name="Colores" id="" defaultValue="nvcbx">
+                    <option defaultValue="">-----Elige una Talla----</option>
+                    <option defaultValue="Blanco">M</option>
+                    <option defaultValue="Negro">L</option>
+                    <option defaultValue="Blanco">S</option>
+                    <option defaultValue="Negro">XL</option>
                   </select>
                 </div>
 
@@ -244,7 +244,7 @@ export const ProductosA = () => {
                 </div>
 
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <input type="text" value="Camiseta Espacio" />
+                  <input type="text" defaultValue="Camiseta Espacio" />
                   <div className="d-flex">
                     <input
                       type="file"
@@ -270,24 +270,24 @@ export const ProductosA = () => {
                 </div>
 
                 <div className="d-flex justify-content-between my-4">
-                  <select name="Colores" id="" value="nvcbx">
-                    <option value="">-----Elige un color-----</option>
-                    <option value="Blanco">Blanco</option>
-                    <option value="Negro">Negro</option>
+                  <select name="Colores" id="" defaultValue="nvcbx">
+                    <option defaultValue="">-----Elige un color-----</option>
+                    <option defaultValue="Blanco">Blanco</option>
+                    <option defaultValue="Negro">Negro</option>
                   </select>
 
-                  <select name="Colores" id="" value="nvcbx">
-                    <option value="">-----Elige una Talla-----</option>
-                    <option value="Blanco">M</option>
-                    <option value="Negro">L</option>
-                    <option value="Blanco">S</option>
-                    <option value="Negro">XL</option>
+                  <select name="Colores" id="" defaultValue="nvcbx">
+                    <option defaultValue="">-----Elige una Talla-----</option>
+                    <option defaultValue="Blanco">M</option>
+                    <option defaultValue="Negro">L</option>
+                    <option defaultValue="Blanco">S</option>
+                    <option defaultValue="Negro">XL</option>
                   </select>
                 </div>
 
                 <div className=" d-flex justify-content-between checkbox">
-                  <input type="number" value="4" />
-                  <input type="number" value="35.000" />
+                  <input type="number" defaultValue="4" />
+                  <input type="number" defaultValue="35.000" />
                 </div>
               </form>
             </div>
@@ -336,7 +336,7 @@ export const ProductosA = () => {
                 className="table table-bordered"
                 id="dataTable"
                 width="100%"
-                cellspacing="0"
+                cellSpacing="0"
               >
                 <thead>
                   <tr>
@@ -385,7 +385,7 @@ export const ProductosA = () => {
                         <button
                           id="toggleButton"
                           className="btn btn-success mr-1"
-                          onclick="toggleEstado()"
+                          // onclick="toggleEstado()"
                         >
                           Activo
                         </button>
@@ -407,21 +407,21 @@ export const ProductosA = () => {
                             <a
                               className="dropdown-item"
                               href="#"
-                              onclick="cambiarEstado('Activo')"
+                              // onclick="cambiarEstado('Activo')"
                             >
                               Activo
                             </a>
                             <a
                               className="dropdown-item"
                               href="#"
-                              onclick="cambiarEstado('Pendiente')"
+                              // onclick="cambiarEstado('Pendiente')"
                             >
                               Pendiente
                             </a>
                             <a
                               className="dropdown-item"
                               href="#"
-                              onclick="cambiarEstado('Inhabilitado')"
+                              // onclick="cambiarEstado('Inhabilitado')"
                             >
                               Inhabilitado
                             </a>

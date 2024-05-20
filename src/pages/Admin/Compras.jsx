@@ -58,7 +58,7 @@ export const Compras = () => {
                         placeholder="Ingrese el monto de la compra"
                         required
                         pattern="\d*"
-                        inputmode="numeric"
+                        inputMode="numeric"
                         title="Solo se permiten números"
                         max="50000"
                       />
@@ -80,7 +80,7 @@ export const Compras = () => {
                   <button
                     type="button"
                     className="btn btn-primary"
-                    onclick="guardarCompra()"
+                    // onclick="guardarCompra()"
                   >
                     Guardar Compra
                   </button>
@@ -192,7 +192,7 @@ export const Compras = () => {
                     className="table table-bordered"
                     id="dataTable"
                     width="100%"
-                    cellspacing="0"
+                    cellSpacing="0"
                   >
                     <thead>
                       <tr>
@@ -230,7 +230,7 @@ export const Compras = () => {
                             style={{display: "none"}}
                             type="button"
                             className="btn btn-success"
-                            onclick="imprimirDocumento()"
+                            // onclick="imprimirDocumento()"
                           >
                             <i className="fas fa-print" title="Imprimir"></i>
                           </button>
