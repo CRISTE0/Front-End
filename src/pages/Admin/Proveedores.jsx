@@ -264,6 +264,7 @@ export const Proveedores = () => {
                     id="tipoDocumentoProveedor"
                     value={TipoDocumento}
                     onChange={(e) => setTipoDocumento(e.target.value)}
+                    disabled={operation === 2}
                   >
                     <option value="Cédula">Cédula</option>
                     <option value="RUC">RUC</option>
@@ -282,6 +283,8 @@ export const Proveedores = () => {
                     required
                     value={NroDocumento}
                     onChange={(e) => setNroDocumento(e.target.value)}
+                    disabled={operation === 2}
+
                   />
                   <small className="form-text text-muted">
                     Ingrese un documento válido (entre 6 y 10 dígitos

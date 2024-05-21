@@ -40,7 +40,7 @@ export const Clientes = () => {
       setOperation(1);
       setTitle("Crear Cliente");
     } else if (op === 2 && cliente) {
-      // Actualizar Proveedor
+      // Actualizar Cliente
       setIdCliente(cliente.IdCliente);
       setTipoDocumento(cliente.TipoDocumento);
       setNroDocumento(cliente.NroDocumento);
@@ -270,6 +270,7 @@ export const Clientes = () => {
                     id="tipoDocumentoCliente"
                     value={TipoDocumento}
                     onChange={(e) => setTipoDocumento(e.target.value)}
+                    disabled={operation === 2}
                   >
                     <option value="Cédula">Cédula</option>
                     <option value="RUC">RUC</option>
@@ -288,6 +289,7 @@ export const Clientes = () => {
                     required
                     value={NroDocumento}
                     onChange={(e) => setNroDocumento(e.target.value)}
+                    disabled={operation === 2}
                   />
                   <small className="form-text text-muted">
                     Ingrese un documento válido (entre 6 y 10 dígitos
