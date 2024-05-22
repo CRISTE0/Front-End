@@ -7,21 +7,21 @@ export const Inicio = () => {
       <div
         id="template-mo-zay-hero-carousel"
         className="carousel slide"
-        data-bs-ride="carousel"
+        data-ride="carousel"
       >
         <ol className="carousel-indicators">
           <li
-            data-bs-target="#template-mo-zay-hero-carousel"
-            data-bs-slide-to="0"
+            data-target="#template-mo-zay-hero-carousel"
+            data-slide-to="0"
             className="active"
           ></li>
           <li
-            data-bs-target="#template-mo-zay-hero-carousel"
-            data-bs-slide-to="1"
+            data-target="#template-mo-zay-hero-carousel"
+            data-slide-to="1"
           ></li>
           <li
-            data-bs-target="#template-mo-zay-hero-carousel"
-            data-bs-slide-to="2"
+            data-target="#template-mo-zay-hero-carousel"
+            data-slide-to="2"
           ></li>
         </ol>
         <div className="carousel-inner">
@@ -101,7 +101,7 @@ export const Inicio = () => {
           className="carousel-control-prev text-decoration-none w-auto ps-3"
           href="#template-mo-zay-hero-carousel"
           role="button"
-          data-bs-slide="prev"
+          data-slide="prev"
         >
           <i className="fas fa-chevron-left"></i>
         </a>
@@ -109,7 +109,7 @@ export const Inicio = () => {
           className="carousel-control-next text-decoration-none w-auto pe-3"
           href="#template-mo-zay-hero-carousel"
           role="button"
-          data-bs-slide="next"
+          data-slide="next"
         >
           <i className="fas fa-chevron-right"></i>
         </a>

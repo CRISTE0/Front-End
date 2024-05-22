@@ -1,9 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { AdminFooter } from "./AdminFooter";
 import { Link } from "react-router-dom";
 import { SideBar } from "./SideBar";
 
 export const AdminHeader = ({ children }) => {
+
+  const [isActive,setIsActive] = useState(false)
+
+  const changeClass= () =>{
+    setIsActive(!isActive)
+  }
+  
   return (
     <>
       <div id="page-top">
@@ -12,7 +19,7 @@ export const AdminHeader = ({ children }) => {
           
           {/* <!-- Sidebar --> */}
 
-            <SideBar/>
+            <SideBar isActive={isActive}/>
           
           {/* <!-- End of Sidebar --> */}
 
@@ -22,10 +29,12 @@ export const AdminHeader = ({ children }) => {
             <div id="content">
               {/* <!-- Topbar --> */}
               <nav className="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
                 {/* <!-- Sidebar Toggle (Topbar) --> */}
                 <button
                   id="sidebarToggleTop"
                   className="btn btn-link d-md-none rounded-circle mr-3"
+                  onClick={changeClass}
                 >
                   <i className="fa fa-bars"></i>
                 </button>

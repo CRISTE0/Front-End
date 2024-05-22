@@ -1,13 +1,13 @@
 import React from "react";
 import { Link,useLocation } from "react-router-dom";
 
-export const SideBar = () => {
+export const SideBar = ({isActive}) => {
     const location=useLocation();
     
   return (
     <>
       <ul
-        className="navbar-nav bg-gradient-success sidebar sidebar-dark accordion"
+        className={`navbar-nav bg-gradient-success sidebar sidebar-dark accordion ${isActive ? '' : 'toggled'}`}
         id="accordionSidebar">
         {/* <!-- Sidebar - Brand --> */}
         <a
@@ -120,13 +120,7 @@ export const SideBar = () => {
         {/* <!-- Divider --> */}
         <hr className="sidebar-divider d-none d-md-block" />
 
-        {/* <!-- Sidebar Toggler (Sidebar) --> */}
-        <div className="text-center d-none d-md-inline">
-          <button
-            className="rounded-circle border-0"
-            id="sidebarToggle"
-          ></button>
-        </div>
+        
       </ul>
     </>
   );
