@@ -8,13 +8,21 @@ export const Proveedores = () => {
   let url = "http://localhost:3000/api/proveedores";
   const [Proveedores, setProveedores] = useState([]);
   const [IdProveedor, setIdProveedor] = useState("");
-  const [TipoDocumento, setTipoDocumento] = useState("Cédula");
+  const [TipoDocumento, setTipoDocumento] = useState("");
   const [NroDocumento, setNroDocumento] = useState("");
   const [NombreApellido, setNombreApellido] = useState("");
   const [Telefono, setTelefono] = useState("");
   const [Direccion, setDireccion] = useState("");
+  const [Correo, setCorreo] = useState("");
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
+  const [errors, setErrors] = useState({
+    nroDocumento: "",
+    nombreApellido: "",
+    telefono: "",
+    direccion: "",
+    correo: "",
+  });
 
   useEffect(() => {
     getProveedores();
@@ -29,11 +37,12 @@ export const Proveedores = () => {
     if (op === 1) {
       // Crear Proveedor
       setIdProveedor("");
-      setTipoDocumento("Cédula");
+      setTipoDocumento("");
       setNroDocumento("");
       setNombreApellido("");
       setTelefono("");
       setDireccion("");
+      setCorreo("");
       setOperation(1);
       setTitle("Crear Proveedor");
     } else if (op === 2 && proveedor) {
@@ -44,8 +53,24 @@ export const Proveedores = () => {
       setNombreApellido(proveedor.NombreApellido);
       setTelefono(proveedor.Telefono);
       setDireccion(proveedor.Direccion);
+      setCorreo(proveedor.Correo);
       setOperation(2);
       setTitle("Actualizar Datos");
+      setErrors({
+        nroDocumento: "",
+        nombreApellido: "",
+        telefono: "",
+        direccion: "",
+        correo: "",
+      });
+      const errors = {
+        nroDocumento: validateNroDocumento(proveedor.NroDocumento),
+        nombreApellido: validateNombreApellido(proveedor.NombreApellido),
+        telefono: validateTelefono(proveedor.Telefono),
+        direccion: validateDireccion(proveedor.Direccion),
+        correo: validateCorreo(proveedor.Correo),
+      };
+      setErrors(errors);
     }
   };
 
@@ -58,6 +83,7 @@ export const Proveedores = () => {
         NombreApellido,
         Telefono,
         Direccion,
+        Correo,
         Estado: "Activo",
       });
     } else if (operation === 2) {
@@ -69,87 +95,157 @@ export const Proveedores = () => {
         NombreApellido,
         Telefono,
         Direccion,
+        Correo,
       });
     }
   };
 
-  const validarDireccion = (direccion) => {
-    return /^[a-zA-Z0-9#-\s]*$/.test(direccion);
+  // Función para validar el número de documento
+  const validateNroDocumento = (value) => {
+    if (!value) {
+      return "Escribe el número de documento";
+    }
+    if (!/^\d+$/.test(value)) {
+      return "El número de documento solo puede contener dígitos";
+    }
+    if (value.length < 6 || value.length > 10) {
+      return "El número de documento debe tener entre 6 y 10 dígitos";
+    }
+    return "";
   };
 
+  // Función para validar el nombre y apellido
+  const validateNombreApellido = (value) => {
+    if (!value) {
+      return "Escribe el nombre y apellido";
+    }
+    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/.test(value)) {
+      return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ'";
+    }
+    return "";
+  };
+
+  // Función para validar el teléfono
+  const validateTelefono = (value) => {
+    if (!value) {
+      return "Escribe el teléfono";
+    }
+    if (!/^\d+$/.test(value)) {
+      return "El teléfono solo puede contener dígitos";
+    }
+    if (value.length !== 10) {
+      return "El teléfono debe tener exactamente 10 dígitos";
+    }
+    return "";
+  };
+
+  // Función para validar la dirección
+  const validateDireccion = (value) => {
+    if (!value) {
+      return "Escribe la dirección";
+    }
+    if (!/^[a-zA-Z0-9#-\s]*$/.test(value)) {
+      return "La dirección solo puede contener letras, números, # y -";
+    }
+    return "";
+  };
+
+  // Función para validar el correo electrónico
+  const validateCorreo = (value) => {
+    if (!value) {
+      return "Ingresa tu correo electrónico";
+    }
+    // Expresión regular para validar correo electrónico
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value)) {
+      return "Ingresa un correo electrónico válido";
+    }
+    return "";
+  };
+
+  const handleChangeTipoDocumento = (e) => {
+    const value = e.target.value;
+    setTipoDocumento(value);
+  };
+  
+
+  // Función para manejar cambios en el número de documento
+  const handleChangeNroDocumento = (e) => {
+    let value = e.target.value;
+    // Limitar la longitud del valor ingresado a entre 6 y 10 caracteres
+    if (value.length > 10) {
+      value = value.slice(0, 10);
+    }
+    setNroDocumento(value);
+    const errorMessage = validateNroDocumento(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      nroDocumento: errorMessage,
+    }));
+  };
+
+  const handleChangeNombreApellido = (e) => {
+    const value = e.target.value;
+    setNombreApellido(value);
+
+    // Validar el nombre y apellido
+    const errorMessage = validateNombreApellido(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      nombreApellido: errorMessage,
+    }));
+  };
+
+  // Función para manejar cambios en el teléfono
+  const handleChangeTelefono = (e) => {
+    let value = e.target.value;
+    // Limitar la longitud del valor ingresado a 10 caracteres
+    if (value.length > 10) {
+      value = value.slice(0, 10);
+    }
+    setTelefono(value);
+    const errorMessage = validateTelefono(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      telefono: errorMessage,
+    }));
+  };
+
+  // Función para manejar cambios en la dirección
   const handleChangeDireccion = (e) => {
-    const direccion = e.target.value;
-    if (validarDireccion(direccion)) {
-      setDireccion(direccion);
-    } else {
-      show_alerta(
-        "La dirección solo puede contener letras, números, # y -",
-        "warning"
-      );
-    }
+    const value = e.target.value;
+    setDireccion(value);
+    const errorMessage = validateDireccion(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      direccion: errorMessage,
+    }));
   };
 
-  const validar = () => {
-    if (!NroDocumento) {
-      show_alerta("Escribe el número de documento", "warning");
-      return false;
-    }
-    if (!NombreApellido) {
-      show_alerta("Escribe el nombre y apellido", "warning");
-      return false;
-    }
-    if (!Telefono) {
-      show_alerta("Escribe el teléfono", "warning");
-      return false;
-    }
-    if (!Direccion) {
-      show_alerta("Escribe la dirección", "warning");
-      return false;
-    }
-    if (!TipoDocumento) {
-      show_alerta("Selecciona el tipo de documento", "warning");
-      return false;
-    }
-  
-    if (NroDocumento.length < 6 || NroDocumento.length > 10) {
-      show_alerta(
-        "El número de documento debe tener entre 6 y 10 dígitos",
-        "warning"
-      );
-      return false;
-    }
-    if (Telefono.length !== 10) {
-      show_alerta("El teléfono debe tener exactamente 10 dígitos", "warning");
-      return false;
-    }
-  
-    if (!/^\d+$/.test(NroDocumento)) {
-      show_alerta(
-        "El número de documento solo puede contener dígitos",
-        "warning"
-      );
-      return false;
-    }
-  
-    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/.test(NombreApellido)) {
-      show_alerta(
-        "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ'",
-        "warning"
-      );
-      return false;
-    }
-  
-    return true;
+  // Función para manejar cambios en el correo electrónico
+  const handleChangeCorreo = (e) => {
+    const value = e.target.value;
+    setCorreo(value);
+    const errorMessage = validateCorreo(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      correo: errorMessage,
+    }));
   };
-  
 
+  // Función para renderizar los mensajes de error
+  const renderErrorMessage = (errorMessage) => {
+    return errorMessage ? (
+      <div className="invalid-feedback">{errorMessage}</div>
+    ) : null;
+  };
 
   const enviarSolicitud = async (metodo, parametros) => {
     let urlRequest =
       metodo === "PUT" || metodo === "DELETE"
         ? `${url}/${parametros.IdProveedor}`
         : url;
-  
+
     try {
       const respuesta = await axios({
         method: metodo,
@@ -178,7 +274,6 @@ export const Proveedores = () => {
       console.log(error);
     }
   };
-  
 
   const deleteProveedor = (IdProveedor, NombreApellido) => {
     const MySwal = withReactContent(Swal);
@@ -263,29 +358,40 @@ export const Proveedores = () => {
                     className="form-control"
                     id="tipoDocumentoProveedor"
                     value={TipoDocumento}
-                    onChange={(e) => setTipoDocumento(e.target.value)}
+                    onChange={(e) => handleChangeTipoDocumento(e)} // Llama a la función handleChangeTipoDocumento
                     disabled={operation === 2}
+                    required
                   >
-                    <option value="Cédula">Cédula</option>
-                    <option value="RUC">RUC</option>
-                    <option value="Pasaporte">Pasaporte</option>
+                    <option value="">Seleccione un tipo de documento</option>
+                    <option value="CC">Cédula</option>
+                    <option value="CE">Cédula de Extranjería</option>
+                    <option value="NIT">NIT</option>
                   </select>
+
+                  {TipoDocumento === "" && (
+                    <p className="text-danger">
+                      Por favor, seleccione un tipo de documento.
+                    </p>
+                  )}
                 </div>
+
                 <div className="form-group">
                   <label htmlFor="nroDocumentoProveedor">
                     Número de Documento:
                   </label>
                   <input
                     type="text"
-                    className="form-control"
+                    className={`form-control ${
+                      errors.nroDocumento ? "is-invalid" : ""
+                    }`}
                     id="nroDocumentoProveedor"
                     placeholder="Ingrese el número de documento"
                     required
                     value={NroDocumento}
-                    onChange={(e) => setNroDocumento(e.target.value)}
+                    onChange={handleChangeNroDocumento}
                     disabled={operation === 2}
-
                   />
+                  {renderErrorMessage(errors.nroDocumento)}
                   <small className="form-text text-muted">
                     Ingrese un documento válido (entre 6 y 10 dígitos
                     numéricos).
@@ -295,25 +401,31 @@ export const Proveedores = () => {
                   <label htmlFor="nombreProveedor">Nombre del Proveedor:</label>
                   <input
                     type="text"
-                    className="form-control"
+                    className={`form-control ${
+                      errors.nombreApellido ? "is-invalid" : ""
+                    }`}
                     id="nombreProveedor"
                     placeholder="Ingrese el nombre del Proveedor"
                     required
                     value={NombreApellido}
-                    onChange={(e) => setNombreApellido(e.target.value)}
+                    onChange={handleChangeNombreApellido}
                   />
+                  {renderErrorMessage(errors.nombreApellido)}
                 </div>
                 <div className="form-group">
                   <label htmlFor="telefonoProveedor">Teléfono:</label>
                   <input
                     type="text"
-                    className="form-control"
+                    className={`form-control ${
+                      errors.telefono ? "is-invalid" : ""
+                    }`}
                     id="telefonoProveedor"
                     placeholder="Ingrese el teléfono"
                     required
                     value={Telefono}
-                    onChange={(e) => setTelefono(e.target.value)}
+                    onChange={handleChangeTelefono}
                   />
+                  {renderErrorMessage(errors.telefono)}
                   <small className="form-text text-muted">
                     Ingrese un número de teléfono válido (10 dígitos).
                   </small>
@@ -322,13 +434,32 @@ export const Proveedores = () => {
                   <label htmlFor="direccionProveedor">Dirección:</label>
                   <input
                     type="text"
-                    className="form-control"
+                    className={`form-control ${
+                      errors.direccion ? "is-invalid" : ""
+                    }`}
                     id="direccionProveedor"
                     placeholder="Ingrese la dirección"
                     required
                     value={Direccion}
                     onChange={handleChangeDireccion}
                   />
+                  {renderErrorMessage(errors.direccion)}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="correoProveedor">Correo:</label>
+                  <input
+                    type="email"
+                    className={`form-control ${
+                      errors.correo ? "is-invalid" : ""
+                    }`}
+                    id="correoProveedor"
+                    placeholder="Ingrese el correo"
+                    required
+                    value={Correo}
+                    onChange={handleChangeCorreo}
+                  />
+                  {renderErrorMessage(errors.correo)}
                 </div>
               </form>
             </div>
@@ -345,9 +476,7 @@ export const Proveedores = () => {
                 type="button"
                 className="btn btn-primary"
                 onClick={() => {
-                  if (validar()) {
-                    guardarProveedor();
-                  }
+                  guardarProveedor();
                 }}
               >
                 Guardar
@@ -370,7 +499,7 @@ export const Proveedores = () => {
               className="btn btn-dark"
               data-toggle="modal"
               data-target="#modalProveedor"
-              onClick={() => openModal(1, "", "Cédula", "", "", "", "")}
+              onClick={() => openModal(1, "", "", "", "", "", "", "")}
             >
               <i className="fas fa-pencil-alt"></i> Crear Proveedor
             </button>
@@ -397,19 +526,10 @@ export const Proveedores = () => {
                     <th>Nombre y Apellido</th>
                     <th>Teléfono</th>
                     <th>Dirección</th>
+                    <th>Correo</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
-                <tfoot>
-                  <tr>
-                    <th>Tipo de Documento</th>
-                    <th>Número de Documento</th>
-                    <th>Nombre y Apellido</th>
-                    <th>Teléfono</th>
-                    <th>Acciones</th>
-                    <th>Estado</th>
-                  </tr>
-                </tfoot>
                 <tbody>
                   {Proveedores.map((proveedor) => (
                     <tr key={proveedor.NroDocumento}>
@@ -418,6 +538,7 @@ export const Proveedores = () => {
                       <td>{proveedor.NombreApellido}</td>
                       <td>{proveedor.Telefono}</td>
                       <td>{proveedor.Direccion}</td>
+                      <td>{proveedor.Correo}</td>
                       <td>
                         <div
                           className="btn-group"
@@ -425,31 +546,29 @@ export const Proveedores = () => {
                           aria-label="Acciones"
                         >
                           {/* Botón de actualizar */}
-                          {proveedor.Estado === "Activo" && (
-                            <button
-                              className="btn btn-warning btn-sm mr-2"
-                              title="Actualizar"
-                              data-toggle="modal"
-                              data-target="#modalProveedor"
-                              onClick={() => openModal(2, proveedor)}
-                            >
-                              <i className="fas fa-sync-alt"></i>
-                            </button>
-                          )}
+                          <button
+                            className="btn btn-warning btn-sm mr-2"
+                            title="Actualizar"
+                            data-toggle="modal"
+                            data-target="#modalProveedor"
+                            onClick={() => openModal(2, proveedor)}
+                            disabled={proveedor.Estado != "Activo"}
+                          >
+                            <i className="fas fa-sync-alt"></i>
+                          </button>
                           {/* Botón de eliminar */}
-                          {proveedor.Estado === "Activo" && (
-                            <button
-                              className="btn btn-danger btn-sm mr-2"
-                              onClick={() =>
-                                deleteProveedor(
-                                  proveedor.IdProveedor,
-                                  proveedor.NombreApellido
-                                )
-                              }
-                            >
-                              <i className="fas fa-trash-alt"></i>
-                            </button>
-                          )}
+                          <button
+                            className="btn btn-danger btn-sm mr-2"
+                            onClick={() =>
+                              deleteProveedor(
+                                proveedor.IdProveedor,
+                                proveedor.NombreApellido
+                              )
+                            }
+                            disabled={proveedor.Estado != "Activo"}
+                          >
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
                           {/* Botón de cambio de estado */}
                           <button
                             className={`btn btn-${
