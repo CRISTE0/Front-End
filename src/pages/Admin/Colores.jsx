@@ -72,7 +72,7 @@ export const Colores = () => {
       }));
     }
   };
-  
+
   const renderErrorMessage = (errorMessage) => {
     return errorMessage ? (
       <div className="invalid-feedback">{errorMessage}</div>
@@ -102,7 +102,11 @@ export const Colores = () => {
       if (metodo === "PUT" || metodo === "DELETE") {
         urlRequest = `${url}/${parametros.IdColor}`;
       }
-      const respuesta = await axios({ method: metodo, url: urlRequest, data: parametros });
+      const respuesta = await axios({
+        method: metodo,
+        url: urlRequest,
+        data: parametros,
+      });
       console.log(respuesta);
       Swal.fire("Éxito", respuesta.data.message, "success");
       document.getElementById("btnCerrar").click();
@@ -140,24 +144,72 @@ export const Colores = () => {
     });
   };
 
+  const cambiarEstadoColor = async (IdColor) => {
+    try {
+      const colorActual = Colores.find((color) => color.IdColor === IdColor);
+      const nuevoEstado = colorActual.Estado === "Activo" ? "Inactivo" : "Activo";
+  
+      const response = await axios.put(`${url}/${IdColor}`, { Estado: nuevoEstado });
+      if (response.status === 200) {
+        setColores((prevColores) =>
+          prevColores.map((color) =>
+            color.IdColor === IdColor ? { ...color, Estado: nuevoEstado } : color
+          )
+        );
+  
+        const MySwal = withReactContent(Swal);
+        MySwal.fire({
+          title: "¡Estado cambiado!",
+          text: "El estado del color ha sido actualizado correctamente.",
+          icon: "success",
+          confirmButtonText: "Ok",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating state:", error);
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+      }
+      show_alerta("Error actualizando el estado del color", "error");
+    }
+  };
+  
+  
+  
+
   return (
     <>
-      <div className="modal fade" id="modalColores" tabIndex="-1" role="dialog" aria-labelledby="ModalAñadirColorLabel" aria-hidden="true">
+      <div
+        className="modal fade"
+        id="modalColores"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="ModalAñadirColorLabel"
+        aria-hidden="true"
+      >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="ModalAñadirColorLabel">{title}</h5>
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+              <h5 className="modal-title" id="ModalAñadirColorLabel">
+                {title}
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div className="modal-body">
               <input type="hidden" id="Color"></input>
               <div className="form-group">
-
                 <input
                   type="text"
-                  className={`form-control ${errors.colores ? "is-invalid" : ""}`}
+                  className={`form-control ${
+                    errors.colores ? "is-invalid" : ""
+                  }`}
                   id="nombreProveedor"
                   placeholder="Ingrese el color"
                   required
@@ -166,18 +218,28 @@ export const Colores = () => {
                 />
                 {renderErrorMessage(errors.colores)}
               </div>
-              <label className="d-flex justify-content-">Seleciona la referencia del color: </label>
-              <div className="input-group mb-3 d-flex justify-content-center" style={{
-                }}>
+              <label className="d-flex justify-content-">
+                Seleciona la referencia del color:{" "}
+              </label>
+              <div
+                className="input-group mb-3 d-flex justify-content-center"
+                style={{}}
+              >
                 <ChromePicker
                   color={Referencia}
                   onChange={(color) => setReferencia(color.hex)}
                 />
               </div>
 
-
               <div className="text-right">
-                <button type="button" id="btnCerrar" className="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button
+                  type="button"
+                  id="btnCerrar"
+                  className="btn btn-secondary"
+                  data-dismiss="modal"
+                >
+                  Cerrar
+                </button>
                 <button onClick={() => validar()} className="btn btn-success">
                   <i className="fa-solid fa-floppy-disk"></i>
                   Guardar Color
@@ -210,7 +272,12 @@ export const Colores = () => {
           </div>
           <div className="card-body">
             <div className="table-responsive">
-              <table className="table table-bordered" id="" width="100%" cellSpacing="0">
+              <table
+                className="table table-bordered"
+                id=""
+                width="100%"
+                cellSpacing="0"
+              >
                 <thead>
                   <tr>
                     <th>Color</th>
@@ -243,7 +310,16 @@ export const Colores = () => {
                       <td>
                         <div className="d-flex">
                           <button
-                            onClick={() => openModal(2, color.IdColor, color.Color, color.Referencia)}
+                            onClick={() =>
+                              openModal(
+                                2,
+                                color.IdColor,
+                                color.Color,
+                                color.Referencia
+                              )
+                            }
+                            disabled={color.Estado != "Activo"}
+
                             className="btn btn-warning mr-1"
                             data-toggle="modal"
                             data-target="#modalColores"
@@ -251,10 +327,23 @@ export const Colores = () => {
                             <i className="fas fa-sync-alt"></i>
                           </button>
                           <button
-                            onClick={() => deleteColor(color.IdColor, color.Color)}
+                            onClick={() =>
+                              deleteColor(color.IdColor, color.Color)
+                            }
                             className="btn btn-danger"
+                            disabled={color.Estado != "Activo"}
                           >
                             <i className="fas fa-trash-alt"></i>
+                          </button>
+                          <button
+                            className={`btn btn-${
+                              color.Estado === "Activo" ? "success" : "danger"
+                            } btn-sm`}
+                            onClick={() =>
+                              cambiarEstadoColor(color.IdColor)
+                            }
+                          >
+                            {color.Estado}
                           </button>
                         </div>
                       </td>
