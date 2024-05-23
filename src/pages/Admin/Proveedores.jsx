@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import { show_alerta } from "../../assets/js/functions";
+// import { show_alerta } from "../../assets/js/functions";
 
 export const Proveedores = () => {
   let url = "http://localhost:3000/api/proveedores";
@@ -11,6 +11,7 @@ export const Proveedores = () => {
   const [TipoDocumento, setTipoDocumento] = useState("");
   const [NroDocumento, setNroDocumento] = useState("");
   const [NombreApellido, setNombreApellido] = useState("");
+  const [Contacto, setContacto] = useState("");
   const [Telefono, setTelefono] = useState("");
   const [Direccion, setDireccion] = useState("");
   const [Correo, setCorreo] = useState("");
@@ -19,10 +20,15 @@ export const Proveedores = () => {
   const [errors, setErrors] = useState({
     nroDocumento: "",
     nombreApellido: "",
+    contacto: "",
     telefono: "",
     direccion: "",
     correo: "",
   });
+
+  const [NombreApellidoLabel, setNombreApellidoLabel] = useState(
+    "Nombre del Proveedor"
+  );
 
   useEffect(() => {
     getProveedores();
@@ -40,17 +46,24 @@ export const Proveedores = () => {
       setTipoDocumento("");
       setNroDocumento("");
       setNombreApellido("");
+      setContacto("");
       setTelefono("");
       setDireccion("");
       setCorreo("");
       setOperation(1);
       setTitle("Crear Proveedor");
+      setNombreApellidoLabel("Nombre del Proveedor");
     } else if (op === 2 && proveedor) {
       // Actualizar Proveedor
       setIdProveedor(proveedor.IdProveedor);
       setTipoDocumento(proveedor.TipoDocumento);
       setNroDocumento(proveedor.NroDocumento);
       setNombreApellido(proveedor.NombreApellido);
+      setContacto(
+        proveedor.TipoDocumento === "CC" || proveedor.TipoDocumento === "CE"
+          ? proveedor.NombreApellido
+          : proveedor.Contacto
+      );
       setTelefono(proveedor.Telefono);
       setDireccion(proveedor.Direccion);
       setCorreo(proveedor.Correo);
@@ -59,6 +72,7 @@ export const Proveedores = () => {
       setErrors({
         nroDocumento: "",
         nombreApellido: "",
+        contacto: "",
         telefono: "",
         direccion: "",
         correo: "",
@@ -66,11 +80,17 @@ export const Proveedores = () => {
       const errors = {
         nroDocumento: validateNroDocumento(proveedor.NroDocumento),
         nombreApellido: validateNombreApellido(proveedor.NombreApellido),
+        contacto: validateContacto(proveedor.Contacto),
         telefono: validateTelefono(proveedor.Telefono),
         direccion: validateDireccion(proveedor.Direccion),
         correo: validateCorreo(proveedor.Correo),
       };
       setErrors(errors);
+      setNombreApellidoLabel(
+        proveedor.TipoDocumento === "NIT"
+          ? "Nombre de la Empresa"
+          : "Nombre del Proveedor"
+      );
     }
   };
 
@@ -81,6 +101,7 @@ export const Proveedores = () => {
         TipoDocumento,
         NroDocumento,
         NombreApellido,
+        Contacto,
         Telefono,
         Direccion,
         Correo,
@@ -93,6 +114,7 @@ export const Proveedores = () => {
         TipoDocumento,
         NroDocumento,
         NombreApellido,
+        Contacto,
         Telefono,
         Direccion,
         Correo,
@@ -108,7 +130,13 @@ export const Proveedores = () => {
     if (!/^\d+$/.test(value)) {
       return "El número de documento solo puede contener dígitos";
     }
-    if (value.length < 6 || value.length > 10) {
+    if (TipoDocumento === "NIT" && (value.length < 9 || value.length > 10)) {
+      return "El NIT debe tener entre 9 y 10 dígitos";
+    }
+    if (
+      (TipoDocumento === "CC" || TipoDocumento === "CE") &&
+      (value.length < 6 || value.length > 10)
+    ) {
       return "El número de documento debe tener entre 6 y 10 dígitos";
     }
     return "";
@@ -121,6 +149,16 @@ export const Proveedores = () => {
     }
     if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/.test(value)) {
       return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ'";
+    }
+    return "";
+  };
+
+  const validateContacto = (value) => {
+    if (!value) {
+      return "Escribe el Contacto";
+    }
+    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/.test(value)) {
+      return "El contacto solo puede contener letras, tildes y la letra 'ñ'";
     }
     return "";
   };
@@ -166,8 +204,12 @@ export const Proveedores = () => {
   const handleChangeTipoDocumento = (e) => {
     const value = e.target.value;
     setTipoDocumento(value);
+    if (value === "NIT") {
+      setNombreApellidoLabel("Nombre de la Empresa");
+    } else {
+      setNombreApellidoLabel("Nombre del Proveedor");
+    }
   };
-  
 
   // Función para manejar cambios en el número de documento
   const handleChangeNroDocumento = (e) => {
@@ -193,6 +235,23 @@ export const Proveedores = () => {
     setErrors((prevState) => ({
       ...prevState,
       nombreApellido: errorMessage,
+    }));
+
+    // Rellenar Contacto si TipoDocumento es "CC" o "CE"
+    if (TipoDocumento === "CC" || TipoDocumento === "CE") {
+      setContacto(value);
+    }
+  };
+
+  const handleChangeContacto = (e) => {
+    const value = e.target.value;
+    setContacto(value);
+
+    // Validar el contacto
+    const errorMessage = validateContacto(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      contacto: errorMessage,
     }));
   };
 
@@ -233,6 +292,17 @@ export const Proveedores = () => {
     }));
   };
 
+  const show_alerta = (message, type) => {
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: message,
+      icon: type,
+      timer: 1500,
+      showConfirmButton: false,
+      timerProgressBar: true,
+    });
+  };
+
   // Función para renderizar los mensajes de error
   const renderErrorMessage = (errorMessage) => {
     return errorMessage ? (
@@ -256,19 +326,23 @@ export const Proveedores = () => {
       show_alerta(msj, "success");
       document.getElementById("btnCerrar").click();
       getProveedores();
-      // Mostrar la alerta específica
       if (metodo === "POST") {
-        show_alerta("Proveedor creado con éxito", "success");
+        show_alerta("Proveedor creado con éxito", "success", { timer: 1500 });
+      } else if (metodo === "PUT") {
+        show_alerta("Proveedor actualizado con éxito", "success", {
+          timer: 1500,
+        });
+      } else if (metodo === "DELETE") {
+        show_alerta("Proveedor eliminado con éxito", "success", {
+          timer: 1500,
+        });
       }
     } catch (error) {
       if (error.response) {
-        // Error en la respuesta del servidor
         show_alerta(error.response.data.message, "error");
       } else if (error.request) {
-        // Error en la solicitud
         show_alerta("Error en la solicitud", "error");
       } else {
-        // Otros errores
         show_alerta("Error desconocido", "error");
       }
       console.log(error);
@@ -311,15 +385,12 @@ export const Proveedores = () => {
         )
       );
 
-      const MySwal = withReactContent(Swal);
-      MySwal.fire({
-        title: "¡Estado cambiado!",
-        text: `El estado del proveedor ha sido actualizado correctamente.`,
-        icon: "success",
-        confirmButtonText: "Ok",
+      show_alerta("Estado del proveedor cambiado con éxito", "success", {
+        timer: 1500,
       });
     } catch (error) {
       console.error("Error updating state:", error);
+      show_alerta("Error cambiando el estado del proveedor", "error");
     }
   };
 
@@ -398,20 +469,39 @@ export const Proveedores = () => {
                   </small>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="nombreProveedor">Nombre del Proveedor:</label>
+                  <label htmlFor="nombreProveedor">
+                    {NombreApellidoLabel}:
+                  </label>
                   <input
                     type="text"
                     className={`form-control ${
                       errors.nombreApellido ? "is-invalid" : ""
                     }`}
                     id="nombreProveedor"
-                    placeholder="Ingrese el nombre del Proveedor"
+                    placeholder={`Ingrese ${NombreApellidoLabel.toLowerCase()}`}
                     required
                     value={NombreApellido}
                     onChange={handleChangeNombreApellido}
                   />
                   {renderErrorMessage(errors.nombreApellido)}
                 </div>
+
+                <div className="form-group">
+                  <label htmlFor="contactoProveedor">Contacto:</label>
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      errors.contacto ? "is-invalid" : ""
+                    }`}
+                    id="contactoProveedor"
+                    placeholder="Ingrese el contacto"
+                    value={Contacto}
+                    onChange={handleChangeContacto}
+                    disabled={TipoDocumento === "CC" || TipoDocumento === "CE"} // Deshabilitar solo si el tipo de documento es "CC" o "CE"
+                  />
+                  {renderErrorMessage(errors.contacto)}
+                </div>
+
                 <div className="form-group">
                   <label htmlFor="telefonoProveedor">Teléfono:</label>
                   <input
@@ -492,14 +582,16 @@ export const Proveedores = () => {
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">Proveedores</h1>
+          <h1 className="h3 mb-4 text-center text-dark">
+            Gestión de Proveedores
+          </h1>
           <div className="text-right">
             <button
               type="button"
               className="btn btn-dark"
               data-toggle="modal"
               data-target="#modalProveedor"
-              onClick={() => openModal(1, "", "", "", "", "", "", "")}
+              onClick={() => openModal(1, "", "", "", "", "", "", "", "")}
             >
               <i className="fas fa-pencil-alt"></i> Crear Proveedor
             </button>
@@ -523,7 +615,8 @@ export const Proveedores = () => {
                   <tr>
                     <th>Tipo de Documento</th>
                     <th>Número de Documento</th>
-                    <th>Nombre y Apellido</th>
+                    <th>Proveedor</th>
+                    <th>Contacto</th>
                     <th>Teléfono</th>
                     <th>Dirección</th>
                     <th>Correo</th>
@@ -536,6 +629,7 @@ export const Proveedores = () => {
                       <td>{proveedor.TipoDocumento}</td>
                       <td>{proveedor.NroDocumento}</td>
                       <td>{proveedor.NombreApellido}</td>
+                      <td>{proveedor.Contacto}</td>
                       <td>{proveedor.Telefono}</td>
                       <td>{proveedor.Direccion}</td>
                       <td>{proveedor.Correo}</td>
