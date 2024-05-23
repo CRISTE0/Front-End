@@ -1,10 +1,9 @@
-// Importación de módulos y componentes de React
 import React, { useEffect, useState } from "react";
-import axios from "axios"; // Biblioteca para realizar solicitudes HTTP
-import Swal from "sweetalert2"; // Biblioteca para mensajes de alerta
-import withReactContent from "sweetalert2-react-content"; // SweetAlert2 con soporte para React
-import { show_alerta } from "../../assets/js/functions"; // Función personalizada
-import { ChromePicker } from "react-color"; // Componente de react-color
+import axios from "axios";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import { show_alerta } from "../../assets/js/functions";
+import { ChromePicker } from "react-color";
 
 export const Colores = () => {
   let url = "http://localhost:3000/api/colores";
@@ -14,25 +13,24 @@ export const Colores = () => {
   const [Referencia, setReferencia] = useState("");
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
+  const [errors, setErrors] = useState({});
 
-  // useEffect para realizar acciones después de la renderización
   useEffect(() => {
-    getColores(); // Llama a la función getColores al montar el componente
+    getColores();
   }, []);
 
-  // Función asíncrona para obtener los colores desde el servidor
   const getColores = async () => {
-    const respuesta = await axios.get(url); // Realiza una solicitud GET utilizando axios
-    setColores(respuesta.data); // Actualiza el estado con los datos recibidos
-    console.log(respuesta.data); // Imprime los datos recibidos en la consola
+    const respuesta = await axios.get(url);
+    setColores(respuesta.data);
   };
-  // Función para abrir el modal de registro o edición de colores
+
   const openModal = (op, idColor, color, referencia) => {
-    // Actualiza el estado con los valores necesarios para el modal
     setIdColor("");
     setColor("");
     setReferencia("");
     setOperation(op);
+    setErrors({});
+
     if (op === 1) {
       setTitle("Registrar Colores");
     } else if (op === 2) {
@@ -43,108 +41,79 @@ export const Colores = () => {
     }
   };
 
-  // Función para validar y enviar la solicitud al servidor
-  const validar = () => {
-    // Definición de expresiones regulares para validar entradas
-    // Expresión regular para validar solo letras y espacios
-    const letrasRegex = /^[A-Za-z\s]+$/;
-    const colorHexRegex = /^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/; // Color hexadecimal
+  const validateColores = (value) => {
+    if (!value) {
+      return "Escribe el color";
+    }
+    if (!/^[A-Za-záéíóúÁÉÍÓÚ\s]+$/.test(value)) {
+      return "El color solo puede contener letras y tildes";
+    }
+    return "";
+  };
 
-    if (Color === "") {
-      show_alerta("Escribe el color", "warning");
-    } else if (!letrasRegex.test(Color)) {
-      show_alerta("El color solo puede contener letras", "warning");
-    } else if (Referencia === "") {
-      show_alerta("Escribe la referencia", "warning");
-    } else if (!colorHexRegex.test(Referencia)) {
-      show_alerta(
-        "La referencia debe ser un color hexadecimal válido",
-        "warning"
-      );
-    } else {
-      // Construcción de los parámetros y método HTTP según la operación
+  const handleChangeColor = (e) => {
+    const value = e.target.value;
+    setColor(value);
+
+    const errorMessage = validateColores(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      colores: errorMessage,
+    }));
+  };
+
+  const renderErrorMessage = (errorMessage) => {
+    return errorMessage ? (
+      <div className="invalid-feedback">{errorMessage}</div>
+    ) : null;
+  };
+
+  const validar = () => {
+    const errorMessage = validateColores(Color);
+    setErrors({ colores: errorMessage });
+
+    if (!errorMessage) {
       let parametros, metodo;
       if (operation === 1) {
-        parametros = {
-          Color: Color,
-          Referencia: Referencia,
-        };
+        parametros = { Color, Referencia };
         metodo = "POST";
       } else {
-        parametros = {
-          IdColor: IdColor,
-          Color: Color,
-          Referencia: Referencia,
-        };
+        parametros = { IdColor, Color, Referencia };
         metodo = "PUT";
       }
-      enviarSolicitud(metodo, parametros); // Llama a la función para enviar la solicitud
+      enviarSolicitud(metodo, parametros);
     }
   };
 
-  // Función para enviar la solicitud al servidor
   const enviarSolicitud = async (metodo, parametros) => {
-    // Lógica para manejar diferentes métodos HTTP
-    if (metodo === "PUT") {
-      // Construye la URL para la solicitud PUT
-      let urlPut = `${url}/${parametros.IdColor}`;
-      // Realiza la solicitud PUT utilizando axios
-      await axios({ method: metodo, url: urlPut, data: parametros })
-        .then(function (respuesta) {
-          // Manejo de la respuesta del servidor
-          console.log(respuesta);
-          var tipo = respuesta.data[0];
-          var msj = respuesta.data.message;
-          show_alerta(msj, "success");
-          document.getElementById("btnCerrar").click(); // Cierra el modal
-          getColores(); // Actualiza la lista de colores
-        })
-        .catch(function (error) {
-          show_alerta("Error en la solicitud", "error");
-          console.log(error);
-        });
-    } else if (metodo === "DELETE") {
-      // Construye la URL para la solicitud DELETE
-      let urlDelete = `${url}/${parametros.IdColor}`;
-      // Realiza la solicitud DELETE utilizando axios
-      await axios({ method: metodo, url: urlDelete, data: parametros })
-        .then(function (respuesta) {
-          // Manejo de la respuesta del servidor
-          console.log(respuesta);
-          var tipo = respuesta.data[0];
-          var msj = respuesta.data.message;
-          show_alerta(msj, "success");
-          document.getElementById("btnCerrar").click(); // Cierra el modal
-          getColores(); // Actualiza la lista de colores
-        })
-        .catch(function (error) {
-          show_alerta("Error en la solicitud", "error");
-          console.log(error);
-        });
-    } else {
-      // Realiza la solicitud POST utilizando axios
-      await axios({ method: metodo, url: url, data: parametros })
-        .then(function (respuesta) {
-          // Manejo de la respuesta del servidor
-          console.log(respuesta);
-          var tipo = respuesta.data[0];
-          var msj = respuesta.data.message;
-          show_alerta(msj, "success");
-          document.getElementById("btnCerrar").click(); // Cierra el modal
-          getColores(); // Actualiza la lista de colores
-        })
-        .catch(function (error) {
-          show_alerta("Error en la solicitud", "error");
-          console.log(error);
-        });
+    try {
+      let urlRequest = url;
+      if (metodo === "PUT" || metodo === "DELETE") {
+        urlRequest = `${url}/${parametros.IdColor}`;
+      }
+      const respuesta = await axios({ method: metodo, url: urlRequest, data: parametros });
+      console.log(respuesta);
+      Swal.fire("Éxito", respuesta.data.message, "success");
+      document.getElementById("btnCerrar").click();
+      getColores();
+    } catch (error) {
+      if (error.response) {
+        // Error en la respuesta del servidor
+        show_alerta(error.response.data.message, "error");
+      } else if (error.request) {
+        // Error en la solicitud
+        show_alerta("Error en la solicitud", "error");
+      } else {
+        // Otros errores
+        show_alerta("Error desconocido", "error");
+      }
+      console.log(error);
     }
   };
 
-  // Función para eliminar un color
   const deleteColor = (id, color) => {
     const MySwal = withReactContent(Swal);
     MySwal.fire({
-      // Crea un modal de confirmación utilizando SweetAlert2
       title: `¿Seguro de eliminar el color ${color}?`,
       icon: "question",
       text: "No se podrá dar marcha atrás",
@@ -153,73 +122,51 @@ export const Colores = () => {
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        enviarSolicitud("DELETE", { IdColor: id }); // Si se confirma, llama a la función para eliminar el color
+        enviarSolicitud("DELETE", { IdColor: id });
       } else {
-        show_alerta("El color NO fue eliminado", "info");
+        Swal.fire("Cancelado", "El color NO fue eliminado", "info");
       }
     });
   };
 
   return (
     <>
-      {/* <!-- Modal para crear colores --> */}
-
-      <div
-        className="modal fade"
-        id="modalColores"
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="ModalAñadirColorLabel"
-        aria-hidden="true"
-      >
+      <div className="modal fade" id="modalColores" tabIndex="-1" role="dialog" aria-labelledby="ModalAñadirColorLabel" aria-hidden="true">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="ModalAñadirColorLabel">
-                {title}
-              </h5>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
+              <h5 className="modal-title" id="ModalAñadirColorLabel">{title}</h5>
+              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div className="modal-body">
-              <input type="hidden" id="IdColor"></input>
-              <div className="input-group mb-3">
-                <span className="input-group-text">
-                  <i className="fa fa-paint-brush" aria-hidden="true"></i>
-                </span>
+              <input type="hidden" id="Color"></input>
+              <div className="form-group">
+
                 <input
                   type="text"
-                  id="color"
-                  className="form-control"
-                  placeholder="Color"
+                  className={`form-control ${errors.colores ? "is-invalid" : ""}`}
+                  id="nombreProveedor"
+                  placeholder="Ingrese el color"
+                  required
                   value={Color}
-                  onChange={(e) => setColor(e.target.value)}
+                  onChange={handleChangeColor}
                 />
+                {renderErrorMessage(errors.colores)}
               </div>
-              <div className="input-group mb-3">
-                <span className="input-group-text">
-                  <i className="fa fa-hashtag" aria-hidden="true"></i>
-                </span>
+              <label className="d-flex justify-content-">Seleciona la referencia del color: </label>
+              <div className="input-group mb-3 d-flex justify-content-center" style={{
+                }}>
                 <ChromePicker
                   color={Referencia}
                   onChange={(color) => setReferencia(color.hex)}
                 />
               </div>
+
+
               <div className="text-right">
-                <button
-                  type="button"
-                  id="btnCerrar"
-                  className="btn btn-secondary"
-                  data-dismiss="modal"
-                >
-                  Cerrar
-                </button>
+                <button type="button" id="btnCerrar" className="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                 <button onClick={() => validar()} className="btn btn-success">
                   <i className="fa-solid fa-floppy-disk"></i>
                   Guardar Color
@@ -229,14 +176,10 @@ export const Colores = () => {
           </div>
         </div>
       </div>
-      {/* Fin modal crear colores */}
 
-      {/* <!-- Inicio de Colores --> */}
       <div className="container-fluid">
-        {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
           <h1 className="h3 mb-4 text-center text-dark">Colores</h1>
-
           <div className="text-center p-3">
             <button
               onClick={() => openModal(1)}
@@ -250,19 +193,13 @@ export const Colores = () => {
           </div>
         </div>
 
-        {/* <!-- Tabla Color --> */}
         <div className="card shadow mb-4">
           <div className="card-header py-3">
             <h6 className="m-0 font-weight-bold text-primary">Colores</h6>
           </div>
           <div className="card-body">
             <div className="table-responsive">
-              <table
-                className="table table-bordered"
-                id=""
-                width="100%"
-                cellSpacing="0"
-              >
+              <table className="table table-bordered" id="" width="100%" cellSpacing="0">
                 <thead>
                   <tr>
                     <th>Color</th>
@@ -282,8 +219,6 @@ export const Colores = () => {
                     <tr key={color.IdColor}>
                       <td>{color.Color}</td>
                       <td>
-                        {color.Referencia}
-                        {/* Muestra un cuadro de color con el valor hexadecimal */}
                         <div
                           style={{
                             backgroundColor: color.Referencia,
@@ -295,29 +230,17 @@ export const Colores = () => {
                         ></div>
                       </td>
                       <td>
-                        {/* Contenedor para los botones de editar y eliminar */}
                         <div className="d-flex">
-                          {/* Botón para editar un color */}
                           <button
-                            onClick={() =>
-                              openModal(
-                                2,
-                                color.IdColor,
-                                color.Color,
-                                color.Referencia
-                              )
-                            }
+                            onClick={() => openModal(2, color.IdColor, color.Color, color.Referencia)}
                             className="btn btn-warning mr-1"
                             data-toggle="modal"
                             data-target="#modalColores"
                           >
                             <i className="fas fa-sync-alt"></i>
                           </button>
-                          {/* Botón para eliminar un color */}
                           <button
-                            onClick={() =>
-                              deleteColor(color.IdColor, color.Color)
-                            }
+                            onClick={() => deleteColor(color.IdColor, color.Color)}
                             className="btn btn-danger"
                           >
                             <i className="fas fa-trash-alt"></i>
@@ -331,7 +254,6 @@ export const Colores = () => {
             </div>
           </div>
         </div>
-        {/* Fin tabla proveedores */}
       </div>
     </>
   );
