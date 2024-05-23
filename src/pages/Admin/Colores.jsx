@@ -48,20 +48,31 @@ export const Colores = () => {
     if (!/^[A-Za-záéíóúÁÉÍÓÚ\s]+$/.test(value)) {
       return "El color solo puede contener letras y tildes";
     }
+    if (value.length > 20) {
+      return "El color no puede tener más de 20 caracteres";
+    }
     return "";
   };
 
   const handleChangeColor = (e) => {
     const value = e.target.value;
-    setColor(value);
-
-    const errorMessage = validateColores(value);
-    setErrors((prevState) => ({
-      ...prevState,
-      colores: errorMessage,
-    }));
+    // Verifica la longitud del color en tiempo real
+    if (value.length <= 20) {
+      setColor(value);
+      const errorMessage = validateColores(value);
+      setErrors((prevState) => ({
+        ...prevState,
+        colores: errorMessage,
+      }));
+    } else {
+      // Muestra un mensaje de error si el color excede los 20 caracteres
+      setErrors((prevState) => ({
+        ...prevState,
+        colores: "El color no puede tener más de 20 caracteres",
+      }));
+    }
   };
-
+  
   const renderErrorMessage = (errorMessage) => {
     return errorMessage ? (
       <div className="invalid-feedback">{errorMessage}</div>
