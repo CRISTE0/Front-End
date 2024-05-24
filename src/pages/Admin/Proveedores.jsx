@@ -297,11 +297,21 @@ export const Proveedores = () => {
     MySwal.fire({
       title: message,
       icon: type,
-      timer: 1500,
+      timer: 2000,
       showConfirmButton: false,
       timerProgressBar: true,
+      didOpen: () => {
+        // Selecciona la barra de progreso y ajusta su estilo
+        const progressBar = MySwal.getTimerProgressBar();
+        if (progressBar) {
+          progressBar.style.backgroundColor = 'black';
+          progressBar.style.height = '6px';
+        }
+      }
     });
   };
+  
+  
 
   // Función para renderizar los mensajes de error
   const renderErrorMessage = (errorMessage) => {
@@ -327,14 +337,14 @@ export const Proveedores = () => {
       document.getElementById("btnCerrar").click();
       getProveedores();
       if (metodo === "POST") {
-        show_alerta("Proveedor creado con éxito", "success", { timer: 1500 });
+        show_alerta("Proveedor creado con éxito", "success", { timer: 2000 });
       } else if (metodo === "PUT") {
         show_alerta("Proveedor actualizado con éxito", "success", {
-          timer: 1500,
+          timer: 2000,
         });
       } else if (metodo === "DELETE") {
         show_alerta("Proveedor eliminado con éxito", "success", {
-          timer: 1500,
+          timer: 2000,
         });
       }
     } catch (error) {
@@ -386,7 +396,7 @@ export const Proveedores = () => {
       );
 
       show_alerta("Estado del proveedor cambiado con éxito", "success", {
-        timer: 1500,
+        timer: 2000,
       });
     } catch (error) {
       console.error("Error updating state:", error);
