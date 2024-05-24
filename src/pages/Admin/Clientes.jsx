@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import { show_alerta } from "../../assets/js/functions";
+// import { show_alerta } from "../../assets/js/functions";
 
 export const Clientes = () => {
   const url = "http://localhost:3000/api/clientes";
@@ -233,6 +233,25 @@ export const Clientes = () => {
     }));
   };
 
+  const show_alerta = (message, type) => {
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: message,
+      icon: type,
+      timer: 2000,
+      showConfirmButton: false,
+      timerProgressBar: true,
+      didOpen: () => {
+        // Selecciona la barra de progreso y ajusta su estilo
+        const progressBar = MySwal.getTimerProgressBar();
+        if (progressBar) {
+          progressBar.style.backgroundColor = 'black';
+          progressBar.style.height = '6px';
+        }
+      }
+    });
+  };
+
   // Función para renderizar los mensajes de error
   const renderErrorMessage = (errorMessage) => {
     return errorMessage ? (
@@ -241,39 +260,42 @@ export const Clientes = () => {
   };
 
   const enviarSolicitud = async (metodo, parametros) => {
-    let urlRequest =
-      metodo === "PUT" || metodo === "DELETE"
-        ? `${url}/${parametros.IdCliente}`
-        : url;
-
+    let urlRequest = metodo === "PUT" || metodo === "DELETE" ? `${url}/${parametros.IdCliente}` : url;
+  
     try {
-      const respuesta = await axios({
-        method: metodo,
-        url: urlRequest,
-        data: parametros,
-      });
-      var msj = respuesta.data.message;
+      let respuesta;
+      if (metodo === "POST") {
+        respuesta = await axios.post(url, parametros);
+      } else if (metodo === "PUT") {
+        respuesta = await axios.put(urlRequest, parametros);
+      } else if (metodo === "DELETE") {
+        respuesta = await axios.delete(urlRequest);
+      }
+  
+      const msj = respuesta.data.message;
       show_alerta(msj, "success");
       document.getElementById("btnCerrarCliente").click();
       getClientes();
-      // Mostrar la alerta específica
       if (metodo === "POST") {
-        show_alerta("Cliente creado con éxito", "success");
+        show_alerta("Cliente creado con éxito", "success", { timer: 2000 });
+      } else if (metodo === "PUT") {
+        show_alerta("Cliente actualizado con éxito", "success", { timer: 2000 });
+      } else if (metodo === "DELETE") {
+        show_alerta("Cliente eliminado con éxito", "success", { timer: 2000 });
       }
     } catch (error) {
       if (error.response) {
-        // Error en la respuesta del servidor
         show_alerta(error.response.data.message, "error");
       } else if (error.request) {
-        // Error en la solicitud
         show_alerta("Error en la solicitud", "error");
       } else {
-        // Otros errores
         show_alerta("Error desconocido", "error");
       }
       console.log(error);
     }
   };
+  
+  
 
   const deleteCliente = (IdCliente, NombreCliente) => {
     const MySwal = withReactContent(Swal);
@@ -296,41 +318,30 @@ export const Clientes = () => {
 
   const cambiarEstadoCliente = async (IdCliente) => {
     try {
-      const response = await axios.put(`${url}/${IdCliente}`);
-      if (response.status === 200) {
-        // Actualizar estado del cliente localmente
-        setClientes((prevClientes) =>
-          prevClientes.map((cliente) =>
-            cliente.IdCliente === IdCliente
-              ? {
-                  ...cliente,
-                  Estado: cliente.Estado === "Activo" ? "Inactivo" : "Activo",
-                }
-              : cliente
-          )
-        );
-        // Actualizar estado del cliente en la base de datos
-        await axios.put(`${url}/${IdCliente}`, {
-          Estado:
-            Clientes.find((cliente) => cliente.IdCliente === IdCliente)
-              .Estado === "Activo"
-              ? "Inactivo"
-              : "Activo",
-        });
-
-        // Mostrar alerta de cambio de estado
-        const MySwal = withReactContent(Swal);
-        MySwal.fire({
-          title: "¡Estado cambiado!",
-          text: "El estado del cliente ha sido actualizado correctamente.",
-          icon: "success",
-          confirmButtonText: "Ok",
-        });
-      }
+      const cliente = Clientes.find(
+        (cliente) => cliente.IdCliente === IdCliente
+      );
+      const nuevoEstado = cliente.Estado === "Activo" ? "Inactivo" : "Activo";
+  
+      await axios.put(`${url}/${IdCliente}`, { Estado: nuevoEstado });
+  
+      setClientes((prevClientes) =>
+        prevClientes.map((cliente) =>
+          cliente.IdCliente === IdCliente
+            ? { ...cliente, Estado: nuevoEstado }
+            : cliente
+        )
+      );
+  
+      show_alerta("Estado del cliente cambiado con éxito", "success", {
+        timer: 2000,
+      });
     } catch (error) {
       console.error("Error updating state:", error);
+      show_alerta("Error cambiando el estado del cliente", "error");
     }
   };
+  
 
   return (
     <>
