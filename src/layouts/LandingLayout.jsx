@@ -20,9 +20,9 @@ import React from "react";
 
 
 
-import { LandingFooter } from "../components/LandingFooter";
-import { LandingHeader } from "../components/LandingHeader";
-import imagenesLanding from "../assets/img/imagenesLanding/imagenesLanding";
+import { LandingFooter } from "../components/Landing/LandingFooter";
+import { LandingHeader } from "../components/Landing/LandingHeader";
+import imagenesLanding from "../assets/img/imagenesHome";
 
 export const LandingLayout = ({ children }) => {
   return (

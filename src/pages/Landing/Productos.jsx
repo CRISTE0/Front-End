@@ -1,5 +1,7 @@
 import React from 'react'
 
+import imagenesProductos from '../../assets/img/camisetas';
+
 export const Productos = () => {
   return (
     <>
@@ -15,7 +17,7 @@ export const Productos = () => {
                     <div className="col">
                         <div className="card mb-4 product-wap rounded-0 d-flex">
                             <div className="card rounded-0">
-                                <img className="card-img img-fluid custom-image" src="~/img/camisetas/camisa1.jfif"/>
+                                <img className="card-img img-fluid custom-image" src={imagenesProductos[0]}/>
                                 <div
                                     className="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center">
                                     <ul className="list-unstyled">
@@ -56,7 +58,7 @@ export const Productos = () => {
                     <div className="col-md-4">
                         <div className="card mb-4 product-wap rounded-0">
                             <div className="card rounded-0">
-                                <img className="card-img rounded-0 img-fluid" src="~/img/camisetas/camisa2.png"/>
+                                <img className="card-img rounded-0 img-fluid" src={imagenesProductos[4]}/>
                                 <div
                                     className="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center">
                                     <ul className="list-unstyled">
@@ -96,7 +98,7 @@ export const Productos = () => {
                     <div className="col-md-4">
                         <div className="card mb-4 product-wap rounded-0">
                             <div className="card rounded-0">
-                                <img className="card-img rounded-0 img-fluid" src="~/img/camisetas/camisa3.jfif"/>
+                                <img className="card-img rounded-0 img-fluid" src={imagenesProductos[1]}/>
                                 <div
                                     className="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center">
                                     <ul className="list-unstyled">
@@ -135,7 +137,7 @@ export const Productos = () => {
                     <div className="col-md-4">
                         <div className="card mb-4 product-wap rounded-0">
                             <div className="card rounded-0">
-                                <img className="card-img rounded-0 img-fluid" src="~/img/camisetas/camisa4.jfif"/>
+                                <img className="card-img rounded-0 img-fluid" src={imagenesProductos[2]}/>
                                 <div
                                     className="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center">
                                     <ul className="list-unstyled">
@@ -174,7 +176,7 @@ export const Productos = () => {
                     <div className="col-md-4">
                         <div className="card mb-4 product-wap rounded-0">
                             <div className="card rounded-0">
-                                <img className="card-img rounded-0 img-fluid" src="~/img/camisetas/camisa5.jpg"/>
+                                <img className="card-img rounded-0 img-fluid" src={imagenesProductos[3]}/>
                                 <div
                                     className="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center">
                                     <ul className="list-unstyled">
@@ -213,7 +215,7 @@ export const Productos = () => {
                     <div className="col-md-4">
                         <div className="card mb-4 product-wap rounded-0">
                             <div className="card rounded-0">
-                                <img className="card-img rounded-0 img-fluid" src="~/img/camisetas/camisa6.png"/>
+                                <img className="card-img rounded-0 img-fluid" src={imagenesProductos[5]}/>
                                 <div
                                     className="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center">
                                     <ul className="list-unstyled">
@@ -248,50 +250,12 @@ export const Productos = () => {
                             </div>
                         </div>
                     </div>
+                    
                     {/* <!-- producto unico --> */}
                     <div className="col-md-4">
                         <div className="card mb-4 product-wap rounded-0">
                             <div className="card rounded-0">
-                                <img className="card-img rounded-0 img-fluid" src="~/img/camisetas/camisa7.png"/>
-                                <div
-                                    className="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center">
-                                    <ul className="list-unstyled">
-                                        <li><a className="btn btn-success text-white" href="shop-single.html"><i
-                                                    className="far fa-heart"></i></a></li>
-                                        <li><a className="btn btn-success text-white mt-2" href="shop-single.html"><i
-                                                    className="far fa-eye"></i></a></li>
-                                        <li><a className="btn btn-success text-white mt-2" href="shop-single.html"><i
-                                                    className="fas fa-cart-plus"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div className="card-body">
-                                <a href="shop-single.html" className="h3 text-decoration-none">Camiseta Espacio v4</a>
-                                <ul className="w-100 list-unstyled d-flex justify-content-between mb-0">
-
-                                    <li className="pt-2">
-                                        <span
-                                            className="product-color-dot color-dot-red float-left rounded-circle ml-1"></span>
-                                        <span
-                                            className="product-color-dot color-dot-blue float-left rounded-circle ml-1"></span>
-                                        <span
-                                            className="product-color-dot color-dot-black float-left rounded-circle ml-1"></span>
-                                        <span
-                                            className="product-color-dot color-dot-light float-left rounded-circle ml-1"></span>
-                                        <span
-                                            className="product-color-dot color-dot-green float-left rounded-circle ml-1"></span>
-                                    </li>
-                                </ul>
-
-                                <p className="text-center mb-0">35.000</p>
-                            </div>
-                        </div>
-                    </div>
-                    {/* <!-- producto unico --> */}
-                    <div className="col-md-4">
-                        <div className="card mb-4 product-wap rounded-0">
-                            <div className="card rounded-0">
-                                <img className="card-img rounded-0 img-fluid" src="~/img/camisetas/camisa8.jpg"/>
+                                <img className="card-img rounded-0 img-fluid" src={imagenesProductos[6]}/>
                                 <div
                                     className="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center">
                                     <ul className="list-unstyled">
@@ -330,7 +294,7 @@ export const Productos = () => {
                     <div className="col-md-4">
                         <div className="card mb-4 product-wap rounded-0">
                             <div className="card rounded-0">
-                                <img className="card-img rounded-0 img-fluid" src="~/img/camisetas/camisa9.jfif"/>
+                                <img className="card-img rounded-0 img-fluid" src={imagenesProductos[7]}/>
                                 <div
                                     className="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center">
                                     <ul className="list-unstyled">

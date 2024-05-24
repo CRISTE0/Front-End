@@ -1,4 +1,5 @@
 import React from 'react'
+import imagenesAdmin from '../../assets/img/imagenesAdmin'
 
 export const Disenios = () => {
   return (
@@ -14,7 +15,7 @@ export const Disenios = () => {
         <div className="card rounded-0">
           <img
             className="card-img rounded-0 img-fluid"
-            src="../assets/img/diseño.png"
+            src={imagenesAdmin[0]}
             alt="Diseño #1"
           />
         </div>
