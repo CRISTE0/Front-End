@@ -86,10 +86,10 @@ export const Colores = () => {
     if (!errorMessage) {
       let parametros, metodo;
       if (operation === 1) {
-        parametros = { Color, Referencia };
+        parametros = { Color, Referencia, Estado: 'Activo' }; // Incluye Estado aquí
         metodo = "POST";
       } else {
-        parametros = { IdColor, Color, Referencia };
+        parametros = { IdColor, Color, Referencia, Estado: 'Activo' }; // Y aquí
         metodo = "PUT";
       }
       enviarSolicitud(metodo, parametros);
@@ -108,7 +108,7 @@ export const Colores = () => {
         data: parametros,
       });
       console.log(respuesta);
-      Swal.fire("Éxito", respuesta.data.message, "success");
+      Swal.fire("Éxito", respuesta.data.message, "success",);
       document.getElementById("btnCerrar").click();
       getColores();
     } catch (error) {
@@ -148,8 +148,15 @@ export const Colores = () => {
     try {
       const colorActual = Colores.find((color) => color.IdColor === IdColor);
       const nuevoEstado = colorActual.Estado === "Activo" ? "Inactivo" : "Activo";
+    
+      const parametros = {
+        IdColor,
+        Estado: nuevoEstado,
+        Color: colorActual.Color,
+        Referencia: colorActual.Referencia,
+      };
   
-      const response = await axios.put(`${url}/${IdColor}`, { Estado: nuevoEstado });
+      const response = await axios.put(`${url}/${IdColor}`, parametros);
       if (response.status === 200) {
         setColores((prevColores) =>
           prevColores.map((color) =>
@@ -173,7 +180,6 @@ export const Colores = () => {
       show_alerta("Error actualizando el estado del color", "error");
     }
   };
-  
   
   
 
@@ -320,7 +326,7 @@ export const Colores = () => {
                             }
                             disabled={color.Estado != "Activo"}
 
-                            className="btn btn-warning mr-1"
+                            className="btn btn-warning btn-sm mr-2"
                             data-toggle="modal"
                             data-target="#modalColores"
                           >
@@ -330,7 +336,7 @@ export const Colores = () => {
                             onClick={() =>
                               deleteColor(color.IdColor, color.Color)
                             }
-                            className="btn btn-danger"
+                            className="btn btn-danger btn-sm mr-2"
                             disabled={color.Estado != "Activo"}
                           >
                             <i className="fas fa-trash-alt"></i>
