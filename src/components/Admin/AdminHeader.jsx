@@ -36,7 +36,7 @@ export const AdminHeader = ({ children }) => {
                   className="btn btn-link d-md-none rounded-circle mr-3"
                   onClick={changeClass}
                 >
-                  <i className="fa fa-bars"></i>
+                  <i className="fas fa-bars" style={{color:"black"}}></i>
                 </button>
 
                 {/* <!-- Topbar Search --> */}
@@ -59,31 +59,34 @@ export const AdminHeader = ({ children }) => {
                       aria-expanded="false"
                     >
                       <span className="mr-2 d-none d-lg-inline text-gray-600 small">
-                        Douglas McGee
+                        Admin
                       </span>
-                      <img
+                      <i className="fas fa-user-circle fa-lg"></i>
+                      {/* <img
                         className="img-profile rounded-circle"
                         src=""
                         alt="User"
-                      />
+                      /> */}
                     </a>
                     {/* <!-- Dropdown - User Information --> */}
                     <div
                       className="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                       aria-labelledby="userDropdown"
                     >
-                      <a className="dropdown-item" href="#">
+                      {/* <a className="dropdown-item" href="#">
                         <i className="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                         Profile
-                      </a>
+                      </a> */}
                       <a className="dropdown-item" href="#">
                         <i className="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                        Settings
+                        Ajustes
                       </a>
-                      <a className="dropdown-item" href="#">
+
+                      {/* <a className="dropdown-item" href="#">
                         <i className="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
                         Activity Log
                       </a>
+                       */}
                       <div className="dropdown-divider"></div>
                       <a
                         className="dropdown-item"
@@ -92,7 +95,7 @@ export const AdminHeader = ({ children }) => {
                         data-target="#logoutModal"
                       >
                         <i className="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                        Logout
+                        Cerrar Sesión 
                       </a>
                     </div>
                   </li>

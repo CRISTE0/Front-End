@@ -1,4 +1,5 @@
 import React from "react";
+import imagenesLanding from "../../assets/img/imagenesHome";
 
 export const Inicio = () => {
   return (
@@ -29,7 +30,7 @@ export const Inicio = () => {
             <div className="container">
               <div className="row p-5">
                 <div className="mx-auto col-md-8 col-lg-6 order-lg-last">
-                  <img className="img-fluid" src="./assets/img/image6.png" alt="" />
+                  <img className="img-fluid" src={imagenesLanding[1]} alt="Imagen slider" />
                 </div>
                 <div className="col-lg-6 mb-0 d-flex align-items-center">
                   <div className="text-align-left align-self-center">
@@ -55,7 +56,7 @@ export const Inicio = () => {
             <div className="container">
               <div className="row p-5">
                 <div className="mx-auto col-md-8 col-lg-6 order-lg-last">
-                  {/* <img className="img-fluid" src="./assets/img/image2.png" alt=""> */}
+                  <img className="img-fluid" src={imagenesLanding[2]} alt="Imagen slider" />
                 </div>
                 <div className="col-lg-6 mb-0 d-flex align-items-center">
                   <div className="text-align-left">
@@ -78,7 +79,7 @@ export const Inicio = () => {
             <div className="container">
               <div className="row p-5">
                 <div className="mx-auto col-md-8 col-lg-6 order-lg-last">
-                  {/* <img className="img-fluid" src="./assets/img/image3.png" alt=""> */}
+                  <img className="img-fluid" src={imagenesLanding[3]} alt="Imagen slider" />
                 </div>
                 <div className="col-lg-6 mb-0 d-flex align-items-center">
                   <div className="text-align-left">
@@ -131,8 +132,8 @@ export const Inicio = () => {
                 descubre un mundo de estilo y originalidad.
               </p>
             </div>
-            <div className="col-md-4">
-              {/* <img src="assets/img/quizas-removebg-preview.png" alt="About Hero" width="359" height="" className=""> */}
+            <div className="col-md-4 p-1">
+              <img src={imagenesLanding[4]} alt="Nosotros" width="320" height="" className="" />
             </div>
           </div>
         </div>
@@ -188,7 +189,7 @@ export const Inicio = () => {
       </section>
       {/* fin servicios  */}
 
-      {/* inicio reseña  */}
+      {/* inicio reseñas  */}
       <section className="bg-light py-2">
         <div className="container my-4">
           <div className="row text-center py-3">
@@ -199,7 +200,7 @@ export const Inicio = () => {
 
             <div className="row">
               <div className="col-md-4">
-                {/* <img src="assets/img/face7.jpg" className="" alt="Cliente 1" id="section-clientes"> */}
+                <img src={imagenesLanding[5]} className="" alt="Cliente 1" id="section-clientes" />
                 <div className="card-body">
                   <p className="card-text">
                     Excelente servicio. ¡Los recomiendo totalmente!
@@ -208,7 +209,7 @@ export const Inicio = () => {
               </div>
 
               <div className="col-md-4">
-                {/* <img src="assets/img/face20.jpg" className="" alt="Cliente 2" id="section-clientes"> */}
+                <img src={imagenesLanding[6]} className="" alt="Cliente 2" id="section-clientes" />
                 <div className="card-body">
                   <p className="card-text">
                     Increíble experiencia. Estoy muy satisfecha con su trabajo.
@@ -217,7 +218,7 @@ export const Inicio = () => {
               </div>
 
               <div className="col-md-4">
-                {/* <img src="assets/img/face21.jpg" className="" alt="Cliente 3" id="section-clientes"> */}
+                <img src={imagenesLanding[7]} className="" alt="Cliente 3" id="section-clientes" />
                 <div className="card-body">
                   <p className="card-text">
                     El personal es amable y profesional. Definitivamente
@@ -230,7 +231,7 @@ export const Inicio = () => {
         </div>
       </section>
 
-      {/* fin reseña */}
+      {/* fin reseñas */}
 
       {/* inicio FAQs  */}
 
@@ -239,10 +240,10 @@ export const Inicio = () => {
         <div className="accordion-item">
           <h2 className="accordion-header" id="headingOne">
             <button
-              className="accordion-button"
+              className="btn btn-link btn-block text-left"
               type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#collapseOne"
+              data-toggle="collapse"
+              data-target="#collapseOne"
               aria-expanded="true"
               aria-controls="collapseOne"
             >
@@ -256,7 +257,7 @@ export const Inicio = () => {
             id="collapseOne"
             className="accordion-collapse collapse show"
             aria-labelledby="headingOne"
-            data-bs-parent="#accordionExample"
+            data-parent="#accordionExample"
           >
             <div className="accordion-body">
               <strong>
@@ -270,10 +271,10 @@ export const Inicio = () => {
         <div className="accordion-item">
           <h2 className="accordion-header" id="headingTwo">
             <button
-              className="accordion-button collapsed"
+              className="btn  btn-block text-left collapsed"
               type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#collapseTwo"
+              data-toggle="collapse"
+              data-target="#collapseTwo"
               aria-expanded="false"
               aria-controls="collapseTwo"
             >
@@ -288,7 +289,7 @@ export const Inicio = () => {
             id="collapseTwo"
             className="accordion-collapse collapse"
             aria-labelledby="headingTwo"
-            data-bs-parent="#accordionExample"
+            data-parent="#accordionExample"
           >
             <div className="accordion-body">
               Normalmente nos demoramos en entregar el pedido a la puerta de tu
@@ -299,10 +300,10 @@ export const Inicio = () => {
         <div className="accordion-item">
           <h2 className="accordion-header" id="headingThree">
             <button
-              className="accordion-button collapsed"
+              className="btn  btn-block text-left collapsed"
               type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#collapseThree"
+              data-toggle="collapse"
+              data-target="#collapseThree"
               aria-expanded="false"
               aria-controls="collapseThree"
             >
@@ -313,7 +314,7 @@ export const Inicio = () => {
             id="collapseThree"
             className="accordion-collapse collapse"
             aria-labelledby="headingThree"
-            data-bs-parent="#accordionExample"
+            data-parent="#accordionExample"
           >
             <div className="accordion-body">
               Para realizar un pedido solo debes comprar una camiseta y el
