@@ -2,11 +2,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import { show_alerta } from "../../assets/js/functions";
 import { ChromePicker } from "react-color";
 
 export const Colores = () => {
-  let url = "http://localhost:3000/api/colores";
+  const url = "http://localhost:3000/api/colores";
   const [Colores, setColores] = useState([]);
   const [IdColor, setIdColor] = useState("");
   const [Color, setColor] = useState("");
@@ -20,8 +19,12 @@ export const Colores = () => {
   }, []);
 
   const getColores = async () => {
-    const respuesta = await axios.get(url);
-    setColores(respuesta.data);
+    try {
+      const respuesta = await axios.get(url);
+      setColores(respuesta.data);
+    } catch (error) {
+      show_alerta("Error al obtener los colores", "error");
+    }
   };
 
   const openModal = (op, idColor, color, referencia) => {
@@ -56,7 +59,6 @@ export const Colores = () => {
 
   const handleChangeColor = (e) => {
     const value = e.target.value;
-    // Verifica la longitud del color en tiempo real
     if (value.length <= 20) {
       setColor(value);
       const errorMessage = validateColores(value);
@@ -65,7 +67,6 @@ export const Colores = () => {
         colores: errorMessage,
       }));
     } else {
-      // Muestra un mensaje de error si el color excede los 20 caracteres
       setErrors((prevState) => ({
         ...prevState,
         colores: "El color no puede tener más de 20 caracteres",
@@ -86,10 +87,10 @@ export const Colores = () => {
     if (!errorMessage) {
       let parametros, metodo;
       if (operation === 1) {
-        parametros = { Color, Referencia, Estado: 'Activo' }; // Incluye Estado aquí
+        parametros = { Color, Referencia, Estado: 'Activo' };
         metodo = "POST";
       } else {
-        parametros = { IdColor, Color, Referencia, Estado: 'Activo' }; // Y aquí
+        parametros = { IdColor, Color, Referencia, Estado: 'Activo' };
         metodo = "PUT";
       }
       enviarSolicitud(metodo, parametros);
@@ -107,22 +108,17 @@ export const Colores = () => {
         url: urlRequest,
         data: parametros,
       });
-      console.log(respuesta);
-      Swal.fire("Éxito", respuesta.data.message, "success",);
+      show_alerta(respuesta.data.message, "success");
       document.getElementById("btnCerrar").click();
       getColores();
     } catch (error) {
       if (error.response) {
-        // Error en la respuesta del servidor
         show_alerta(error.response.data.message, "error");
       } else if (error.request) {
-        // Error en la solicitud
         show_alerta("Error en la solicitud", "error");
       } else {
-        // Otros errores
         show_alerta("Error desconocido", "error");
       }
-      console.log(error);
     }
   };
 
@@ -139,7 +135,7 @@ export const Colores = () => {
       if (result.isConfirmed) {
         enviarSolicitud("DELETE", { IdColor: id });
       } else {
-        Swal.fire("Cancelado", "El color NO fue eliminado", "info");
+        show_alerta("El color NO fue eliminado", "info");
       }
     });
   };
@@ -148,14 +144,14 @@ export const Colores = () => {
     try {
       const colorActual = Colores.find((color) => color.IdColor === IdColor);
       const nuevoEstado = colorActual.Estado === "Activo" ? "Inactivo" : "Activo";
-    
+
       const parametros = {
         IdColor,
         Estado: nuevoEstado,
         Color: colorActual.Color,
         Referencia: colorActual.Referencia,
       };
-  
+
       const response = await axios.put(`${url}/${IdColor}`, parametros);
       if (response.status === 200) {
         setColores((prevColores) =>
@@ -163,25 +159,33 @@ export const Colores = () => {
             color.IdColor === IdColor ? { ...color, Estado: nuevoEstado } : color
           )
         );
-  
-        const MySwal = withReactContent(Swal);
-        MySwal.fire({
-          title: "¡Estado cambiado!",
-          text: "El estado del color ha sido actualizado correctamente.",
-          icon: "success",
-          confirmButtonText: "Ok",
-        });
+        show_alerta("El estado del color ha sido actualizado correctamente", "success");
       }
     } catch (error) {
-      console.error("Error updating state:", error);
       if (error.response) {
-        console.error("Error response data:", error.response.data);
+        show_alerta("Error actualizando el estado del color", "error");
       }
-      show_alerta("Error actualizando el estado del color", "error");
     }
   };
-  
-  
+
+  const show_alerta = (message, type) => {
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: message,
+      icon: type,
+      timer: 2000,
+      showConfirmButton: false,
+      timerProgressBar: true,
+      didOpen: () => {
+        // Selecciona la barra de progreso y ajusta su estilo
+        const progressBar = MySwal.getTimerProgressBar();
+        if (progressBar) {
+          progressBar.style.backgroundColor = 'black';
+          progressBar.style.height = '6px';
+        }
+      }
+    });
+  };
 
   return (
     <>
@@ -224,13 +228,8 @@ export const Colores = () => {
                 />
                 {renderErrorMessage(errors.colores)}
               </div>
-              <label className="d-flex justify-content-">
-                Seleciona la referencia del color:{" "}
-              </label>
-              <div
-                className="input-group mb-3 d-flex justify-content-center"
-                style={{}}
-              >
+              <label>Selecciona la referencia del color:</label>
+              <div className="input-group mb-3 d-flex justify-content-center">
                 <ChromePicker
                   color={Referencia}
                   onChange={(color) => setReferencia(color.hex)}
@@ -247,8 +246,7 @@ export const Colores = () => {
                   Cerrar
                 </button>
                 <button onClick={() => validar()} className="btn btn-success">
-                  <i className="fa-solid fa-floppy-disk"></i>
-                  Guardar Color
+                  <i className="fa-solid fa-floppy-disk"></i> Guardar Color
                 </button>
               </div>
             </div>
@@ -280,7 +278,6 @@ export const Colores = () => {
             <div className="table-responsive">
               <table
                 className="table table-bordered"
-                id=""
                 width="100%"
                 cellSpacing="0"
               >
@@ -291,13 +288,6 @@ export const Colores = () => {
                     <th>Acciones</th>
                   </tr>
                 </thead>
-                <tfoot>
-                  <tr>
-                    <th>Color</th>
-                    <th>Referencia</th>
-                    <th>Acciones</th>
-                  </tr>
-                </tfoot>
                 <tbody>
                   {Colores.map((color) => (
                     <tr key={color.IdColor}>
@@ -324,8 +314,7 @@ export const Colores = () => {
                                 color.Referencia
                               )
                             }
-                            disabled={color.Estado != "Activo"}
-
+                            disabled={color.Estado !== "Activo"}
                             className="btn btn-warning btn-sm mr-2"
                             data-toggle="modal"
                             data-target="#modalColores"
@@ -337,7 +326,7 @@ export const Colores = () => {
                               deleteColor(color.IdColor, color.Color)
                             }
                             className="btn btn-danger btn-sm mr-2"
-                            disabled={color.Estado != "Activo"}
+                            disabled={color.Estado !== "Activo"}
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
@@ -345,9 +334,7 @@ export const Colores = () => {
                             className={`btn btn-${
                               color.Estado === "Activo" ? "success" : "danger"
                             } btn-sm`}
-                            onClick={() =>
-                              cambiarEstadoColor(color.IdColor)
-                            }
+                            onClick={() => cambiarEstadoColor(color.IdColor)}
                           >
                             {color.Estado}
                           </button>
