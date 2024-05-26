@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import { show_alerta } from "../../assets/js/functions";
+// import { show_alerta } from "../../assets/js/functions";
 
 export const Tallas = () => {
   let url = "http://localhost:3000/api/tallas";
@@ -16,6 +16,10 @@ export const Tallas = () => {
   useEffect(() => {
     getTallas();
   }, []);
+
+  const handleChangeTalla = (e) =>{
+    setTalla(e.target.value.toUpperCase());
+  }
 
   const getTallas = async () => {
     const respuesta = await axios.get(url);
@@ -157,6 +161,64 @@ export const Tallas = () => {
     });
   };
 
+  const cambiarEstadoTalla = async (IdTalla) => {
+    console.log(IdTalla);
+    try {
+      const tallaActual = Tallas.find((talla) => talla.IdTalla === IdTalla);
+
+      const nuevoEstado =
+        tallaActual.Estado === "Activo" ? "Inactivo" : "Activo";
+      console.log(nuevoEstado);
+
+      const parametrosTalla = {
+        IdTalla,
+        Talla: tallaActual.Talla,
+        Estado: nuevoEstado,
+      };
+
+      const response = await axios.put(`${url}/${IdTalla}`, parametrosTalla);
+
+      if (response.status === 200) {
+        setTallas((prevTalla) =>
+          prevTalla.map((talla) =>
+            talla.IdTalla === IdTalla
+              ? { ...talla, Estado: nuevoEstado }
+              : talla
+          )
+        );
+
+        show_alerta("Estado de la talla cambiada con éxito", "success", {
+          timer: 8000
+        });
+      }
+      
+    } catch (error) {
+      console.error("Error updating state:", error);
+      show_alerta("Error cambiando el estado de la talla", "error");
+    }
+  };
+
+  // Configuracion mensaje de alerta 
+  const show_alerta = (message, type) => {
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: message,
+      icon: type,
+      timer: 2000,
+      showConfirmButton: false,
+      timerProgressBar: true,
+      didOpen: () => {
+        // Selecciona la barra de progreso y ajusta su estilo
+        const progressBar = MySwal.getTimerProgressBar();
+        if (progressBar) {
+          progressBar.style.backgroundColor = 'black';
+          progressBar.style.height = '3.5px';
+        }
+      }
+    });
+  };
+
+
   return (
     <>
       {/* <!-- Modal para crear talla --> */}
@@ -193,8 +255,8 @@ export const Tallas = () => {
               ></input>
 
               <div className="input-group mb-3">
-                <span className="input-group-text">
-                  <i className="fa-solid fa-toggle-on"></i>
+                <span className="input-group-text mx-2">
+                  <i className="fas fa-solid fa-ruler-combined"></i>
                 </span>
                 <input
                   type="text"
@@ -202,7 +264,7 @@ export const Tallas = () => {
                   className="form-control"
                   placeholder="Talla"
                   value={Talla}
-                  onChange={(e) => setTalla(e.target.value)}
+                  onChange={handleChangeTalla}
                 ></input>
               </div>
 
@@ -264,7 +326,7 @@ export const Tallas = () => {
                   <tr>
                     <th>#</th>
                     <th>Talla</th>
-                    <th></th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
 
@@ -276,25 +338,44 @@ export const Tallas = () => {
                       <td>{talla.Talla}</td>
 
                       <td>
-                        <button
-                          onClick={() =>
-                            openModal(2, talla.IdTalla, talla.Talla)
-                          }
-                          className="btn btn-warning"
-                          data-toggle="modal"
-                          data-target="#modalTallas"
+                        <div
+                          className="btn-group"
+                          role="group"
+                          aria-label="Acciones"
                         >
-                          <i className="fa-solid fa-edit"></i>
-                        </button>
-                        &nbsp;
-                        <button
-                          onClick={() =>
-                            deletetalla(talla.IdTalla, talla.Talla)
-                          }
-                          className="btn btn-danger"
-                        >
-                          <i className="fa-solid fa-trash"></i>
-                        </button>
+                          {/* boton de actualizar */}
+                          <button
+                            className="btn btn-warning btn-sm mr-2"
+                            data-toggle="modal"
+                            data-target="#modalTallas"
+                            onClick={() =>
+                              openModal(2, talla.IdTalla, talla.Talla)
+                            }
+                            disabled={talla.Estado != "Activo"}
+                          >
+                            <i className="fas fa-solid fa-edit"></i>
+                          </button>
+                          {/* boton de eliminar */}
+                          &nbsp;
+                          <button
+                            className="btn btn-danger btn-sm mr-2"
+                            onClick={() =>
+                              deletetalla(talla.IdTalla, talla.Talla)
+                            }
+                            disabled={talla.Estado != "Activo"}
+                          >
+                            <i className="fas fa-solid fa-trash"></i>
+                          </button>
+                          {/* Botón de cambio de estado */}
+                          <button
+                            className={`btn btn-${
+                              talla.Estado === "Activo" ? "success" : "danger"
+                            } btn-sm`}
+                            onClick={() => cambiarEstadoTalla(talla.IdTalla)}
+                          >
+                            {talla.Estado}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
