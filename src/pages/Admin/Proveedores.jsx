@@ -3,6 +3,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 // import { show_alerta } from "../../assets/js/functions";
+import Pagination from "../../assets/js/Pagination";
 
 export const Proveedores = () => {
   let url = "http://localhost:3000/api/proveedores";
@@ -29,6 +30,9 @@ export const Proveedores = () => {
   const [NombreApellidoLabel, setNombreApellidoLabel] = useState(
     "Nombre del Proveedor"
   );
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     getProveedores();
@@ -304,14 +308,12 @@ export const Proveedores = () => {
         // Selecciona la barra de progreso y ajusta su estilo
         const progressBar = MySwal.getTimerProgressBar();
         if (progressBar) {
-          progressBar.style.backgroundColor = 'black';
-          progressBar.style.height = '6px';
+          progressBar.style.backgroundColor = "black";
+          progressBar.style.height = "6px";
         }
-      }
+      },
     });
   };
-  
-  
 
   // Función para renderizar los mensajes de error
   const renderErrorMessage = (errorMessage) => {
@@ -403,6 +405,13 @@ export const Proveedores = () => {
       show_alerta("Error cambiando el estado del proveedor", "error");
     }
   };
+
+  // Lógica de paginación
+  const totalPages = Math.ceil(Proveedores.length / itemsPerPage);
+  const currentProveedores = Proveedores.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <>
@@ -634,7 +643,7 @@ export const Proveedores = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {Proveedores.map((proveedor) => (
+                  {currentProveedores.map((proveedor) => (
                     <tr key={proveedor.NroDocumento}>
                       <td>{proveedor.TipoDocumento}</td>
                       <td>{proveedor.NroDocumento}</td>
@@ -649,18 +658,16 @@ export const Proveedores = () => {
                           role="group"
                           aria-label="Acciones"
                         >
-                          {/* Botón de actualizar */}
                           <button
                             className="btn btn-warning btn-sm mr-2"
                             title="Actualizar"
                             data-toggle="modal"
                             data-target="#modalProveedor"
                             onClick={() => openModal(2, proveedor)}
-                            disabled={proveedor.Estado != "Activo"}
+                            disabled={proveedor.Estado !== "Activo"}
                           >
                             <i className="fas fa-sync-alt"></i>
                           </button>
-                          {/* Botón de eliminar */}
                           <button
                             className="btn btn-danger btn-sm mr-2"
                             onClick={() =>
@@ -669,11 +676,10 @@ export const Proveedores = () => {
                                 proveedor.NombreApellido
                               )
                             }
-                            disabled={proveedor.Estado != "Activo"}
+                            disabled={proveedor.Estado !== "Activo"}
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                          {/* Botón de cambio de estado */}
                           <button
                             className={`btn btn-${
                               proveedor.Estado === "Activo"
@@ -693,6 +699,11 @@ export const Proveedores = () => {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
         {/* Fin tabla proveedores */}
