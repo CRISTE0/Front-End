@@ -203,3 +203,55 @@ h5 {
 label {
   color: black;
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  list-style-type: none;
+  padding: 0;
+}
+
+.page-item {
+  margin: 0 5px;
+}
+
+.page-link {
+  border: 1px solid #858796; /* Borde gris */
+  padding: 10px 15px;
+  border-radius: 5px;
+  color: #858796; /* Texto gris */
+  text-decoration: none;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Añadir sombra */
+  background-color: #f8f9fa; /* Color de fondo claro */
+}
+
+.page-link:hover {
+  background-color: #858796; /* Color gris al pasar el cursor */
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra más intensa */
+}
+
+.page-item.active .page-link {
+  background-color: #858796; /* Fondo gris para el enlace activo */
+  color: white; /* Texto blanco para el enlace activo */
+  border-color: #858796;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra más intensa */
+}
+
+.page-item.disabled .page-link {
+  color: #6c757d; /* Color gris claro para el enlace deshabilitado */
+  pointer-events: none;
+  cursor: default;
+}
+
+.page-item.disabled .page-link:hover {
+  background-color: transparent; /* Asegura que no cambie de color */
+  color: #6c757d;
+}
+
+.page-link {
+  font-size: 16px; /* Ajusta el tamaño del texto */
+  padding: 8px 16px; /* Ajusta el espaciado interno */
+}

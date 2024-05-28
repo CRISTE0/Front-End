@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-// import { show_alerta } from "../../assets/js/functions";
 import Pagination from "../../assets/js/Pagination";
+import SearchBar from "../../assets/js/SearchBar";
 
 export const Proveedores = () => {
   let url = "http://localhost:3000/api/proveedores";
@@ -26,6 +26,7 @@ export const Proveedores = () => {
     direccion: "",
     correo: "",
   });
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [NombreApellidoLabel, setNombreApellidoLabel] = useState(
     "Nombre del Proveedor"
@@ -406,9 +407,21 @@ export const Proveedores = () => {
     }
   };
 
-  // Lógica de paginación
-  const totalPages = Math.ceil(Proveedores.length / itemsPerPage);
-  const currentProveedores = Proveedores.slice(
+  const handleSearchTermChange = (newSearchTerm) => {
+    setSearchTerm(newSearchTerm);
+    setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
+  };
+
+  // Filtrar los proveedores según el término de búsqueda
+  const filteredProveedores = Proveedores.filter((proveedor) =>
+    Object.values(proveedor).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Aplicar paginación a los proveedores filtrados
+  const totalPages = Math.ceil(filteredProveedores.length / itemsPerPage);
+  const currentProveedores = filteredProveedores.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -556,14 +569,14 @@ export const Proveedores = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="correoProveedor">Correo:</label>
+                  <label htmlFor="correoProveedor">Correo Electrónico:</label>
                   <input
                     type="email"
                     className={`form-control ${
                       errors.correo ? "is-invalid" : ""
                     }`}
                     id="correoProveedor"
-                    placeholder="Ingrese el correo"
+                    placeholder="Ingrese el correo Electrónico"
                     required
                     value={Correo}
                     onChange={handleChangeCorreo}
@@ -623,6 +636,10 @@ export const Proveedores = () => {
             <h6 className="m-0 font-weight-bold text-primary">Proveedores</h6>
           </div>
           <div className="card-body">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -638,7 +655,7 @@ export const Proveedores = () => {
                     <th>Contacto</th>
                     <th>Teléfono</th>
                     <th>Dirección</th>
-                    <th>Correo</th>
+                    <th>Correo Electrónico</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>

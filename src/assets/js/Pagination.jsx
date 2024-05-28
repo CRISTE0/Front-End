@@ -1,5 +1,5 @@
-// src/components/Pagination.js
 import React from "react";
+import "../../assets/css/style.css"; // Ajusta la ruta si es necesario
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const handlePageChange = (page) => {
@@ -33,9 +33,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           </li>
         ))}
         <li
-          className={`page-item ${
-            currentPage === totalPages ? "disabled" : ""
-          }`}
+          className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
         >
           <button
             className="page-link"
