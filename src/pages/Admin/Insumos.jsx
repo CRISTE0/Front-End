@@ -1,0 +1,576 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import Pagination from "../../assets/js/Pagination";
+import SearchBar from "../../assets/js/SearchBar";
+
+export const Insumos = () => {
+  const url = "http://localhost:3000/api/insumos";
+  const [Insumos, setInsumos] = useState([]);
+  const [IdInsumo, setIdInsumo] = useState("");
+  const [IdColor, setIdColor] = useState("");
+  const [IdTalla, setIdTalla] = useState("");
+  const [Referencia, setReferencia] = useState("");
+  const [Cantidad, setCantidad] = useState("");
+  const [ValorCompra, setValorCompra] = useState("");
+  const [operation, setOperation] = useState(1);
+  const [title, setTitle] = useState("");
+  const [errors, setErrors] = useState({
+    IdColor: 0,
+    IdTalla: 0,
+    Referencia: "",
+    Cantidad: 0,
+    ValorCompra: 0,
+  });
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
+
+  useEffect(() => {
+    getInsumos();
+  }, []);
+
+  const getInsumos = async () => {
+    const respuesta = await axios.get(url);
+    setInsumos(respuesta.data);
+    console.log(respuesta.data);
+  };
+
+  const openModal = (op, cliente = null) => {
+    if (op === 1) {
+      // Crear cliente
+      setIdCliente("");
+      setTipoDocumento("");
+      setNroDocumento("");
+      setNombreApellido("");
+      setTelefono("");
+      setDireccion("");
+      setCorreo("");
+      setOperation(1);
+      setTitle("Crear Cliente");
+    } else if (op === 2 && cliente) {
+      // Actualizar Cliente
+      setIdCliente(cliente.IdCliente);
+      setTipoDocumento(cliente.TipoDocumento);
+      setNroDocumento(cliente.NroDocumento);
+      setNombreApellido(cliente.NombreApellido);
+      setTelefono(cliente.Telefono);
+      setDireccion(cliente.Direccion);
+      setCorreo(cliente.Correo);
+      setOperation(2);
+      setTitle("Actualizar Datos");
+      setErrors({
+        nroDocumento: "",
+        nombreApellido: "",
+        telefono: "",
+        direccion: "",
+        correo: "",
+      });
+      const errors = {
+        nroDocumento: validateNroDocumento(cliente.NroDocumento),
+        nombreApellido: validateNombreApellido(cliente.NombreApellido),
+        telefono: validateTelefono(cliente.Telefono),
+        direccion: validateDireccion(cliente.Direccion),
+        correo: validateCorreo(cliente.Correo),
+      };
+      setErrors(errors);
+    }
+  };
+
+  const guardarCliente = async () => {
+    if (operation === 1) {
+      // Crear Cliente
+      await enviarSolicitud("POST", {
+        TipoDocumento,
+        NroDocumento,
+        NombreApellido,
+        Telefono,
+        Direccion,
+        Correo,
+        Estado: "Activo",
+      });
+    } else if (operation === 2) {
+      // Actualizar Cliente
+      await enviarSolicitud("PUT", {
+        IdCliente,
+        TipoDocumento,
+        NroDocumento,
+        NombreApellido,
+        Telefono,
+        Direccion,
+        Correo,
+      });
+    }
+  };
+
+  const handleChangeTipoDocumento = (e) => {
+    const value = e.target.value;
+    setTipoDocumento(value);
+  };
+
+  // Función para manejar cambios en el número de documento
+  const handleChangeNroDocumento = (e) => {
+    let value = e.target.value;
+    // Limitar la longitud del valor ingresado a entre 6 y 10 caracteres
+    if (value.length > 10) {
+      value = value.slice(0, 10);
+    }
+    setNroDocumento(value);
+    const errorMessage = validateNroDocumento(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      nroDocumento: errorMessage,
+    }));
+  };
+
+  const handleChangeNombreApellido = (e) => {
+    const value = e.target.value;
+    setNombreApellido(value);
+
+    // Validar el nombre y apellido
+    const errorMessage = validateNombreApellido(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      nombreApellido: errorMessage,
+    }));
+  };
+
+  // Función para manejar cambios en el teléfono
+  const handleChangeTelefono = (e) => {
+    let value = e.target.value;
+    // Limitar la longitud del valor ingresado a 10 caracteres
+    if (value.length > 10) {
+      value = value.slice(0, 10);
+    }
+    setTelefono(value);
+    const errorMessage = validateTelefono(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      telefono: errorMessage,
+    }));
+  };
+
+  // Función para manejar cambios en la dirección
+  const handleChangeDireccion = (e) => {
+    const value = e.target.value;
+    setDireccion(value);
+    const errorMessage = validateDireccion(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      direccion: errorMessage,
+    }));
+  };
+
+  // Función para manejar cambios en el correo electrónico
+  const handleChangeCorreo = (e) => {
+    const value = e.target.value;
+    setCorreo(value);
+    const errorMessage = validateCorreo(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      correo: errorMessage,
+    }));
+  };
+
+  const show_alerta = (message, type) => {
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: message,
+      icon: type,
+      timer: 2000,
+      showConfirmButton: false,
+      timerProgressBar: true,
+      didOpen: () => {
+        // Selecciona la barra de progreso y ajusta su estilo
+        const progressBar = MySwal.getTimerProgressBar();
+        if (progressBar) {
+          progressBar.style.backgroundColor = "black";
+          progressBar.style.height = "6px";
+        }
+      },
+    });
+  };
+
+  // Función para renderizar los mensajes de error
+  const renderErrorMessage = (errorMessage) => {
+    return errorMessage ? (
+      <div className="invalid-feedback">{errorMessage}</div>
+    ) : null;
+  };
+
+  const enviarSolicitud = async (metodo, parametros) => {
+    let urlRequest =
+      metodo === "PUT" || metodo === "DELETE"
+        ? `${url}/${parametros.IdCliente}`
+        : url;
+
+    try {
+      let respuesta;
+      if (metodo === "POST") {
+        respuesta = await axios.post(url, parametros);
+      } else if (metodo === "PUT") {
+        respuesta = await axios.put(urlRequest, parametros);
+      } else if (metodo === "DELETE") {
+        respuesta = await axios.delete(urlRequest);
+      }
+
+      const msj = respuesta.data.message;
+      show_alerta(msj, "success");
+      document.getElementById("btnCerrarCliente").click();
+      getClientes();
+      if (metodo === "POST") {
+        show_alerta("Cliente creado con éxito", "success", { timer: 2000 });
+      } else if (metodo === "PUT") {
+        show_alerta("Cliente actualizado con éxito", "success", {
+          timer: 2000,
+        });
+      } else if (metodo === "DELETE") {
+        show_alerta("Cliente eliminado con éxito", "success", { timer: 2000 });
+      }
+    } catch (error) {
+      if (error.response) {
+        show_alerta(error.response.data.message, "error");
+      } else if (error.request) {
+        show_alerta("Error en la solicitud", "error");
+      } else {
+        show_alerta("Error desconocido", "error");
+      }
+      console.log(error);
+    }
+  };
+
+  const deleteCliente = (IdCliente, NombreCliente) => {
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: `¿Seguro de eliminar al cliente ${NombreCliente}?`,
+      icon: "question",
+      text: "No se podrá dar marcha atrás",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setIdCliente(IdCliente);
+        enviarSolicitud("DELETE", { IdCliente: IdCliente });
+      } else {
+        show_alerta("El cliente NO fue eliminado", "info");
+      }
+    });
+  };
+
+  const cambiarEstadoCliente = async (IdCliente) => {
+    try {
+      const cliente = Clientes.find(
+        (cliente) => cliente.IdCliente === IdCliente
+      );
+      const nuevoEstado = cliente.Estado === "Activo" ? "Inactivo" : "Activo";
+
+      await axios.put(`${url}/${IdCliente}`, { Estado: nuevoEstado });
+
+      setClientes((prevClientes) =>
+        prevClientes.map((cliente) =>
+          cliente.IdCliente === IdCliente
+            ? { ...cliente, Estado: nuevoEstado }
+            : cliente
+        )
+      );
+
+      show_alerta("Estado del cliente cambiado con éxito", "success", {
+        timer: 2000,
+      });
+    } catch (error) {
+      console.error("Error updating state:", error);
+      show_alerta("Error cambiando el estado del cliente", "error");
+    }
+  };
+
+  const handleSearchTermChange = (newSearchTerm) => {
+    setSearchTerm(newSearchTerm);
+    setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
+  };
+
+  // Filtrar los clientes según el término de búsqueda
+  const filteredInsumos = Insumos.filter((cliente) =>
+    Object.values(cliente).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Aplicar paginación a los clientes filtrados
+  const totalPages = Math.ceil(filteredInsumos.length / itemsPerPage);
+  const currentInsumos = filteredInsumos.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  return (
+    <>
+      <div
+        className="modal fade"
+        id="modalCliente"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="modalClienteLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="modalClienteLabel">
+                {title}
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <form id="crearClienteForm">
+                <div className="form-group">
+                  <label htmlFor="tipoDocumentoCliente">
+                    Tipo de Documento:
+                  </label>
+                  <select
+                    className="form-control"
+                    id="tipoDocumentoCliente"
+                    // value={TipoDocumento}
+                    onChange={(e) => handleChangeTipoDocumento(e)} // Llama a la función handleChangeTipoDocumento
+                    disabled={operation === 2}
+                    required
+                  >
+                    <option value="">Seleccione un tipo de documento</option>
+                    <option value="CC">Cédula</option>
+                    <option value="CE">Cédula de Extranjería</option>
+                  </select>
+{/* 
+                  {TipoDocumento === "" && (
+                    <p className="text-danger">
+                      Por favor, seleccione un tipo de documento.
+                    </p>
+                  )} */}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nroDocumentoCliente">
+                    Número de Documento:
+                  </label>
+                  {/* <input
+                    type="text"
+                    className={`form-control ${
+                      errors.nroDocumento ? "is-invalid" : ""
+                    }`}
+                    id="nroDocumentoCliente"
+                    placeholder="Ingrese el número de documento"
+                    required
+                    value={NroDocumento}
+                    onChange={handleChangeNroDocumento}
+                    disabled={operation === 2}
+                  /> */}
+                  {renderErrorMessage(errors.nroDocumento)}
+                  <small className="form-text text-muted">
+                    Ingrese un documento válido (entre 6 y 10 dígitos
+                    numéricos).
+                  </small>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="nombreCliente">Nombre del Cliente:</label>
+                  {/* <input
+                    type="text"
+                    className={`form-control ${
+                      errors.nombreApellido ? "is-invalid" : ""
+                    }`}
+                    id="nombreCliente"
+                    placeholder="Ingrese el nombre del Cliente"
+                    required
+                    value={NombreApellido}
+                    onChange={handleChangeNombreApellido}
+                  /> */}
+                  {renderErrorMessage(errors.nombreApellido)}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="telefonoCliente">Teléfono:</label>
+                  {/* <input
+                    type="text"
+                    className={`form-control ${
+                      errors.telefono ? "is-invalid" : ""
+                    }`}
+                    id="telefonoCliente"
+                    placeholder="Ingrese el teléfono"
+                    required
+                    value={Telefono}
+                    onChange={handleChangeTelefono}
+                  /> */}
+                  {renderErrorMessage(errors.telefono)}
+                  <small className="form-text text-muted">
+                    Ingrese un número de teléfono válido (10 dígitos).
+                  </small>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="direccionCliente">Dirección:</label>
+                  {/* <input
+                    type="text"
+                    className={`form-control ${
+                      errors.direccion ? "is-invalid" : ""
+                    }`}
+                    id="direccionCliente"
+                    placeholder="Ingrese la dirección"
+                    required
+                    value={Direccion}
+                    onChange={handleChangeDireccion}
+                  /> */}
+                  {renderErrorMessage(errors.direccion)}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="correoCliente">Correo Electrónico:</label>
+                  {/* <input
+                    type="email"
+                    className={`form-control ${
+                      errors.correo ? "is-invalid" : ""
+                    }`}
+                    id="correoCliente"
+                    placeholder="Ingrese el correo electrónico"
+                    required
+                    value={Correo}
+                    onChange={handleChangeCorreo}
+                  /> */}
+                  {renderErrorMessage(errors.correo)}
+                </div>
+              </form>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-dismiss="modal"
+                id="btnCerrarCliente"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  guardarCliente();
+                }}
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container-fluid">
+        {/* <!-- Page Heading --> */}
+        <div className="d-flex align-items-center justify-content-between">
+          <h1 className="h3 mb-4 text-center text-dark">Gestión de Insumos</h1>
+          <div className="text-right">
+            <button
+              type="button"
+              className="btn btn-dark"
+              data-toggle="modal"
+              data-target="#modalCliente"
+              onClick={() => openModal(1, "", "", "", "", "", "")}
+            >
+              <i className="fas fa-pencil-alt"></i> Crear Insumo
+            </button>
+          </div>
+        </div>
+
+        {/* <!-- Tabla de Clientes --> */}
+        <div className="card shadow mb-4">
+          <div className="card-header py-3">
+            <h6 className="m-0 font-weight-bold text-primary">Insumos</h6>
+          </div>
+          <div className="card-body">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
+            <div className="table-responsive">
+              <table
+                className="table table-bordered"
+                id="dataTable"
+                width="100%"
+                cellSpacing="0"
+              >
+                <thead>
+                  <tr>
+                    <th>Color</th>
+                    <th>Talla</th>
+                    <th>Referencia</th>
+                    <th>Cantidad</th>
+                    <th>Valor de laCompra</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentInsumos.map((insumo) => (
+                    <tr key={insumo.IdColor}>
+                      <td>{insumo.IdTalla}</td>
+                      <td>{insumo.Referencia}</td>
+                      <td>{insumo.Referencia}</td>
+                      <td>{insumo.Telefono}</td>
+
+                      <td>
+                        <div
+                          className="btn-group"
+                          role="group"
+                          aria-label="Acciones"
+                        >
+                          <button
+                            className="btn btn-warning btn-sm mr-2"
+                            title="Actualizar"
+                            data-toggle="modal"
+                            data-target="#modalCliente"
+                            onClick={() => openModal(2, cliente)}
+                            disabled={cliente.Estado != "Activo"}
+                          >
+                            <i className="fas fa-sync-alt"></i>
+                          </button>
+                          <button
+                            className="btn btn-danger btn-sm mr-2"
+                            onClick={() =>
+                              deleteCliente(
+                                cliente.IdCliente,
+                                cliente.NombreApellido
+                              )
+                            }
+                            disabled={cliente.Estado != "Activo"}
+                          >
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+                          <button
+                            className={`btn btn-${
+                              cliente.Estado === "Activo" ? "success" : "danger"
+                            } btn-sm`}
+                            onClick={() =>
+                              cambiarEstadoCliente(cliente.IdCliente)
+                            }
+                          >
+                            {cliente.Estado}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        </div>
+        {/* Fin tabla de clientes */}
+      </div>
+    </>
+  );
+};

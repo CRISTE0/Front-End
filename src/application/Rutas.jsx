@@ -18,6 +18,7 @@ import { Ventas } from "../pages/Admin/Ventas";
 import { Pedidos } from "../pages/Admin/Pedidos";
 import { Tallas } from "../pages/Admin/Tallas";
 import { Colores } from "../pages/Admin/Colores";
+import { Insumos } from "../pages/Admin/Insumos"
 
 export const Rutas = () => {
   return (
@@ -33,6 +34,7 @@ export const Rutas = () => {
         <Route path="/admin" Component={()=> <AdminLayout> <Dashboard /> </AdminLayout>  } />
         <Route path="/admin/Usuarios" Component={()=> <AdminLayout> <Usuarios /> </AdminLayout> } />
         <Route path="/admin/Proveedores" Component={()=> <AdminLayout> <Proveedores /> </AdminLayout> } />
+        <Route path="/admin/Insumos" Component={()=> <AdminLayout> <Insumos /> </AdminLayout> } />
         <Route path="/admin/Tallas" Component={()=> <AdminLayout> <Tallas /> </AdminLayout> } />
         <Route path="/admin/Colores" Component={()=> <AdminLayout> <Colores /> </AdminLayout> } />
         <Route path="/admin/Compras" Component={()=> <AdminLayout> <Compras /> </AdminLayout> } />
