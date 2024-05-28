@@ -6,16 +6,11 @@ const SearchBar = ({ searchTerm, onSearchTermChange }) => {
     <div className="input-group mb-3">
       <input
         type="text"
-        className="form-control"
+        className="Buscador"
         placeholder="Buscar..."
         value={searchTerm}
         onChange={(e) => onSearchTermChange(e.target.value)}
       />
-      <div className="input-group-append">
-        <button className="btn btn-outline-secondary" type="button">
-          <i className="fas fa-search"></i>
-        </button>
-      </div>
     </div>
   );
 };

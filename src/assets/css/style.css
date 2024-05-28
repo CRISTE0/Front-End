@@ -200,10 +200,6 @@ h5 {
   color: black;
 }
 
-label {
-  color: black;
-}
-
 .pagination {
   display: flex;
   justify-content: center;
@@ -255,3 +251,18 @@ label {
   font-size: 16px; /* Ajusta el tamaño del texto */
   padding: 8px 16px; /* Ajusta el espaciado interno */
 }
+
+input.Buscador {
+  padding: 8px; /* Reducir el padding */
+  margin-left: auto;
+  border: 1px solid #ccc;
+  border-radius: 15px; /* Reducir el radio de los bordes */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  transition: all 0.3s ease; /* Transición suave para los cambios */
+}
+
+input.Buscador:focus {
+  border-color: #007bff; /* Cambio de color del borde al enfocarse */
+  box-shadow: 0 3px 6px rgba(0, 123, 255, 0.2); /* Reducir la sombra al enfocarse */
+}
+
