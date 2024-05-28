@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-// import { show_alerta } from "../../assets/js/functions";
+import Pagination from "../../assets/js/Pagination";
+import SearchBar from "../../assets/js/SearchBar";
 
 export const Clientes = () => {
   const url = "http://localhost:3000/api/clientes";
@@ -23,6 +24,10 @@ export const Clientes = () => {
     direccion: "",
     correo: "",
   });
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     getClientes();
@@ -341,6 +346,25 @@ export const Clientes = () => {
       show_alerta("Error cambiando el estado del cliente", "error");
     }
   };
+
+  const handleSearchTermChange = (newSearchTerm) => {
+    setSearchTerm(newSearchTerm);
+    setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
+  };
+
+  // Filtrar los clientes según el término de búsqueda
+  const filteredClientes = Clientes.filter((cliente) =>
+    Object.values(cliente).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Aplicar paginación a los clientes filtrados
+  const totalPages = Math.ceil(filteredClientes.length / itemsPerPage);
+  const currentClientes = filteredClientes.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
   
 
   return (
@@ -526,6 +550,10 @@ export const Clientes = () => {
             <h6 className="m-0 font-weight-bold text-primary">Clientes</h6>
           </div>
           <div className="card-body">
+          <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -545,7 +573,7 @@ export const Clientes = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {Clientes.map((cliente) => (
+                  {currentClientes.map((cliente) => (
                     <tr key={cliente.NroDocumento}>
                       <td>{cliente.TipoDocumento}</td>
                       <td>{cliente.NroDocumento}</td>
@@ -598,6 +626,11 @@ export const Clientes = () => {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
         {/* Fin tabla de clientes */}
