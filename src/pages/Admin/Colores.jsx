@@ -3,6 +3,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { ChromePicker } from "react-color";
+import Pagination from "../../assets/js/Pagination";
+import SearchBar from "../../assets/js/SearchBar";
 
 export const Colores = () => {
   const url = "http://localhost:3000/api/colores";
@@ -13,6 +15,10 @@ export const Colores = () => {
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [errors, setErrors] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     getColores();
@@ -187,6 +193,25 @@ export const Colores = () => {
     });
   };
 
+  const handleSearchTermChange = (newSearchTerm) => {
+    setSearchTerm(newSearchTerm);
+    setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
+  };
+
+  // Filtrar los proveedores según el término de búsqueda
+  const filteredColores = Colores.filter((color) =>
+    Object.values(color).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Aplicar paginación a los proveedores filtrados
+  const totalPages = Math.ceil(filteredColores.length / itemsPerPage);
+  const currentColores = filteredColores.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <>
       <div
@@ -275,6 +300,10 @@ export const Colores = () => {
             <h6 className="m-0 font-weight-bold text-primary">Colores</h6>
           </div>
           <div className="card-body">
+          <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -289,7 +318,7 @@ export const Colores = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {Colores.map((color) => (
+                  {currentColores.map((color) => (
                     <tr key={color.IdColor}>
                       <td>{color.Color}</td>
                       <td>
@@ -345,6 +374,11 @@ export const Colores = () => {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
       </div>

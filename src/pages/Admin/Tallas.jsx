@@ -2,7 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-// import { show_alerta } from "../../assets/js/functions";
+import Pagination from "../../assets/js/Pagination";
+import SearchBar from "../../assets/js/SearchBar";
 
 export const Tallas = () => {
   let url = "http://localhost:3000/api/tallas";
@@ -12,6 +13,10 @@ export const Tallas = () => {
   const [Talla, setTalla] = useState([]);
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     getTallas();
@@ -218,6 +223,25 @@ export const Tallas = () => {
     });
   };
 
+  const handleSearchTermChange = (newSearchTerm) => {
+    setSearchTerm(newSearchTerm);
+    setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
+  };
+
+  // Filtrar las tallas según el término de búsqueda
+  const filteredTallass = Tallas.filter((talla) =>
+    Object.values(talla).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Aplicar paginación a las tallas filtrados
+  const totalPages = Math.ceil(filteredTallass.length / itemsPerPage);
+  const currenTallas = filteredTallass.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
 
   return (
     <>
@@ -315,6 +339,10 @@ export const Tallas = () => {
             <h6 className="m-0 font-weight-bold text-primary">Tallas</h6>
           </div>
           <div className="card-body">
+          <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -331,7 +359,7 @@ export const Tallas = () => {
                 </thead>
 
                 <tbody>
-                  {Tallas.map((talla, i) => (
+                  {currenTallas.map((talla, i) => (
                     <tr key={talla.IdTalla}>
                       <td>{i + 1}</td>
 
@@ -382,6 +410,11 @@ export const Tallas = () => {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
         {/* Fin tabla tallas */}
