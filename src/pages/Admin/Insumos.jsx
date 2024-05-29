@@ -8,6 +8,8 @@ import SearchBar from "../../assets/js/SearchBar";
 export const Insumos = () => {
   const url = "http://localhost:3000/api/insumos";
   const [Insumos, setInsumos] = useState([]);
+  const [Colores, setColores] = useState([]);
+  const [Tallas, setTallas] = useState([]);
   const [IdInsumo, setIdInsumo] = useState("");
   const [IdColor, setIdColor] = useState("");
   const [IdTalla, setIdTalla] = useState("");
@@ -30,6 +32,8 @@ export const Insumos = () => {
 
   useEffect(() => {
     getInsumos();
+    getColores();
+    getTallas(); // Obtener los colores cuando el componente se monta
   }, []);
 
   const getInsumos = async () => {
@@ -38,139 +42,156 @@ export const Insumos = () => {
     console.log(respuesta.data);
   };
 
-  const openModal = (op, cliente = null) => {
+  const getColores = async () => {
+    const respuesta = await axios.get("http://localhost:3000/api/colores");
+    setColores(respuesta.data);
+    console.log(respuesta.data);
+  };
+
+  const getTallas = async () => {
+    const respuesta = await axios.get("http://localhost:3000/api/tallas");
+    setTallas(respuesta.data);
+    console.log(respuesta.data);
+  };
+
+  const openModal = (op, insumo = null) => {
     if (op === 1) {
       // Crear cliente
-      setIdCliente("");
-      setTipoDocumento("");
-      setNroDocumento("");
-      setNombreApellido("");
-      setTelefono("");
-      setDireccion("");
-      setCorreo("");
+      setIdInsumo("");
+      setIdColor("");
+      setIdTalla("");
+      setReferencia("");
+      setCantidad("");
+      setValorCompra("");
       setOperation(1);
-      setTitle("Crear Cliente");
-    } else if (op === 2 && cliente) {
+      setTitle("Crear Insumo");
+    } else if (op === 2 && insumo) {
       // Actualizar Cliente
-      setIdCliente(cliente.IdCliente);
-      setTipoDocumento(cliente.TipoDocumento);
-      setNroDocumento(cliente.NroDocumento);
-      setNombreApellido(cliente.NombreApellido);
-      setTelefono(cliente.Telefono);
-      setDireccion(cliente.Direccion);
-      setCorreo(cliente.Correo);
+      setIdInsumo(insumo.IdInsumo);
+      setIdColor(insumo.IdColor);
+      setIdTalla(insumo.IdTalla);
+      setReferencia(insumo.Referencia);
+      setCantidad(insumo.Cantidad);
+      setValorCompra(insumo.ValorCompra);
       setOperation(2);
       setTitle("Actualizar Datos");
       setErrors({
-        nroDocumento: "",
-        nombreApellido: "",
-        telefono: "",
-        direccion: "",
-        correo: "",
+        IdColor: 0,
+        IdTalla: 0,
+        Referencia: "",
+        Cantidad: 0,
+        ValorCompra: 0,
       });
       const errors = {
-        nroDocumento: validateNroDocumento(cliente.NroDocumento),
-        nombreApellido: validateNombreApellido(cliente.NombreApellido),
-        telefono: validateTelefono(cliente.Telefono),
-        direccion: validateDireccion(cliente.Direccion),
-        correo: validateCorreo(cliente.Correo),
+        Referencia: validateReferencia(insumo.Referencia),
+        Cantidad: validateCantidad(insumo.Cantidad),
+        ValorCompra: validateValorCompra(insumo.ValorCompra),
       };
       setErrors(errors);
     }
   };
 
-  const guardarCliente = async () => {
+  const guardarInsumo = async () => {
     if (operation === 1) {
       // Crear Cliente
       await enviarSolicitud("POST", {
-        TipoDocumento,
-        NroDocumento,
-        NombreApellido,
-        Telefono,
-        Direccion,
-        Correo,
-        Estado: "Activo",
+        IdColor,
+        IdTalla,
+        Referencia,
+        Cantidad,
+        ValorCompra,
       });
     } else if (operation === 2) {
       // Actualizar Cliente
       await enviarSolicitud("PUT", {
-        IdCliente,
-        TipoDocumento,
-        NroDocumento,
-        NombreApellido,
-        Telefono,
-        Direccion,
-        Correo,
+        IdInsumo,
+        IdColor,
+        IdTalla,
+        Referencia,
+        Cantidad,
+        ValorCompra,
       });
     }
   };
 
-  const handleChangeTipoDocumento = (e) => {
-    const value = e.target.value;
-    setTipoDocumento(value);
-  };
-
-  // Función para manejar cambios en el número de documento
-  const handleChangeNroDocumento = (e) => {
-    let value = e.target.value;
-    // Limitar la longitud del valor ingresado a entre 6 y 10 caracteres
-    if (value.length > 10) {
-      value = value.slice(0, 10);
+  // Función para validar la referencia
+  const validateReferencia = (value) => {
+    if (!value) {
+      return "Escribe la referencia";
     }
-    setNroDocumento(value);
-    const errorMessage = validateNroDocumento(value);
-    setErrors((prevState) => ({
-      ...prevState,
-      nroDocumento: errorMessage,
-    }));
+    if (!/^[a-zA-Z0-9]+$/.test(value)) {
+      return "La referencia solo puede contener letras y números";
+    }
+    return "";
   };
 
-  const handleChangeNombreApellido = (e) => {
-    const value = e.target.value;
-    setNombreApellido(value);
+  // Función para validar la cantidad
+  const validateCantidad = (value) => {
+    if (!value) {
+      return "Escribe la cantidad";
+    }
+    if (!/^\d+$/.test(value)) {
+      return "La cantidad solo puede contener números";
+    }
+    return "";
+  };
 
-    // Validar el nombre y apellido
-    const errorMessage = validateNombreApellido(value);
-    setErrors((prevState) => ({
-      ...prevState,
-      nombreApellido: errorMessage,
-    }));
+  const validateValorCompra = (value) => {
+    if (!value) {
+      return "Escribe el valor de compra";
+    }
+    if (!/^\d+(\.\d+)?$/.test(value)) {
+      return "El valor de compra solo puede contener números y decimales";
+    }
+    return "";
+  };
+
+
+
+  const handleChangeIdColor = (e) => {
+    const value = e.target.value;
+    setIdColor(value);
+  };
+
+  const handleChangeIdTalla = (e) => {
+    const value = e.target.value;
+    setIdTalla(value);
   };
 
   // Función para manejar cambios en el teléfono
-  const handleChangeTelefono = (e) => {
+  const handleChangeReferencia = (e) => {
     let value = e.target.value;
     // Limitar la longitud del valor ingresado a 10 caracteres
     if (value.length > 10) {
       value = value.slice(0, 10);
     }
-    setTelefono(value);
-    const errorMessage = validateTelefono(value);
+    setReferencia(value);
+    const errorMessage = validateReferencia(value);
     setErrors((prevState) => ({
       ...prevState,
-      telefono: errorMessage,
+      Referencia: errorMessage,
     }));
   };
 
   // Función para manejar cambios en la dirección
-  const handleChangeDireccion = (e) => {
+  const handleChangeCantidad = (e) => {
     const value = e.target.value;
-    setDireccion(value);
-    const errorMessage = validateDireccion(value);
+    setCantidad(value);
+    const errorMessage = validateCantidad(value);
     setErrors((prevState) => ({
       ...prevState,
-      direccion: errorMessage,
+      Cantidad: errorMessage,
     }));
   };
 
   // Función para manejar cambios en el correo electrónico
-  const handleChangeCorreo = (e) => {
+  const handleChangeValorCompra = (e) => {
     const value = e.target.value;
-    setCorreo(value);
-    const errorMessage = validateCorreo(value);
+    setValorCompra(value);
+    const errorMessage = validateValorCompra(value);
     setErrors((prevState) => ({
       ...prevState,
-      correo: errorMessage,
+      ValorCompra: errorMessage,
     }));
   };
 
@@ -203,7 +224,7 @@ export const Insumos = () => {
   const enviarSolicitud = async (metodo, parametros) => {
     let urlRequest =
       metodo === "PUT" || metodo === "DELETE"
-        ? `${url}/${parametros.IdCliente}`
+        ? `${url}/${parametros.IdInsumo}`
         : url;
 
     try {
@@ -219,15 +240,15 @@ export const Insumos = () => {
       const msj = respuesta.data.message;
       show_alerta(msj, "success");
       document.getElementById("btnCerrarCliente").click();
-      getClientes();
+      getInsumos();
       if (metodo === "POST") {
-        show_alerta("Cliente creado con éxito", "success", { timer: 2000 });
+        show_alerta("Insumo creado con éxito", "success", { timer: 2000 });
       } else if (metodo === "PUT") {
-        show_alerta("Cliente actualizado con éxito", "success", {
+        show_alerta("Insumo actualizado con éxito", "success", {
           timer: 2000,
         });
       } else if (metodo === "DELETE") {
-        show_alerta("Cliente eliminado con éxito", "success", { timer: 2000 });
+        show_alerta("Insumo eliminado con éxito", "success", { timer: 2000 });
       }
     } catch (error) {
       if (error.response) {
@@ -241,10 +262,10 @@ export const Insumos = () => {
     }
   };
 
-  const deleteCliente = (IdCliente, NombreCliente) => {
+  const deleteInsumo = (IdInsumo, Referencia) => {
     const MySwal = withReactContent(Swal);
     MySwal.fire({
-      title: `¿Seguro de eliminar al cliente ${NombreCliente}?`,
+      title: `¿Seguro de eliminar el insumo ${Referencia}?`,
       icon: "question",
       text: "No se podrá dar marcha atrás",
       showCancelButton: true,
@@ -252,38 +273,47 @@ export const Insumos = () => {
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        setIdCliente(IdCliente);
-        enviarSolicitud("DELETE", { IdCliente: IdCliente });
+        setIdInsumo(IdInsumo);
+        enviarSolicitud("DELETE", { IdInsumo: IdInsumo });
       } else {
-        show_alerta("El cliente NO fue eliminado", "info");
+        show_alerta("El insumo NO fue eliminado", "info");
       }
     });
   };
 
-  const cambiarEstadoCliente = async (IdCliente) => {
-    try {
-      const cliente = Clientes.find(
-        (cliente) => cliente.IdCliente === IdCliente
-      );
-      const nuevoEstado = cliente.Estado === "Activo" ? "Inactivo" : "Activo";
+  // const cambiarEstadoCliente = async (IdCliente) => {
+  //   try {
+  //     const cliente = Clientes.find(
+  //       (cliente) => cliente.IdCliente === IdCliente
+  //     );
+  //     const nuevoEstado = cliente.Estado === "Activo" ? "Inactivo" : "Activo";
 
-      await axios.put(`${url}/${IdCliente}`, { Estado: nuevoEstado });
+  //     await axios.put(`${url}/${IdCliente}`, { Estado: nuevoEstado });
 
-      setClientes((prevClientes) =>
-        prevClientes.map((cliente) =>
-          cliente.IdCliente === IdCliente
-            ? { ...cliente, Estado: nuevoEstado }
-            : cliente
-        )
-      );
+  //     setClientes((prevClientes) =>
+  //       prevClientes.map((cliente) =>
+  //         cliente.IdCliente === IdCliente
+  //           ? { ...cliente, Estado: nuevoEstado }
+  //           : cliente
+  //       )
+  //     );
 
-      show_alerta("Estado del cliente cambiado con éxito", "success", {
-        timer: 2000,
-      });
-    } catch (error) {
-      console.error("Error updating state:", error);
-      show_alerta("Error cambiando el estado del cliente", "error");
-    }
+  //     show_alerta("Estado del cliente cambiado con éxito", "success", {
+  //       timer: 2000,
+  //     });
+  //   } catch (error) {
+  //     console.error("Error updating state:", error);
+  //     show_alerta("Error cambiando el estado del cliente", "error");
+  //   }
+  // };
+  const convertColorIdToName = (colorId) => {
+    const color = Colores.find((color) => color.IdColor === colorId);
+    return color ? color.Color : "";
+  };
+
+  const convertTallaIdToName = (tallaId) => {
+    const talla = Tallas.find((talla) => talla.IdTalla === tallaId);
+    return talla ? talla.Talla : "";
   };
 
   const handleSearchTermChange = (newSearchTerm) => {
@@ -292,13 +322,13 @@ export const Insumos = () => {
   };
 
   // Filtrar los clientes según el término de búsqueda
-  const filteredInsumos = Insumos.filter((cliente) =>
-    Object.values(cliente).some((value) =>
+  const filteredInsumos = Insumos.filter((insumo) =>
+    Object.values(insumo).some((value) =>
       value.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  // Aplicar paginación a los clientes filtrados
+  // Aplicar paginación a los insumos filtrados
   const totalPages = Math.ceil(filteredInsumos.length / itemsPerPage);
   const currentInsumos = filteredInsumos.slice(
     (currentPage - 1) * itemsPerPage,
@@ -333,112 +363,100 @@ export const Insumos = () => {
             <div className="modal-body">
               <form id="crearClienteForm">
                 <div className="form-group">
-                  <label htmlFor="tipoDocumentoCliente">
-                    Tipo de Documento:
+                  <label htmlFor="idColor">
+                    Color del Insumo:
                   </label>
                   <select
                     className="form-control"
-                    id="tipoDocumentoCliente"
-                    // value={TipoDocumento}
-                    onChange={(e) => handleChangeTipoDocumento(e)} // Llama a la función handleChangeTipoDocumento
-                    disabled={operation === 2}
+                    id="idColor"
+                    value={IdColor}
+                    onChange={(e) => handleChangeIdColor(e)}
                     required
                   >
-                    <option value="">Seleccione un tipo de documento</option>
-                    <option value="CC">Cédula</option>
-                    <option value="CE">Cédula de Extranjería</option>
+                    <option value="">Seleccione un color</option>
+                    {Colores.map((color) => (
+                      <option key={color.IdColor} value={color.IdColor}>
+                        {color.Color}
+                      </option>
+                    ))}
                   </select>
-{/* 
-                  {TipoDocumento === "" && (
+
+                  {IdColor === "" && (
                     <p className="text-danger">
-                      Por favor, seleccione un tipo de documento.
+                      Por favor, seleccione un color.
                     </p>
-                  )} */}
+                  )}
                 </div>
+                <div className="form-group">
+                  <label htmlFor="idTalla">
+                    Talla del insumo:
+                  </label>
+                  <select
+                    className="form-control"
+                    id="idTalla"
+                    value={IdTalla}
+                    onChange={(e) => handleChangeIdTalla(e)}
+                    required
+                  >
+                    <option value="">Seleccione una talla</option>
+                    {Tallas.map((talla) => (
+                      <option key={talla.IdTalla} value={talla.IdTalla}>
+                        {talla.Talla}
+                      </option>
+                    ))}
+                  </select>
+
+                  {IdTalla === "" && (
+                    <p className="text-danger">
+                      Por favor, seleccione una talla.
+                    </p>
+                  )}
+                </div>
+
                 <div className="form-group">
                   <label htmlFor="nroDocumentoCliente">
-                    Número de Documento:
+                    Referencia del insumo:
                   </label>
-                  {/* <input
+                  <input
                     type="text"
-                    className={`form-control ${
-                      errors.nroDocumento ? "is-invalid" : ""
-                    }`}
+                    className={`form-control ${errors.Referencia ? "is-invalid" : ""
+                      }`}
                     id="nroDocumentoCliente"
-                    placeholder="Ingrese el número de documento"
+                    placeholder="Ingrese la referencia del insumo"
                     required
-                    value={NroDocumento}
-                    onChange={handleChangeNroDocumento}
-                    disabled={operation === 2}
-                  /> */}
-                  {renderErrorMessage(errors.nroDocumento)}
-                  <small className="form-text text-muted">
-                    Ingrese un documento válido (entre 6 y 10 dígitos
-                    numéricos).
-                  </small>
+                    value={Referencia}
+                    onChange={handleChangeReferencia}
+                  />
+                  {renderErrorMessage(errors.Referencia)}
+
                 </div>
                 <div className="form-group">
-                  <label htmlFor="nombreCliente">Nombre del Cliente:</label>
-                  {/* <input
+                  <label htmlFor="nombreCliente">Cantidad:</label>
+                  <input
                     type="text"
-                    className={`form-control ${
-                      errors.nombreApellido ? "is-invalid" : ""
-                    }`}
+                    className={`form-control ${errors.Cantidad ? "is-invalid" : ""
+                      }`}
                     id="nombreCliente"
-                    placeholder="Ingrese el nombre del Cliente"
+                    placeholder="Ingrese la cantidad del insumo"
                     required
-                    value={NombreApellido}
-                    onChange={handleChangeNombreApellido}
-                  /> */}
-                  {renderErrorMessage(errors.nombreApellido)}
+                    value={Cantidad}
+                    onChange={handleChangeCantidad}
+                  />
+                  {renderErrorMessage(errors.Cantidad)}
                 </div>
                 <div className="form-group">
-                  <label htmlFor="telefonoCliente">Teléfono:</label>
-                  {/* <input
+                  <label htmlFor="direccionCliente">Valor de de la compra del insumo:</label>
+                  <input
                     type="text"
-                    className={`form-control ${
-                      errors.telefono ? "is-invalid" : ""
-                    }`}
-                    id="telefonoCliente"
-                    placeholder="Ingrese el teléfono"
-                    required
-                    value={Telefono}
-                    onChange={handleChangeTelefono}
-                  /> */}
-                  {renderErrorMessage(errors.telefono)}
-                  <small className="form-text text-muted">
-                    Ingrese un número de teléfono válido (10 dígitos).
-                  </small>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="direccionCliente">Dirección:</label>
-                  {/* <input
-                    type="text"
-                    className={`form-control ${
-                      errors.direccion ? "is-invalid" : ""
-                    }`}
+                    className={`form-control ${errors.ValorCompra ? "is-invalid" : ""
+                      }`}
                     id="direccionCliente"
-                    placeholder="Ingrese la dirección"
+                    placeholder="Ingrese el valor de la compra"
                     required
-                    value={Direccion}
-                    onChange={handleChangeDireccion}
-                  /> */}
-                  {renderErrorMessage(errors.direccion)}
-                </div>
-                <div className="form-group">
-                  <label htmlFor="correoCliente">Correo Electrónico:</label>
-                  {/* <input
-                    type="email"
-                    className={`form-control ${
-                      errors.correo ? "is-invalid" : ""
-                    }`}
-                    id="correoCliente"
-                    placeholder="Ingrese el correo electrónico"
-                    required
-                    value={Correo}
-                    onChange={handleChangeCorreo}
-                  /> */}
-                  {renderErrorMessage(errors.correo)}
+                    value={ValorCompra}
+                    onChange={handleChangeValorCompra}
+                  />
+                  {renderErrorMessage(errors.ValorCompra)}
                 </div>
               </form>
             </div>
@@ -455,7 +473,7 @@ export const Insumos = () => {
                 type="button"
                 className="btn btn-primary"
                 onClick={() => {
-                  guardarCliente();
+                  guardarInsumo();
                 }}
               >
                 Guardar
@@ -505,17 +523,18 @@ export const Insumos = () => {
                     <th>Talla</th>
                     <th>Referencia</th>
                     <th>Cantidad</th>
-                    <th>Valor de laCompra</th>
+                    <th>Valor de la Compra</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {currentInsumos.map((insumo) => (
-                    <tr key={insumo.IdColor}>
-                      <td>{insumo.IdTalla}</td>
+                    <tr key={insumo.IdInsumo}>
+                      <td>{convertColorIdToName(insumo.IdColor)}</td>
+                      <td>{convertTallaIdToName(insumo.IdTalla)}</td>
                       <td>{insumo.Referencia}</td>
-                      <td>{insumo.Referencia}</td>
-                      <td>{insumo.Telefono}</td>
+                      <td>{insumo.Cantidad}</td>
+                      <td>{insumo.ValorCompra}</td>
 
                       <td>
                         <div
@@ -528,33 +547,32 @@ export const Insumos = () => {
                             title="Actualizar"
                             data-toggle="modal"
                             data-target="#modalCliente"
-                            onClick={() => openModal(2, cliente)}
-                            disabled={cliente.Estado != "Activo"}
+                            onClick={() => openModal(2, insumo)}
+                          // disabled={cliente.Estado != "Activo"}
                           >
                             <i className="fas fa-sync-alt"></i>
                           </button>
                           <button
                             className="btn btn-danger btn-sm mr-2"
                             onClick={() =>
-                              deleteCliente(
-                                cliente.IdCliente,
-                                cliente.NombreApellido
+                              deleteInsumo(
+                                insumo.IdInsumo,
+                                insumo.Referencia
                               )
                             }
-                            disabled={cliente.Estado != "Activo"}
+                          // disabled={cliente.Estado != "Activo"}
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                          <button
-                            className={`btn btn-${
-                              cliente.Estado === "Activo" ? "success" : "danger"
-                            } btn-sm`}
+                          {/* <button
+                            className={`btn btn-${insumo.Estado === "Activo" ? "success" : "danger"
+                              } btn-sm`}
                             onClick={() =>
                               cambiarEstadoCliente(cliente.IdCliente)
                             }
                           >
-                            {cliente.Estado}
-                          </button>
+                            {insumo.Estado}
+                          </button> */}
                         </div>
                       </td>
                     </tr>
