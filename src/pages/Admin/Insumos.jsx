@@ -335,6 +335,11 @@ export const Insumos = () => {
     currentPage * itemsPerPage
   );
 
+  function formatCurrency(value) {
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(value);
+  }
+  
+
   return (
     <>
       <div
@@ -534,7 +539,7 @@ export const Insumos = () => {
                       <td>{convertTallaIdToName(insumo.IdTalla)}</td>
                       <td>{insumo.Referencia}</td>
                       <td>{insumo.Cantidad}</td>
-                      <td>{insumo.ValorCompra}</td>
+                      <td>{formatCurrency(insumo.ValorCompra)}</td>
 
                       <td>
                         <div
