@@ -14,8 +14,8 @@ export const Insumos = () => {
   const [IdColor, setIdColor] = useState("");
   const [IdTalla, setIdTalla] = useState("");
   const [Referencia, setReferencia] = useState("");
-  const [Cantidad, setCantidad] = useState("");
-  const [ValorCompra, setValorCompra] = useState("");
+  const [Cantidad, setCantidad] = useState("0");
+  const [ValorCompra, setValorCompra] = useState("0");
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [errors, setErrors] = useState({
@@ -61,8 +61,8 @@ export const Insumos = () => {
       setIdColor("");
       setIdTalla("");
       setReferencia("");
-      setCantidad("");
-      setValorCompra("");
+      setCantidad("0");
+      setValorCompra("0");
       setOperation(1);
       setTitle("Crear Insumo");
     } else if (op === 2 && insumo) {
@@ -84,8 +84,8 @@ export const Insumos = () => {
       });
       const errors = {
         Referencia: validateReferencia(insumo.Referencia),
-        Cantidad: validateCantidad(insumo.Cantidad),
-        ValorCompra: validateValorCompra(insumo.ValorCompra),
+        // Cantidad: validateCantidad(insumo.Cantidad),
+        // ValorCompra: validateValorCompra(insumo.ValorCompra),
       };
       setErrors(errors);
     }
@@ -98,8 +98,8 @@ export const Insumos = () => {
         IdColor,
         IdTalla,
         Referencia,
-        Cantidad,
-        ValorCompra,
+        Cantidad:0,
+        ValorCompr:0,
       });
     } else if (operation === 2) {
       // Actualizar Cliente
@@ -125,26 +125,26 @@ export const Insumos = () => {
     return "";
   };
 
-  // Función para validar la cantidad
-  const validateCantidad = (value) => {
-    if (!value) {
-      return "Escribe la cantidad";
-    }
-    if (!/^\d+$/.test(value)) {
-      return "La cantidad solo puede contener números";
-    }
-    return "";
-  };
+  // // Función para validar la cantidad
+  // const validateCantidad = (value) => {
+  //   if (!value) {
+  //     return "Escribe la cantidad";
+  //   }
+  //   if (!/^\d+$/.test(value)) {
+  //     return "La cantidad solo puede contener números";
+  //   }
+  //   return "";
+  // };
 
-  const validateValorCompra = (value) => {
-    if (!value) {
-      return "Escribe el valor de compra";
-    }
-    if (!/^\d+(\.\d+)?$/.test(value)) {
-      return "El valor de compra solo puede contener números y decimales";
-    }
-    return "";
-  };
+  // const validateValorCompra = (value) => {
+  //   if (!value) {
+  //     return "Escribe el valor de compra";
+  //   }
+  //   if (!/^\d+(\.\d+)?$/.test(value)) {
+  //     return "El valor de compra solo puede contener números y decimales";
+  //   }
+  //   return "";
+  // };
 
 
 
@@ -321,12 +321,24 @@ export const Insumos = () => {
     setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
   };
 
-  // Filtrar los clientes según el término de búsqueda
-  const filteredInsumos = Insumos.filter((insumo) =>
-    Object.values(insumo).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  // Filtrar los insumos según el término de búsqueda
+  const filteredInsumos = Insumos.filter((insumo) => {
+    const colorName = convertColorIdToName(insumo.IdColor);
+    const tallaName = convertTallaIdToName(insumo.IdTalla);
+    const referencia = insumo.Referencia ? insumo.Referencia.toString() : '';
+    const cantidad = insumo.Cantidad ? insumo.Cantidad.toString() : '';
+    const valorCompra = insumo.ValorCompra ? insumo.ValorCompra.toString() : '';
+  
+    return (
+      colorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tallaName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      referencia.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cantidad.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      valorCompra.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+  
+  
 
   // Aplicar paginación a los insumos filtrados
   const totalPages = Math.ceil(filteredInsumos.length / itemsPerPage);
@@ -444,8 +456,9 @@ export const Insumos = () => {
                     id="nombreCliente"
                     placeholder="Ingrese la cantidad del insumo"
                     required
-                    value={Cantidad}
+                    value="0" // Establecer valor en 0
                     onChange={handleChangeCantidad}
+                    disabled
                   />
                   {renderErrorMessage(errors.Cantidad)}
                 </div>
@@ -458,8 +471,9 @@ export const Insumos = () => {
                     id="direccionCliente"
                     placeholder="Ingrese el valor de la compra"
                     required
-                    value={ValorCompra}
+                    value="0" // Establecer valor en 0
                     onChange={handleChangeValorCompra}
+                    disabled
                   />
                   {renderErrorMessage(errors.ValorCompra)}
                 </div>
