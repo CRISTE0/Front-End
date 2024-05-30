@@ -583,7 +583,7 @@ export const Insumos = () => {
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                          {/* <button
+                          <button
                             className={`btn btn-${insumo.Estado === "Activo" ? "success" : "danger"
                               } btn-sm`}
                             onClick={() =>
@@ -591,7 +591,7 @@ export const Insumos = () => {
                             }
                           >
                             {insumo.Estado}
-                          </button> */}
+                          </button>
                         </div>
                       </td>
                     </tr>
