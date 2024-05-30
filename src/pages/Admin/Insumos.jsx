@@ -14,8 +14,8 @@ export const Insumos = () => {
   const [IdColor, setIdColor] = useState("");
   const [IdTalla, setIdTalla] = useState("");
   const [Referencia, setReferencia] = useState("");
-  const [Cantidad, setCantidad] = useState("0");
-  const [ValorCompra, setValorCompra] = useState("0");
+  const [Cantidad, setCantidad] = useState(0);
+  const [ValorCompra, setValorCompra] = useState(0);
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [errors, setErrors] = useState({
@@ -61,8 +61,8 @@ export const Insumos = () => {
       setIdColor("");
       setIdTalla("");
       setReferencia("");
-      setCantidad("0");
-      setValorCompra("0");
+      setCantidad(0);
+      setValorCompra(0);
       setOperation(1);
       setTitle("Crear Insumo");
     } else if (op === 2 && insumo) {
@@ -99,7 +99,7 @@ export const Insumos = () => {
         IdTalla,
         Referencia,
         Cantidad:0,
-        ValorCompr:0,
+        ValorCompra:0,
       });
     } else if (operation === 2) {
       // Actualizar Cliente
