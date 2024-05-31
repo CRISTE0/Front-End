@@ -198,11 +198,21 @@ export const Proveedores = () => {
     if (!value) {
       return "Ingresa tu correo electrónico";
     }
-    // Expresión regular para validar correo electrónico
+
+    // Expresión regular para validar correo electrónico sin espacios
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Verifica si el correo contiene espacios
+    if (/\s/.test(value)) {
+      return "El correo electrónico no puede contener espacios";
+    }
+
+    // Verifica si el correo sigue el formato estándar
     if (!emailRegex.test(value)) {
       return "Ingresa un correo electrónico válido";
     }
+
+    // Si pasa todas las validaciones, retorna una cadena vacía
     return "";
   };
 
@@ -289,11 +299,15 @@ export const Proveedores = () => {
   // Función para manejar cambios en el correo electrónico
   const handleChangeCorreo = (e) => {
     const value = e.target.value;
-    setCorreo(value);
+    setCorreo(value); // Actualiza el estado del correo electrónico
+
+    // Valida el correo electrónico y obtiene el mensaje de error
     const errorMessage = validateCorreo(value);
+
+    // Actualiza el estado de los errores con el mensaje de error correspondiente
     setErrors((prevState) => ({
       ...prevState,
-      correo: errorMessage,
+      correo: errorMessage, // Actualiza el error de correo con el mensaje de error obtenido
     }));
   };
 
@@ -388,18 +402,32 @@ export const Proveedores = () => {
       );
       const nuevoEstado = proveedor.Estado === "Activo" ? "Inactivo" : "Activo";
 
-      await axios.put(`${url}/${IdProveedor}`, { Estado: nuevoEstado });
+      const MySwal = withReactContent(Swal);
+      MySwal.fire({
+        title: `¿Seguro de cambiar el estado del proveedor ${proveedor.NombreApellido}?`,
+        icon: "question",
+        text: `El estado actual del proveedor es: ${proveedor.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        showCancelButton: true,
+        confirmButtonText: "Sí, cambiar estado",
+        cancelButtonText: "Cancelar",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          await axios.put(`${url}/${IdProveedor}`, { Estado: nuevoEstado });
 
-      setProveedores((prevProveedores) =>
-        prevProveedores.map((proveedor) =>
-          proveedor.IdProveedor === IdProveedor
-            ? { ...proveedor, Estado: nuevoEstado }
-            : proveedor
-        )
-      );
+          setProveedores((prevProveedores) =>
+            prevProveedores.map((proveedor) =>
+              proveedor.IdProveedor === IdProveedor
+                ? { ...proveedor, Estado: nuevoEstado }
+                : proveedor
+            )
+          );
 
-      show_alerta("Estado del proveedor cambiado con éxito", "success", {
-        timer: 2000,
+          show_alerta("Estado del proveedor cambiado con éxito", "success", {
+            timer: 2000,
+          });
+        } else {
+          show_alerta("No se ha cambiado el estado del proveedor", "info");
+        }
       });
     } catch (error) {
       console.error("Error updating state:", error);
@@ -462,7 +490,6 @@ export const Proveedores = () => {
                     id="tipoDocumentoProveedor"
                     value={TipoDocumento}
                     onChange={(e) => handleChangeTipoDocumento(e)} // Llama a la función handleChangeTipoDocumento
-                    disabled={operation === 2}
                     required
                   >
                     <option value="">Seleccione un tipo de documento</option>
@@ -492,7 +519,6 @@ export const Proveedores = () => {
                     required
                     value={NroDocumento}
                     onChange={handleChangeNroDocumento}
-                    disabled={operation === 2}
                   />
                   {renderErrorMessage(errors.nroDocumento)}
                   <small className="form-text text-muted">
