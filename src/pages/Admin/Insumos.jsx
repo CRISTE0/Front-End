@@ -98,7 +98,7 @@ export const Insumos = () => {
       await enviarSolicitud("POST", {
         IdColor,
         IdTalla,
-        Referencia,
+        Referencia:Referencia.trim(),
         Cantidad: 0,
         ValorCompra: 0,
       });
@@ -108,7 +108,7 @@ export const Insumos = () => {
         IdInsumo,
         IdColor,
         IdTalla,
-        Referencia,
+        Referencia:Referencia.trim(),
         Cantidad,
         ValorCompra,
       });
@@ -161,7 +161,7 @@ export const Insumos = () => {
 
   // Función para manejar cambios en el teléfono
   const handleChangeReferencia = (e) => {
-    let value = e.target.value;
+    let value = e.target.value.trim();
     // Limitar la longitud del valor ingresado a 10 caracteres
     if (value.length > 10) {
       value = value.slice(0, 10);
@@ -173,7 +173,7 @@ export const Insumos = () => {
       Referencia: errorMessage,
     }));
   };
-
+  
   // Función para manejar cambios en la dirección
   const handleChangeCantidad = (e) => {
     const value = e.target.value;
@@ -613,7 +613,7 @@ export const Insumos = () => {
             />
           </div>
         </div>
-        {/* Fin tabla de clientes */}
+        {/* Fin tabla de insumos */}
       </div>
     </>
   );
