@@ -463,11 +463,10 @@ export const Proveedores = () => {
         role="dialog"
         aria-labelledby="modalProveedorLabel"
         aria-hidden="true"
-        data-backdrop = "static"
-        data-keyboard = "false"
+        data-backdrop="static"
+        data-keyboard="false"
       >
         <div className="modal-dialog modal-lg" role="document">
-          {" "}
           {/* Cambiado a modal-lg para un modal más ancho */}
           <div className="modal-content">
             <div className="modal-header">
@@ -529,8 +528,6 @@ export const Proveedores = () => {
                       numéricos).
                     </small>
                   </div>
-                </div>
-                <div className="form-row">
                   <div className="form-group col-md-6">
                     <label htmlFor="nombreProveedor">
                       {NombreApellidoLabel}:
@@ -547,6 +544,13 @@ export const Proveedores = () => {
                       onChange={handleChangeNombreApellido}
                     />
                     {renderErrorMessage(errors.nombreApellido)}
+                    <small className="form-text text-muted">
+                      Ingrese un{" "}
+                      {TipoDocumento === "NIT"
+                        ? "nombre de la empresa"
+                        : "nombre y apellido"}{" "}
+                      válido.
+                    </small>
                   </div>
                   <div className="form-group col-md-6">
                     <label htmlFor="contactoProveedor">Contacto:</label>
@@ -564,6 +568,13 @@ export const Proveedores = () => {
                       }
                     />
                     {renderErrorMessage(errors.contacto)}
+                    <small className="form-text text-muted">
+                      Ingrese{" "}
+                      {TipoDocumento === "NIT"
+                        ? "nombre y apellido"
+                        : "un contacto"}{" "}
+                      válido.
+                    </small>
                   </div>
                 </div>
                 <div className="form-row">
