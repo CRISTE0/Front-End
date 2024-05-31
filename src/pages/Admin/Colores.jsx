@@ -221,6 +221,8 @@ export const Colores = () => {
         role="dialog"
         aria-labelledby="ModalAñadirColorLabel"
         aria-hidden="true"
+        data-backdrop = "static"
+        data-keyboard = "false"
       >
         <div className="modal-dialog" role="document">
           <div className="modal-content">

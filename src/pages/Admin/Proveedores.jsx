@@ -463,8 +463,12 @@ export const Proveedores = () => {
         role="dialog"
         aria-labelledby="modalProveedorLabel"
         aria-hidden="true"
+        data-backdrop = "static"
+        data-keyboard = "false"
       >
-        <div className="modal-dialog" role="document">
+        <div className="modal-dialog modal-lg" role="document">
+          {" "}
+          {/* Cambiado a modal-lg para un modal más ancho */}
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="modalProveedorLabel">
@@ -481,133 +485,138 @@ export const Proveedores = () => {
             </div>
             <div className="modal-body">
               <form id="crearProveedorForm">
-                <div className="form-group">
-                  <label htmlFor="tipoDocumentoProveedor">
-                    Tipo de Documento:
-                  </label>
-                  <select
-                    className="form-control"
-                    id="tipoDocumentoProveedor"
-                    value={TipoDocumento}
-                    onChange={(e) => handleChangeTipoDocumento(e)} // Llama a la función handleChangeTipoDocumento
-                    required
-                  >
-                    <option value="">Seleccione un tipo de documento</option>
-                    <option value="CC">Cédula</option>
-                    <option value="CE">Cédula de Extranjería</option>
-                    <option value="NIT">NIT</option>
-                  </select>
-
-                  {TipoDocumento === "" && (
-                    <p className="text-danger">
-                      Por favor, seleccione un tipo de documento.
-                    </p>
-                  )}
+                <div className="form-row">
+                  <div className="form-group col-md-6">
+                    <label htmlFor="tipoDocumentoProveedor">
+                      Tipo de Documento:
+                    </label>
+                    <select
+                      className="form-control"
+                      id="tipoDocumentoProveedor"
+                      value={TipoDocumento}
+                      onChange={(e) => handleChangeTipoDocumento(e)}
+                      required
+                    >
+                      <option value="">Seleccione un tipo de documento</option>
+                      <option value="CC">Cédula</option>
+                      <option value="CE">Cédula de Extranjería</option>
+                      <option value="NIT">NIT</option>
+                    </select>
+                    {TipoDocumento === "" && (
+                      <p className="text-danger">
+                        Por favor, seleccione un tipo de documento.
+                      </p>
+                    )}
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="nroDocumentoProveedor">
+                      Número de Documento:
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.nroDocumento ? "is-invalid" : ""
+                      }`}
+                      id="nroDocumentoProveedor"
+                      placeholder="Ingrese el número de documento"
+                      required
+                      value={NroDocumento}
+                      onChange={handleChangeNroDocumento}
+                    />
+                    {renderErrorMessage(errors.nroDocumento)}
+                    <small className="form-text text-muted">
+                      Ingrese un documento válido (entre 6 y 10 dígitos
+                      numéricos).
+                    </small>
+                  </div>
                 </div>
-
-                <div className="form-group">
-                  <label htmlFor="nroDocumentoProveedor">
-                    Número de Documento:
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.nroDocumento ? "is-invalid" : ""
-                    }`}
-                    id="nroDocumentoProveedor"
-                    placeholder="Ingrese el número de documento"
-                    required
-                    value={NroDocumento}
-                    onChange={handleChangeNroDocumento}
-                  />
-                  {renderErrorMessage(errors.nroDocumento)}
-                  <small className="form-text text-muted">
-                    Ingrese un documento válido (entre 6 y 10 dígitos
-                    numéricos).
-                  </small>
+                <div className="form-row">
+                  <div className="form-group col-md-6">
+                    <label htmlFor="nombreProveedor">
+                      {NombreApellidoLabel}:
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.nombreApellido ? "is-invalid" : ""
+                      }`}
+                      id="nombreProveedor"
+                      placeholder={`Ingrese ${NombreApellidoLabel.toLowerCase()}`}
+                      required
+                      value={NombreApellido}
+                      onChange={handleChangeNombreApellido}
+                    />
+                    {renderErrorMessage(errors.nombreApellido)}
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="contactoProveedor">Contacto:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.contacto ? "is-invalid" : ""
+                      }`}
+                      id="contactoProveedor"
+                      placeholder="Ingrese el contacto"
+                      value={Contacto}
+                      onChange={handleChangeContacto}
+                      disabled={
+                        TipoDocumento === "CC" || TipoDocumento === "CE"
+                      }
+                    />
+                    {renderErrorMessage(errors.contacto)}
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="nombreProveedor">
-                    {NombreApellidoLabel}:
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.nombreApellido ? "is-invalid" : ""
-                    }`}
-                    id="nombreProveedor"
-                    placeholder={`Ingrese ${NombreApellidoLabel.toLowerCase()}`}
-                    required
-                    value={NombreApellido}
-                    onChange={handleChangeNombreApellido}
-                  />
-                  {renderErrorMessage(errors.nombreApellido)}
+                <div className="form-row">
+                  <div className="form-group col-md-6">
+                    <label htmlFor="telefonoProveedor">Teléfono:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.telefono ? "is-invalid" : ""
+                      }`}
+                      id="telefonoProveedor"
+                      placeholder="Ingrese el teléfono"
+                      required
+                      value={Telefono}
+                      onChange={handleChangeTelefono}
+                    />
+                    {renderErrorMessage(errors.telefono)}
+                    <small className="form-text text-muted">
+                      Ingrese un número de teléfono válido (10 dígitos).
+                    </small>
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="direccionProveedor">Dirección:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.direccion ? "is-invalid" : ""
+                      }`}
+                      id="direccionProveedor"
+                      placeholder="Ingrese la dirección"
+                      required
+                      value={Direccion}
+                      onChange={handleChangeDireccion}
+                    />
+                    {renderErrorMessage(errors.direccion)}
+                  </div>
                 </div>
-
-                <div className="form-group">
-                  <label htmlFor="contactoProveedor">Contacto:</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.contacto ? "is-invalid" : ""
-                    }`}
-                    id="contactoProveedor"
-                    placeholder="Ingrese el contacto"
-                    value={Contacto}
-                    onChange={handleChangeContacto}
-                    disabled={TipoDocumento === "CC" || TipoDocumento === "CE"} // Deshabilitar solo si el tipo de documento es "CC" o "CE"
-                  />
-                  {renderErrorMessage(errors.contacto)}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="telefonoProveedor">Teléfono:</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.telefono ? "is-invalid" : ""
-                    }`}
-                    id="telefonoProveedor"
-                    placeholder="Ingrese el teléfono"
-                    required
-                    value={Telefono}
-                    onChange={handleChangeTelefono}
-                  />
-                  {renderErrorMessage(errors.telefono)}
-                  <small className="form-text text-muted">
-                    Ingrese un número de teléfono válido (10 dígitos).
-                  </small>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="direccionProveedor">Dirección:</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.direccion ? "is-invalid" : ""
-                    }`}
-                    id="direccionProveedor"
-                    placeholder="Ingrese la dirección"
-                    required
-                    value={Direccion}
-                    onChange={handleChangeDireccion}
-                  />
-                  {renderErrorMessage(errors.direccion)}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="correoProveedor">Correo Electrónico:</label>
-                  <input
-                    type="email"
-                    className={`form-control ${
-                      errors.correo ? "is-invalid" : ""
-                    }`}
-                    id="correoProveedor"
-                    placeholder="Ingrese el correo Electrónico"
-                    required
-                    value={Correo}
-                    onChange={handleChangeCorreo}
-                  />
-                  {renderErrorMessage(errors.correo)}
+                <div className="form-row">
+                  <div className="form-group col-md-12">
+                    <label htmlFor="correoProveedor">Correo Electrónico:</label>
+                    <input
+                      type="email"
+                      className={`form-control ${
+                        errors.correo ? "is-invalid" : ""
+                      }`}
+                      id="correoProveedor"
+                      placeholder="Ingrese el correo Electrónico"
+                      required
+                      value={Correo}
+                      onChange={handleChangeCorreo}
+                    />
+                    {renderErrorMessage(errors.correo)}
+                  </div>
                 </div>
               </form>
             </div>

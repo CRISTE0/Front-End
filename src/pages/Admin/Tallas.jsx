@@ -254,6 +254,8 @@ export const Tallas = () => {
         role="dialog"
         aria-labelledby="modalAñadirTallaLabel"
         aria-hidden="true"
+        data-backdrop = "static"
+        data-keyboard = "false"
       >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
