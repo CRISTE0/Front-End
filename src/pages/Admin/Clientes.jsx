@@ -328,18 +328,32 @@ export const Clientes = () => {
       );
       const nuevoEstado = cliente.Estado === "Activo" ? "Inactivo" : "Activo";
   
-      await axios.put(`${url}/${IdCliente}`, { Estado: nuevoEstado });
+      const MySwal = withReactContent(Swal);
+      MySwal.fire({
+        title: `¿Seguro de cambiar el estado del cliente ${cliente.NombreApellido}?`,
+        icon: "question",
+        text: `El estado actual del cliente es: ${cliente.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        showCancelButton: true,
+        confirmButtonText: "Sí, cambiar estado",
+        cancelButtonText: "Cancelar",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          await axios.put(`${url}/${IdCliente}`, { Estado: nuevoEstado });
   
-      setClientes((prevClientes) =>
-        prevClientes.map((cliente) =>
-          cliente.IdCliente === IdCliente
-            ? { ...cliente, Estado: nuevoEstado }
-            : cliente
-        )
-      );
+          setClientes((prevClientes) =>
+            prevClientes.map((cliente) =>
+              cliente.IdCliente === IdCliente
+                ? { ...cliente, Estado: nuevoEstado }
+                : cliente
+            )
+          );
   
-      show_alerta("Estado del cliente cambiado con éxito", "success", {
-        timer: 2000,
+          show_alerta("Estado del cliente cambiado con éxito", "success", {
+            timer: 2000,
+          });
+        } else {
+          show_alerta("No se ha cambiado el estado del cliente", "info");
+        }
       });
     } catch (error) {
       console.error("Error updating state:", error);
@@ -403,7 +417,6 @@ export const Clientes = () => {
                     id="tipoDocumentoCliente"
                     value={TipoDocumento}
                     onChange={(e) => handleChangeTipoDocumento(e)} // Llama a la función handleChangeTipoDocumento
-                    disabled={operation === 2}
                     required
                   >
                     <option value="">Seleccione un tipo de documento</option>
@@ -431,7 +444,6 @@ export const Clientes = () => {
                     required
                     value={NroDocumento}
                     onChange={handleChangeNroDocumento}
-                    disabled={operation === 2}
                   />
                   {renderErrorMessage(errors.nroDocumento)}
                   <small className="form-text text-muted">
