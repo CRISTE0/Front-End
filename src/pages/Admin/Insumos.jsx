@@ -44,15 +44,16 @@ export const Insumos = () => {
 
   const getColores = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/colores");
-    setColores(respuesta.data);
-    console.log(respuesta.data);
+    const coloresActivos = respuesta.data.filter(color => color.Estado === "Activo");
+    setColores(coloresActivos);
   };
-
+  
   const getTallas = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/tallas");
-    setTallas(respuesta.data);
-    console.log(respuesta.data);
+    const tallasActivas = respuesta.data.filter(talla => talla.Estado === "Activo");
+    setTallas(tallasActivas);
   };
+  
 
   const openModal = (op, insumo = null) => {
     if (op === 1) {
@@ -98,8 +99,8 @@ export const Insumos = () => {
         IdColor,
         IdTalla,
         Referencia,
-        Cantidad:0,
-        ValorCompra:0,
+        Cantidad: 0,
+        ValorCompra: 0,
       });
     } else if (operation === 2) {
       // Actualizar Cliente
@@ -281,31 +282,37 @@ export const Insumos = () => {
     });
   };
 
-  // const cambiarEstadoCliente = async (IdCliente) => {
-  //   try {
-  //     const cliente = Clientes.find(
-  //       (cliente) => cliente.IdCliente === IdCliente
-  //     );
-  //     const nuevoEstado = cliente.Estado === "Activo" ? "Inactivo" : "Activo";
+  const cambiarEstadoInsumo = async (IdInsumo) => {
+    try {
+      const insumoActual = Insumos.find((insumo) => insumo.IdInsumo === IdInsumo);
+      const nuevoEstado = insumoActual.Estado === "Activo" ? "Inactivo" : "Activo";
 
-  //     await axios.put(`${url}/${IdCliente}`, { Estado: nuevoEstado });
+      const parametros = {
+        IdInsumo,
+        IdColor: insumoActual.IdColor,
+        IdTalla: insumoActual.IdTalla,
+        Referencia: insumoActual.Referencia,
+        Cantidad: insumoActual.Cantidad,
+        ValorCompra: insumoActual.ValorCompra,
+        Estado: nuevoEstado,
+      };
 
-  //     setClientes((prevClientes) =>
-  //       prevClientes.map((cliente) =>
-  //         cliente.IdCliente === IdCliente
-  //           ? { ...cliente, Estado: nuevoEstado }
-  //           : cliente
-  //       )
-  //     );
+      const response = await axios.put(`${url}/${IdInsumo}`, parametros);
+      if (response.status === 200) {
+        setInsumos((prevInsumos) =>
+          prevInsumos.map((insumo) =>
+            insumo.IdInsumo === IdInsumo ? { ...insumo, Estado: nuevoEstado } : insumo
+          )
+        );
+        show_alerta("El estado del color ha sido actualizado correctamente", "success");
+      }
+    } catch (error) {
+      if (error.response) {
+        show_alerta("Error actualizando el estado del color", "error");
+      }
+    }
+  };
 
-  //     show_alerta("Estado del cliente cambiado con éxito", "success", {
-  //       timer: 2000,
-  //     });
-  //   } catch (error) {
-  //     console.error("Error updating state:", error);
-  //     show_alerta("Error cambiando el estado del cliente", "error");
-  //   }
-  // };
   const convertColorIdToName = (colorId) => {
     const color = Colores.find((color) => color.IdColor === colorId);
     return color ? color.Color : "";
@@ -328,7 +335,7 @@ export const Insumos = () => {
     const referencia = insumo.Referencia ? insumo.Referencia.toString() : '';
     const cantidad = insumo.Cantidad ? insumo.Cantidad.toString() : '';
     const valorCompra = insumo.ValorCompra ? insumo.ValorCompra.toString() : '';
-  
+
     return (
       colorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tallaName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -337,8 +344,8 @@ export const Insumos = () => {
       valorCompra.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
-  
-  
+
+
 
   // Aplicar paginación a los insumos filtrados
   const totalPages = Math.ceil(filteredInsumos.length / itemsPerPage);
@@ -350,7 +357,7 @@ export const Insumos = () => {
   function formatCurrency(value) {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(value);
   }
-  
+
 
   return (
     <>
@@ -538,9 +545,9 @@ export const Insumos = () => {
               >
                 <thead>
                   <tr>
+                    <th>Referencia</th>
                     <th>Color</th>
                     <th>Talla</th>
-                    <th>Referencia</th>
                     <th>Cantidad</th>
                     <th>Valor de la Compra</th>
                     <th>Acciones</th>
@@ -549,9 +556,9 @@ export const Insumos = () => {
                 <tbody>
                   {currentInsumos.map((insumo) => (
                     <tr key={insumo.IdInsumo}>
+                      <td>{insumo.Referencia}</td>
                       <td>{convertColorIdToName(insumo.IdColor)}</td>
                       <td>{convertTallaIdToName(insumo.IdTalla)}</td>
-                      <td>{insumo.Referencia}</td>
                       <td>{insumo.Cantidad}</td>
                       <td>{formatCurrency(insumo.ValorCompra)}</td>
 
@@ -567,7 +574,7 @@ export const Insumos = () => {
                             data-toggle="modal"
                             data-target="#modalCliente"
                             onClick={() => openModal(2, insumo)}
-                          // disabled={cliente.Estado != "Activo"}
+                            disabled={insumo.Estado != "Activo"}
                           >
                             <i className="fas fa-sync-alt"></i>
                           </button>
@@ -579,7 +586,7 @@ export const Insumos = () => {
                                 insumo.Referencia
                               )
                             }
-                          // disabled={cliente.Estado != "Activo"}
+                            disabled={insumo.Estado != "Activo"}
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
@@ -587,7 +594,7 @@ export const Insumos = () => {
                             className={`btn btn-${insumo.Estado === "Activo" ? "success" : "danger"
                               } btn-sm`}
                             onClick={() =>
-                              cambiarEstadoCliente(cliente.IdCliente)
+                              cambiarEstadoInsumo(insumo.IdInsumo)
                             }
                           >
                             {insumo.Estado}

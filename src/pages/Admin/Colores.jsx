@@ -93,10 +93,10 @@ export const Colores = () => {
     if (!errorMessage) {
       let parametros, metodo;
       if (operation === 1) {
-        parametros = { Color, Referencia, Estado: 'Activo' };
+        parametros = { Color:Color.trim(), Referencia, Estado: 'Activo' };
         metodo = "POST";
       } else {
-        parametros = { IdColor, Color, Referencia, Estado: 'Activo' };
+        parametros = { IdColor, Color:Color.trim(), Referencia, Estado: 'Activo' };
         metodo = "PUT";
       }
       enviarSolicitud(metodo, parametros);
