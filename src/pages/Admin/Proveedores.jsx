@@ -100,15 +100,18 @@ export const Proveedores = () => {
   };
 
   const guardarProveedor = async () => {
+    const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, ' '); // Elimina los espacios múltiples y los extremos
+    const cleanedDireccion = Direccion.trim().replace(/\s+/g, ' '); // Elimina los espacios múltiples y los extremos
+  
     if (operation === 1) {
       // Crear Proveedor
       await enviarSolicitud("POST", {
         TipoDocumento,
         NroDocumento,
-        NombreApellido,
+        NombreApellido: cleanedNombreApellido,
         Contacto,
         Telefono,
-        Direccion,
+        Direccion: cleanedDireccion,
         Correo,
         Estado: "Activo",
       });
@@ -118,10 +121,10 @@ export const Proveedores = () => {
         IdProveedor,
         TipoDocumento,
         NroDocumento,
-        NombreApellido,
+        NombreApellido: cleanedNombreApellido,
         Contacto,
         Telefono,
-        Direccion,
+        Direccion: cleanedDireccion,
         Correo,
       });
     }
@@ -152,8 +155,8 @@ export const Proveedores = () => {
     if (!value) {
       return "Escribe el nombre y apellido";
     }
-    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/.test(value)) {
-      return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ'";
+    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value)) {
+      return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
     }
     return "";
   };
@@ -182,16 +185,17 @@ export const Proveedores = () => {
     return "";
   };
 
-  // Función para validar la dirección
   const validateDireccion = (value) => {
     if (!value) {
-      return "Escribe la dirección";
+        return "Escribe la dirección";
     }
-    if (!/^[a-zA-Z0-9#-\s]*$/.test(value)) {
-      return "La dirección solo puede contener letras, números, # y -";
+    if (!/^[a-zA-Z0-9#\-_\s]+(?:[a-zA-Z0-9#\-_\s])*[^\s]$/.test(value)) {
+        return "La dirección solo puede contener letras, números, espacios, # y -";
     }
-    return "";
-  };
+    return ""; // La dirección es válida
+};
+
+
 
   // Función para validar el correo electrónico
   const validateCorreo = (value) => {
@@ -242,7 +246,7 @@ export const Proveedores = () => {
   };
 
   const handleChangeNombreApellido = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(/\s+/g, ' '); // Reemplaza múltiples espacios con un solo espacio
     setNombreApellido(value);
 
     // Validar el nombre y apellido
@@ -287,15 +291,20 @@ export const Proveedores = () => {
 
   // Función para manejar cambios en la dirección
   const handleChangeDireccion = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(/\s+/g, ' '); // Reemplaza múltiples espacios con un solo espacio
     setDireccion(value);
+
+    // Validar la dirección
     const errorMessage = validateDireccion(value);
     setErrors((prevState) => ({
-      ...prevState,
-      direccion: errorMessage,
+        ...prevState,
+        direccion: errorMessage,
     }));
-  };
+};
+;
 
+  
+  
   // Función para manejar cambios en el correo electrónico
   const handleChangeCorreo = (e) => {
     const value = e.target.value;
@@ -609,13 +618,13 @@ export const Proveedores = () => {
                     </small>
                   </div>
                   <div className="form-group col-md-6">
-                    <label htmlFor="direccionProveedor">Dirección:</label>
+                    <label htmlFor="direccionCliente">Dirección:</label>
                     <input
                       type="text"
                       className={`form-control ${
                         errors.direccion ? "is-invalid" : ""
                       }`}
-                      id="direccionProveedor"
+                      id="direccionCliente"
                       placeholder="Ingrese la dirección"
                       required
                       value={Direccion}

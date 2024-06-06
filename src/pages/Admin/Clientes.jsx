@@ -81,14 +81,17 @@ export const Clientes = () => {
   };
 
   const guardarCliente = async () => {
+    const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, ' '); // Elimina los espacios múltiples y los extremos
+    const cleanedDireccion = Direccion.trim().replace(/\s+/g, ' '); // Elimina los espacios múltiples y los extremos
+  
     if (operation === 1) {
       // Crear Cliente
       await enviarSolicitud("POST", {
         TipoDocumento,
         NroDocumento,
-        NombreApellido,
+        NombreApellido: cleanedNombreApellido,
         Telefono,
-        Direccion,
+        Direccion: cleanedDireccion,
         Correo,
         Estado: "Activo",
       });
@@ -98,13 +101,14 @@ export const Clientes = () => {
         IdCliente,
         TipoDocumento,
         NroDocumento,
-        NombreApellido,
+        NombreApellido: cleanedNombreApellido,
         Telefono,
-        Direccion,
+        Direccion: cleanedDireccion,
         Correo,
       });
     }
   };
+   
 
   // Función para validar el número de documento
   const validateNroDocumento = (value) => {
@@ -120,13 +124,12 @@ export const Clientes = () => {
     return "";
   };
 
-  // Función para validar el nombre y apellido
   const validateNombreApellido = (value) => {
     if (!value) {
       return "Escribe el nombre y apellido";
     }
-    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/.test(value)) {
-      return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ'";
+    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value)) {
+      return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
     }
     return "";
   };
@@ -153,6 +156,9 @@ export const Clientes = () => {
     if (!/^[a-zA-Z0-9#-\s]*$/.test(value)) {
       return "La dirección solo puede contener letras, números, # y -";
     }
+    // if (!/^[a-zA-Z0-9#-\s]*$/.test(value)) {
+    //   return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
+    // }
     return "";
   };
 
@@ -190,9 +196,9 @@ export const Clientes = () => {
   };
 
   const handleChangeNombreApellido = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(/\s+/g, ' '); // Reemplaza múltiples espacios con un solo espacio
     setNombreApellido(value);
-
+  
     // Validar el nombre y apellido
     const errorMessage = validateNombreApellido(value);
     setErrors((prevState) => ({
@@ -200,6 +206,7 @@ export const Clientes = () => {
       nombreApellido: errorMessage,
     }));
   };
+  
 
   // Función para manejar cambios en el teléfono
   const handleChangeTelefono = (e) => {
@@ -216,16 +223,18 @@ export const Clientes = () => {
     }));
   };
 
-  // Función para manejar cambios en la dirección
   const handleChangeDireccion = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(/\s+/g, ' '); // Reemplaza múltiples espacios con un solo espacio
     setDireccion(value);
+  
+    // Validar la dirección
     const errorMessage = validateDireccion(value);
     setErrors((prevState) => ({
       ...prevState,
       direccion: errorMessage,
     }));
   };
+  
 
   // Función para manejar cambios en el correo electrónico
   const handleChangeCorreo = (e) => {
