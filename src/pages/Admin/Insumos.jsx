@@ -44,16 +44,19 @@ export const Insumos = () => {
 
   const getColores = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/colores");
-    const coloresActivos = respuesta.data.filter(color => color.Estado === "Activo");
+    const coloresActivos = respuesta.data.filter(
+      (color) => color.Estado === "Activo"
+    );
     setColores(coloresActivos);
   };
-  
+
   const getTallas = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/tallas");
-    const tallasActivas = respuesta.data.filter(talla => talla.Estado === "Activo");
+    const tallasActivas = respuesta.data.filter(
+      (talla) => talla.Estado === "Activo"
+    );
     setTallas(tallasActivas);
   };
-  
 
   const openModal = (op, insumo = null) => {
     if (op === 1) {
@@ -98,7 +101,7 @@ export const Insumos = () => {
       await enviarSolicitud("POST", {
         IdColor,
         IdTalla,
-        Referencia:Referencia.trim(),
+        Referencia: Referencia.trim(),
         Cantidad: 0,
         ValorCompra: 0,
       });
@@ -108,7 +111,7 @@ export const Insumos = () => {
         IdInsumo,
         IdColor,
         IdTalla,
-        Referencia:Referencia.trim(),
+        Referencia: Referencia.trim(),
         Cantidad,
         ValorCompra,
       });
@@ -147,8 +150,6 @@ export const Insumos = () => {
   //   return "";
   // };
 
-
-
   const handleChangeIdColor = (e) => {
     const value = e.target.value;
     setIdColor(value);
@@ -173,7 +174,7 @@ export const Insumos = () => {
       Referencia: errorMessage,
     }));
   };
-  
+
   // Función para manejar cambios en la dirección
   const handleChangeCantidad = (e) => {
     const value = e.target.value;
@@ -272,46 +273,97 @@ export const Insumos = () => {
       showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
+      showClass: {
+        popup: 'swal2-show',
+        backdrop: 'swal2-backdrop-show',
+        icon: 'swal2-icon-show'
+      },
+      hideClass: {
+        popup: 'swal2-hide',
+        backdrop: 'swal2-backdrop-hide',
+        icon: 'swal2-icon-hide'
+      }
     }).then((result) => {
       if (result.isConfirmed) {
         setIdInsumo(IdInsumo);
-        enviarSolicitud("DELETE", { IdInsumo: IdInsumo });
-      } else {
+        enviarSolicitud("DELETE", { IdInsumo: IdInsumo }).then(() => {
+          // Calcular el índice del insumo eliminado en la lista filtrada
+          const index = filteredInsumos.findIndex(
+            (insumo) => insumo.IdInsumo === IdInsumo
+          );
+  
+          // Determinar la página en la que debería estar el insumo después de la eliminación
+          const newPage = Math.ceil((filteredInsumos.length - 1) / itemsPerPage) || 1;
+  
+          // Establecer la nueva página como la página actual
+          setCurrentPage(newPage);
+  
+          // Actualizar la lista de insumos eliminando el insumo eliminado
+          setInsumos((prevInsumos) =>
+            prevInsumos.filter((insumo) => insumo.IdInsumo !== IdInsumo)
+          );
+  
+          show_alerta("El insumo fue eliminado correctamente", "success");
+        });
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        show_alerta("El insumo NO fue eliminado", "info");
+      } else if (result.dismiss === Swal.DismissReason.backdrop || result.dismiss === Swal.DismissReason.esc) {
         show_alerta("El insumo NO fue eliminado", "info");
       }
     });
   };
+  
 
   const cambiarEstadoInsumo = async (IdInsumo) => {
     try {
-      const insumoActual = Insumos.find((insumo) => insumo.IdInsumo === IdInsumo);
-      const nuevoEstado = insumoActual.Estado === "Activo" ? "Inactivo" : "Activo";
-
-      const parametros = {
-        IdInsumo,
-        IdColor: insumoActual.IdColor,
-        IdTalla: insumoActual.IdTalla,
-        Referencia: insumoActual.Referencia,
-        Cantidad: insumoActual.Cantidad,
-        ValorCompra: insumoActual.ValorCompra,
-        Estado: nuevoEstado,
-      };
-
-      const response = await axios.put(`${url}/${IdInsumo}`, parametros);
-      if (response.status === 200) {
-        setInsumos((prevInsumos) =>
-          prevInsumos.map((insumo) =>
-            insumo.IdInsumo === IdInsumo ? { ...insumo, Estado: nuevoEstado } : insumo
-          )
-        );
-        show_alerta("El estado del color ha sido actualizado correctamente", "success");
-      }
+      const insumoActual = Insumos.find(
+        (insumo) => insumo.IdInsumo === IdInsumo
+      );
+      const nuevoEstado =
+        insumoActual.Estado === "Activo" ? "Inactivo" : "Activo";
+  
+      const MySwal = withReactContent(Swal);
+      MySwal.fire({
+        title: `¿Seguro de cambiar el estado del insumo ${insumoActual.Referencia}?`,
+        icon: "question",
+        text: `El estado actual del insumo es: ${insumoActual.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        showCancelButton: true,
+        confirmButtonText: "Sí, cambiar estado",
+        cancelButtonText: "Cancelar",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const parametros = {
+            IdInsumo,
+            IdColor: insumoActual.IdColor,
+            IdTalla: insumoActual.IdTalla,
+            Referencia: insumoActual.Referencia,
+            Cantidad: insumoActual.Cantidad,
+            ValorCompra: insumoActual.ValorCompra,
+            Estado: nuevoEstado,
+          };
+  
+          const response = await axios.put(`${url}/${IdInsumo}`, parametros);
+          if (response.status === 200) {
+            setInsumos((prevInsumos) =>
+              prevInsumos.map((insumo) =>
+                insumo.IdInsumo === IdInsumo ? { ...insumo, Estado: nuevoEstado } : insumo
+              )
+            );
+  
+            show_alerta("Estado del insumo cambiado con éxito", "success", {
+              timer: 2000,
+            });
+          }
+        } else {
+          show_alerta("No se ha cambiado el estado del insumo", "info");
+        }
+      });
     } catch (error) {
-      if (error.response) {
-        show_alerta("Error actualizando el estado del color", "error");
-      }
+      console.error("Error updating state:", error);
+      show_alerta("Error cambiando el estado del insumo", "error");
     }
   };
+  
 
   const convertColorIdToName = (colorId) => {
     const color = Colores.find((color) => color.IdColor === colorId);
@@ -332,9 +384,9 @@ export const Insumos = () => {
   const filteredInsumos = Insumos.filter((insumo) => {
     const colorName = convertColorIdToName(insumo.IdColor);
     const tallaName = convertTallaIdToName(insumo.IdTalla);
-    const referencia = insumo.Referencia ? insumo.Referencia.toString() : '';
-    const cantidad = insumo.Cantidad ? insumo.Cantidad.toString() : '';
-    const valorCompra = insumo.ValorCompra ? insumo.ValorCompra.toString() : '';
+    const referencia = insumo.Referencia ? insumo.Referencia.toString() : "";
+    const cantidad = insumo.Cantidad ? insumo.Cantidad.toString() : "";
+    const valorCompra = insumo.ValorCompra ? insumo.ValorCompra.toString() : "";
 
     return (
       colorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -345,8 +397,6 @@ export const Insumos = () => {
     );
   });
 
-
-
   // Aplicar paginación a los insumos filtrados
   const totalPages = Math.ceil(filteredInsumos.length / itemsPerPage);
   const currentInsumos = filteredInsumos.slice(
@@ -355,9 +405,11 @@ export const Insumos = () => {
   );
 
   function formatCurrency(value) {
-    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(value);
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+    }).format(value);
   }
-
 
   return (
     <>
@@ -368,10 +420,10 @@ export const Insumos = () => {
         role="dialog"
         aria-labelledby="modalClienteLabel"
         aria-hidden="true"
-        data-backdrop = "static"
-        data-keyboard = "false"
+        data-backdrop="static"
+        data-keyboard="false"
       >
-        <div className="modal-dialog" role="document">
+        <div className="modal-dialog modal-lg" role="document">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="modalClienteLabel">
@@ -388,103 +440,108 @@ export const Insumos = () => {
             </div>
             <div className="modal-body">
               <form id="crearClienteForm">
-                <div className="form-group">
-                  <label htmlFor="idColor">
-                    Color del Insumo:
-                  </label>
-                  <select
-                    className="form-control"
-                    id="idColor"
-                    value={IdColor}
-                    onChange={(e) => handleChangeIdColor(e)}
-                    required
-                  >
-                    <option value="">Seleccione un color</option>
-                    {Colores.map((color) => (
-                      <option key={color.IdColor} value={color.IdColor}>
-                        {color.Color}
-                      </option>
-                    ))}
-                  </select>
-
-                  {IdColor === "" && (
-                    <p className="text-danger">
-                      Por favor, seleccione un color.
-                    </p>
-                  )}
-                </div>
-                <div className="form-group">
-                  <label htmlFor="idTalla">
-                    Talla del insumo:
-                  </label>
-                  <select
-                    className="form-control"
-                    id="idTalla"
-                    value={IdTalla}
-                    onChange={(e) => handleChangeIdTalla(e)}
-                    required
-                  >
-                    <option value="">Seleccione una talla</option>
-                    {Tallas.map((talla) => (
-                      <option key={talla.IdTalla} value={talla.IdTalla}>
-                        {talla.Talla}
-                      </option>
-                    ))}
-                  </select>
-
-                  {IdTalla === "" && (
-                    <p className="text-danger">
-                      Por favor, seleccione una talla.
-                    </p>
-                  )}
+                <div className="form-row">
+                  <div className="form-group col-md-6">
+                    <label htmlFor="idColor">Color del Insumo:</label>
+                    <select
+                      className="form-control"
+                      id="idColor"
+                      value={IdColor}
+                      onChange={(e) => handleChangeIdColor(e)}
+                      required
+                    >
+                      <option value="">Seleccione un color</option>
+                      {Colores.map((color) => (
+                        <option key={color.IdColor} value={color.IdColor}>
+                          {color.Color}
+                        </option>
+                      ))}
+                    </select>
+                    {IdColor === "" && (
+                      <p className="text-danger">
+                        Por favor, seleccione un color.
+                      </p>
+                    )}
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="idTalla">Talla del insumo:</label>
+                    <select
+                      className="form-control"
+                      id="idTalla"
+                      value={IdTalla}
+                      onChange={(e) => handleChangeIdTalla(e)}
+                      required
+                    >
+                      <option value="">Seleccione una talla</option>
+                      {Tallas.map((talla) => (
+                        <option key={talla.IdTalla} value={talla.IdTalla}>
+                          {talla.Talla}
+                        </option>
+                      ))}
+                    </select>
+                    {IdTalla === "" && (
+                      <p className="text-danger">
+                        Por favor, seleccione una talla.
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="nroDocumentoCliente">
-                    Referencia del insumo:
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${errors.Referencia ? "is-invalid" : ""
+                <div className="form-row">
+                  <div className="form-group col-md-6">
+                    <label htmlFor="nroDocumentoCliente">
+                      Referencia del insumo:
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.Referencia ? "is-invalid" : ""
                       }`}
-                    id="nroDocumentoCliente"
-                    placeholder="Ingrese la referencia del insumo"
-                    required
-                    value={Referencia}
-                    onChange={handleChangeReferencia}
-                  />
-                  {renderErrorMessage(errors.Referencia)}
+                      id="nroDocumentoCliente"
+                      placeholder="Ingrese la referencia del insumo"
+                      required
+                      value={Referencia}
+                      onChange={handleChangeReferencia}
+                    />
+                    {renderErrorMessage(errors.Referencia)}
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="nombreCliente">Cantidad:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.Cantidad ? "is-invalid" : ""
+                      }`}
+                      id="nombreCliente"
+                      placeholder="Ingrese la cantidad del insumo"
+                      required
+                      value="0" // Establecer valor en 0
+                      onChange={handleChangeCantidad}
+                      disabled
+                    />
+                    {renderErrorMessage(errors.Cantidad)}
+                  </div>
+                </div>
 
-                </div>
-                <div className="form-group">
-                  <label htmlFor="nombreCliente">Cantidad:</label>
-                  <input
-                    type="text"
-                    className={`form-control ${errors.Cantidad ? "is-invalid" : ""
+                <div className="form-row">
+                  <div className="form-group col-md-12">
+                    <label htmlFor="direccionCliente">
+                      Valor de la compra del insumo:
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.ValorCompra ? "is-invalid" : ""
                       }`}
-                    id="nombreCliente"
-                    placeholder="Ingrese la cantidad del insumo"
-                    required
-                    value="0" // Establecer valor en 0
-                    onChange={handleChangeCantidad}
-                    disabled
-                  />
-                  {renderErrorMessage(errors.Cantidad)}
-                </div>
-                <div className="form-group">
-                  <label htmlFor="direccionCliente">Valor de de la compra del insumo:</label>
-                  <input
-                    type="text"
-                    className={`form-control ${errors.ValorCompra ? "is-invalid" : ""
-                      }`}
-                    id="direccionCliente"
-                    placeholder="Ingrese el valor de la compra"
-                    required
-                    value="0" // Establecer valor en 0
-                    onChange={handleChangeValorCompra}
-                    disabled
-                  />
-                  {renderErrorMessage(errors.ValorCompra)}
+                      id="direccionCliente"
+                      placeholder="Ingrese el valor de la compra"
+                      required
+                      value="0" // Establecer valor en 0
+                      onChange={handleChangeValorCompra}
+                      disabled
+                    />
+                    {renderErrorMessage(errors.ValorCompra)}
+                  </div>
                 </div>
               </form>
             </div>
@@ -583,24 +640,27 @@ export const Insumos = () => {
                           <button
                             className="btn btn-danger btn-sm mr-2"
                             onClick={() =>
-                              deleteInsumo(
-                                insumo.IdInsumo,
-                                insumo.Referencia
-                              )
+                              deleteInsumo(insumo.IdInsumo, insumo.Referencia)
                             }
                             disabled={insumo.Estado != "Activo"}
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                          <button
-                            className={`btn btn-${insumo.Estado === "Activo" ? "success" : "danger"
-                              } btn-sm`}
-                            onClick={() =>
-                              cambiarEstadoInsumo(insumo.IdInsumo)
-                            }
-                          >
-                            {insumo.Estado}
-                          </button>
+                          <label className="switch">
+                            <input
+                              type="checkbox"
+                              checked={insumo.Estado === "Activo"}
+                              onChange={() =>
+                                cambiarEstadoInsumo(insumo.IdInsumo)
+                              }
+                              className={
+                                insumo.Estado === "Activo"
+                                  ? "switch-green"
+                                  : "switch-red"
+                              }
+                            />
+                            <span className="slider round"></span>
+                          </label>
                         </div>
                       </td>
                     </tr>

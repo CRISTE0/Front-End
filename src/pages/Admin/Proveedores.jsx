@@ -388,7 +388,19 @@ export const Proveedores = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         setIdProveedor(IdProveedor);
-        enviarSolicitud("DELETE", { IdProveedor });
+        enviarSolicitud("DELETE", { IdProveedor }).then(() => {
+          // Calcular el índice del proveedor eliminado en la lista filtrada
+          const index = filteredProveedores.findIndex(
+            (proveedor) => proveedor.IdProveedor === IdProveedor
+          );
+
+          // Determinar la página en la que debería estar el proveedor después de la eliminación
+          const newPage =
+            Math.ceil((filteredProveedores.length - 1) / itemsPerPage) || 1;
+
+          // Establecer la nueva página como la página actual
+          setCurrentPage(newPage);
+        });
       } else {
         show_alerta("El proveedor NO fue eliminado", "info");
       }
@@ -743,18 +755,21 @@ export const Proveedores = () => {
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                          <button
-                            className={`btn btn-${
-                              proveedor.Estado === "Activo"
-                                ? "success"
-                                : "danger"
-                            } btn-sm`}
-                            onClick={() =>
-                              cambiarEstadoProveedor(proveedor.IdProveedor)
-                            }
-                          >
-                            {proveedor.Estado}
-                          </button>
+                          <label className="switch">
+                            <input
+                              type="checkbox"
+                              checked={proveedor.Estado === "Activo"}
+                              onChange={() =>
+                                cambiarEstadoProveedor(proveedor.IdProveedor)
+                              }
+                              className={
+                                proveedor.Estado === "Activo"
+                                  ? "switch-green"
+                                  : "switch-red"
+                              }
+                            />
+                            <span className="slider round"></span>
+                          </label>
                         </div>
                       </td>
                     </tr>

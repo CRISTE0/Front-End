@@ -150,58 +150,82 @@ export const Tallas = () => {
   const deletetalla = (IdTalla, Talla) => {
     const MySwal = withReactContent(Swal);
     MySwal.fire({
-      title: "¿Seguro de eliminar la talla  " + Talla + " ?",
+      title: `¿Seguro de eliminar la talla ${Talla}?`,
       icon: "question",
       text: "No se podrá dar marcha atrás",
       showCancelButton: true,
-      confirmButtonText: "Si, eliminar",
+      confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        setIdTalla(IdTalla);
-        enviarSolicitud("DELETE", { IdTalla: IdTalla });
+        enviarSolicitud("DELETE", { IdTalla: IdTalla }).then(() => {
+          // Calcular el índice de la talla eliminada en la lista filtrada (si es necesario)
+          const index = filteredTallass.findIndex((talla) => talla.id === IdTalla);
+  
+          // Determinar la página en la que debería estar la talla después de la eliminación
+          const newPage =
+            Math.ceil((filteredTallass.length - 1) / itemsPerPage) || 1;
+  
+          // Establecer la nueva página como la página actual
+          setCurrentPage(newPage);
+        }).catch(() => {
+          show_alerta("Hubo un error al eliminar la talla", "error");
+        });
       } else {
         show_alerta("La talla NO fue eliminada", "info");
       }
     });
   };
+  
 
   const cambiarEstadoTalla = async (IdTalla) => {
-    console.log(IdTalla);
     try {
       const tallaActual = Tallas.find((talla) => talla.IdTalla === IdTalla);
-
+  
       const nuevoEstado =
         tallaActual.Estado === "Activo" ? "Inactivo" : "Activo";
-      console.log(nuevoEstado);
-
-      const parametrosTalla = {
-        IdTalla,
-        Talla: tallaActual.Talla,
-        Estado: nuevoEstado,
-      };
-
-      const response = await axios.put(`${url}/${IdTalla}`, parametrosTalla);
-
-      if (response.status === 200) {
-        setTallas((prevTalla) =>
-          prevTalla.map((talla) =>
-            talla.IdTalla === IdTalla
-              ? { ...talla, Estado: nuevoEstado }
-              : talla
-          )
-        );
-
-        show_alerta("Estado de la talla cambiada con éxito", "success", {
-          timer: 8000
-        });
-      }
-      
+  
+      const MySwal = withReactContent(Swal);
+      MySwal.fire({
+        title: `¿Seguro de cambiar el estado de la talla ${tallaActual.Talla}?`,
+        icon: "question",
+        text: `El estado actual de la talla es: ${tallaActual.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        showCancelButton: true,
+        confirmButtonText: "Sí, cambiar estado",
+        cancelButtonText: "Cancelar",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const parametrosTalla = {
+            IdTalla,
+            Talla: tallaActual.Talla,
+            Estado: nuevoEstado,
+          };
+  
+          const response = await axios.put(`${url}/${IdTalla}`, parametrosTalla);
+  
+          if (response.status === 200) {
+            setTallas((prevTalla) =>
+              prevTalla.map((talla) =>
+                talla.IdTalla === IdTalla
+                  ? { ...talla, Estado: nuevoEstado }
+                  : talla
+              )
+            );
+  
+            show_alerta("Estado de la talla cambiada con éxito", "success", {
+              timer: 8000
+            });
+          }
+        } else {
+          show_alerta("No se ha cambiado el estado de la talla", "info");
+        }
+      });
     } catch (error) {
       console.error("Error updating state:", error);
       show_alerta("Error cambiando el estado de la talla", "error");
     }
   };
+  
 
   // Configuracion mensaje de alerta 
   const show_alerta = (message, type) => {
@@ -397,14 +421,21 @@ export const Tallas = () => {
                             <i className="fas fa-solid fa-trash"></i>
                           </button>
                           {/* Botón de cambio de estado */}
-                          <button
-                            className={`btn btn-${
-                              talla.Estado === "Activo" ? "success" : "danger"
-                            } btn-sm`}
-                            onClick={() => cambiarEstadoTalla(talla.IdTalla)}
-                          >
-                            {talla.Estado}
-                          </button>
+                          <label className="switch">
+                            <input
+                              type="checkbox"
+                              checked={talla.Estado === "Activo"}
+                              onChange={() =>
+                                cambiarEstadoTalla(talla.IdTalla)
+                              }
+                              className={
+                                talla.Estado === "Activo"
+                                  ? "switch-green"
+                                  : "switch-red"
+                              }
+                            />
+                            <span className="slider round"></span>
+                          </label>
                         </div>
                       </td>
                     </tr>

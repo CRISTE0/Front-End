@@ -316,8 +316,19 @@ export const Clientes = () => {
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        setIdCliente(IdCliente);
-        enviarSolicitud("DELETE", { IdCliente: IdCliente });
+        enviarSolicitud("DELETE", { IdCliente: IdCliente }).then(() => {
+          // Calcular el índice del cliente eliminado en la lista filtrada
+          const index = filteredClientes.findIndex(
+            (cliente) => cliente.IdCliente === IdCliente
+          );
+
+          // Determinar la página en la que debería estar el cliente después de la eliminación
+          const newPage =
+            Math.ceil((filteredClientes.length - 1) / itemsPerPage) || 1;
+
+          // Establecer la nueva página como la página actual
+          setCurrentPage(newPage);
+        });
       } else {
         show_alerta("El cliente NO fue eliminado", "info");
       }
@@ -627,16 +638,21 @@ export const Clientes = () => {
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                          <button
-                            className={`btn btn-${
-                              cliente.Estado === "Activo" ? "success" : "danger"
-                            } btn-sm`}
-                            onClick={() =>
-                              cambiarEstadoCliente(cliente.IdCliente)
-                            }
-                          >
-                            {cliente.Estado}
-                          </button>
+                          <label className="switch">
+                            <input
+                              type="checkbox"
+                              checked={cliente.Estado === "Activo"}
+                              onChange={() =>
+                                cambiarEstadoCliente(cliente.IdCliente)
+                              }
+                              className={
+                                cliente.Estado === "Activo"
+                                  ? "switch-green"
+                                  : "switch-red"
+                              }
+                            />
+                            <span className="slider round"></span>
+                          </label>
                         </div>
                       </td>
                     </tr>
