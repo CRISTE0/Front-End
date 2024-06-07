@@ -100,16 +100,17 @@ export const Proveedores = () => {
   };
 
   const guardarProveedor = async () => {
-    const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, ' '); // Elimina los espacios múltiples y los extremos
-    const cleanedDireccion = Direccion.trim().replace(/\s+/g, ' '); // Elimina los espacios múltiples y los extremos
-  
+    const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+    const cleanedDireccion = Direccion.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+    const cleanedContacto = Contacto.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+
     if (operation === 1) {
       // Crear Proveedor
       await enviarSolicitud("POST", {
         TipoDocumento,
         NroDocumento,
         NombreApellido: cleanedNombreApellido,
-        Contacto,
+        Contacto: cleanedContacto,
         Telefono,
         Direccion: cleanedDireccion,
         Correo,
@@ -122,7 +123,7 @@ export const Proveedores = () => {
         TipoDocumento,
         NroDocumento,
         NombreApellido: cleanedNombreApellido,
-        Contacto,
+        Contacto: cleanedContacto,
         Telefono,
         Direccion: cleanedDireccion,
         Correo,
@@ -163,10 +164,10 @@ export const Proveedores = () => {
 
   const validateContacto = (value) => {
     if (!value) {
-      return "Escribe el Contacto";
+      return "Escribe el nombre y apellido";
     }
-    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/.test(value)) {
-      return "El contacto solo puede contener letras, tildes y la letra 'ñ'";
+    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value)) {
+      return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
     }
     return "";
   };
@@ -187,15 +188,13 @@ export const Proveedores = () => {
 
   const validateDireccion = (value) => {
     if (!value) {
-        return "Escribe la dirección";
+      return "Escribe la dirección";
     }
     if (!/^[a-zA-Z0-9#\-_\s]+(?:[a-zA-Z0-9#\-_\s])*[^\s]$/.test(value)) {
-        return "La dirección solo puede contener letras, números, espacios, # y -";
+      return "La dirección solo puede contener letras, números, espacios, # y -";
     }
     return ""; // La dirección es válida
-};
-
-
+  };
 
   // Función para validar el correo electrónico
   const validateCorreo = (value) => {
@@ -246,7 +245,7 @@ export const Proveedores = () => {
   };
 
   const handleChangeNombreApellido = (e) => {
-    const value = e.target.value.replace(/\s+/g, ' '); // Reemplaza múltiples espacios con un solo espacio
+    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setNombreApellido(value);
 
     // Validar el nombre y apellido
@@ -263,7 +262,7 @@ export const Proveedores = () => {
   };
 
   const handleChangeContacto = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setContacto(value);
 
     // Validar el contacto
@@ -291,20 +290,17 @@ export const Proveedores = () => {
 
   // Función para manejar cambios en la dirección
   const handleChangeDireccion = (e) => {
-    const value = e.target.value.replace(/\s+/g, ' '); // Reemplaza múltiples espacios con un solo espacio
+    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setDireccion(value);
 
     // Validar la dirección
     const errorMessage = validateDireccion(value);
     setErrors((prevState) => ({
-        ...prevState,
-        direccion: errorMessage,
+      ...prevState,
+      direccion: errorMessage,
     }));
-};
-;
+  };
 
-  
-  
   // Función para manejar cambios en el correo electrónico
   const handleChangeCorreo = (e) => {
     const value = e.target.value;
@@ -723,6 +719,7 @@ export const Proveedores = () => {
                     <th>Teléfono</th>
                     <th>Dirección</th>
                     <th>Correo Electrónico</th>
+                    <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -736,6 +733,23 @@ export const Proveedores = () => {
                       <td>{proveedor.Telefono}</td>
                       <td>{proveedor.Direccion}</td>
                       <td>{proveedor.Correo}</td>
+                      <td>
+                        <label className="switch">
+                          <input
+                            type="checkbox"
+                            checked={proveedor.Estado === "Activo"}
+                            onChange={() =>
+                              cambiarEstadoProveedor(proveedor.IdProveedor)
+                            }
+                            className={
+                              proveedor.Estado === "Activo"
+                                ? "switch-green"
+                                : "switch-red"
+                            }
+                          />
+                          <span className="slider round"></span>
+                        </label>
+                      </td>
                       <td>
                         <div
                           className="btn-group"
@@ -764,21 +778,6 @@ export const Proveedores = () => {
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                          <label className="switch">
-                            <input
-                              type="checkbox"
-                              checked={proveedor.Estado === "Activo"}
-                              onChange={() =>
-                                cambiarEstadoProveedor(proveedor.IdProveedor)
-                              }
-                              className={
-                                proveedor.Estado === "Activo"
-                                  ? "switch-green"
-                                  : "switch-red"
-                              }
-                            />
-                            <span className="slider round"></span>
-                          </label>
                         </div>
                       </td>
                     </tr>

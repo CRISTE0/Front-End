@@ -353,6 +353,7 @@ export const Colores = () => {
                   <tr>
                     <th>Color</th>
                     <th>Referencia</th>
+                    <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -370,6 +371,21 @@ export const Colores = () => {
                             marginLeft: "5px",
                           }}
                         ></div>
+                      </td>
+                      <td>
+                        <label className="switch">
+                          <input
+                            type="checkbox"
+                            checked={color.Estado === "Activo"}
+                            onChange={() => cambiarEstadoColor(color.IdColor)}
+                            className={
+                              color.Estado === "Activo"
+                                ? "switch-green"
+                                : "switch-red"
+                            }
+                          />
+                          <span className="slider round"></span>
+                        </label>
                       </td>
                       <td>
                         <div className="d-flex">
@@ -398,19 +414,6 @@ export const Colores = () => {
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                          <label className="switch">
-                            <input
-                              type="checkbox"
-                              checked={color.Estado === "Activo"}
-                              onChange={() => cambiarEstadoColor(color.IdColor)}
-                              className={
-                                color.Estado === "Activo"
-                                  ? "switch-green"
-                                  : "switch-red"
-                              }
-                            />
-                            <span className="slider round"></span>
-                          </label>
                         </div>
                       </td>
                     </tr>

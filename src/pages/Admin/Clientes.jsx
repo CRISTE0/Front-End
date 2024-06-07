@@ -81,9 +81,9 @@ export const Clientes = () => {
   };
 
   const guardarCliente = async () => {
-    const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, ' '); // Elimina los espacios múltiples y los extremos
-    const cleanedDireccion = Direccion.trim().replace(/\s+/g, ' '); // Elimina los espacios múltiples y los extremos
-  
+    const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+    const cleanedDireccion = Direccion.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+
     if (operation === 1) {
       // Crear Cliente
       await enviarSolicitud("POST", {
@@ -108,7 +108,6 @@ export const Clientes = () => {
       });
     }
   };
-   
 
   // Función para validar el número de documento
   const validateNroDocumento = (value) => {
@@ -196,9 +195,9 @@ export const Clientes = () => {
   };
 
   const handleChangeNombreApellido = (e) => {
-    const value = e.target.value.replace(/\s+/g, ' '); // Reemplaza múltiples espacios con un solo espacio
+    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setNombreApellido(value);
-  
+
     // Validar el nombre y apellido
     const errorMessage = validateNombreApellido(value);
     setErrors((prevState) => ({
@@ -206,7 +205,6 @@ export const Clientes = () => {
       nombreApellido: errorMessage,
     }));
   };
-  
 
   // Función para manejar cambios en el teléfono
   const handleChangeTelefono = (e) => {
@@ -224,9 +222,9 @@ export const Clientes = () => {
   };
 
   const handleChangeDireccion = (e) => {
-    const value = e.target.value.replace(/\s+/g, ' '); // Reemplaza múltiples espacios con un solo espacio
+    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setDireccion(value);
-  
+
     // Validar la dirección
     const errorMessage = validateDireccion(value);
     setErrors((prevState) => ({
@@ -234,7 +232,6 @@ export const Clientes = () => {
       direccion: errorMessage,
     }));
   };
-  
 
   // Función para manejar cambios en el correo electrónico
   const handleChangeCorreo = (e) => {
@@ -607,6 +604,7 @@ export const Clientes = () => {
                     <th>Teléfono</th>
                     <th>Dirección</th>
                     <th>Correo Electrónico</th>
+                    <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -619,6 +617,23 @@ export const Clientes = () => {
                       <td>{cliente.Telefono}</td>
                       <td>{cliente.Direccion}</td>
                       <td>{cliente.Correo}</td>
+                      <td>
+                        <label className="switch">
+                          <input
+                            type="checkbox"
+                            checked={cliente.Estado === "Activo"}
+                            onChange={() =>
+                              cambiarEstadoCliente(cliente.IdCliente)
+                            }
+                            className={
+                              cliente.Estado === "Activo"
+                                ? "switch-green"
+                                : "switch-red"
+                            }
+                          />
+                          <span className="slider round"></span>
+                        </label>
+                      </td>
                       <td>
                         <div
                           className="btn-group"
@@ -647,21 +662,6 @@ export const Clientes = () => {
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                          <label className="switch">
-                            <input
-                              type="checkbox"
-                              checked={cliente.Estado === "Activo"}
-                              onChange={() =>
-                                cambiarEstadoCliente(cliente.IdCliente)
-                              }
-                              className={
-                                cliente.Estado === "Activo"
-                                  ? "switch-green"
-                                  : "switch-red"
-                              }
-                            />
-                            <span className="slider round"></span>
-                          </label>
                         </div>
                       </td>
                     </tr>

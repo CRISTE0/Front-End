@@ -609,6 +609,7 @@ export const Insumos = () => {
                     <th>Talla</th>
                     <th>Cantidad</th>
                     <th>Valor de la Compra</th>
+                    <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -620,7 +621,23 @@ export const Insumos = () => {
                       <td>{convertTallaIdToName(insumo.IdTalla)}</td>
                       <td>{insumo.Cantidad}</td>
                       <td>{formatCurrency(insumo.ValorCompra)}</td>
-
+                      <td>
+                      <label className="switch">
+                            <input
+                              type="checkbox"
+                              checked={insumo.Estado === "Activo"}
+                              onChange={() =>
+                                cambiarEstadoInsumo(insumo.IdInsumo)
+                              }
+                              className={
+                                insumo.Estado === "Activo"
+                                  ? "switch-green"
+                                  : "switch-red"
+                              }
+                            />
+                            <span className="slider round"></span>
+                          </label>
+                      </td>
                       <td>
                         <div
                           className="btn-group"
@@ -646,21 +663,6 @@ export const Insumos = () => {
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                          <label className="switch">
-                            <input
-                              type="checkbox"
-                              checked={insumo.Estado === "Activo"}
-                              onChange={() =>
-                                cambiarEstadoInsumo(insumo.IdInsumo)
-                              }
-                              className={
-                                insumo.Estado === "Activo"
-                                  ? "switch-green"
-                                  : "switch-red"
-                              }
-                            />
-                            <span className="slider round"></span>
-                          </label>
                         </div>
                       </td>
                     </tr>
