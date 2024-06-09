@@ -200,6 +200,149 @@ h5 {
   color: black;
 }
 
-label {
-  color: black;
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  list-style-type: none;
+  padding: 0;
+}
+
+.page-item {
+  margin: 0 5px;
+}
+
+.page-link {
+  border: 1px solid #858796; /* Borde gris */
+  padding: 10px 15px;
+  border-radius: 5px;
+  color: #858796; /* Texto gris */
+  text-decoration: none;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Añadir sombra */
+  background-color: #f8f9fa; /* Color de fondo claro */
+}
+
+.page-link:hover {
+  background-color: #858796; /* Color gris al pasar el cursor */
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra más intensa */
+}
+
+.page-item.active .page-link {
+  background-color: #858796; /* Fondo gris para el enlace activo */
+  color: white; /* Texto blanco para el enlace activo */
+  border-color: #858796;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra más intensa */
+}
+
+.page-item.disabled .page-link {
+  color: #6c757d; /* Color gris claro para el enlace deshabilitado */
+  pointer-events: none;
+  cursor: default;
+}
+
+.page-item.disabled .page-link:hover {
+  background-color: transparent; /* Asegura que no cambie de color */
+  color: #6c757d;
+}
+
+.page-link {
+  font-size: 16px; /* Ajusta el tamaño del texto */
+  padding: 8px 16px; /* Ajusta el espaciado interno */
+}
+
+input.Buscador {
+  padding: 8px; /* Reducir el padding */
+  margin-left: auto;
+  border: 1px solid #ccc;
+  border-radius: 15px; /* Reducir el radio de los bordes */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  transition: all 0.3s ease; /* Transición suave para los cambios */
+}
+
+input.Buscador:focus {
+  border-color: #007bff; /* Cambio de color del borde al enfocarse */
+  box-shadow: 0 3px 6px rgba(0, 123, 255, 0.2); /* Reducir la sombra al enfocarse */
+}
+
+/* Añadir en tu archivo CSS */
+.modal-header {
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-title {
+  font-weight: bold;
+}
+
+.form-control {
+  border-radius: 4px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+.switch input[type="checkbox"] {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 20px;
+}
+
+.switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.switch input[type="checkbox"]:checked + .slider {
+  background-color: #4caf50; /* Color verde cuando está activo */
+}
+
+.switch input[type="checkbox"]:checked + .slider:before {
+  -webkit-transform: translateX(20px);
+  -ms-transform: translateX(20px);
+  transform: translateX(20px);
+}
+
+.switch input[type="checkbox"]:not(:checked) + .slider {
+  background-color: #f44336; /* Color rojo cuando está inactivo */
+}
+
+.switch input[type="checkbox"]:focus + .slider {
+  box-shadow: 0 0 1px #4caf50;
 }

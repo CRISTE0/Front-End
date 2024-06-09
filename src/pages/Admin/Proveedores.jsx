@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-// import { show_alerta } from "../../assets/js/functions";
+import Pagination from "../../assets/js/Pagination";
+import SearchBar from "../../assets/js/SearchBar";
 
 export const Proveedores = () => {
   let url = "http://localhost:3000/api/proveedores";
@@ -25,10 +26,14 @@ export const Proveedores = () => {
     direccion: "",
     correo: "",
   });
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [NombreApellidoLabel, setNombreApellidoLabel] = useState(
     "Nombre del Proveedor"
   );
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     getProveedores();
@@ -95,15 +100,19 @@ export const Proveedores = () => {
   };
 
   const guardarProveedor = async () => {
+    const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+    const cleanedDireccion = Direccion.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+    const cleanedContacto = Contacto.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+
     if (operation === 1) {
       // Crear Proveedor
       await enviarSolicitud("POST", {
         TipoDocumento,
         NroDocumento,
-        NombreApellido,
-        Contacto,
+        NombreApellido: cleanedNombreApellido,
+        Contacto: cleanedContacto,
         Telefono,
-        Direccion,
+        Direccion: cleanedDireccion,
         Correo,
         Estado: "Activo",
       });
@@ -113,10 +122,10 @@ export const Proveedores = () => {
         IdProveedor,
         TipoDocumento,
         NroDocumento,
-        NombreApellido,
-        Contacto,
+        NombreApellido: cleanedNombreApellido,
+        Contacto: cleanedContacto,
         Telefono,
-        Direccion,
+        Direccion: cleanedDireccion,
         Correo,
       });
     }
@@ -147,18 +156,18 @@ export const Proveedores = () => {
     if (!value) {
       return "Escribe el nombre y apellido";
     }
-    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/.test(value)) {
-      return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ'";
+    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value)) {
+      return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
     }
     return "";
   };
 
   const validateContacto = (value) => {
     if (!value) {
-      return "Escribe el Contacto";
+      return "Escribe el nombre y apellido";
     }
-    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/.test(value)) {
-      return "El contacto solo puede contener letras, tildes y la letra 'ñ'";
+    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value)) {
+      return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
     }
     return "";
   };
@@ -177,15 +186,14 @@ export const Proveedores = () => {
     return "";
   };
 
-  // Función para validar la dirección
   const validateDireccion = (value) => {
     if (!value) {
       return "Escribe la dirección";
     }
-    if (!/^[a-zA-Z0-9#-\s]*$/.test(value)) {
-      return "La dirección solo puede contener letras, números, # y -";
+    if (!/^[a-zA-Z0-9#\-_\s]+(?:[a-zA-Z0-9#\-_\s])*[^\s]$/.test(value)) {
+      return "La dirección solo puede contener letras, números, espacios, # y -";
     }
-    return "";
+    return ""; // La dirección es válida
   };
 
   // Función para validar el correo electrónico
@@ -193,11 +201,21 @@ export const Proveedores = () => {
     if (!value) {
       return "Ingresa tu correo electrónico";
     }
-    // Expresión regular para validar correo electrónico
+
+    // Expresión regular para validar correo electrónico sin espacios
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Verifica si el correo contiene espacios
+    if (/\s/.test(value)) {
+      return "El correo electrónico no puede contener espacios";
+    }
+
+    // Verifica si el correo sigue el formato estándar
     if (!emailRegex.test(value)) {
       return "Ingresa un correo electrónico válido";
     }
+
+    // Si pasa todas las validaciones, retorna una cadena vacía
     return "";
   };
 
@@ -227,7 +245,7 @@ export const Proveedores = () => {
   };
 
   const handleChangeNombreApellido = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setNombreApellido(value);
 
     // Validar el nombre y apellido
@@ -244,7 +262,7 @@ export const Proveedores = () => {
   };
 
   const handleChangeContacto = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setContacto(value);
 
     // Validar el contacto
@@ -272,8 +290,10 @@ export const Proveedores = () => {
 
   // Función para manejar cambios en la dirección
   const handleChangeDireccion = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setDireccion(value);
+
+    // Validar la dirección
     const errorMessage = validateDireccion(value);
     setErrors((prevState) => ({
       ...prevState,
@@ -284,11 +304,15 @@ export const Proveedores = () => {
   // Función para manejar cambios en el correo electrónico
   const handleChangeCorreo = (e) => {
     const value = e.target.value;
-    setCorreo(value);
+    setCorreo(value); // Actualiza el estado del correo electrónico
+
+    // Valida el correo electrónico y obtiene el mensaje de error
     const errorMessage = validateCorreo(value);
+
+    // Actualiza el estado de los errores con el mensaje de error correspondiente
     setErrors((prevState) => ({
       ...prevState,
-      correo: errorMessage,
+      correo: errorMessage, // Actualiza el error de correo con el mensaje de error obtenido
     }));
   };
 
@@ -304,14 +328,12 @@ export const Proveedores = () => {
         // Selecciona la barra de progreso y ajusta su estilo
         const progressBar = MySwal.getTimerProgressBar();
         if (progressBar) {
-          progressBar.style.backgroundColor = 'black';
-          progressBar.style.height = '6px';
+          progressBar.style.backgroundColor = "black";
+          progressBar.style.height = "6px";
         }
-      }
+      },
     });
   };
-  
-  
 
   // Función para renderizar los mensajes de error
   const renderErrorMessage = (errorMessage) => {
@@ -371,7 +393,19 @@ export const Proveedores = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         setIdProveedor(IdProveedor);
-        enviarSolicitud("DELETE", { IdProveedor });
+        enviarSolicitud("DELETE", { IdProveedor }).then(() => {
+          // Calcular el índice del proveedor eliminado en la lista filtrada
+          const index = filteredProveedores.findIndex(
+            (proveedor) => proveedor.IdProveedor === IdProveedor
+          );
+
+          // Determinar la página en la que debería estar el proveedor después de la eliminación
+          const newPage =
+            Math.ceil((filteredProveedores.length - 1) / itemsPerPage) || 1;
+
+          // Establecer la nueva página como la página actual
+          setCurrentPage(newPage);
+        });
       } else {
         show_alerta("El proveedor NO fue eliminado", "info");
       }
@@ -385,24 +419,57 @@ export const Proveedores = () => {
       );
       const nuevoEstado = proveedor.Estado === "Activo" ? "Inactivo" : "Activo";
 
-      await axios.put(`${url}/${IdProveedor}`, { Estado: nuevoEstado });
+      const MySwal = withReactContent(Swal);
+      MySwal.fire({
+        title: `¿Seguro de cambiar el estado del proveedor ${proveedor.NombreApellido}?`,
+        icon: "question",
+        text: `El estado actual del proveedor es: ${proveedor.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        showCancelButton: true,
+        confirmButtonText: "Sí, cambiar estado",
+        cancelButtonText: "Cancelar",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          await axios.put(`${url}/${IdProveedor}`, { Estado: nuevoEstado });
 
-      setProveedores((prevProveedores) =>
-        prevProveedores.map((proveedor) =>
-          proveedor.IdProveedor === IdProveedor
-            ? { ...proveedor, Estado: nuevoEstado }
-            : proveedor
-        )
-      );
+          setProveedores((prevProveedores) =>
+            prevProveedores.map((proveedor) =>
+              proveedor.IdProveedor === IdProveedor
+                ? { ...proveedor, Estado: nuevoEstado }
+                : proveedor
+            )
+          );
 
-      show_alerta("Estado del proveedor cambiado con éxito", "success", {
-        timer: 2000,
+          show_alerta("Estado del proveedor cambiado con éxito", "success", {
+            timer: 2000,
+          });
+        } else {
+          show_alerta("No se ha cambiado el estado del proveedor", "info");
+        }
       });
     } catch (error) {
       console.error("Error updating state:", error);
       show_alerta("Error cambiando el estado del proveedor", "error");
     }
   };
+
+  const handleSearchTermChange = (newSearchTerm) => {
+    setSearchTerm(newSearchTerm);
+    setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
+  };
+
+  // Filtrar los proveedores según el término de búsqueda
+  const filteredProveedores = Proveedores.filter((proveedor) =>
+    Object.values(proveedor).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Aplicar paginación a los proveedores filtrados
+  const totalPages = Math.ceil(filteredProveedores.length / itemsPerPage);
+  const currentProveedores = filteredProveedores.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <>
@@ -413,8 +480,11 @@ export const Proveedores = () => {
         role="dialog"
         aria-labelledby="modalProveedorLabel"
         aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
       >
-        <div className="modal-dialog" role="document">
+        <div className="modal-dialog modal-lg" role="document">
+          {/* Cambiado a modal-lg para un modal más ancho */}
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="modalProveedorLabel">
@@ -431,135 +501,150 @@ export const Proveedores = () => {
             </div>
             <div className="modal-body">
               <form id="crearProveedorForm">
-                <div className="form-group">
-                  <label htmlFor="tipoDocumentoProveedor">
-                    Tipo de Documento:
-                  </label>
-                  <select
-                    className="form-control"
-                    id="tipoDocumentoProveedor"
-                    value={TipoDocumento}
-                    onChange={(e) => handleChangeTipoDocumento(e)} // Llama a la función handleChangeTipoDocumento
-                    disabled={operation === 2}
-                    required
-                  >
-                    <option value="">Seleccione un tipo de documento</option>
-                    <option value="CC">Cédula</option>
-                    <option value="CE">Cédula de Extranjería</option>
-                    <option value="NIT">NIT</option>
-                  </select>
-
-                  {TipoDocumento === "" && (
-                    <p className="text-danger">
-                      Por favor, seleccione un tipo de documento.
-                    </p>
-                  )}
+                <div className="form-row">
+                  <div className="form-group col-md-6">
+                    <label htmlFor="tipoDocumentoProveedor">
+                      Tipo de Documento:
+                    </label>
+                    <select
+                      className="form-control"
+                      id="tipoDocumentoProveedor"
+                      value={TipoDocumento}
+                      onChange={(e) => handleChangeTipoDocumento(e)}
+                      required
+                    >
+                      <option value="">Seleccione un tipo de documento</option>
+                      <option value="CC">Cédula</option>
+                      <option value="CE">Cédula de Extranjería</option>
+                      <option value="NIT">NIT</option>
+                    </select>
+                    {TipoDocumento === "" && (
+                      <p className="text-danger">
+                        Por favor, seleccione un tipo de documento.
+                      </p>
+                    )}
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="nroDocumentoProveedor">
+                      Número de Documento:
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.nroDocumento ? "is-invalid" : ""
+                      }`}
+                      id="nroDocumentoProveedor"
+                      placeholder="Ingrese el número de documento"
+                      required
+                      value={NroDocumento}
+                      onChange={handleChangeNroDocumento}
+                    />
+                    {renderErrorMessage(errors.nroDocumento)}
+                    <small className="form-text text-muted">
+                      Ingrese un documento válido (entre 6 y 10 dígitos
+                      numéricos).
+                    </small>
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="nombreProveedor">
+                      {NombreApellidoLabel}:
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.nombreApellido ? "is-invalid" : ""
+                      }`}
+                      id="nombreProveedor"
+                      placeholder={`Ingrese ${NombreApellidoLabel.toLowerCase()}`}
+                      required
+                      value={NombreApellido}
+                      onChange={handleChangeNombreApellido}
+                    />
+                    {renderErrorMessage(errors.nombreApellido)}
+                    <small className="form-text text-muted">
+                      Ingrese un{" "}
+                      {TipoDocumento === "NIT"
+                        ? "nombre de la empresa"
+                        : "nombre y apellido"}{" "}
+                      válido.
+                    </small>
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="contactoProveedor">Contacto:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.contacto ? "is-invalid" : ""
+                      }`}
+                      id="contactoProveedor"
+                      placeholder="Ingrese el contacto"
+                      value={Contacto}
+                      onChange={handleChangeContacto}
+                      disabled={
+                        TipoDocumento === "CC" || TipoDocumento === "CE"
+                      }
+                    />
+                    {renderErrorMessage(errors.contacto)}
+                    <small className="form-text text-muted">
+                      Ingrese{" "}
+                      {TipoDocumento === "NIT"
+                        ? "nombre y apellido"
+                        : "un contacto"}{" "}
+                      válido.
+                    </small>
+                  </div>
                 </div>
-
-                <div className="form-group">
-                  <label htmlFor="nroDocumentoProveedor">
-                    Número de Documento:
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.nroDocumento ? "is-invalid" : ""
-                    }`}
-                    id="nroDocumentoProveedor"
-                    placeholder="Ingrese el número de documento"
-                    required
-                    value={NroDocumento}
-                    onChange={handleChangeNroDocumento}
-                    disabled={operation === 2}
-                  />
-                  {renderErrorMessage(errors.nroDocumento)}
-                  <small className="form-text text-muted">
-                    Ingrese un documento válido (entre 6 y 10 dígitos
-                    numéricos).
-                  </small>
+                <div className="form-row">
+                  <div className="form-group col-md-6">
+                    <label htmlFor="telefonoProveedor">Teléfono:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.telefono ? "is-invalid" : ""
+                      }`}
+                      id="telefonoProveedor"
+                      placeholder="Ingrese el teléfono"
+                      required
+                      value={Telefono}
+                      onChange={handleChangeTelefono}
+                    />
+                    {renderErrorMessage(errors.telefono)}
+                    <small className="form-text text-muted">
+                      Ingrese un número de teléfono válido (10 dígitos).
+                    </small>
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="direccionCliente">Dirección:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.direccion ? "is-invalid" : ""
+                      }`}
+                      id="direccionCliente"
+                      placeholder="Ingrese la dirección"
+                      required
+                      value={Direccion}
+                      onChange={handleChangeDireccion}
+                    />
+                    {renderErrorMessage(errors.direccion)}
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="nombreProveedor">
-                    {NombreApellidoLabel}:
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.nombreApellido ? "is-invalid" : ""
-                    }`}
-                    id="nombreProveedor"
-                    placeholder={`Ingrese ${NombreApellidoLabel.toLowerCase()}`}
-                    required
-                    value={NombreApellido}
-                    onChange={handleChangeNombreApellido}
-                  />
-                  {renderErrorMessage(errors.nombreApellido)}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="contactoProveedor">Contacto:</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.contacto ? "is-invalid" : ""
-                    }`}
-                    id="contactoProveedor"
-                    placeholder="Ingrese el contacto"
-                    value={Contacto}
-                    onChange={handleChangeContacto}
-                    disabled={TipoDocumento === "CC" || TipoDocumento === "CE"} // Deshabilitar solo si el tipo de documento es "CC" o "CE"
-                  />
-                  {renderErrorMessage(errors.contacto)}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="telefonoProveedor">Teléfono:</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.telefono ? "is-invalid" : ""
-                    }`}
-                    id="telefonoProveedor"
-                    placeholder="Ingrese el teléfono"
-                    required
-                    value={Telefono}
-                    onChange={handleChangeTelefono}
-                  />
-                  {renderErrorMessage(errors.telefono)}
-                  <small className="form-text text-muted">
-                    Ingrese un número de teléfono válido (10 dígitos).
-                  </small>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="direccionProveedor">Dirección:</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.direccion ? "is-invalid" : ""
-                    }`}
-                    id="direccionProveedor"
-                    placeholder="Ingrese la dirección"
-                    required
-                    value={Direccion}
-                    onChange={handleChangeDireccion}
-                  />
-                  {renderErrorMessage(errors.direccion)}
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="correoProveedor">Correo:</label>
-                  <input
-                    type="email"
-                    className={`form-control ${
-                      errors.correo ? "is-invalid" : ""
-                    }`}
-                    id="correoProveedor"
-                    placeholder="Ingrese el correo"
-                    required
-                    value={Correo}
-                    onChange={handleChangeCorreo}
-                  />
-                  {renderErrorMessage(errors.correo)}
+                <div className="form-row">
+                  <div className="form-group col-md-12">
+                    <label htmlFor="correoProveedor">Correo Electrónico:</label>
+                    <input
+                      type="email"
+                      className={`form-control ${
+                        errors.correo ? "is-invalid" : ""
+                      }`}
+                      id="correoProveedor"
+                      placeholder="Ingrese el correo Electrónico"
+                      required
+                      value={Correo}
+                      onChange={handleChangeCorreo}
+                    />
+                    {renderErrorMessage(errors.correo)}
+                  </div>
                 </div>
               </form>
             </div>
@@ -614,6 +699,10 @@ export const Proveedores = () => {
             <h6 className="m-0 font-weight-bold text-primary">Proveedores</h6>
           </div>
           <div className="card-body">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -629,12 +718,13 @@ export const Proveedores = () => {
                     <th>Contacto</th>
                     <th>Teléfono</th>
                     <th>Dirección</th>
-                    <th>Correo</th>
+                    <th>Correo Electrónico</th>
+                    <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {Proveedores.map((proveedor) => (
+                  {currentProveedores.map((proveedor) => (
                     <tr key={proveedor.NroDocumento}>
                       <td>{proveedor.TipoDocumento}</td>
                       <td>{proveedor.NroDocumento}</td>
@@ -644,23 +734,38 @@ export const Proveedores = () => {
                       <td>{proveedor.Direccion}</td>
                       <td>{proveedor.Correo}</td>
                       <td>
+                        <label className="switch">
+                          <input
+                            type="checkbox"
+                            checked={proveedor.Estado === "Activo"}
+                            onChange={() =>
+                              cambiarEstadoProveedor(proveedor.IdProveedor)
+                            }
+                            className={
+                              proveedor.Estado === "Activo"
+                                ? "switch-green"
+                                : "switch-red"
+                            }
+                          />
+                          <span className="slider round"></span>
+                        </label>
+                      </td>
+                      <td>
                         <div
                           className="btn-group"
                           role="group"
                           aria-label="Acciones"
                         >
-                          {/* Botón de actualizar */}
                           <button
                             className="btn btn-warning btn-sm mr-2"
                             title="Actualizar"
                             data-toggle="modal"
                             data-target="#modalProveedor"
                             onClick={() => openModal(2, proveedor)}
-                            disabled={proveedor.Estado != "Activo"}
+                            disabled={proveedor.Estado !== "Activo"}
                           >
                             <i className="fas fa-sync-alt"></i>
                           </button>
-                          {/* Botón de eliminar */}
                           <button
                             className="btn btn-danger btn-sm mr-2"
                             onClick={() =>
@@ -669,22 +774,9 @@ export const Proveedores = () => {
                                 proveedor.NombreApellido
                               )
                             }
-                            disabled={proveedor.Estado != "Activo"}
+                            disabled={proveedor.Estado !== "Activo"}
                           >
                             <i className="fas fa-trash-alt"></i>
-                          </button>
-                          {/* Botón de cambio de estado */}
-                          <button
-                            className={`btn btn-${
-                              proveedor.Estado === "Activo"
-                                ? "success"
-                                : "danger"
-                            } btn-sm`}
-                            onClick={() =>
-                              cambiarEstadoProveedor(proveedor.IdProveedor)
-                            }
-                          >
-                            {proveedor.Estado}
                           </button>
                         </div>
                       </td>
@@ -693,6 +785,11 @@ export const Proveedores = () => {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
         {/* Fin tabla proveedores */}

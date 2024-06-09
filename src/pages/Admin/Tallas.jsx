@@ -2,7 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-// import { show_alerta } from "../../assets/js/functions";
+import Pagination from "../../assets/js/Pagination";
+import SearchBar from "../../assets/js/SearchBar";
 
 export const Tallas = () => {
   let url = "http://localhost:3000/api/tallas";
@@ -12,14 +13,18 @@ export const Tallas = () => {
   const [Talla, setTalla] = useState([]);
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     getTallas();
   }, []);
 
-  const handleChangeTalla = (e) =>{
+  const handleChangeTalla = (e) => {
     setTalla(e.target.value.toUpperCase());
-  }
+  };
 
   const getTallas = async () => {
     const respuesta = await axios.get(url);
@@ -145,16 +150,31 @@ export const Tallas = () => {
   const deletetalla = (IdTalla, Talla) => {
     const MySwal = withReactContent(Swal);
     MySwal.fire({
-      title: "¿Seguro de eliminar la talla  " + Talla + " ?",
+      title: `¿Seguro de eliminar la talla ${Talla}?`,
       icon: "question",
       text: "No se podrá dar marcha atrás",
       showCancelButton: true,
-      confirmButtonText: "Si, eliminar",
+      confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        setIdTalla(IdTalla);
-        enviarSolicitud("DELETE", { IdTalla: IdTalla });
+        enviarSolicitud("DELETE", { IdTalla: IdTalla })
+          .then(() => {
+            // Calcular el índice de la talla eliminada en la lista filtrada (si es necesario)
+            const index = filteredTallass.findIndex(
+              (talla) => talla.id === IdTalla
+            );
+
+            // Determinar la página en la que debería estar la talla después de la eliminación
+            const newPage =
+              Math.ceil((filteredTallass.length - 1) / itemsPerPage) || 1;
+
+            // Establecer la nueva página como la página actual
+            setCurrentPage(newPage);
+          })
+          .catch(() => {
+            show_alerta("Hubo un error al eliminar la talla", "error");
+          });
       } else {
         show_alerta("La talla NO fue eliminada", "info");
       }
@@ -162,43 +182,57 @@ export const Tallas = () => {
   };
 
   const cambiarEstadoTalla = async (IdTalla) => {
-    console.log(IdTalla);
     try {
       const tallaActual = Tallas.find((talla) => talla.IdTalla === IdTalla);
 
       const nuevoEstado =
         tallaActual.Estado === "Activo" ? "Inactivo" : "Activo";
-      console.log(nuevoEstado);
 
-      const parametrosTalla = {
-        IdTalla,
-        Talla: tallaActual.Talla,
-        Estado: nuevoEstado,
-      };
+      const MySwal = withReactContent(Swal);
+      MySwal.fire({
+        title: `¿Seguro de cambiar el estado de la talla ${tallaActual.Talla}?`,
+        icon: "question",
+        text: `El estado actual de la talla es: ${tallaActual.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        showCancelButton: true,
+        confirmButtonText: "Sí, cambiar estado",
+        cancelButtonText: "Cancelar",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const parametrosTalla = {
+            IdTalla,
+            Talla: tallaActual.Talla,
+            Estado: nuevoEstado,
+          };
 
-      const response = await axios.put(`${url}/${IdTalla}`, parametrosTalla);
+          const response = await axios.put(
+            `${url}/${IdTalla}`,
+            parametrosTalla
+          );
 
-      if (response.status === 200) {
-        setTallas((prevTalla) =>
-          prevTalla.map((talla) =>
-            talla.IdTalla === IdTalla
-              ? { ...talla, Estado: nuevoEstado }
-              : talla
-          )
-        );
+          if (response.status === 200) {
+            setTallas((prevTalla) =>
+              prevTalla.map((talla) =>
+                talla.IdTalla === IdTalla
+                  ? { ...talla, Estado: nuevoEstado }
+                  : talla
+              )
+            );
 
-        show_alerta("Estado de la talla cambiada con éxito", "success", {
-          timer: 8000
-        });
-      }
-      
+            show_alerta("Estado de la talla cambiada con éxito", "success", {
+              timer: 8000,
+            });
+          }
+        } else {
+          show_alerta("No se ha cambiado el estado de la talla", "info");
+        }
+      });
     } catch (error) {
       console.error("Error updating state:", error);
       show_alerta("Error cambiando el estado de la talla", "error");
     }
   };
 
-  // Configuracion mensaje de alerta 
+  // Configuracion mensaje de alerta
   const show_alerta = (message, type) => {
     const MySwal = withReactContent(Swal);
     MySwal.fire({
@@ -211,13 +245,31 @@ export const Tallas = () => {
         // Selecciona la barra de progreso y ajusta su estilo
         const progressBar = MySwal.getTimerProgressBar();
         if (progressBar) {
-          progressBar.style.backgroundColor = 'black';
-          progressBar.style.height = '3.5px';
+          progressBar.style.backgroundColor = "black";
+          progressBar.style.height = "6px";
         }
-      }
+      },
     });
   };
 
+  const handleSearchTermChange = (newSearchTerm) => {
+    setSearchTerm(newSearchTerm);
+    setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
+  };
+
+  // Filtrar las tallas según el término de búsqueda
+  const filteredTallass = Tallas.filter((talla) =>
+    Object.values(talla).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Aplicar paginación a las tallas filtrados
+  const totalPages = Math.ceil(filteredTallass.length / itemsPerPage);
+  const currenTallas = filteredTallass.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <>
@@ -230,6 +282,8 @@ export const Tallas = () => {
         role="dialog"
         aria-labelledby="modalAñadirTallaLabel"
         aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
       >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
@@ -315,6 +369,10 @@ export const Tallas = () => {
             <h6 className="m-0 font-weight-bold text-primary">Tallas</h6>
           </div>
           <div className="card-body">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -326,16 +384,32 @@ export const Tallas = () => {
                   <tr>
                     <th>#</th>
                     <th>Talla</th>
+                    <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {Tallas.map((talla, i) => (
+                  {currenTallas.map((talla, i) => (
                     <tr key={talla.IdTalla}>
                       <td>{i + 1}</td>
 
                       <td>{talla.Talla}</td>
+                      <td>
+                        <label className="switch">
+                          <input
+                            type="checkbox"
+                            checked={talla.Estado === "Activo"}
+                            onChange={() => cambiarEstadoTalla(talla.IdTalla)}
+                            className={
+                              talla.Estado === "Activo"
+                                ? "switch-green"
+                                : "switch-red"
+                            }
+                          />
+                          <span className="slider round"></span>
+                        </label>
+                      </td>
 
                       <td>
                         <div
@@ -366,15 +440,6 @@ export const Tallas = () => {
                           >
                             <i className="fas fa-solid fa-trash"></i>
                           </button>
-                          {/* Botón de cambio de estado */}
-                          <button
-                            className={`btn btn-${
-                              talla.Estado === "Activo" ? "success" : "danger"
-                            } btn-sm`}
-                            onClick={() => cambiarEstadoTalla(talla.IdTalla)}
-                          >
-                            {talla.Estado}
-                          </button>
                         </div>
                       </td>
                     </tr>
@@ -382,6 +447,11 @@ export const Tallas = () => {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
         {/* Fin tabla tallas */}

@@ -54,6 +54,14 @@ export const SideBar = ({isActive}) => {
           </Link>
         </li>
 
+        {/* <!-- INSUMOS --> */}
+          <li className= {`nav-item ${location.pathname === '/admin/Insumos' ? 'active':'' }`}>
+            <Link to={"/admin/Insumos"} className="nav-link">
+            <i className="fas fa-solid fa-box-open"></i>
+            <span>Insumos</span>
+          </Link>
+        </li>
+
         {/* <!-- COLORES --> */}
         <li className= {`nav-item ${location.pathname === '/admin/Colores' ? 'active':'' }`}>
           <Link to={"/admin/Colores"} className="nav-link">

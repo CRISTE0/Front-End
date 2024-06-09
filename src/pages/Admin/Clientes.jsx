@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-// import { show_alerta } from "../../assets/js/functions";
+import Pagination from "../../assets/js/Pagination";
+import SearchBar from "../../assets/js/SearchBar";
 
 export const Clientes = () => {
   const url = "http://localhost:3000/api/clientes";
@@ -23,6 +24,10 @@ export const Clientes = () => {
     direccion: "",
     correo: "",
   });
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     getClientes();
@@ -76,14 +81,17 @@ export const Clientes = () => {
   };
 
   const guardarCliente = async () => {
+    const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+    const cleanedDireccion = Direccion.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+
     if (operation === 1) {
       // Crear Cliente
       await enviarSolicitud("POST", {
         TipoDocumento,
         NroDocumento,
-        NombreApellido,
+        NombreApellido: cleanedNombreApellido,
         Telefono,
-        Direccion,
+        Direccion: cleanedDireccion,
         Correo,
         Estado: "Activo",
       });
@@ -93,9 +101,9 @@ export const Clientes = () => {
         IdCliente,
         TipoDocumento,
         NroDocumento,
-        NombreApellido,
+        NombreApellido: cleanedNombreApellido,
         Telefono,
-        Direccion,
+        Direccion: cleanedDireccion,
         Correo,
       });
     }
@@ -115,13 +123,12 @@ export const Clientes = () => {
     return "";
   };
 
-  // Función para validar el nombre y apellido
   const validateNombreApellido = (value) => {
     if (!value) {
       return "Escribe el nombre y apellido";
     }
-    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+$/.test(value)) {
-      return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ'";
+    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value)) {
+      return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
     }
     return "";
   };
@@ -148,6 +155,9 @@ export const Clientes = () => {
     if (!/^[a-zA-Z0-9#-\s]*$/.test(value)) {
       return "La dirección solo puede contener letras, números, # y -";
     }
+    // if (!/^[a-zA-Z0-9#-\s]*$/.test(value)) {
+    //   return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
+    // }
     return "";
   };
 
@@ -185,7 +195,7 @@ export const Clientes = () => {
   };
 
   const handleChangeNombreApellido = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setNombreApellido(value);
 
     // Validar el nombre y apellido
@@ -211,10 +221,11 @@ export const Clientes = () => {
     }));
   };
 
-  // Función para manejar cambios en la dirección
   const handleChangeDireccion = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setDireccion(value);
+
+    // Validar la dirección
     const errorMessage = validateDireccion(value);
     setErrors((prevState) => ({
       ...prevState,
@@ -245,10 +256,10 @@ export const Clientes = () => {
         // Selecciona la barra de progreso y ajusta su estilo
         const progressBar = MySwal.getTimerProgressBar();
         if (progressBar) {
-          progressBar.style.backgroundColor = 'black';
-          progressBar.style.height = '6px';
+          progressBar.style.backgroundColor = "black";
+          progressBar.style.height = "6px";
         }
-      }
+      },
     });
   };
 
@@ -260,8 +271,11 @@ export const Clientes = () => {
   };
 
   const enviarSolicitud = async (metodo, parametros) => {
-    let urlRequest = metodo === "PUT" || metodo === "DELETE" ? `${url}/${parametros.IdCliente}` : url;
-  
+    let urlRequest =
+      metodo === "PUT" || metodo === "DELETE"
+        ? `${url}/${parametros.IdCliente}`
+        : url;
+
     try {
       let respuesta;
       if (metodo === "POST") {
@@ -271,7 +285,7 @@ export const Clientes = () => {
       } else if (metodo === "DELETE") {
         respuesta = await axios.delete(urlRequest);
       }
-  
+
       const msj = respuesta.data.message;
       show_alerta(msj, "success");
       document.getElementById("btnCerrarCliente").click();
@@ -279,7 +293,9 @@ export const Clientes = () => {
       if (metodo === "POST") {
         show_alerta("Cliente creado con éxito", "success", { timer: 2000 });
       } else if (metodo === "PUT") {
-        show_alerta("Cliente actualizado con éxito", "success", { timer: 2000 });
+        show_alerta("Cliente actualizado con éxito", "success", {
+          timer: 2000,
+        });
       } else if (metodo === "DELETE") {
         show_alerta("Cliente eliminado con éxito", "success", { timer: 2000 });
       }
@@ -294,8 +310,6 @@ export const Clientes = () => {
       console.log(error);
     }
   };
-  
-  
 
   const deleteCliente = (IdCliente, NombreCliente) => {
     const MySwal = withReactContent(Swal);
@@ -308,8 +322,19 @@ export const Clientes = () => {
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        setIdCliente(IdCliente);
-        enviarSolicitud("DELETE", { IdCliente: IdCliente });
+        enviarSolicitud("DELETE", { IdCliente: IdCliente }).then(() => {
+          // Calcular el índice del cliente eliminado en la lista filtrada
+          const index = filteredClientes.findIndex(
+            (cliente) => cliente.IdCliente === IdCliente
+          );
+
+          // Determinar la página en la que debería estar el cliente después de la eliminación
+          const newPage =
+            Math.ceil((filteredClientes.length - 1) / itemsPerPage) || 1;
+
+          // Establecer la nueva página como la página actual
+          setCurrentPage(newPage);
+        });
       } else {
         show_alerta("El cliente NO fue eliminado", "info");
       }
@@ -322,26 +347,58 @@ export const Clientes = () => {
         (cliente) => cliente.IdCliente === IdCliente
       );
       const nuevoEstado = cliente.Estado === "Activo" ? "Inactivo" : "Activo";
-  
-      await axios.put(`${url}/${IdCliente}`, { Estado: nuevoEstado });
-  
-      setClientes((prevClientes) =>
-        prevClientes.map((cliente) =>
-          cliente.IdCliente === IdCliente
-            ? { ...cliente, Estado: nuevoEstado }
-            : cliente
-        )
-      );
-  
-      show_alerta("Estado del cliente cambiado con éxito", "success", {
-        timer: 2000,
+
+      const MySwal = withReactContent(Swal);
+      MySwal.fire({
+        title: `¿Seguro de cambiar el estado del cliente ${cliente.NombreApellido}?`,
+        icon: "question",
+        text: `El estado actual del cliente es: ${cliente.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        showCancelButton: true,
+        confirmButtonText: "Sí, cambiar estado",
+        cancelButtonText: "Cancelar",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          await axios.put(`${url}/${IdCliente}`, { Estado: nuevoEstado });
+
+          setClientes((prevClientes) =>
+            prevClientes.map((cliente) =>
+              cliente.IdCliente === IdCliente
+                ? { ...cliente, Estado: nuevoEstado }
+                : cliente
+            )
+          );
+
+          show_alerta("Estado del cliente cambiado con éxito", "success", {
+            timer: 2000,
+          });
+        } else {
+          show_alerta("No se ha cambiado el estado del cliente", "info");
+        }
       });
     } catch (error) {
       console.error("Error updating state:", error);
       show_alerta("Error cambiando el estado del cliente", "error");
     }
   };
-  
+
+  const handleSearchTermChange = (newSearchTerm) => {
+    setSearchTerm(newSearchTerm);
+    setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
+  };
+
+  // Filtrar los clientes según el término de búsqueda
+  const filteredClientes = Clientes.filter((cliente) =>
+    Object.values(cliente).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Aplicar paginación a los clientes filtrados
+  const totalPages = Math.ceil(filteredClientes.length / itemsPerPage);
+  const currentClientes = filteredClientes.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <>
@@ -352,8 +409,10 @@ export const Clientes = () => {
         role="dialog"
         aria-labelledby="modalClienteLabel"
         aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
       >
-        <div className="modal-dialog" role="document">
+        <div className="modal-dialog modal-lg" role="document">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="modalClienteLabel">
@@ -370,113 +429,113 @@ export const Clientes = () => {
             </div>
             <div className="modal-body">
               <form id="crearClienteForm">
-              <div className="form-group">
-                  <label htmlFor="tipoDocumentoCliente">
-                    Tipo de Documento:
-                  </label>
-                  <select
-                    className="form-control"
-                    id="tipoDocumentoCliente"
-                    value={TipoDocumento}
-                    onChange={(e) => handleChangeTipoDocumento(e)} // Llama a la función handleChangeTipoDocumento
-                    disabled={operation === 2}
-                    required
-                  >
-                    <option value="">Seleccione un tipo de documento</option>
-                    <option value="CC">Cédula</option>
-                    <option value="CE">Cédula de Extranjería</option>
-                  </select>
+                <div className="form-row">
+                  <div className="form-group col-md-6">
+                    <label htmlFor="tipoDocumentoCliente">
+                      Tipo de Documento:
+                    </label>
+                    <select
+                      className="form-control"
+                      id="tipoDocumentoCliente"
+                      value={TipoDocumento}
+                      onChange={(e) => handleChangeTipoDocumento(e)}
+                      required
+                    >
+                      <option value="">Seleccione un tipo de documento</option>
+                      <option value="CC">Cédula</option>
+                      <option value="CE">Cédula de Extranjería</option>
+                    </select>
 
-                  {TipoDocumento === "" && (
-                    <p className="text-danger">
-                      Por favor, seleccione un tipo de documento.
-                    </p>
-                  )}
-                </div>
-                <div className="form-group">
-                  <label htmlFor="nroDocumentoCliente">
-                    Número de Documento:
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.nroDocumento ? "is-invalid" : ""
-                    }`}
-                    id="nroDocumentoCliente"
-                    placeholder="Ingrese el número de documento"
-                    required
-                    value={NroDocumento}
-                    onChange={handleChangeNroDocumento}
-                    disabled={operation === 2}
-                  />
-                  {renderErrorMessage(errors.nroDocumento)}
-                  <small className="form-text text-muted">
-                    Ingrese un documento válido (entre 6 y 10 dígitos
-                    numéricos).
-                  </small>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="nombreCliente">Nombre del Cliente:</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.nombreApellido ? "is-invalid" : ""
-                    }`}
-                    id="nombreCliente"
-                    placeholder="Ingrese el nombre del Cliente"
-                    required
-                    value={NombreApellido}
-                    onChange={handleChangeNombreApellido}
-                  />
-                  {renderErrorMessage(errors.nombreApellido)}
-                </div>
-                <div className="form-group">
-                  <label htmlFor="telefonoCliente">Teléfono:</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.telefono ? "is-invalid" : ""
-                    }`}
-                    id="telefonoCliente"
-                    placeholder="Ingrese el teléfono"
-                    required
-                    value={Telefono}
-                    onChange={handleChangeTelefono}
-                  />
-                  {renderErrorMessage(errors.telefono)}
-                  <small className="form-text text-muted">
-                    Ingrese un número de teléfono válido (10 dígitos).
-                  </small>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="direccionCliente">Dirección:</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.direccion ? "is-invalid" : ""
-                    }`}
-                    id="direccionCliente"
-                    placeholder="Ingrese la dirección"
-                    required
-                    value={Direccion}
-                    onChange={handleChangeDireccion}
-                  />
-                  {renderErrorMessage(errors.direccion)}
-                </div>
-                <div className="form-group">
-                  <label htmlFor="correoCliente">Correo Electrónico:</label>
-                  <input
-                    type="email"
-                    className={`form-control ${
-                      errors.correo ? "is-invalid" : ""
-                    }`}
-                    id="correoCliente"
-                    placeholder="Ingrese el correo electrónico"
-                    required
-                    value={Correo}
-                    onChange={handleChangeCorreo}
-                  />
-                  {renderErrorMessage(errors.correo)}
+                    {TipoDocumento === "" && (
+                      <p className="text-danger">
+                        Por favor, seleccione un tipo de documento.
+                      </p>
+                    )}
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="nroDocumentoCliente">
+                      Número de Documento:
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.nroDocumento ? "is-invalid" : ""
+                      }`}
+                      id="nroDocumentoCliente"
+                      placeholder="Ingrese el número de documento"
+                      required
+                      value={NroDocumento}
+                      onChange={handleChangeNroDocumento}
+                    />
+                    {renderErrorMessage(errors.nroDocumento)}
+                    <small className="form-text text-muted">
+                      Ingrese un documento válido (entre 6 y 10 dígitos
+                      numéricos).
+                    </small>
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="nombreCliente">Nombre del Cliente:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.nombreApellido ? "is-invalid" : ""
+                      }`}
+                      id="nombreCliente"
+                      placeholder="Ingrese el nombre del Cliente"
+                      required
+                      value={NombreApellido}
+                      onChange={handleChangeNombreApellido}
+                    />
+                    {renderErrorMessage(errors.nombreApellido)}
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="telefonoCliente">Teléfono:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.telefono ? "is-invalid" : ""
+                      }`}
+                      id="telefonoCliente"
+                      placeholder="Ingrese el teléfono"
+                      required
+                      value={Telefono}
+                      onChange={handleChangeTelefono}
+                    />
+                    {renderErrorMessage(errors.telefono)}
+                    <small className="form-text text-muted">
+                      Ingrese un número de teléfono válido (10 dígitos).
+                    </small>
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="direccionCliente">Dirección:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.direccion ? "is-invalid" : ""
+                      }`}
+                      id="direccionCliente"
+                      placeholder="Ingrese la dirección"
+                      required
+                      value={Direccion}
+                      onChange={handleChangeDireccion}
+                    />
+                    {renderErrorMessage(errors.direccion)}
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="correoCliente">Correo Electrónico:</label>
+                    <input
+                      type="email"
+                      className={`form-control ${
+                        errors.correo ? "is-invalid" : ""
+                      }`}
+                      id="correoCliente"
+                      placeholder="Ingrese el correo electrónico"
+                      required
+                      value={Correo}
+                      onChange={handleChangeCorreo}
+                    />
+                    {renderErrorMessage(errors.correo)}
+                  </div>
                 </div>
               </form>
             </div>
@@ -526,6 +585,10 @@ export const Clientes = () => {
             <h6 className="m-0 font-weight-bold text-primary">Clientes</h6>
           </div>
           <div className="card-body">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -541,11 +604,12 @@ export const Clientes = () => {
                     <th>Teléfono</th>
                     <th>Dirección</th>
                     <th>Correo Electrónico</th>
+                    <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {Clientes.map((cliente) => (
+                  {currentClientes.map((cliente) => (
                     <tr key={cliente.NroDocumento}>
                       <td>{cliente.TipoDocumento}</td>
                       <td>{cliente.NroDocumento}</td>
@@ -553,6 +617,23 @@ export const Clientes = () => {
                       <td>{cliente.Telefono}</td>
                       <td>{cliente.Direccion}</td>
                       <td>{cliente.Correo}</td>
+                      <td>
+                        <label className="switch">
+                          <input
+                            type="checkbox"
+                            checked={cliente.Estado === "Activo"}
+                            onChange={() =>
+                              cambiarEstadoCliente(cliente.IdCliente)
+                            }
+                            className={
+                              cliente.Estado === "Activo"
+                                ? "switch-green"
+                                : "switch-red"
+                            }
+                          />
+                          <span className="slider round"></span>
+                        </label>
+                      </td>
                       <td>
                         <div
                           className="btn-group"
@@ -569,27 +650,17 @@ export const Clientes = () => {
                           >
                             <i className="fas fa-sync-alt"></i>
                           </button>
-                            <button
-                              className="btn btn-danger btn-sm mr-2"
-                              onClick={() =>
-                                deleteCliente(
-                                  cliente.IdCliente,
-                                  cliente.NombreApellido
-                                )
-                              }
-                            disabled={cliente.Estado != "Activo"}
-                            >
-                              <i className="fas fa-trash-alt"></i>
-                            </button>
                           <button
-                            className={`btn btn-${
-                              cliente.Estado === "Activo" ? "success" : "danger"
-                            } btn-sm`}
+                            className="btn btn-danger btn-sm mr-2"
                             onClick={() =>
-                              cambiarEstadoCliente(cliente.IdCliente)
+                              deleteCliente(
+                                cliente.IdCliente,
+                                cliente.NombreApellido
+                              )
                             }
+                            disabled={cliente.Estado != "Activo"}
                           >
-                            {cliente.Estado}
+                            <i className="fas fa-trash-alt"></i>
                           </button>
                         </div>
                       </td>
@@ -598,6 +669,11 @@ export const Clientes = () => {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
         {/* Fin tabla de clientes */}

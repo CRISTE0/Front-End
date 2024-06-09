@@ -3,6 +3,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { ChromePicker } from "react-color";
+import Pagination from "../../assets/js/Pagination";
+import SearchBar from "../../assets/js/SearchBar";
 
 export const Colores = () => {
   const url = "http://localhost:3000/api/colores";
@@ -13,6 +15,10 @@ export const Colores = () => {
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [errors, setErrors] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     getColores();
@@ -87,10 +93,15 @@ export const Colores = () => {
     if (!errorMessage) {
       let parametros, metodo;
       if (operation === 1) {
-        parametros = { Color, Referencia, Estado: 'Activo' };
+        parametros = { Color: Color.trim(), Referencia, Estado: "Activo" };
         metodo = "POST";
       } else {
-        parametros = { IdColor, Color, Referencia, Estado: 'Activo' };
+        parametros = {
+          IdColor,
+          Color: Color.trim(),
+          Referencia,
+          Estado: "Activo",
+        };
         metodo = "PUT";
       }
       enviarSolicitud(metodo, parametros);
@@ -133,7 +144,21 @@ export const Colores = () => {
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        enviarSolicitud("DELETE", { IdColor: id });
+        enviarSolicitud("DELETE", { IdColor: id })
+          .then(() => {
+            // Calcular el índice del color eliminado en la lista filtrada (si es necesario)
+            const index = filteredColores.findIndex((color) => color.id === id);
+
+            // Determinar la página en la que debería estar el color después de la eliminación
+            const newPage =
+              Math.ceil((filteredColores.length - 1) / itemsPerPage) || 1;
+
+            // Establecer la nueva página como la página actual
+            setCurrentPage(newPage);
+          })
+          .catch(() => {
+            show_alerta("Hubo un error al eliminar el color", "error");
+          });
       } else {
         show_alerta("El color NO fue eliminado", "info");
       }
@@ -143,28 +168,46 @@ export const Colores = () => {
   const cambiarEstadoColor = async (IdColor) => {
     try {
       const colorActual = Colores.find((color) => color.IdColor === IdColor);
-      const nuevoEstado = colorActual.Estado === "Activo" ? "Inactivo" : "Activo";
+      const nuevoEstado =
+        colorActual.Estado === "Activo" ? "Inactivo" : "Activo";
 
-      const parametros = {
-        IdColor,
-        Estado: nuevoEstado,
-        Color: colorActual.Color,
-        Referencia: colorActual.Referencia,
-      };
+      const MySwal = withReactContent(Swal);
+      MySwal.fire({
+        title: `¿Seguro de cambiar el estado del color ${colorActual.Color}?`,
+        icon: "question",
+        text: `El estado actual del color es: ${colorActual.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        showCancelButton: true,
+        confirmButtonText: "Sí, cambiar estado",
+        cancelButtonText: "Cancelar",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const parametros = {
+            IdColor,
+            Estado: nuevoEstado,
+            Color: colorActual.Color,
+            Referencia: colorActual.Referencia,
+          };
 
-      const response = await axios.put(`${url}/${IdColor}`, parametros);
-      if (response.status === 200) {
-        setColores((prevColores) =>
-          prevColores.map((color) =>
-            color.IdColor === IdColor ? { ...color, Estado: nuevoEstado } : color
-          )
-        );
-        show_alerta("El estado del color ha sido actualizado correctamente", "success");
-      }
+          const response = await axios.put(`${url}/${IdColor}`, parametros);
+          if (response.status === 200) {
+            setColores((prevColores) =>
+              prevColores.map((color) =>
+                color.IdColor === IdColor
+                  ? { ...color, Estado: nuevoEstado }
+                  : color
+              )
+            );
+
+            const message = `Estado del color cambiado con éxito`;
+            show_alerta(message, "success");
+          }
+        } else {
+          show_alerta("No se ha cambiado el estado del color", "info");
+        }
+      });
     } catch (error) {
-      if (error.response) {
-        show_alerta("Error actualizando el estado del color", "error");
-      }
+      console.error("Error updating state:", error);
+      show_alerta("Error cambiando el estado del color", "error");
     }
   };
 
@@ -180,12 +223,31 @@ export const Colores = () => {
         // Selecciona la barra de progreso y ajusta su estilo
         const progressBar = MySwal.getTimerProgressBar();
         if (progressBar) {
-          progressBar.style.backgroundColor = 'black';
-          progressBar.style.height = '6px';
+          progressBar.style.backgroundColor = "black";
+          progressBar.style.height = "6px";
         }
-      }
+      },
     });
   };
+
+  const handleSearchTermChange = (newSearchTerm) => {
+    setSearchTerm(newSearchTerm);
+    setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
+  };
+
+  // Filtrar los proveedores según el término de búsqueda
+  const filteredColores = Colores.filter((color) =>
+    Object.values(color).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // Aplicar paginación a los proveedores filtrados
+  const totalPages = Math.ceil(filteredColores.length / itemsPerPage);
+  const currentColores = filteredColores.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <>
@@ -196,6 +258,8 @@ export const Colores = () => {
         role="dialog"
         aria-labelledby="ModalAñadirColorLabel"
         aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
       >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
@@ -275,6 +339,10 @@ export const Colores = () => {
             <h6 className="m-0 font-weight-bold text-primary">Colores</h6>
           </div>
           <div className="card-body">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -285,11 +353,12 @@ export const Colores = () => {
                   <tr>
                     <th>Color</th>
                     <th>Referencia</th>
+                    <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {Colores.map((color) => (
+                  {currentColores.map((color) => (
                     <tr key={color.IdColor}>
                       <td>{color.Color}</td>
                       <td>
@@ -302,6 +371,21 @@ export const Colores = () => {
                             marginLeft: "5px",
                           }}
                         ></div>
+                      </td>
+                      <td>
+                        <label className="switch">
+                          <input
+                            type="checkbox"
+                            checked={color.Estado === "Activo"}
+                            onChange={() => cambiarEstadoColor(color.IdColor)}
+                            className={
+                              color.Estado === "Activo"
+                                ? "switch-green"
+                                : "switch-red"
+                            }
+                          />
+                          <span className="slider round"></span>
+                        </label>
                       </td>
                       <td>
                         <div className="d-flex">
@@ -330,14 +414,6 @@ export const Colores = () => {
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                          <button
-                            className={`btn btn-${
-                              color.Estado === "Activo" ? "success" : "danger"
-                            } btn-sm`}
-                            onClick={() => cambiarEstadoColor(color.IdColor)}
-                          >
-                            {color.Estado}
-                          </button>
                         </div>
                       </td>
                     </tr>
@@ -345,6 +421,11 @@ export const Colores = () => {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
       </div>
