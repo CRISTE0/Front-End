@@ -46,7 +46,7 @@ button {
 
 #section-clientes {
   border-radius: 50%;
-  width: 100px; /* Ajusta el tamaño de la imagen circular según tus necesidades */
+  width: 100px; /* Ajusta el tamaño de la imagen   circular según tus necesidades */
   height: 100px; /* Ajusta el tamaño de la imagen circular según tus necesidades */
   object-fit: cover;
 }

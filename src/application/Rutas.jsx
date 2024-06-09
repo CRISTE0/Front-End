@@ -18,6 +18,7 @@ import { Ventas } from "../pages/Admin/Ventas";
 import { Pedidos } from "../pages/Admin/Pedidos";
 import { Tallas } from "../pages/Admin/Tallas";
 import { Colores } from "../pages/Admin/Colores";
+import { Carrito } from "../pages/Landing/Carrito";
 
 export const Rutas = () => {
   return (
@@ -25,6 +26,7 @@ export const Rutas = () => {
       <Routes>
         <Route exat path="/" Component={()=> <LandingLayout> <Inicio /> </LandingLayout> } />
         <Route path="/Productos" Component={()=> <LandingLayout> <Productos /> </LandingLayout>  } />
+        <Route path="/Carrito" Component={()=> <LandingLayout> <Carrito /> </LandingLayout>  } />
         <Route path="/Contactenos" Component={()=> <LandingLayout> <Contactenos /> </LandingLayout> } />
         <Route path="/Diseniador" Component={()=> <LandingLayout> <Diseniador /> </LandingLayout> } />
         <Route path="/Login" Component={()=> <LandingLayout> <Login /> </LandingLayout> } />

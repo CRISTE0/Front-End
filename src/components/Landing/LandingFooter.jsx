@@ -194,15 +194,7 @@ export const LandingFooter = () => {
       </footer>
       {/* <!-- fin Footer --> */}
 
-      {/* Button trigger modal  */}
-      <button
-        type="button"
-        className="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#exampleModal"
-      >
-        Launch demo modal
-      </button>
+      
 
       {/* Modal  */}
       <div

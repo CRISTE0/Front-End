@@ -288,7 +288,7 @@ export const Tallas = () => {
           </div>
         </div>
       </div>
-      {/* Fin modal crear proveedor */}
+      {/* Fin modal crear talla */}
 
       {/* <!-- Inicio de tallas --> */}
       <div className="container-fluid">

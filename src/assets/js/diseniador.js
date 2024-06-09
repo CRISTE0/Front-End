@@ -1,7 +1,7 @@
 //Buenooo
 
 window.onload = function () {
-  let camisaDefault = "../assets/img/camiseta_blanca.png";
+  let camisaDefault = "./assets/img/camiseta_blanca.png";
   let camisaN = "../templatemo_559_zay_shop/assets/img/camiseta_negra.png";
 
   const canvas = document.getElementById("canvas");
