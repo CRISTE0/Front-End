@@ -123,11 +123,14 @@ export const Insumos = () => {
     if (!value) {
       return "Escribe la referencia";
     }
-    if (!/^[a-zA-Z0-9]+$/.test(value)) {
-      return "La referencia solo puede contener letras y números";
+    // Validar que la referencia siga el patrón TST-001
+    if (!/^[A-Z]{3}-\d{3}$/.test(value)) {
+      return "La referencia debe ser en el formato AAA-000";
     }
     return "";
   };
+  
+  
 
   // // Función para validar la cantidad
   // const validateCantidad = (value) => {
@@ -163,9 +166,9 @@ export const Insumos = () => {
   // Función para manejar cambios en el teléfono
   const handleChangeReferencia = (e) => {
     let value = e.target.value.trim();
-    // Limitar la longitud del valor ingresado a 10 caracteres
-    if (value.length > 10) {
-      value = value.slice(0, 10);
+    // Limitar la longitud del valor ingresado a 7 caracteres
+    if (value.length > 7) {
+      value = value.slice(0, 7);
     }
     setReferencia(value);
     const errorMessage = validateReferencia(value);
@@ -174,6 +177,7 @@ export const Insumos = () => {
       Referencia: errorMessage,
     }));
   };
+  
 
   // Función para manejar cambios en la dirección
   const handleChangeCantidad = (e) => {
