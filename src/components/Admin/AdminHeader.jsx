@@ -28,7 +28,7 @@ export const AdminHeader = ({ children }) => {
             {/* <!-- Main Content --> */}
             <div id="content">
               {/* <!-- Topbar --> */}
-              <nav className="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+              <nav className="navbar navbar-expand navbar-light bg-white topbar mb-1 static-top shadow">
 
                 {/* <!-- Sidebar Toggle (Topbar) --> */}
                 <button
@@ -102,12 +102,12 @@ export const AdminHeader = ({ children }) => {
                 </ul>
               </nav>
               {/* <!-- End of Topbar --> */}
+            {children}
+            {/* {<AdminFooter />} */}
             </div>
 
-            {children}
 
             {/* <!-- Footer --> */}
-            {<AdminFooter />}
             {/* <!-- End of Footer --> */}
           </div>
           {/* <!-- End of Content Wrapper --> */}

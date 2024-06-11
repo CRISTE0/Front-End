@@ -116,6 +116,9 @@ export const Usuarios = () => {
         <div className="card shadow mb-4">
           <div className="card-header py-3">
             <h6 className="m-0 font-weight-bold text-primary">Usuarios</h6>
+            lpdpppctactF1
+            quicenosofia.65@gmail.com
+            deporte
           </div>
           <div className="card-body">
             <div className="table-responsive">
@@ -133,14 +136,6 @@ export const Usuarios = () => {
                     <th>Estado</th>
                   </tr>
                 </thead>
-                <tfoot>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Correo</th>
-                    <th>Contraseña</th>
-                    <th>Estado</th>
-                  </tr>
-                </tfoot>
                 <tbody>
                   <tr>
                     <td>Alejandro</td>
