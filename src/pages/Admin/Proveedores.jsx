@@ -695,14 +695,14 @@ export const Proveedores = () => {
 
         {/* <!-- Tabla Proveedores --> */}
         <div className="card shadow mb-4">
-          <div className="card-header py-3">
+          <div className="card-header py-2">
             <h6 className="m-0 font-weight-bold text-primary">Proveedores</h6>
-          </div>
-          <div className="card-body">
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+          </div>
+          <div className="card-body">
             <div className="table-responsive">
               <table
                 className="table table-bordered"

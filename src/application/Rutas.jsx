@@ -11,7 +11,7 @@ import { Dashboard } from "../pages/Admin/Dashboard";
 import { Usuarios } from "../pages/Admin/Usuarios";
 import { Proveedores } from "../pages/Admin/Proveedores";
 import { Compras } from "../pages/Admin/Compras";
-import { ProductosA } from "../pages/Admin/Productos";
+import { Catalogo} from "../pages/Admin/Productos";
 import { Disenios } from "../pages/Admin/Disenios";
 import { Clientes } from "../pages/Admin/Clientes";
 import { Ventas } from "../pages/Admin/Ventas";
@@ -40,7 +40,7 @@ export const Rutas = () => {
         <Route path="/admin/Tallas" Component={()=> <AdminLayout> <Tallas /> </AdminLayout> } />
         <Route path="/admin/Colores" Component={()=> <AdminLayout> <Colores /> </AdminLayout> } />
         <Route path="/admin/Compras" Component={()=> <AdminLayout> <Compras /> </AdminLayout> } />
-        <Route path="/admin/Productos" Component={()=> <AdminLayout> <ProductosA /> </AdminLayout> } />
+        <Route path="/admin/Productos" Component={()=> <AdminLayout> <Catalogo /> </AdminLayout> } />
         <Route path="/admin/Disenios" Component={()=> <AdminLayout> <Disenios /> </AdminLayout> } />
         <Route path="/admin/Clientes" Component={()=> <AdminLayout> <Clientes /> </AdminLayout> } />
         <Route path="/admin/Ventas" Component={()=> <AdminLayout> <Ventas /> </AdminLayout> } />
