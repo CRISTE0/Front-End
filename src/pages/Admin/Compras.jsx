@@ -13,9 +13,7 @@ export const Compras = () => {
   const [IdProveedor, setIdProveedor] = useState("");
   const [Fecha, setFecha] = useState("");
   const [Total, setTotal] = useState("");
-  const [Detalles, setDetalles] = useState([
-    { IdInsumo: "", cantidad: "", precio: "" },
-  ]);
+  const [Detalles, setDetalles] = useState([]);
   const [Insumos, setInsumos] = useState([]);
   const [showDetalleField, setShowDetalleField] = useState(false);
   const [compraSeleccionada, setCompraSeleccionada] = useState(null);
@@ -102,6 +100,26 @@ export const Compras = () => {
     }
   };
 
+  const formatPrice = (price) => {
+    // Convertir el precio a número si es una cadena
+    const formattedPrice = typeof price === 'string' ? parseFloat(price) : price;
+  
+    // Verificar si el precio es un número válido
+    if (!isNaN(formattedPrice)) {
+      // Formatear el número con separadores de miles y coma decimal
+      const formattedNumber = formattedPrice.toLocaleString('es-ES', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+  
+      // Retornar el número con el símbolo de peso
+      return `$${formattedNumber}`;
+    }
+  
+    return `$0.00`; // Valor predeterminado si no es un número válido
+  };
+  
+
   const openModal = () => {
     setIdCompra(""); // Resetear el IdCompra al abrir el modal para indicar una nueva compra
     setIdProveedor("");
@@ -128,19 +146,51 @@ export const Compras = () => {
   const handleDetailChange = (index, e) => {
     const { name, value } = e.target;
     const updatedDetalles = [...Detalles];
-    updatedDetalles[index][name] = value;
-    setDetalles(updatedDetalles);
 
-    // Actualizar el precio en el insumo seleccionado
-    const selectedInsumoId = updatedDetalles[index].IdInsumo;
-    const selectedInsumoIndex = Insumos.findIndex(
-      (insumo) => insumo.IdInsumo === selectedInsumoId
-    );
-    if (selectedInsumoIndex !== -1) {
-      const updatedInsumos = [...Insumos];
-      updatedInsumos[selectedInsumoIndex].ValorCompra = value;
-      setInsumos(updatedInsumos);
+    if (name === "IdInsumo") {
+      const insumoDuplicado = updatedDetalles.some(
+        (detalle, detalleIndex) =>
+          detalle.IdInsumo === value && detalleIndex !== index
+      );
+      if (insumoDuplicado) {
+        show_alerta("Este insumo ya está agregado en los detalles", "error");
+        return;
+      }
     }
+
+    if (name === "cantidad" || name === "precio") {
+      const regex = /^[0-9\b]+$/;
+      if (value === "" || regex.test(value)) {
+        updatedDetalles[index][name] = value;
+      } else {
+        return;
+      }
+    } else {
+      updatedDetalles[index][name] = value;
+    }
+
+    if (name === "cantidad" || name === "precio") {
+      const cantidad = updatedDetalles[index].cantidad || 0;
+      const precio = updatedDetalles[index].precio || 0;
+      updatedDetalles[index].subtotal = cantidad * precio;
+    }
+
+    setDetalles(updatedDetalles);
+  };
+
+  const getFilteredInsumos = (index) => {
+    // Obtener los IDs de los insumos seleccionados en las otras filas de detalles
+    const insumosSeleccionados = Detalles.reduce((acc, detalle, i) => {
+      if (i !== index && detalle.IdInsumo) {
+        acc.push(detalle.IdInsumo);
+      }
+      return acc;
+    }, []);
+
+    // Filtrar los insumos disponibles excluyendo los ya seleccionados
+    return Insumos.filter(
+      (insumo) => !insumosSeleccionados.includes(insumo.IdInsumo)
+    );
   };
 
   const addDetail = () => {
@@ -149,6 +199,7 @@ export const Compras = () => {
       IdInsumo: "",
       cantidad: "",
       precio: "",
+      subtotal: 0,
     };
 
     // Crear una nueva matriz de detalles con el nuevo detalle agregado
@@ -172,6 +223,24 @@ export const Compras = () => {
     ) : null;
   };
 
+  const showDetalleAlert = (message) => {
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: message,
+      icon: "error",
+      timer: 2000,
+      showConfirmButton: false,
+      timerProgressBar: true,
+      didOpen: () => {
+        const progressBar = MySwal.getTimerProgressBar();
+        if (progressBar) {
+          progressBar.style.backgroundColor = "black";
+          progressBar.style.height = "6px";
+        }
+      },
+    });
+  };
+
   const validar = () => {
     let errorMessage = "";
 
@@ -181,23 +250,57 @@ export const Compras = () => {
       return;
     }
 
-    if (Detalles.length === 0) {
-      errorMessage = "Agrega al menos un detalle de compra";
-      setErrors({ Detalles: errorMessage });
+    if (!Fecha) {
+      errorMessage = "Selecciona una fecha";
+      setErrors({ Fecha: errorMessage });
       return;
     }
 
-    if (Detalles.some((detalle) => !detalle.cantidad || !detalle.precio)) {
-      errorMessage =
-        "Ingresa una cantidad y un precio válido para cada detalle";
-      setErrors({ Detalles: errorMessage });
+    // Validar que haya al menos un detalle
+    if (Detalles.length === 0) {
+      errorMessage = "Agrega al menos un detalle de compra";
+      showDetalleAlert(errorMessage); // Mostrar la alerta cuando no hay detalles
+      return;
+    }
+
+    // Validación de los detalles de la compra
+    const detallesValidados = Detalles.map((detalle, index) => {
+      const errors = {};
+
+      if (!detalle.IdInsumo) {
+        errors.IdInsumo = "Selecciona un insumo";
+      }
+
+      if (!detalle.cantidad || detalle.cantidad <= 0) {
+        errors.cantidad = "Ingresa una cantidad válida";
+      }
+
+      if (!detalle.precio || detalle.precio <= 0) {
+        errors.precio = "Ingresa un precio válido";
+      }
+
+      if (Object.keys(errors).length > 0) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          Detalles: { ...prevErrors.Detalles, [index]: errors },
+        }));
+      }
+
+      return errors;
+    });
+
+    const hasErrors = detallesValidados.some(
+      (errors) => Object.keys(errors).length > 0
+    );
+
+    if (hasErrors) {
       return;
     }
 
     enviarSolicitud("POST", {
       IdProveedor: IdProveedor,
       Fecha: Fecha,
-      Total: Total,
+      Total: totalCompra,
       detalles: Detalles,
     });
   };
@@ -216,6 +319,11 @@ export const Compras = () => {
       show_alerta(respuesta.data.message, "success");
       document.getElementById("btnCerrar").click();
       getCompras();
+
+      // Cerrar el modal de detalles si está abierto
+      if (compraSeleccionada) {
+        $("#modalDetalleCompra").modal("hide");
+      }
     } catch (error) {
       if (error.response) {
         show_alerta(error.response.data.message, "error");
@@ -332,7 +440,7 @@ export const Compras = () => {
                   }`}
                   name="IdProveedor"
                   value={IdProveedor}
-                  onChange={handleChange}
+                  onChange={(e) => setIdProveedor(e.target.value)}
                 >
                   <option value="">Selecciona un proveedor</option>
                   {proveedores.map((proveedor) => (
@@ -344,9 +452,10 @@ export const Compras = () => {
                     </option>
                   ))}
                 </select>
-                {renderErrorMessage(errors.IdProveedor)}
+                {errors.IdProveedor && (
+                  <div className="invalid-feedback">{errors.IdProveedor}</div>
+                )}
               </div>
-
               <div className="form-group">
                 <label>Fecha:</label>
                 <input
@@ -367,6 +476,7 @@ export const Compras = () => {
                       <th>Insumo</th>
                       <th>Cantidad</th>
                       <th>Precio</th>
+                      <th>SubTotal</th>
                       <th>Acción</th>
                     </tr>
                   </thead>
@@ -375,18 +485,19 @@ export const Compras = () => {
                       <tr key={index}>
                         <td>
                           <select
-                            className="form-control"
+                            className={`form-control ${
+                              errors.Detalles &&
+                              errors.Detalles[index] &&
+                              errors.Detalles[index].IdInsumo
+                                ? "is-invalid"
+                                : ""
+                            }`}
                             name="IdInsumo"
                             value={detalle.IdInsumo}
                             onChange={(e) => handleDetailChange(index, e)}
                           >
                             <option value="">Selecciona un insumo</option>
-                            {Insumos.filter(
-                              (insumo) =>
-                                !Detalles.some(
-                                  (det) => det.IdInsumo === insumo.IdInsumo
-                                )
-                            ).map((insumo) => (
+                            {getFilteredInsumos(index).map((insumo) => (
                               <option
                                 key={insumo.IdInsumo}
                                 value={insumo.IdInsumo}
@@ -395,25 +506,68 @@ export const Compras = () => {
                               </option>
                             ))}
                           </select>
+                          {errors.Detalles &&
+                            errors.Detalles[index] &&
+                            errors.Detalles[index].IdInsumo && (
+                              <div className="invalid-feedback">
+                                {errors.Detalles[index].IdInsumo}
+                              </div>
+                            )}
                         </td>
                         <td>
                           <input
                             type="number"
-                            className="form-control"
+                            className={`form-control ${
+                              errors.Detalles &&
+                              errors.Detalles[index] &&
+                              errors.Detalles[index].cantidad
+                                ? "is-invalid"
+                                : ""
+                            }`}
                             name="cantidad"
                             placeholder="Cantidad"
                             value={detalle.cantidad}
                             onChange={(e) => handleDetailChange(index, e)}
                           />
+                          {errors.Detalles &&
+                            errors.Detalles[index] &&
+                            errors.Detalles[index].cantidad && (
+                              <div className="invalid-feedback">
+                                {errors.Detalles[index].cantidad}
+                              </div>
+                            )}
                         </td>
                         <td>
                           <input
                             type="number"
-                            className="form-control"
+                            className={`form-control ${
+                              errors.Detalles &&
+                              errors.Detalles[index] &&
+                              errors.Detalles[index].precio
+                                ? "is-invalid"
+                                : ""
+                            }`}
                             name="precio"
                             placeholder="Precio"
                             value={detalle.precio}
                             onChange={(e) => handleDetailChange(index, e)}
+                          />
+                          {errors.Detalles &&
+                            errors.Detalles[index] &&
+                            errors.Detalles[index].precio && (
+                              <div className="invalid-feedback">
+                                {errors.Detalles[index].precio}
+                              </div>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="subtotal"
+                            placeholder="Subtotal"
+                            value={formatPrice(detalle.subtotal)}
+                            disabled
                           />
                         </td>
                         <td>
@@ -444,15 +598,14 @@ export const Compras = () => {
                   Añadir Detalle
                 </button>
               </div>
-
               <div className="form-group">
                 <label>Total:</label>
                 <input
-                  type="number"
+                  type="text"
                   className="form-control"
                   id="Total"
                   name="Total"
-                  value={totalCompra}
+                  value={formatPrice(totalCompra)}
                   disabled
                 />
               </div>
@@ -535,6 +688,7 @@ export const Compras = () => {
                           <th>Insumo</th>
                           <th>Cantidad</th>
                           <th>Precio</th>
+                          <th>SubTotal</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -543,7 +697,10 @@ export const Compras = () => {
                             <tr key={index}>
                               <td>{getInsumoName(detalle.IdInsumo)}</td>
                               <td>{detalle.Cantidad}</td>
-                              <td>{detalle.Precio}</td>
+                              <td>{formatPrice(detalle.Precio)}</td>
+                              <td>
+                                {formatPrice(detalle.Cantidad * detalle.Precio)}
+                              </td>
                             </tr>
                           )
                         )}
@@ -553,9 +710,9 @@ export const Compras = () => {
                   <div className="form-group">
                     <label>Total:</label>
                     <input
-                      type="number"
+                      type="text"
                       className="form-control"
-                      value={compraSeleccionada.Total}
+                      value={formatPrice(compraSeleccionada.Total)}
                       disabled
                     />
                   </div>
@@ -626,7 +783,7 @@ export const Compras = () => {
                       <td>
                         {new Date(compra.Fecha).toLocaleDateString("es-ES")}
                       </td>
-                      <td>{compra.Total}</td>
+                      <td>{formatPrice(compra.Total)}</td>
                       <td>
                         {compra.Estado === "Cancelado" ? (
                           <button className="btn btn-secondary mr-2" disabled>
