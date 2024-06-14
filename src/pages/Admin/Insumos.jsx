@@ -323,9 +323,15 @@ export const Insumos = () => {
       const insumoActual = Insumos.find(
         (insumo) => insumo.IdInsumo === IdInsumo
       );
+  
+      if (insumoActual.Cantidad > 0) {
+        show_alerta("No se puede desactivar el insumo porque la cantidad es mayor a 0", "warning");
+        return;
+      }
+  
       const nuevoEstado =
         insumoActual.Estado === "Activo" ? "Inactivo" : "Activo";
-
+  
       const MySwal = withReactContent(Swal);
       MySwal.fire({
         title: `¿Seguro de cambiar el estado del insumo ${insumoActual.Referencia}?`,
@@ -345,7 +351,7 @@ export const Insumos = () => {
             ValorCompra: insumoActual.ValorCompra,
             Estado: nuevoEstado,
           };
-
+  
           const response = await axios.put(`${url}/${IdInsumo}`, parametros);
           if (response.status === 200) {
             setInsumos((prevInsumos) =>
@@ -355,7 +361,7 @@ export const Insumos = () => {
                   : insumo
               )
             );
-
+  
             show_alerta("Estado del insumo cambiado con éxito", "success", {
               timer: 2000,
             });
@@ -369,6 +375,8 @@ export const Insumos = () => {
       show_alerta("Error cambiando el estado del insumo", "error");
     }
   };
+  
+  
 
   const convertColorIdToName = (colorId) => {
     const color = Colores.find((color) => color.IdColor === colorId);
