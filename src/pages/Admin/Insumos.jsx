@@ -129,8 +129,6 @@ export const Insumos = () => {
     }
     return "";
   };
-  
-  
 
   // // Función para validar la cantidad
   // const validateCantidad = (value) => {
@@ -177,7 +175,6 @@ export const Insumos = () => {
       Referencia: errorMessage,
     }));
   };
-  
 
   // Función para manejar cambios en la dirección
   const handleChangeCantidad = (e) => {
@@ -278,15 +275,15 @@ export const Insumos = () => {
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
       showClass: {
-        popup: 'swal2-show',
-        backdrop: 'swal2-backdrop-show',
-        icon: 'swal2-icon-show'
+        popup: "swal2-show",
+        backdrop: "swal2-backdrop-show",
+        icon: "swal2-icon-show",
       },
       hideClass: {
-        popup: 'swal2-hide',
-        backdrop: 'swal2-backdrop-hide',
-        icon: 'swal2-icon-hide'
-      }
+        popup: "swal2-hide",
+        backdrop: "swal2-backdrop-hide",
+        icon: "swal2-icon-hide",
+      },
     }).then((result) => {
       if (result.isConfirmed) {
         setIdInsumo(IdInsumo);
@@ -295,28 +292,31 @@ export const Insumos = () => {
           const index = filteredInsumos.findIndex(
             (insumo) => insumo.IdInsumo === IdInsumo
           );
-  
+
           // Determinar la página en la que debería estar el insumo después de la eliminación
-          const newPage = Math.ceil((filteredInsumos.length - 1) / itemsPerPage) || 1;
-  
+          const newPage =
+            Math.ceil((filteredInsumos.length - 1) / itemsPerPage) || 1;
+
           // Establecer la nueva página como la página actual
           setCurrentPage(newPage);
-  
+
           // Actualizar la lista de insumos eliminando el insumo eliminado
           setInsumos((prevInsumos) =>
             prevInsumos.filter((insumo) => insumo.IdInsumo !== IdInsumo)
           );
-  
+
           show_alerta("El insumo fue eliminado correctamente", "success");
         });
       } else if (result.dismiss === Swal.DismissReason.cancel) {
         show_alerta("El insumo NO fue eliminado", "info");
-      } else if (result.dismiss === Swal.DismissReason.backdrop || result.dismiss === Swal.DismissReason.esc) {
+      } else if (
+        result.dismiss === Swal.DismissReason.backdrop ||
+        result.dismiss === Swal.DismissReason.esc
+      ) {
         show_alerta("El insumo NO fue eliminado", "info");
       }
     });
   };
-  
 
   const cambiarEstadoInsumo = async (IdInsumo) => {
     try {
@@ -325,7 +325,7 @@ export const Insumos = () => {
       );
       const nuevoEstado =
         insumoActual.Estado === "Activo" ? "Inactivo" : "Activo";
-  
+
       const MySwal = withReactContent(Swal);
       MySwal.fire({
         title: `¿Seguro de cambiar el estado del insumo ${insumoActual.Referencia}?`,
@@ -345,15 +345,17 @@ export const Insumos = () => {
             ValorCompra: insumoActual.ValorCompra,
             Estado: nuevoEstado,
           };
-  
+
           const response = await axios.put(`${url}/${IdInsumo}`, parametros);
           if (response.status === 200) {
             setInsumos((prevInsumos) =>
               prevInsumos.map((insumo) =>
-                insumo.IdInsumo === IdInsumo ? { ...insumo, Estado: nuevoEstado } : insumo
+                insumo.IdInsumo === IdInsumo
+                  ? { ...insumo, Estado: nuevoEstado }
+                  : insumo
               )
             );
-  
+
             show_alerta("Estado del insumo cambiado con éxito", "success", {
               timer: 2000,
             });
@@ -367,7 +369,6 @@ export const Insumos = () => {
       show_alerta("Error cambiando el estado del insumo", "error");
     }
   };
-  
 
   const convertColorIdToName = (colorId) => {
     const color = Colores.find((color) => color.IdColor === colorId);
@@ -626,21 +627,21 @@ export const Insumos = () => {
                       <td>{insumo.Cantidad}</td>
                       <td>{formatCurrency(insumo.ValorCompra)}</td>
                       <td>
-                      <label className="switch">
-                            <input
-                              type="checkbox"
-                              checked={insumo.Estado === "Activo"}
-                              onChange={() =>
-                                cambiarEstadoInsumo(insumo.IdInsumo)
-                              }
-                              className={
-                                insumo.Estado === "Activo"
-                                  ? "switch-green"
-                                  : "switch-red"
-                              }
-                            />
-                            <span className="slider round"></span>
-                          </label>
+                        <label className="switch">
+                          <input
+                            type="checkbox"
+                            checked={insumo.Estado === "Activo"}
+                            onChange={() =>
+                              cambiarEstadoInsumo(insumo.IdInsumo)
+                            }
+                            className={
+                              insumo.Estado === "Activo"
+                                ? "switch-green"
+                                : "switch-red"
+                            }
+                          />
+                          <span className="slider round"></span>
+                        </label>
                       </td>
                       <td>
                         <div
@@ -654,19 +655,21 @@ export const Insumos = () => {
                             data-toggle="modal"
                             data-target="#modalCliente"
                             onClick={() => openModal(2, insumo)}
-                            disabled={insumo.Estado != "Activo"}
+                            disabled={insumo.Estado !== "Activo"}
                           >
                             <i className="fas fa-sync-alt"></i>
                           </button>
-                          <button
-                            className="btn btn-danger btn-sm mr-2"
-                            onClick={() =>
-                              deleteInsumo(insumo.IdInsumo, insumo.Referencia)
-                            }
-                            disabled={insumo.Estado != "Activo"}
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
+                          {insumo.Cantidad === 0 && (
+                            <button
+                              className="btn btn-danger btn-sm mr-2"
+                              onClick={() =>
+                                deleteInsumo(insumo.IdInsumo, insumo.Referencia)
+                              }
+                              disabled={insumo.Estado !== "Activo"}
+                            >
+                              <i className="fas fa-trash-alt"></i>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
