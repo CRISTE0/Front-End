@@ -528,7 +528,7 @@ export const Insumos = () => {
                       id="nombreCliente"
                       placeholder="Ingrese la cantidad del insumo"
                       required
-                      value="0" // Establecer valor en 0
+                      value={Cantidad} // Aquí usamos la variable ValorCompra del estado
                       onChange={handleChangeCantidad}
                       disabled
                     />
@@ -549,7 +549,7 @@ export const Insumos = () => {
                       id="direccionCliente"
                       placeholder="Ingrese el valor de la compra"
                       required
-                      value="0" // Establecer valor en 0
+                      value={ValorCompra} // Aquí usamos la variable ValorCompra del estado
                       onChange={handleChangeValorCompra}
                       disabled
                     />
