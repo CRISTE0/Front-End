@@ -102,23 +102,41 @@ export const Compras = () => {
 
   const formatPrice = (price) => {
     // Convertir el precio a número si es una cadena
-    const formattedPrice = typeof price === 'string' ? parseFloat(price) : price;
-  
+    const formattedPrice =
+      typeof price === "string" ? parseFloat(price) : price;
+
     // Verificar si el precio es un número válido
     if (!isNaN(formattedPrice)) {
       // Formatear el número con separadores de miles y coma decimal
-      const formattedNumber = formattedPrice.toLocaleString('es-ES', {
+      const formattedNumber = formattedPrice.toLocaleString("es-ES", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       });
-  
+
       // Retornar el número con el símbolo de peso
       return `$${formattedNumber}`;
     }
-  
+
     return `$0.00`; // Valor predeterminado si no es un número válido
   };
-  
+
+  // Función para obtener el precio actual del insumo
+  const getCurrentPrice = (idInsumo) => {
+    const insumo = Insumos.find((item) => item.IdInsumo === idInsumo);
+    const precioActual = insumo ? insumo.precio : 0; // Obtener el precio actual del insumo
+
+    // Verificar si hay detalles en la compra seleccionada y devolver el precio correspondiente
+    if (compraSeleccionada && compraSeleccionada.DetallesCompras) {
+      const detalleCompra = compraSeleccionada.DetallesCompras.find(
+        (detalle) => detalle.IdInsumo === idInsumo
+      );
+      if (detalleCompra) {
+        return detalleCompra.Precio; // Devolver el precio del detalle de la compra
+      }
+    }
+
+    return precioActual; // Si no hay detalle de compra asociado, devolver el precio actual
+  };
 
   const openModal = () => {
     setIdCompra(""); // Resetear el IdCompra al abrir el modal para indicar una nueva compra
@@ -143,6 +161,7 @@ export const Compras = () => {
     }
   };
 
+  // Función para manejar los cambios en los detalles de la compra
   const handleDetailChange = (index, e) => {
     const { name, value } = e.target;
     const updatedDetalles = [...Detalles];
@@ -162,17 +181,34 @@ export const Compras = () => {
       const regex = /^[0-9\b]+$/;
       if (value === "" || regex.test(value)) {
         updatedDetalles[index][name] = value;
+
+        // Actualizar el subtotal si se modificó cantidad o precio
+        if (name === "cantidad" || name === "precio") {
+          const cantidad = parseFloat(updatedDetalles[index].cantidad || 0);
+          const precio = parseFloat(updatedDetalles[index].precio || 0);
+          updatedDetalles[index].subtotal = cantidad * precio;
+        }
+
+        // Si el precio es menor al actual, mostrar una advertencia
+        if (name === "precio") {
+          const idInsumo = updatedDetalles[index].IdInsumo;
+          const currentPrice = getCurrentPrice(idInsumo);
+          const newPrice = parseFloat(value);
+
+          if (newPrice < currentPrice) {
+            show_alerta(
+              `El precio no puede ser menor al actual (${formatPrice(
+                currentPrice
+              )})`,
+              "warning"
+            );
+          }
+        }
       } else {
         return;
       }
     } else {
       updatedDetalles[index][name] = value;
-    }
-
-    if (name === "cantidad" || name === "precio") {
-      const cantidad = updatedDetalles[index].cantidad || 0;
-      const precio = updatedDetalles[index].precio || 0;
-      updatedDetalles[index].subtotal = cantidad * precio;
     }
 
     setDetalles(updatedDetalles);
