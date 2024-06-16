@@ -155,11 +155,31 @@ export const Compras = () => {
     if (name === "IdProveedor") {
       setIdProveedor(value);
     } else if (name === "Fecha") {
-      setFecha(value);
+      const selectedDate = new Date(value);
+      const currentDate = new Date();
+      
+      // Calcular la fecha hace 8 días
+      const minDate = new Date();
+      minDate.setDate(currentDate.getDate() - 8);
+      
+      if (selectedDate > currentDate) {
+        // Si la fecha seleccionada es después de la fecha actual,
+        // establecer la fecha actual como valor de Fecha
+        const formattedCurrentDate = currentDate.toISOString().split("T")[0];
+        setFecha(formattedCurrentDate);
+      } else if (selectedDate < minDate) {
+        // Si la fecha seleccionada es anterior a 8 días atrás, establecer la fecha mínima
+        const formattedMinDate = minDate.toISOString().split("T")[0];
+        setFecha(formattedMinDate);
+      } else {
+        // Establecer la fecha seleccionada
+        setFecha(value);
+      }
     } else if (name === "Total") {
       setTotal(value);
     }
   };
+  
 
   // Función para manejar los cambios en los detalles de la compra
   const handleDetailChange = (index, e) => {
@@ -501,7 +521,9 @@ export const Compras = () => {
                   name="Fecha"
                   value={Fecha}
                   onChange={handleChange}
+                  max={new Date().toISOString().split("T")[0]}
                 />
+                <small>Seleeciona una fecha que este en un rango de 8 dias</small>
                 {renderErrorMessage(errors.Fecha)}
               </div>
 
