@@ -6,12 +6,14 @@ import Pagination from "../../assets/js/Pagination";
 import SearchBar from "../../assets/js/SearchBar";
 
 export const Usuarios = () => {
-  let url = "http://localhost:3000/api/usuarios";
+  const url = "http://localhost:3000/api/usuarios";
+  const rolesUrl = "http://localhost:3000/api/roles"; // URL de la API de roles
   const [Usuarios, setUsuarios] = useState([]);
   const [IdUsuario, setIdUsuario] = useState("");
-  const [Usuario, setUsuario] = useState(""); // Corrected from setUsuarios to setUsuario
+  const [Usuario, setUsuario] = useState("");
   const [Correo, setCorreo] = useState("");
   const [Contrasenia, setContrasenia] = useState("");
+  const [Rol, setRol] = useState(""); // Estado para almacenar el rol seleccionado
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [errors, setErrors] = useState({
@@ -22,14 +24,25 @@ export const Usuarios = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+  const [roles, setRoles] = useState([]); // Estado para almacenar la lista de roles
 
   useEffect(() => {
     getUsuarios();
+    getRoles();
   }, []);
 
   const getUsuarios = async () => {
     const respuesta = await axios.get(url);
     setUsuarios(respuesta.data);
+  };
+
+  const getRoles = async () => {
+    try {
+      const response = await axios.get(rolesUrl);
+      setRoles(response.data);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    }
   };
 
   const openModal = (op, usuario = null) => {
@@ -39,6 +52,7 @@ export const Usuarios = () => {
       setUsuario("");
       setCorreo("");
       setContrasenia("");
+      setRol(""); // Limpiar el estado del rol seleccionado al crear usuario
       setOperation(1);
       setTitle("Crear Usuario");
     } else if (op === 2 && usuario) {
@@ -47,26 +61,31 @@ export const Usuarios = () => {
       setUsuario(usuario.Usuario);
       setCorreo(usuario.Correo);
       setContrasenia(usuario.Contrasenia);
+      setRol(usuario.Rol); // Establecer el rol seleccionado al actualizar usuario
       setOperation(2);
       setTitle("Actualizar Usuario");
       setErrors({
         usuario: "",
         correo: "",
-        contrasenia: ""
+        contrasenia: "",
       });
-      const errors = {
-        usuario: validateUsuario(usuario.Usuario),
-        correo: validateCorreo(usuario.Correo),
-        contrasenia: validateContrasenia(usuario.Contrasenia)
-      };
-      setErrors(errors);
     }
+
+    // Mostrar el modal
+    const modal = new bootstrap.Modal(document.getElementById("modalUsuarios"));
+    modal.show();
   };
 
   const guardarUsuario = async () => {
     const cleanedUsuario = Usuario.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
     const cleanedCorreo = Correo.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
     const cleanedContrasenia = Contrasenia.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+
+    if (!Rol) {
+      // Validar que se seleccione un rol
+      show_alerta("Selecciona un rol para el usuario", "error");
+      return;
+    }
 
     if (operation === 1) {
       // Crear Usuario
@@ -75,7 +94,8 @@ export const Usuarios = () => {
         Correo: cleanedCorreo,
         Contrasenia: cleanedContrasenia,
         Estado: "Activo",
-      });
+        Rol: Rol, // Aquí debe ser el IdRol, no el nombre del rol
+      });      
     } else if (operation === 2) {
       // Actualizar Usuario
       await enviarSolicitud("PUT", {
@@ -83,8 +103,14 @@ export const Usuarios = () => {
         Usuario: cleanedUsuario,
         Correo: cleanedCorreo,
         Contrasenia: cleanedContrasenia,
+        Rol: Rol, // Incluir el rol seleccionado en los parámetros
       });
     }
+  };
+
+  const handleChangeRol = (e) => {
+    const value = e.target.value;
+    setRol(value); // Actualizar el estado del rol seleccionado
   };
 
   const validateUsuario = (Usuario) => {
@@ -238,7 +264,9 @@ export const Usuarios = () => {
 
   const cambiarEstadoUsuario = async (idUsuario) => {
     try {
-      const usuario = Usuarios.find((usuario) => usuario.IdUsuario === idUsuario);
+      const usuario = Usuarios.find(
+        (usuario) => usuario.IdUsuario === idUsuario
+      );
       const nuevoEstado = usuario.Estado === "Activo" ? "Inactivo" : "Activo";
 
       const MySwal = withReactContent(Swal);
@@ -252,210 +280,285 @@ export const Usuarios = () => {
       }).then(async (result) => {
         if (result.isConfirmed) {
           await axios.put(`${url}/${idUsuario}`, { Estado: nuevoEstado });
-          show_alerta(
-            "Estado del usuario actualizado con éxito",
-            "success",
-            {
-              timer: 2000,
-            }
-          );
+          show_alerta("Estado del usuario actualizado con éxito", "success", {
+            timer: 2000,
+          });
           getUsuarios();
         }
       });
     } catch (error) {
-      show_alerta("Error al cambiar el estado del usuario", "error");
-      console.error("Error al cambiar el estado del usuario:", error);
+      if (error.response) {
+        show_alerta(error.response.data.message, "error");
+      } else if (error.request) {
+        show_alerta("Error en la solicitud", "error");
+      } else {
+        show_alerta("Error desconocido", "error");
+      }
+      console.log(error);
     }
   };
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
   const filteredUsuarios = Usuarios.filter((usuario) =>
     usuario.Usuario.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const paginatedUsuarios = filteredUsuarios.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+  const currentItems = filteredUsuarios.slice(
+    indexOfFirstItem,
+    indexOfLastItem
   );
 
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleSearchTermChange = (newSearchTerm) => {
+    setSearchTerm(newSearchTerm);
+    setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
+  };
+
   return (
-    <div className="container-fluid">
-      <div className="row mt-3">
-        <div className="col-md-4 offset-md-4">
-          <div className="d-grid mx-auto">
+    <>
+      {/* Modal para crear/editar usuario */}
+      <div
+        className="modal fade"
+        id="modalUsuarios"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="modalUsuariosLabel"
+        aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
+      >
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="modalUsuariosLabel">
+                {title}
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <input
+                type="hidden"
+                id="id"
+                value={IdUsuario}
+                onChange={(e) => setIdUsuario(e.target.value)}
+              />
+
+              <div className="input-group mb-3">
+                <span className="input-group-text mx-2">
+                  <i className="fa-solid fa-user"></i>
+                </span>
+                <input
+                  type="text"
+                  id="usuario"
+                  className={`form-control ${
+                    errors.usuario ? "is-invalid" : ""
+                  }`}
+                  placeholder="Nombre de usuario"
+                  value={Usuario}
+                  onChange={handleChangeUsuario}
+                />
+                {renderErrorMessage(errors.usuario)}
+              </div>
+
+              <div className="input-group mb-3">
+                <span className="input-group-text mx-2">
+                  <i className="fa-solid fa-envelope"></i>
+                </span>
+                <input
+                  type="email"
+                  id="correo"
+                  className={`form-control ${
+                    errors.correo ? "is-invalid" : ""
+                  }`}
+                  placeholder="Correo electrónico"
+                  value={Correo}
+                  onChange={handleChangeCorreo}
+                />
+                {renderErrorMessage(errors.correo)}
+              </div>
+
+              <div className="input-group mb-3">
+                <span className="input-group-text mx-2">
+                  <i className="fa-solid fa-lock"></i>
+                </span>
+                <input
+                  type="password"
+                  id="contrasenia"
+                  className={`form-control ${
+                    errors.contrasenia ? "is-invalid" : ""
+                  }`}
+                  placeholder="Contraseña"
+                  value={Contrasenia}
+                  onChange={handleChangeContrasenia}
+                />
+                {renderErrorMessage(errors.contrasenia)}
+              </div>
+
+              {/* Selección de rol */}
+              <div className="input-group mb-3">
+                <span className="input-group-text mx-2">
+                  <i className="fa-solid fa-user-tag"></i>
+                </span>
+                <select
+                  id="rol"
+                  className="form-select"
+                  value={Rol}
+                  onChange={handleChangeRol}
+                >
+                  <option value="">Selecciona un rol</option>
+                  {roles.map((rol) => (
+                    <option key={rol.IdRol} value={rol.IdRol}>
+                      {rol.Nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <div className="text-right">
+                <button
+                  type="button"
+                  id="btnCerrar"
+                  className="btn btn-secondary"
+                  data-dismiss="modal"
+                >
+                  Cancelar
+                </button>
+                <button onClick={guardarUsuario} className="btn btn-success">
+                  <i className="fa-solid fa-floppy-disk"></i> Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Fin modal crear/editar usuario */}
+
+      {/* Inicio de usuarios */}
+      <div className="container-fluid">
+        {/* Page Heading */}
+        <div className="d-flex align-items-center justify-content-between">
+          <h1 className="h3 mb-4 text-center text-dark">Usuarios</h1>
+
+          <div className="text-center p-3">
             <button
               onClick={() => openModal(1)}
+              type="button"
               className="btn btn-dark"
-              data-bs-toggle="modal"
-              data-bs-target="#modalUsuarios"
+              data-toggle="modal"
+              data-target="#modalUsuarios"
             >
-              <i className="fa-solid fa-circle-plus"></i> Añadir Usuario
+              <i className="fas fa-pencil-alt"></i> Añadir Usuario
             </button>
           </div>
         </div>
-      </div>
-      <div className="row mt-3">
-        <div className="col-md-4 offset-md-4">
-          <div className="d-grid mx-auto">
+
+        {/* Tabla Usuarios */}
+        <div className="card shadow mb-4">
+          <div className="card-header py-3">
+            <h6 className="m-0 font-weight-bold text-primary">Usuarios</h6>
+          </div>
+          <div className="card-body">
             <SearchBar
-              placeholder="Buscar usuario"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
+            <div className="table-responsive">
+              <table
+                className="table table-bordered"
+                id="dataTable"
+                width="100%"
+                cellSpacing="0"
+              >
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Usuario</th>
+                    <th>Correo</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentItems.map((usuario, index) => (
+                    <tr key={usuario.IdUsuario}>
+                      <td>{index + 1 + (currentPage - 1) * itemsPerPage}</td>
+                      <td>{usuario.Usuario}</td>
+                      <td>{usuario.Correo}</td>
+                      <td>
+                        <label className="switch">
+                          <input
+                            type="checkbox"
+                            checked={usuario.Estado === "Activo"}
+                            onChange={() =>
+                              cambiarEstadoUsuario(usuario.IdUsuario)
+                            }
+                            className={
+                              usuario.Estado === "Activo"
+                                ? "switch-green"
+                                : "switch-red"
+                            }
+                          />
+                          <span className="slider round"></span>
+                        </label>
+                      </td>
+                      <td>
+                        <div
+                          className="btn-group"
+                          role="group"
+                          aria-label="Acciones"
+                        >
+                          {/* Botón de actualizar */}
+                          <button
+                            className="btn btn-warning btn-sm mr-2"
+                            onClick={() => openModal(2, usuario)}
+                            disabled={usuario.Estado !== "Activo"}
+                          >
+                            <i className="fas fa-solid fa-edit"></i>
+                          </button>
+                          {/* Botón de eliminar */}
+                          &nbsp;
+                          <button
+                            className="btn btn-danger btn-sm mr-2"
+                            onClick={() =>
+                              deleteUsuario(usuario.IdUsuario, usuario.Usuario)
+                            }
+                            disabled={usuario.Estado !== "Activo"}
+                          >
+                            <i className="fas fa-solid fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <Pagination
+              itemsPerPage={itemsPerPage}
+              totalItems={filteredUsuarios.length}
+              currentPage={currentPage}
+              paginate={paginate}
             />
           </div>
         </div>
+        {/* Fin tabla usuarios */}
       </div>
-      <div className="row mt-3">
-        <div className="col-12 col-lg-6 offset-0 offset-lg-3">
-          <div className="table-responsive">
-            <table className="table table-bordered">
-              <thead>
-                <tr>
-                  <th>Usuario</th>
-                  <th>Correo</th>
-                  <th>Contraseña</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="table-group-divider">
-                {paginatedUsuarios.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="text-center">
-                      No se encontraron usuarios
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedUsuarios.map((usuario, index) => (
-                    <tr key={usuario.IdUsuario}>
-                      <td>{usuario.Usuario}</td>
-                      <td>{usuario.Correo}</td>
-                      <td>{usuario.Contrasenia}</td>
-                      <td>
-                        <button
-                          className={`btn btn-sm ${
-                            usuario.Estado === "Activo"
-                              ? "btn-success"
-                              : "btn-danger"
-                          }`}
-                          onClick={() => cambiarEstadoUsuario(usuario.IdUsuario)}
-                        >
-                          {usuario.Estado}
-                        </button>
-                      </td>
-                      <td>
-                        <button
-                          onClick={() => openModal(2, usuario)}
-                          className="btn btn-warning btn-sm"
-                          data-bs-toggle="modal"
-                          data-bs-target="#modalUsuarios"
-                        >
-                          <i className="fa-solid fa-edit"></i>
-                        </button>
-                        &nbsp;
-                        <button
-                          onClick={() =>
-                            deleteUsuario(usuario.IdUsuario, usuario.Usuario)
-                          }
-                          className="btn btn-danger btn-sm"
-                        >
-                          <i className="fa-solid fa-trash"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          <Pagination
-            itemsPerPage={itemsPerPage}
-            totalItems={filteredUsuarios.length}
-            currentPage={currentPage}
-            onPageChange={(page) => setCurrentPage(page)}
-          />
-        </div>
-      </div>
-      <div id="modalUsuarios" className="modal fade" aria-hidden="true">
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">{title}</h5>
-              <button
-                type="button"
-                id="btnCerrar"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body">
-              <form>
-                <div className="form-floating mb-3">
-                  <input
-                    id="Usuario"
-                    className={`form-control ${
-                      errors.usuario ? "is-invalid" : ""
-                    }`}
-                    type="text"
-                    placeholder="Usuario"
-                    value={Usuario}
-                    onChange={handleChangeUsuario}
-                  />
-                  <label htmlFor="Usuario">Usuario</label>
-                  {renderErrorMessage(errors.usuario)}
-                </div>
-                <div className="form-floating mb-3">
-                  <input
-                    id="Correo"
-                    className={`form-control ${
-                      errors.correo ? "is-invalid" : ""
-                    }`}
-                    type="email"
-                    placeholder="Correo"
-                    value={Correo}
-                    onChange={handleChangeCorreo}
-                  />
-                  <label htmlFor="Correo">Correo</label>
-                  {renderErrorMessage(errors.correo)}
-                </div>
-                <div className="form-floating mb-3">
-                  <input
-                    id="Contrasenia"
-                    className={`form-control ${
-                      errors.contrasenia ? "is-invalid" : ""
-                    }`}
-                    type="password"
-                    placeholder="Contraseña"
-                    value={Contrasenia}
-                    onChange={handleChangeContrasenia}
-                  />
-                  <label htmlFor="Contrasenia">Contraseña</label>
-                  {renderErrorMessage(errors.contrasenia)}
-                </div>
-                <div className="d-grid col-6 mx-auto">
-                  <button
-                    onClick={guardarUsuario}
-                    type="button"
-                    className="btn btn-success"
-                  >
-                    Guardar
-                  </button>
-                </div>
-              </form>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                id="btnCerrar"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   );
 };
+
+export default Usuarios;
