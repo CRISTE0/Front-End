@@ -8,6 +8,7 @@ import { Login } from "../pages/Landing/Login";
 import { LandingLayout } from "../layouts/LandingLayout";
 import { AdminLayout } from "../layouts/AdminLayout";
 import { Dashboard } from "../pages/Admin/Dashboard";
+import { Configuracion } from "../pages/Admin/Configuracion";
 import { Usuarios } from "../pages/Admin/Usuarios";
 import { Proveedores } from "../pages/Admin/Proveedores";
 import { Compras } from "../pages/Admin/Compras";
@@ -34,6 +35,7 @@ export const Rutas = () => {
 
         
         <Route path="/admin" Component={()=> <AdminLayout> <Dashboard /> </AdminLayout>  } />
+        <Route path="/admin/Configuracion" Component={()=> <AdminLayout> <Configuracion /> </AdminLayout> } />
         <Route path="/admin/Usuarios" Component={()=> <AdminLayout> <Usuarios /> </AdminLayout> } />
         <Route path="/admin/Proveedores" Component={()=> <AdminLayout> <Proveedores /> </AdminLayout> } />
         <Route path="/admin/Insumos" Component={()=> <AdminLayout> <Insumos /> </AdminLayout> } />
