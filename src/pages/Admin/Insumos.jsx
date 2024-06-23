@@ -265,58 +265,106 @@ export const Insumos = () => {
     }
   };
 
-  const deleteInsumo = (IdInsumo, Referencia) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: `¿Seguro de eliminar el insumo ${Referencia}?`,
-      icon: "question",
-      text: "No se podrá dar marcha atrás",
-      showCancelButton: true,
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-      showClass: {
-        popup: "swal2-show",
-        backdrop: "swal2-backdrop-show",
-        icon: "swal2-icon-show",
-      },
-      hideClass: {
-        popup: "swal2-hide",
-        backdrop: "swal2-backdrop-hide",
-        icon: "swal2-icon-hide",
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setIdInsumo(IdInsumo);
-        enviarSolicitud("DELETE", { IdInsumo: IdInsumo }).then(() => {
-          // Calcular el índice del insumo eliminado en la lista filtrada
-          const index = filteredInsumos.findIndex(
-            (insumo) => insumo.IdInsumo === IdInsumo
-          );
+  // const deleteInsumo = (IdInsumo, Referencia) => {
+  //   const MySwal = withReactContent(Swal);
+  //   MySwal.fire({
+  //     title: `¿Seguro de eliminar el insumo ${Referencia}?`,
+  //     icon: "question",
+  //     text: "No se podrá dar marcha atrás",
+  //     showCancelButton: true,
+  //     confirmButtonText: "Sí, eliminar",
+  //     cancelButtonText: "Cancelar",
+  //     showClass: {
+  //       popup: "swal2-show",
+  //       backdrop: "swal2-backdrop-show",
+  //       icon: "swal2-icon-show",
+  //     },
+  //     hideClass: {
+  //       popup: "swal2-hide",
+  //       backdrop: "swal2-backdrop-hide",
+  //       icon: "swal2-icon-hide",
+  //     },
+  //   }).then((result) => {
+  //     if (result.isConfirmed) {
+  //       setIdInsumo(IdInsumo);
+  //       enviarSolicitud("DELETE", { IdInsumo: IdInsumo }).then(() => {
+  //         // Calcular el índice del insumo eliminado en la lista filtrada
+  //         const index = filteredInsumos.findIndex(
+  //           (insumo) => insumo.IdInsumo === IdInsumo
+  //         );
 
-          // Determinar la página en la que debería estar el insumo después de la eliminación
-          const newPage =
-            Math.ceil((filteredInsumos.length - 1) / itemsPerPage) || 1;
+  //         // Determinar la página en la que debería estar el insumo después de la eliminación
+  //         const newPage =
+  //           Math.ceil((filteredInsumos.length - 1) / itemsPerPage) || 1;
 
-          // Establecer la nueva página como la página actual
-          setCurrentPage(newPage);
+  //         // Establecer la nueva página como la página actual
+  //         setCurrentPage(newPage);
 
-          // Actualizar la lista de insumos eliminando el insumo eliminado
-          setInsumos((prevInsumos) =>
-            prevInsumos.filter((insumo) => insumo.IdInsumo !== IdInsumo)
-          );
+  //         // Actualizar la lista de insumos eliminando el insumo eliminado
+  //         setInsumos((prevInsumos) =>
+  //           prevInsumos.filter((insumo) => insumo.IdInsumo !== IdInsumo)
+  //         );
 
-          show_alerta("El insumo fue eliminado correctamente", "success");
+  //         show_alerta("El insumo fue eliminado correctamente", "success");
+  //       });
+  //     } else if (result.dismiss === Swal.DismissReason.cancel) {
+  //       show_alerta("El insumo NO fue eliminado", "info");
+  //     } else if (
+  //       result.dismiss === Swal.DismissReason.backdrop ||
+  //       result.dismiss === Swal.DismissReason.esc
+  //     ) {
+  //       show_alerta("El insumo NO fue eliminado", "info");
+  //     }
+  //   });
+  // };
+  const deleteInsumo = async (idInsumo) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/insumos/${idInsumo}`, {
+        method: 'DELETE',
+      });
+  
+      if (response.status === 409) {
+        const data = await response.json();
+        Swal.fire({
+          icon: 'error',
+          title: 'No se puede eliminar',
+          text: data.message, 
+          timer: 3000, // 3 segundos
+          showConfirmButton: false // Oculta el botón "OK"
         });
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        show_alerta("El insumo NO fue eliminado", "info");
-      } else if (
-        result.dismiss === Swal.DismissReason.backdrop ||
-        result.dismiss === Swal.DismissReason.esc
-      ) {
-        show_alerta("El insumo NO fue eliminado", "info");
+      } else if (response.status === 200) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Eliminado',
+          text: 'Insumo eliminado correctamente',
+          timer: 3000, // 3 segundos
+          showConfirmButton: false // Oculta el botón "OK"
+        });
+        // Actualizar la tabla de insumos
+        getInsumos();
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'El insumo está asociado a una compra, no se puede eliminar',
+          timer: 3000, // 3 segundos
+          showConfirmButton: false // Oculta el botón "OK"
+        });
       }
-    });
-  };
+    } catch (error) {
+      console.error('Error al eliminar el insumo:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al eliminar el insumo',
+        timer: 3000, // 3 segundos
+        showConfirmButton: false // Oculta el botón "OK"
+      });
+    }
+};
+
+
+  
 
   const cambiarEstadoInsumo = async (IdInsumo) => {
     try {

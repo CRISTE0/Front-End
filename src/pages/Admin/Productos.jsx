@@ -12,7 +12,7 @@ export const Catalogo = () => {
   const [Insumos, setInsumos] = useState([]);
   const [IdDisenio, setIdDisenio] = useState("");
   const [IdInsumo, setIdInsumo] = useState("");
-  const [IdProductoAdmin, setIdProductoAdmin] = useState("");
+  const [IdProducto, setIdProducto] = useState("");
   const [Referencia, setReferencia] = useState("");
   const [Cantidad, setCantidad] = useState("");
   const [ValorVenta, setValorVenta] = useState("");
@@ -61,7 +61,7 @@ export const Catalogo = () => {
   const openModal = (op, insumo = null) => {
     if (op === 1) {
       // Crear cliente
-      setIdProductoAdmin("");
+      setIdProducto("");
       setIdDisenio("");
       setIdInsumo("");
       setReferencia("");
@@ -71,7 +71,7 @@ export const Catalogo = () => {
       setTitle("Crear Producto");
     } else if (op === 2 && insumo) {
       // Actualizar Cliente
-      setIdProductoAdmin(insumo.IdProductoAdmin);
+      setIdProducto(insumo.IdProducto);
       setIdDisenio(insumo.IdDisenio);
       setIdInsumo(insumo.IdInsumo);
       setReferencia(insumo.Referencia);
@@ -97,38 +97,58 @@ export const Catalogo = () => {
 
   // funcion para guardar producto
   const guardarProducto = async () => {
+    const insumoSeleccionado = Insumos.find(
+      (insumo) => insumo.IdInsumo == IdInsumo
+    );
+  
+    if (!insumoSeleccionado) {
+      show_alerta("Insumo no encontrado", "error");
+      return;
+    }
+  
+    if (parseInt(Cantidad) > insumoSeleccionado.Cantidad) {
+      show_alerta("La cantidad de productos no puede ser mayor que la cantidad de insumos disponibles", "error");
+      return;
+    }
+  
+    if (parseFloat(ValorVenta) <= parseFloat(insumoSeleccionado.ValorCompra)) {
+      show_alerta("El valor de venta debe ser mayor que el valor de compra del insumo", "error");
+      return;
+    }
+  
     if (operation === 1) {
-      // Crear Cliente
       await enviarSolicitud("POST", {
         IdDisenio,
         IdInsumo,
         Referencia: Referencia.trim(),
-        Cantidad,
-        ValorVenta,
+        Cantidad: Cantidad,
+        ValorVenta: ValorVenta,
       });
     } else if (operation === 2) {
-      // Actualizar Cliente
       await enviarSolicitud("PUT", {
-        IdProductoAdmin,
+        IdProducto,
         IdDisenio,
         IdInsumo,
         Referencia: Referencia.trim(),
-        Cantidad,
-        ValorVenta,
+        Cantidad: Cantidad,
+        ValorVenta: ValorVenta,
       });
     }
   };
+  
+  
 
-  // Función para validar la referencia
-  const validateReferencia = (value) => {
-    if (!value) {
-      return "Escribe la referencia";
-    }
-    if (!/^[a-zA-Z0-9]+$/.test(value)) {
-      return "La referencia solo puede contener letras y números";
-    }
-    return "";
-  };
+// Función para validar la referencia
+const validateReferencia = (value) => {
+  if (!value) {
+    return "Escribe la referencia";
+  }
+  // Validar que la referencia siga el patrón TST-001
+  if (!/^[A-Z]{3}-\d{3}$/.test(value)) {
+    return "La referencia debe ser en el formato AAA-000";
+  }
+  return "";
+};
 
   // Función para validar la cantidad
   const validateCantidad = (value) => {
@@ -144,13 +164,14 @@ export const Catalogo = () => {
   // Función para validar el valorVenta
   const validateValorVenta = (value) => {
     if (!value) {
-      return "Escribe el valor de compra";
+      return "Escribe el valor de venta";
     }
     if (!/^\d+(\.\d+)?$/.test(value)) {
       return "El valor de venta solo puede contener números y decimales";
     }
     return "";
   };
+  
 
   const handleChangeIdDisenio = (e) => {
     const value = e.target.value;
@@ -165,9 +186,8 @@ export const Catalogo = () => {
   // Función para manejar cambios en la referencia
   const handleChangeReferencia = (e) => {
     let value = e.target.value.trim();
-    // Limitar la longitud del valor ingresado a 10 caracteres
-    if (value.length > 10) {
-      value = value.slice(0, 10);
+    if (value.length > 7) {
+      value = value.slice(0, 7);
     }
     setReferencia(value);
     const errorMessage = validateReferencia(value);
@@ -176,6 +196,7 @@ export const Catalogo = () => {
       Referencia: errorMessage,
     }));
   };
+  
 
   // Función para manejar cambios en la cantidad
   const handleChangeCantidad = async (e) => {
@@ -186,19 +207,31 @@ export const Catalogo = () => {
     setErrors((prevState) => ({
       ...prevState,
       Cantidad: errorMessage,
-      }));
+    }));
   };
-
+  
   // Función para manejar cambios en el valorVenta
-  const handleChangeValorVenta = (e) => {
+  const handleChangeValorVenta = async (e) => {
     let value = e.target.value;
     setValorVenta(value);
-    const errorMessage = validateValorVenta(value);
+  
+    const insumoSeleccionado = Insumos.find(
+      (insumo) => insumo.IdInsumo === IdInsumo
+    );
+  
+    let errorMessage = '';
+    if (insumoSeleccionado && parseFloat(value) <= parseFloat(insumoSeleccionado.ValorCompra)) {
+      errorMessage = 'El valor de venta debe ser mayor que el valor de compra del insumo';
+    } else {
+      errorMessage = validateValorVenta(value);
+    }
+  
     setErrors((prevState) => ({
       ...prevState,
       ValorVenta: errorMessage,
     }));
   };
+  
 
   const show_alerta = (message, type) => {
     const MySwal = withReactContent(Swal);
@@ -229,7 +262,7 @@ export const Catalogo = () => {
   const enviarSolicitud = async (metodo, parametros) => {
     let urlRequest =
       metodo === "PUT" || metodo === "DELETE"
-        ? `${url}/${parametros.IdProductoAdmin}`
+        ? `${url}/${parametros.IdProducto}`
         : url;
 
     try {
@@ -248,13 +281,13 @@ export const Catalogo = () => {
       document.getElementById("btnCerrarCliente").click();
       getProductosAdmin();
       if (metodo === "POST") {
-        show_alerta("Insumo creado con éxito", "success", { timer: 2000 });
+        show_alerta("producto creado con éxito", "success", { timer: 2000 });
       } else if (metodo === "PUT") {
-        show_alerta("Insumo actualizado con éxito", "success", {
+        show_alerta("producto actualizado con éxito", "success", {
           timer: 2000,
         });
       } else if (metodo === "DELETE") {
-        show_alerta("Insumo eliminado con éxito", "success", { timer: 2000 });
+        show_alerta("producto eliminado con éxito", "success", { timer: 2000 });
       }
     } catch (error) {
       if (error.response) {
@@ -268,10 +301,10 @@ export const Catalogo = () => {
     }
   };
 
-  const deleteInsumo = (IdProductoAdmin, Referencia) => {
+  const deleteInsumo = (IdProducto, Referencia) => {
     const MySwal = withReactContent(Swal);
     MySwal.fire({
-      title: `¿Seguro de eliminar el insumo ${Referencia}?`,
+      title: `¿Seguro de eliminar el producto ${Referencia}?`,
       icon: "question",
       text: "No se podrá dar marcha atrás",
       showCancelButton: true,
@@ -289,11 +322,11 @@ export const Catalogo = () => {
       }
     }).then((result) => {
       if (result.isConfirmed) {
-        setIdProductoAdmin(IdProductoAdmin);
-        enviarSolicitud("DELETE", { IdProductoAdmin: IdProductoAdmin }).then(() => {
+        setIdProducto(IdProducto);
+        enviarSolicitud("DELETE", { IdProducto: IdProducto }).then(() => {
           // Calcular el índice del insumo eliminado en la lista filtrada
           const index = filteredproductosAdmin.findIndex(
-            (insumo) => insumo.IdProductoAdmin === IdProductoAdmin
+            (insumo) => insumo.IdProducto === IdProducto
           );
   
           // Determinar la página en la que debería estar el insumo después de la eliminación
@@ -304,67 +337,72 @@ export const Catalogo = () => {
   
           // Actualizar la lista de productosAdmin eliminando el insumo eliminado
           setProductosAdmin((prevproductosAdmin) =>
-            prevproductosAdmin.filter((insumo) => insumo.IdProductoAdmin !== IdProductoAdmin)
+            prevproductosAdmin.filter((insumo) => insumo.IdProducto !== IdProducto)
           );
   
-          show_alerta("El insumo fue eliminado correctamente", "success");
+          show_alerta("El producto fue eliminado correctamente", "success");
         });
       } else if (result.dismiss === Swal.DismissReason.cancel) {
-        show_alerta("El insumo NO fue eliminado", "info");
+        show_alerta("El producto NO fue eliminado", "info");
       } else if (result.dismiss === Swal.DismissReason.backdrop || result.dismiss === Swal.DismissReason.esc) {
-        show_alerta("El insumo NO fue eliminado", "info");
+        show_alerta("El producto NO fue eliminado", "info");
       }
     });
   };
   
 
-  const cambiarEstadoInsumo = async (IdProductoAdmin) => {
+  const cambiarEstadoProducto = async (IdProducto) => {
     try {
-      const insumoActual = productosAdmin.find(
-        (insumo) => insumo.IdProductoAdmin === IdProductoAdmin
-      );
+      const productoActual = productosAdmin.find((producto) => producto.IdProducto === IdProducto);
+
       const nuevoEstado =
-        insumoActual.Estado === "Activo" ? "Inactivo" : "Activo";
-  
+        productoActual.Estado === "Activo" ? "Inactivo" : "Activo";
+
       const MySwal = withReactContent(Swal);
       MySwal.fire({
-        title: `¿Seguro de cambiar el estado del insumo ${insumoActual.Referencia}?`,
+        title: `¿Seguro de cambiar el estado del producto ${productoActual.Referencia}?`,
         icon: "question",
-        text: `El estado actual del insumo es: ${insumoActual.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        text: `El estado actual del producto es: ${productoActual.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
         showCancelButton: true,
         confirmButtonText: "Sí, cambiar estado",
         cancelButtonText: "Cancelar",
       }).then(async (result) => {
         if (result.isConfirmed) {
           const parametros = {
-            IdProductoAdmin,
-            IdDisenio: insumoActual.IdDisenio,
-            IdInsumo: insumoActual.IdInsumo,
-            Referencia: insumoActual.Referencia,
-            Cantidad: insumoActual.Cantidad,
-            ValorVenta: insumoActual.ValorVenta,
+            IdProducto,
+            IdDisenio: productoActual.IdDisenio,
+            IdInsumo: productoActual.IdInsumo,
+            Referencia: productoActual.Referencia,
+            Cantidad: productoActual.Cantidad,
+            ValorVenta: productoActual.ValorVenta,
             Estado: nuevoEstado,
           };
-  
-          const response = await axios.put(`${url}/${IdProductoAdmin}`, parametros);
+
+          const response = await axios.put(
+            `${url}/${IdProducto}`,
+            parametros
+          );
+
           if (response.status === 200) {
-            setProductosAdmin((prevproductosAdmin) =>
-              prevproductosAdmin.map((insumo) =>
-                insumo.IdProductoAdmin === IdProductoAdmin ? { ...insumo, Estado: nuevoEstado } : insumo
+            setProductosAdmin((prevProducto) =>
+              prevProducto.map((producto) =>
+                producto.IdProducto === IdProducto
+                  ? { ...producto, Estado: nuevoEstado }
+                  : producto
               )
             );
-  
-            show_alerta("Estado del insumo cambiado con éxito", "success", {
-              timer: 2000,
+
+            show_alerta("Estado del producto cambiada con éxito", "success", {
+              timer: 8000,
             });
           }
         } else {
-          show_alerta("No se ha cambiado el estado del insumo", "info");
+          show_alerta("No se ha cambiado el estado del producto", "info");
         }
       });
     } catch (error) {
       console.error("Error updating state:", error);
-      show_alerta("Error cambiando el estado del insumo", "error");
+      show_alerta("Error cambiando el estado del producto", "error");
     }
   };
   
@@ -391,13 +429,16 @@ export const Catalogo = () => {
     const referencia = insumo.Referencia ? insumo.Referencia.toString() : "";
     const cantidad = insumo.Cantidad ? insumo.Cantidad.toString() : "";
     const valorVenta = insumo.ValorVenta ? insumo.ValorVenta.toString() : "";
+    const estado = insumo.Estado ? insumo.Estado.toString() : "";
+
 
     return (
       colorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tallaName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       referencia.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cantidad.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      valorVenta.toLowerCase().includes(searchTerm.toLowerCase())
+      valorVenta.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      estado.toLowerCase().includes(searchTerm.toLocaleLowerCase())
     );
   });
 
@@ -493,7 +534,7 @@ export const Catalogo = () => {
 
                 <div className="form-row">
                   <div className="form-group col-md-6">
-                    <label htmlFor="nroDocumentoCliente">
+                    <label htmlFor="Referencia">
                       Referencia del Producto:
                     </label>
                     <input
@@ -501,7 +542,7 @@ export const Catalogo = () => {
                       className={`form-control ${
                         errors.Referencia ? "is-invalid" : ""
                       }`}
-                      id="nroDocumentoCliente"
+                      id="Referencia"
                       placeholder="Ingrese la referencia del producto"
                       required
                       value={Referencia}
@@ -626,13 +667,13 @@ export const Catalogo = () => {
                       <td>{convertInsumoIdToName(producto.IdInsumo)}</td>
                       <td>{producto.Cantidad}</td>
                       <td>{formatCurrency(producto.ValorVenta)}</td>
-                      {/* <td>
+                      <td>
                           <label className="switch">
                             <input
                               type="checkbox"
                               checked={producto.Estado === "Activo"}
                               onChange={() =>
-                                cambiarEstadoInsumo(producto.IdProductoAdmin)
+                                cambiarEstadoProducto(producto.IdProducto)
                               }
                               className={
                                 producto.Estado === "Activo"
@@ -642,7 +683,7 @@ export const Catalogo = () => {
                             />
                             <span className="slider round"></span>
                           </label>
-                      </td> */}
+                      </td>
                       <td>
                         <div
                           className="btn-group"
@@ -662,7 +703,7 @@ export const Catalogo = () => {
                           <button
                             className="btn btn-danger btn-sm mr-2"
                             onClick={() =>
-                              deleteInsumo(producto.IdProductoAdmin, producto.Referencia)
+                              deleteInsumo(producto.IdProducto, producto.Referencia)
                             }
                             disabled={producto.Estado != "Activo"}
                           >
