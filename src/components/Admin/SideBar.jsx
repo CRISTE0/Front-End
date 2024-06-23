@@ -48,6 +48,18 @@ export const SideBar = ({ isActive }) => {
             {/* <!-- Heading --> */}
             <div className="sidebar-heading">Modulos</div>
 
+            {/* <!-- Configuracion --> */}
+            <li
+              className={`nav-item ${
+                location.pathname === "/admin/Configuracion" ? "active" : ""
+              }`}
+            >
+              <Link to={"/admin/Configuracion"} className="nav-link">
+                <i className="fas fa-fw fa-cog"></i>
+                <span>Configuración</span>
+              </Link>
+            </li>
+
             {/* <!-- Usuarios --> */}
             <li
               className={`nav-item ${
