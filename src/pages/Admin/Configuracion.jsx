@@ -23,18 +23,19 @@ export const Configuracion = () => {
 
   const [showErrors, setShowErrors] = useState(false);
 
-  const validateNombreRol = (value) => {
-    // Expresión regular para validar que solo contiene letras con tildes, la letra ñ y espacios
-    const regex = /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/;
+// Función para validar el nombre del rol
+const validateNombreRol = (value) => {
+  // Expresión regular para validar que solo contiene letras con tildes, la letra ñ y espacios
+  const regex = /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/;
 
-    if (!value.trim()) {
-      return "El nombre del rol es requerido";
-    } else if (!regex.test(value)) {
-      return "El nombre del rol solo puede contener letras con tildes, la letra ñ y espacios";
-    }
+  if (!value.trim()) {
+    return "El nombre del rol es requerido";
+  } else if (!regex.test(value)) {
+    return "El nombre del rol solo puede contener letras con tildes, la letra ñ y espacios";
+  }
 
-    return "";
-  };
+  return "";
+};
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
@@ -53,7 +54,7 @@ export const Configuracion = () => {
   }, [errors]);
 
   const handleChangeRol = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setNombreRol(value);
     const errorMessage = validateNombreRol(value);
     setErrors((prevState) => ({
@@ -101,8 +102,9 @@ export const Configuracion = () => {
 
   const validar = () => {
     let isValid = true;
+    const cleanedNombreRol = NombreRol.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
     const newErrors = {
-      nombreRol: validateNombreRol(NombreRol),
+      nombreRol: validateNombreRol(cleanedNombreRol),
       // Puedes agregar más campos aquí según sea necesario
     };
 
@@ -125,7 +127,7 @@ export const Configuracion = () => {
       } else {
         if (operation === 1) {
           parametros = {
-            NombreRol: NombreRol.trim(),
+            NombreRol: cleanedNombreRol,
             Estado: "Activo",
             Permisos: SelectedPermisos, // Añadir permisos seleccionados
           };
