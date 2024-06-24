@@ -10,9 +10,11 @@ export const Usuarios = () => {
   const rolesUrl = "http://localhost:3000/api/roles"; // URL de la API de roles
   const [Usuarios, setUsuarios] = useState([]);
   const [IdUsuario, setIdUsuario] = useState("");
+  const [IdRol, setIdRol] = useState("");
   const [Usuario, setUsuario] = useState("");
   const [Correo, setCorreo] = useState("");
   const [Contrasenia, setContrasenia] = useState("");
+  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
   const [Rol, setRol] = useState(""); // Estado para almacenar el rol seleccionado
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
@@ -25,6 +27,7 @@ export const Usuarios = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const [roles, setRoles] = useState([]); // Estado para almacenar la lista de roles
+  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
 
   useEffect(() => {
     getUsuarios();
@@ -32,8 +35,12 @@ export const Usuarios = () => {
   }, []);
 
   const getUsuarios = async () => {
-    const respuesta = await axios.get(url);
-    setUsuarios(respuesta.data);
+    try {
+      const respuesta = await axios.get(url);
+      setUsuarios(respuesta.data);
+    } catch (error) {
+      console.error("Error fetching usuarios:", error);
+    }
   };
 
   const getRoles = async () => {
@@ -45,6 +52,11 @@ export const Usuarios = () => {
     }
   };
 
+  const getRolName = (roleId) => {
+    const rol = roles.find((rol) => rol.IdRol === roleId);
+    return rol ? rol.NombreRol : "Rol no encontrado";
+  };
+
   const openModal = (op, usuario = null) => {
     if (op === 1) {
       // Crear Usuario
@@ -52,7 +64,7 @@ export const Usuarios = () => {
       setUsuario("");
       setCorreo("");
       setContrasenia("");
-      setRol(""); // Limpiar el estado del rol seleccionado al crear usuario
+      setIdRol(""); // Limpiar el estado del rol seleccionado al crear usuario
       setOperation(1);
       setTitle("Crear Usuario");
     } else if (op === 2 && usuario) {
@@ -61,7 +73,7 @@ export const Usuarios = () => {
       setUsuario(usuario.Usuario);
       setCorreo(usuario.Correo);
       setContrasenia(usuario.Contrasenia);
-      setRol(usuario.Rol); // Establecer el rol seleccionado al actualizar usuario
+      setIdRol(usuario.IdRol); // Establecer el Id del rol seleccionado al actualizar usuario
       setOperation(2);
       setTitle("Actualizar Usuario");
       setErrors({
@@ -77,13 +89,13 @@ export const Usuarios = () => {
   };
 
   const guardarUsuario = async () => {
-    const cleanedUsuario = Usuario.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
-    const cleanedCorreo = Correo.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
-    const cleanedContrasenia = Contrasenia.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+    const cleanedUsuario = Usuario.trim();
+    const cleanedCorreo = Correo.trim();
+    const cleanedContrasenia = Contrasenia.trim();
 
-    if (!Rol) {
-      // Validar que se seleccione un rol
-      show_alerta("Selecciona un rol para el usuario", "error");
+    if (!cleanedUsuario || !cleanedCorreo || !cleanedContrasenia || !IdRol) {
+      // Validar campos requeridos
+      show_alerta("Todos los campos son requeridos", "error");
       return;
     }
 
@@ -94,8 +106,8 @@ export const Usuarios = () => {
         Correo: cleanedCorreo,
         Contrasenia: cleanedContrasenia,
         Estado: "Activo",
-        Rol: Rol, // Aquí debe ser el IdRol, no el nombre del rol
-      });      
+        IdRol: IdRol,
+      });
     } else if (operation === 2) {
       // Actualizar Usuario
       await enviarSolicitud("PUT", {
@@ -103,50 +115,60 @@ export const Usuarios = () => {
         Usuario: cleanedUsuario,
         Correo: cleanedCorreo,
         Contrasenia: cleanedContrasenia,
-        Rol: Rol, // Incluir el rol seleccionado en los parámetros
+        IdRol: IdRol,
       });
     }
   };
 
   const handleChangeRol = (e) => {
-    const value = e.target.value;
-    setRol(value); // Actualizar el estado del rol seleccionado
+    setIdRol(e.target.value); // Actualizar el estado del rol seleccionado
   };
 
-  const validateUsuario = (Usuario) => {
-    if (!Usuario) {
-      return "El nombre de usuario es requerido";
+  
+
+  const validateUsuario = (value) => {
+    if (!value) {
+      return "Escribe el usuario";
     }
+    
+    // Expresión regular ajustada para permitir solo letras, tildes y 'ñ' con un solo espacio entre palabras
+    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value.trim())) {
+      return "El usuario solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
+    }
+    
+    // Verificar si hay espacios al inicio o al final
+    if (value !== value.trim()) {
+      return "El usuario no puede contener espacios al inicio ni al final";
+    }
+    
     return "";
   };
+  
+
 
   const validateCorreo = (value) => {
     if (!value) {
-      return "Ingresa tu correo electrónico";
+      return "El correo electrónico es requerido";
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (/\s/.test(value)) {
-      return "El correo electrónico no puede contener espacios";
-    }
     if (!emailRegex.test(value)) {
       return "Ingresa un correo electrónico válido";
     }
     return "";
   };
 
-  const validateContrasenia = (Contrasenia) => {
-    if (!Contrasenia) {
+  const validateContrasenia = (value) => {
+    if (!value) {
       return "La contraseña es requerida";
-    } else if (Contrasenia.length < 6) {
-      return "La contraseña debe tener al menos 6 caracteres";
+    } else if (value.length < 8 || value.length > 15) {
+      return "La contraseña debe tener entre 8 y 15 caracteres";
     }
     return "";
-  };
+  };  
 
   const handleChangeUsuario = (e) => {
-    const value = e.target.value;
-    setUsuario(value); // Actualiza el estado del nombre de usuario
-    const errorMessage = validateUsuario(value);
+    setUsuario(e.target.value); // Actualiza el estado del nombre de usuario
+    const errorMessage = validateUsuario(e.target.value);
     setErrors((prevState) => ({
       ...prevState,
       usuario: errorMessage, // Actualiza el error del nombre de usuario con el mensaje de error obtenido
@@ -154,9 +176,8 @@ export const Usuarios = () => {
   };
 
   const handleChangeCorreo = (e) => {
-    const value = e.target.value;
-    setCorreo(value); // Actualiza el estado del correo electrónico
-    const errorMessage = validateCorreo(value);
+    setCorreo(e.target.value); // Actualiza el estado del correo electrónico
+    const errorMessage = validateCorreo(e.target.value);
     setErrors((prevState) => ({
       ...prevState,
       correo: errorMessage, // Actualiza el error de correo con el mensaje de error obtenido
@@ -164,13 +185,40 @@ export const Usuarios = () => {
   };
 
   const handleChangeContrasenia = (e) => {
-    const value = e.target.value;
-    setContrasenia(value); // Actualiza el estado de la contraseña
-    const errorMessage = validateContrasenia(value);
+    setContrasenia(e.target.value); // Actualiza el estado de la contraseña
+    const errorMessage = validateContrasenia(e.target.value);
     setErrors((prevState) => ({
       ...prevState,
       contrasenia: errorMessage, // Actualiza el error de contraseña con el mensaje de error obtenido
     }));
+  };
+
+  const handleDetalleUsuario = async (IdUsuario) => {
+    try {
+      const respuesta = await axios.get(
+        `http://localhost:3000/api/usuarios/${IdUsuario}`
+      );
+      const usuario = respuesta.data;
+      console.log("Detalle de usuario:", usuario);
+      setUsuarioSeleccionado(usuario);
+      // Mostrar el modal de detalles de usuario
+      const modal = new bootstrap.Modal(
+        document.getElementById("modalDetalleUsuario")
+      );
+      modal.show();
+    } catch (error) {
+      // Manejar errores
+      console.error("Error al obtener los detalles del usuario:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error al obtener los detalles del usuario",
+      });
+    }
+  };
+
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword); // Alternar el estado para mostrar/ocultar contraseña
   };
 
   const show_alerta = (message, type) => {
@@ -209,21 +257,10 @@ export const Usuarios = () => {
         url: urlRequest,
         data: parametros,
       });
-      var msj = respuesta.data.message;
+      const msj = respuesta.data.message;
       show_alerta(msj, "success");
       document.getElementById("btnCerrar").click();
       getUsuarios();
-      if (metodo === "POST") {
-        show_alerta("Usuario creado con éxito", "success", { timer: 2000 });
-      } else if (metodo === "PUT") {
-        show_alerta("Usuario actualizado con éxito", "success", {
-          timer: 2000,
-        });
-      } else if (metodo === "DELETE") {
-        show_alerta("Usuario eliminado con éxito", "success", {
-          timer: 2000,
-        });
-      }
     } catch (error) {
       if (error.response) {
         show_alerta(error.response.data.message, "error");
@@ -232,7 +269,7 @@ export const Usuarios = () => {
       } else {
         show_alerta("Error desconocido", "error");
       }
-      console.log(error);
+      console.error("Error en la solicitud:", error);
     }
   };
 
@@ -247,13 +284,8 @@ export const Usuarios = () => {
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        setIdUsuario(idUsuario);
         enviarSolicitud("DELETE", { IdUsuario: idUsuario }).then(() => {
-          const index = filteredUsuarios.findIndex(
-            (usuario) => usuario.IdUsuario === idUsuario
-          );
-          const newPage =
-            Math.ceil((filteredUsuarios.length - 1) / itemsPerPage) || 1;
+          const newPage = Math.ceil((Usuarios.length - 1) / itemsPerPage) || 1;
           setCurrentPage(newPage);
         });
       } else {
@@ -294,7 +326,7 @@ export const Usuarios = () => {
       } else {
         show_alerta("Error desconocido", "error");
       }
-      console.log(error);
+      console.error("Error al cambiar estado:", error);
     }
   };
 
@@ -356,9 +388,6 @@ export const Usuarios = () => {
               />
 
               <div className="input-group mb-3">
-                <span className="input-group-text mx-2">
-                  <i className="fa-solid fa-user"></i>
-                </span>
                 <input
                   type="text"
                   id="usuario"
@@ -373,9 +402,6 @@ export const Usuarios = () => {
               </div>
 
               <div className="input-group mb-3">
-                <span className="input-group-text mx-2">
-                  <i className="fa-solid fa-envelope"></i>
-                </span>
                 <input
                   type="email"
                   id="correo"
@@ -390,11 +416,8 @@ export const Usuarios = () => {
               </div>
 
               <div className="input-group mb-3">
-                <span className="input-group-text mx-2">
-                  <i className="fa-solid fa-lock"></i>
-                </span>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   id="contrasenia"
                   className={`form-control ${
                     errors.contrasenia ? "is-invalid" : ""
@@ -403,24 +426,28 @@ export const Usuarios = () => {
                   value={Contrasenia}
                   onChange={handleChangeContrasenia}
                 />
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={toggleShowPassword}
+                >
+                  {showPassword ? "Ocultar" : "Mostrar"}
+                </button>
                 {renderErrorMessage(errors.contrasenia)}
               </div>
 
               {/* Selección de rol */}
               <div className="input-group mb-3">
-                <span className="input-group-text mx-2">
-                  <i className="fa-solid fa-user-tag"></i>
-                </span>
                 <select
                   id="rol"
                   className="form-select"
-                  value={Rol}
+                  value={IdRol}
                   onChange={handleChangeRol}
                 >
                   <option value="">Selecciona un rol</option>
                   {roles.map((rol) => (
                     <option key={rol.IdRol} value={rol.IdRol}>
-                      {rol.Nombre}
+                      {rol.NombreRol}
                     </option>
                   ))}
                 </select>
@@ -438,7 +465,7 @@ export const Usuarios = () => {
                   Cancelar
                 </button>
                 <button onClick={guardarUsuario} className="btn btn-success">
-                  <i className="fa-solid fa-floppy-disk"></i> Guardar
+                  Guardar
                 </button>
               </div>
             </div>
@@ -461,7 +488,7 @@ export const Usuarios = () => {
               data-toggle="modal"
               data-target="#modalUsuarios"
             >
-              <i className="fas fa-pencil-alt"></i> Añadir Usuario
+              Añadir Usuario
             </button>
           </div>
         </div>
@@ -485,7 +512,6 @@ export const Usuarios = () => {
               >
                 <thead>
                   <tr>
-                    <th>#</th>
                     <th>Usuario</th>
                     <th>Correo</th>
                     <th>Estado</th>
@@ -495,7 +521,6 @@ export const Usuarios = () => {
                 <tbody>
                   {currentItems.map((usuario, index) => (
                     <tr key={usuario.IdUsuario}>
-                      <td>{index + 1 + (currentPage - 1) * itemsPerPage}</td>
                       <td>{usuario.Usuario}</td>
                       <td>{usuario.Correo}</td>
                       <td>
@@ -527,10 +552,11 @@ export const Usuarios = () => {
                             onClick={() => openModal(2, usuario)}
                             disabled={usuario.Estado !== "Activo"}
                           >
-                            <i className="fas fa-solid fa-edit"></i>
+                            <i className="fas fa-edit"></i>
                           </button>
-                          {/* Botón de eliminar */}
-                          &nbsp;
+                          {/* Fin de botón de actualizar */}
+
+                          {/* Botón de actualizar */}
                           <button
                             className="btn btn-danger btn-sm mr-2"
                             onClick={() =>
@@ -538,9 +564,27 @@ export const Usuarios = () => {
                             }
                             disabled={usuario.Estado !== "Activo"}
                           >
-                            <i className="fas fa-solid fa-trash"></i>
+                            <i className="fas fa-trash-alt"></i>
                           </button>
+                          {/* Fin de botón de eliminar */}
                         </div>
+                        {/* Botón de ver detalle */}
+                        <button
+                          onClick={() =>
+                            handleDetalleUsuario(usuario.IdUsuario)
+                          }
+                          className={`btn ${
+                            usuario.Estado === "Cancelado"
+                              ? "btn-secondary mr-2"
+                              : "btn-info"
+                          }`}
+                          disabled={usuario.Estado === "Cancelado"}
+                          data-toggle="modal"
+                          data-target="#modalDetalleUsuario"
+                        >
+                          <i className="fas fa-eye"></i>
+                        </button>
+                        {/* Fin de botón de detalle */}
                       </td>
                     </tr>
                   ))}
@@ -557,6 +601,53 @@ export const Usuarios = () => {
         </div>
         {/* Fin tabla usuarios */}
       </div>
+      {/* Modal para detalles de usuario */}
+      <div className="modal fade" id="modalDetalleUsuario" tabIndex="-1" role="dialog" aria-labelledby="modalDetalleUsuarioLabel" aria-hidden="true">
+  <div className="modal-dialog" role="document">
+    <div className="modal-content">
+      <div className="modal-header">
+        <h5 className="modal-title" id="modalDetalleUsuarioLabel">
+          Detalles del Usuario
+        </h5>
+        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div className="modal-body">
+        {usuarioSeleccionado && (
+          <table className="table">
+            <tbody>
+              <tr>
+                <th scope="row">ID:</th>
+                <td>{usuarioSeleccionado.IdUsuario}</td>
+              </tr>
+              <tr>
+                <th scope="row">Usuario:</th>
+                <td>{usuarioSeleccionado.Usuario}</td>
+              </tr>
+              <tr>
+                <th scope="row">Correo:</th>
+                <td>{usuarioSeleccionado.Correo}</td>
+              </tr>
+              <tr>
+                <th scope="row">Estado:</th>
+                <td>{usuarioSeleccionado.Estado}</td>
+              </tr>
+              <tr>
+                <th scope="row">Rol:</th>
+                <td>{getRolName(usuarioSeleccionado.IdRol)}</td>
+              </tr>
+            </tbody>
+          </table>
+        )}
+      </div>
+      <div className="modal-footer">
+        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
     </>
   );
 };
