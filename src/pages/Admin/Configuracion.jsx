@@ -7,150 +7,198 @@ import SearchBar from "../../assets/js/SearchBar";
 
 export const Configuracion = () => {
   let url = "http://localhost:3000/api/roles";
+  let urlPermisos = "http://localhost:3000/api/permisos"; // URL para obtener los permisos
 
-  const [Tallas, setTallas] = useState([]);
-  const [IdTalla, setIdTalla] = useState("");
-  const [Talla, setTalla] = useState([]);
+  const [Roles, setRoles] = useState([]);
+  const [Permisos, setPermisos] = useState([]); // Estado para permisos
+  const [SelectedPermisos, setSelectedPermisos] = useState([]); // Estado para permisos seleccionados
+  const [IdRol, setIdRol] = useState("");
+  const [NombreRol, setNombreRol] = useState("");
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [errors, setErrors] = useState({
+    nombreRol: "",
+  });
+
+  const [showErrors, setShowErrors] = useState(false);
+
+  const validateNombreRol = (value) => {
+    // Expresión regular para validar que solo contiene letras con tildes, la letra ñ y espacios
+    const regex = /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/;
+
+    if (!value.trim()) {
+      return "El nombre del rol es requerido";
+    } else if (!regex.test(value)) {
+      return "El nombre del rol solo puede contener letras con tildes, la letra ñ y espacios";
+    }
+
+    return "";
+  };
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
+  // Estado para el modal de detalle
+  const [detailRol, setDetailRol] = useState(null);
+
   useEffect(() => {
-    getTallas();
+    getRoles();
+    getPermisos(); // Obtener permisos al cargar el componente
   }, []);
 
-  const handleChangeTalla = (e) => {
-    setTalla(e.target.value.toUpperCase());
+  useEffect(() => {
+    const hasError = Object.values(errors).some((error) => error !== "");
+    setShowErrors(hasError);
+  }, [errors]);
+
+  const handleChangeRol = (e) => {
+    const value = e.target.value;
+    setNombreRol(value);
+    const errorMessage = validateNombreRol(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      nombreRol: errorMessage,
+    }));
   };
 
-  const getTallas = async () => {
+  const getRoles = async () => {
     const respuesta = await axios.get(url);
-    setTallas(respuesta.data);
+    setRoles(respuesta.data);
     console.log(respuesta.data);
   };
 
-  const openModal = (op, IdTalla, Talla) => {
-    setIdTalla("");
-    setTalla("");
+  const getPermisos = async () => {
+    const respuesta = await axios.get(urlPermisos);
+    setPermisos(respuesta.data);
+    console.log(respuesta.data);
+  };
+
+  const handlePermisosChange = (permisoId) => {
+    setSelectedPermisos((prevSelectedPermisos) =>
+      prevSelectedPermisos.includes(permisoId)
+        ? prevSelectedPermisos.filter((id) => id !== permisoId)
+        : [...prevSelectedPermisos, permisoId]
+    );
+  };
+
+  const openModal = (op, IdRol = "", NombreRol = "", permisos = []) => {
+    setIdRol(IdRol);
+    setNombreRol(NombreRol);
     setOperation(op);
+    setSelectedPermisos(permisos.map((permiso) => permiso.IdPermiso)); // Configurar permisos seleccionados
+
     if (op === 1) {
-      setTitle("Registrar talla");
+      setTitle("Registrar Rol");
     } else if (op === 2) {
-      setTitle("Editar talla");
-      setIdTalla(IdTalla);
-      setTalla(Talla);
+      setTitle("Editar Rol");
     }
-    // window.setTimeout(function () {
-    //   document.getElementById("nombre").focus();
-    // }, 500);
+  };
+
+  const openDetailModal = (rol) => {
+    setDetailRol(rol);
   };
 
   const validar = () => {
-    var parametros;
-    var metodo;
-    if (Talla === "") {
-      show_alerta("Escribe el nombre de la talla ", "warning");
-    } else {
-      console.log(Talla);
-      if (operation === 1) {
-        parametros = {
-          Talla: Talla.trim(),
-        };
-        metodo = "POST";
-      } else {
-        parametros = {
-          IdTalla: IdTalla,
-          Talla: Talla,
-        };
-        metodo = "PUT";
+    let isValid = true;
+    const newErrors = {
+      nombreRol: validateNombreRol(NombreRol),
+      // Puedes agregar más campos aquí según sea necesario
+    };
+
+    // Verificar si hay algún error
+    Object.values(newErrors).forEach((error) => {
+      if (error) {
+        isValid = false;
       }
-      enviarSolicitud(metodo, parametros);
+    });
+
+    // Actualizar el estado de errores y mostrar alerta si es necesario
+    setErrors(newErrors);
+
+    if (isValid) {
+      // Lógica para enviar la solicitud si no hay errores
+      var parametros;
+      var metodo;
+      if (NombreRol === "") {
+        show_alerta("Escribe el nombre del rol", "warning");
+      } else {
+        if (operation === 1) {
+          parametros = {
+            NombreRol: NombreRol.trim(),
+            Estado: "Activo",
+            Permisos: SelectedPermisos, // Añadir permisos seleccionados
+          };
+          metodo = "POST";
+        } else {
+          parametros = {
+            IdRol: IdRol,
+            NombreRol: NombreRol,
+            Permisos: SelectedPermisos, // Añadir permisos seleccionados
+          };
+          metodo = "PUT";
+        }
+        enviarSolicitud(metodo, parametros);
+      }
+    } else {
+      show_alerta(
+        "Por favor, completa todos los campos correctamente",
+        "error"
+      );
     }
   };
 
   const enviarSolicitud = async (metodo, parametros) => {
     if (metodo === "PUT") {
-      let urlPut = `${url}/${parametros.IdTalla}`;
+      let urlPut = `${url}/${parametros.IdRol}`;
 
-      console.log(parametros);
-      console.log(url);
       await axios({ method: metodo, url: urlPut, data: parametros })
-        .then(function (respuesta) {
-          console.log(respuesta);
-          var tipo = respuesta.data[0];
+        .then((respuesta) => {
           var msj = respuesta.data.message;
           show_alerta(msj, "success");
-          // if (jtipo === "success") {
           document.getElementById("btnCerrar").click();
-          getTallas();
-          // }
+          getRoles();
         })
-        .catch(function (error) {
-          if (!error.response.data.error) {
-            let mensaje = error.response.data.message;
-
-            show_alerta(mensaje, "error");
-          } else {
-            show_alerta(error.response.data.error, "error");
-          }
-
-          console.log(error);
+        .catch((error) => {
+          show_alerta(
+            error.response.data.message || "Error en la solicitud",
+            "error"
+          );
         });
     } else if (metodo === "DELETE") {
-      console.log(parametros);
-      let urlDelete = `${url}/${parametros.IdTalla}`;
+      let urlDelete = `${url}/${parametros.IdRol}`;
 
       await axios({ method: metodo, url: urlDelete, data: parametros })
-        .then(function (respuesta) {
-          console.log(respuesta);
-          var tipo = respuesta.data[0];
+        .then((respuesta) => {
           var msj = respuesta.data.message;
           show_alerta(msj, "success");
-          // if (tipo === "success") {
           document.getElementById("btnCerrar").click();
-          getTallas();
-          // }
+          getRoles();
         })
-        .catch(function (error) {
+        .catch((error) => {
           show_alerta("Error en la solicitud", "error");
-          console.log(error);
         });
     } else {
-      //POST
       await axios({ method: metodo, url: url, data: parametros })
-        .then(function (respuesta) {
-          console.log(respuesta);
-          var tipo = respuesta.data[0];
+        .then((respuesta) => {
           var msj = respuesta.data.message;
-          console.log(Talla);
-
           show_alerta(msj, "success");
-          // if (jtipo === "success") {
           document.getElementById("btnCerrar").click();
-          getTallas();
-          // }
+          getRoles();
         })
-        .catch(function (error) {
-          if (!error.response.data.error) {
-            let mensaje = error.response.data.message;
-
-            show_alerta(mensaje, "error");
-          } else {
-            show_alerta(error.response.data.error, "error");
-          }
-          console.log(error);
-          console.log(error.response.data.error);
+        .catch((error) => {
+          show_alerta(
+            error.response.data.message || "Error en la solicitud",
+            "error"
+          );
         });
     }
   };
 
-  const deletetalla = (IdTalla, Talla) => {
+  const deleteRol = (IdRol, NombreRol) => {
     const MySwal = withReactContent(Swal);
     MySwal.fire({
-      title: `¿Seguro de eliminar la talla ${Talla}?`,
+      title: `¿Seguro de eliminar el rol ${NombreRol}?`,
       icon: "question",
       text: "No se podrá dar marcha atrás",
       showCancelButton: true,
@@ -158,81 +206,66 @@ export const Configuracion = () => {
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        enviarSolicitud("DELETE", { IdTalla: IdTalla })
+        enviarSolicitud("DELETE", { IdRol: IdRol })
           .then(() => {
-            // Calcular el índice de la talla eliminada en la lista filtrada (si es necesario)
-            const index = filteredTallass.findIndex(
-              (talla) => talla.id === IdTalla
+            setCurrentPage(
+              Math.ceil((filteredRoles.length - 1) / itemsPerPage) || 1
             );
-
-            // Determinar la página en la que debería estar la talla después de la eliminación
-            const newPage =
-              Math.ceil((filteredTallass.length - 1) / itemsPerPage) || 1;
-
-            // Establecer la nueva página como la página actual
-            setCurrentPage(newPage);
           })
           .catch(() => {
-            show_alerta("Hubo un error al eliminar la talla", "error");
+            show_alerta("Hubo un error al eliminar el rol", "error");
           });
       } else {
-        show_alerta("La talla NO fue eliminada", "info");
+        show_alerta("El rol NO fue eliminado", "info");
       }
     });
   };
 
-  const cambiarEstadoTalla = async (IdTalla) => {
+  const cambiarEstadoRol = async (IdRol) => {
     try {
-      const tallaActual = Tallas.find((talla) => talla.IdTalla === IdTalla);
-
-      const nuevoEstado =
-        tallaActual.Estado === "Activo" ? "Inactivo" : "Activo";
+      const rolActual = Roles.find((rol) => rol.IdRol === IdRol);
+      const nuevoEstado = rolActual.Estado === "Activo" ? "Inactivo" : "Activo";
 
       const MySwal = withReactContent(Swal);
       MySwal.fire({
-        title: `¿Seguro de cambiar el estado de la talla ${tallaActual.Talla}?`,
+        title: `¿Seguro de cambiar el estado del rol ${rolActual.NombreRol}?`,
         icon: "question",
-        text: `El estado actual de la talla es: ${tallaActual.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        text: `El estado actual del rol es: ${rolActual.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
         showCancelButton: true,
         confirmButtonText: "Sí, cambiar estado",
         cancelButtonText: "Cancelar",
       }).then(async (result) => {
         if (result.isConfirmed) {
-          const parametrosTalla = {
-            IdTalla,
-            Talla: tallaActual.Talla,
+          const parametrosRol = {
             Estado: nuevoEstado,
           };
 
           const response = await axios.put(
-            `${url}/${IdTalla}`,
-            parametrosTalla
+            `${url}/estado/${IdRol}`,
+            parametrosRol
           );
 
           if (response.status === 200) {
-            setTallas((prevTalla) =>
-              prevTalla.map((talla) =>
-                talla.IdTalla === IdTalla
-                  ? { ...talla, Estado: nuevoEstado }
-                  : talla
+            setRoles((prevRoles) =>
+              prevRoles.map((rol) =>
+                rol.IdRol === IdRol ? { ...rol, Estado: nuevoEstado } : rol
               )
             );
 
-            show_alerta("Estado de la talla cambiada con éxito", "success", {
+            show_alerta("Estado del rol cambiado con éxito", "success", {
               timer: 8000,
             });
           }
         } else {
-          show_alerta("No se ha cambiado el estado de la talla", "info");
+          show_alerta("No se ha cambiado el estado del rol", "info");
         }
       });
     } catch (error) {
-      console.error("Error updating state:", error);
-      show_alerta("Error cambiando el estado de la talla", "error");
+      show_alerta("Error cambiando el estado del rol", "error");
     }
   };
 
-  // Configuracion mensaje de alerta
+  // Configuración mensaje de alerta
   const show_alerta = (message, type) => {
     const MySwal = withReactContent(Swal);
     MySwal.fire({
@@ -242,7 +275,6 @@ export const Configuracion = () => {
       showConfirmButton: false,
       timerProgressBar: true,
       didOpen: () => {
-        // Selecciona la barra de progreso y ajusta su estilo
         const progressBar = MySwal.getTimerProgressBar();
         if (progressBar) {
           progressBar.style.backgroundColor = "black";
@@ -254,41 +286,40 @@ export const Configuracion = () => {
 
   const handleSearchTermChange = (newSearchTerm) => {
     setSearchTerm(newSearchTerm);
-    setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
+    setCurrentPage(1);
   };
 
-  // Filtrar las tallas según el término de búsqueda
-  const filteredTallass = Tallas.filter((talla) =>
-    Object.values(talla).some((value) =>
+  // Filtrar los roles según el término de búsqueda
+  const filteredRoles = Roles.filter((rol) =>
+    Object.values(rol).some((value) =>
       value.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  // Aplicar paginación a las tallas filtrados
-  const totalPages = Math.ceil(filteredTallass.length / itemsPerPage);
-  const currenTallas = filteredTallass.slice(
+  // Aplicar paginación a los roles filtrados
+  const totalPages = Math.ceil(filteredRoles.length / itemsPerPage);
+  const currentRoles = filteredRoles.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
   return (
     <>
-      {/* <!-- Modal para crear talla --> */}
-
+      {/* <!-- Modal para crear rol --> */}
       <div
         className="modal fade"
-        id="modalTallas"
+        id="modalRoles"
         tabIndex="-1"
         role="dialog"
-        aria-labelledby="modalAñadirTallaLabel"
+        aria-labelledby="modalAñadirRolLabel"
         aria-hidden="true"
         data-backdrop="static"
         data-keyboard="false"
       >
-        <div className="modal-dialog" role="document">
+        <div className="modal-dialog modal-lg" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="modalAñadirTallaLabel">
+              <h5 className="modal-title" id="modalAñadirRolLabel">
                 {title}
               </h5>
               <button
@@ -301,54 +332,169 @@ export const Configuracion = () => {
               </button>
             </div>
             <div className="modal-body">
-              <input
-                type="hidden"
-                id="id"
-                value={IdTalla}
-                onChange={(e) => setIdTalla(e.target.value)}
-              ></input>
-
-              <div className="input-group mb-3">
-                <span className="input-group-text mx-2">
-                  <i className="fas fa-solid fa-ruler-combined"></i>
-                </span>
-                <input
-                  type="text"
-                  id="precio"
-                  className="form-control"
-                  placeholder="Talla"
-                  value={Talla}
-                  onChange={handleChangeTalla}
-                ></input>
-              </div>
-
-              <div className="modal-footer">
-                <div className="text-right">
-                  <button
-                    type="button"
-                    id="btnCerrar"
-                    className="btn btn-secondary"
-                    data-dismiss="modal"
-                  >
-                    Cancelar
-                  </button>
-
-                  <button onClick={() => validar()} className="btn btn-success">
-                    <i className="fa-solid fa-floppy-disk"></i> Guardar
-                  </button>
+              <form>
+                <div className="form-group">
+                  <input
+                    type="hidden"
+                    id="id"
+                    value={IdRol}
+                    onChange={(e) => setIdRol(e.target.value)}
+                  />
                 </div>
-              </div>
+                <form>
+                  <div className="form-group">
+                    <label htmlFor="nombre">Nombre del Rol:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        showErrors && errors.nombreRol ? "is-invalid" : ""
+                      }`}
+                      id="nombre"
+                      placeholder="Ingrese el nombre del rol"
+                      value={NombreRol}
+                      onChange={handleChangeRol}
+                    />
+                    {showErrors && errors.nombreRol && (
+                      <div className="invalid-feedback">{errors.nombreRol}</div>
+                    )}
+                  </div>
+                </form>
+
+                <div className="form-group">
+                  <label>Permisos:</label>
+                  <div className="row">
+                    {Permisos.map((permiso) => (
+                      <div
+                        key={permiso.IdPermiso}
+                        className="col-lg-3 col-md-4 col-sm-6 mb-3"
+                      >
+                        <div className="custom-control custom-switch">
+                          <input
+                            type="checkbox"
+                            className="custom-control-input"
+                            id={`permiso-${permiso.IdPermiso}`}
+                            value={permiso.IdPermiso}
+                            checked={SelectedPermisos.includes(
+                              permiso.IdPermiso
+                            )}
+                            onChange={() =>
+                              handlePermisosChange(permiso.IdPermiso)
+                            }
+                          />
+                          <label
+                            className="custom-control-label ml-2"
+                            htmlFor={`permiso-${permiso.IdPermiso}`}
+                          >
+                            {permiso.Permiso}
+                          </label>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-dismiss="modal"
+                id="btnCerrar"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={() => validar()}
+              >
+                <i className="fa-solid fa-floppy-disk"></i> Guardar
+              </button>
             </div>
           </div>
         </div>
       </div>
-      {/* Fin modal crear talla */}
 
-      {/* <!-- Inicio de tallas --> */}
+      {/* Fin modal crear rol */}
+
+      {/* <!-- Modal de detalle --> */}
+      <div
+        className="modal fade"
+        id="modalDetalleRol"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="modalDetalleRolLabel"
+        aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
+      >
+        <div className="modal-dialog modal-l" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="modalDetalleRolLabel">
+                Detalle del Rol
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              {detailRol && (
+                <form>
+                  <div className="form-group">
+                    <label htmlFor="nombre">Nombre del Rol:</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="nombre"
+                      value={detailRol.NombreRol}
+                      disabled
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Permisos:</label>
+                    <div className="d-flex flex-wrap">
+                      {detailRol.Permisos.map((permiso) => (
+                        <div key={permiso.IdPermiso} className="mr-3 mb-2">
+                          <span className="mr-1">
+                            <i className="fas fa-check-circle"></i>
+                          </span>
+                          {permiso.Permiso}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </form>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-dismiss="modal"
+                id="btnCerrarDetalle"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Fin modal de detalle */}
+
+      {/* <!-- Inicio de roles --> */}
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">Tallas</h1>
+          <h1 className="h3 mb-4 text-center text-dark">
+            Gestión de Configuración
+          </h1>
 
           <div className="text-center p-3">
             <button
@@ -356,17 +502,17 @@ export const Configuracion = () => {
               type="button"
               className="btn btn-dark"
               data-toggle="modal"
-              data-target="#modalTallas"
+              data-target="#modalRoles"
             >
-              <i className="fas fa-pencil-alt"></i> Crear talla
+              <i className="fas fa-pencil-alt"></i> Crear rol
             </button>
           </div>
         </div>
 
-        {/* <!-- Tabla Proveedor --> */}
+        {/* <!-- Tabla Roles --> */}
         <div className="card shadow mb-4">
           <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Tallas</h6>
+            <h6 className="m-0 font-weight-bold text-primary">Roles</h6>
           </div>
           <div className="card-body">
             <SearchBar
@@ -382,27 +528,23 @@ export const Configuracion = () => {
               >
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>Talla</th>
+                    <th>Nombre del Rol</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
-
                 <tbody>
-                  {currenTallas.map((talla, i) => (
-                    <tr key={talla.IdTalla}>
-                      <td>{i + 1}</td>
-
-                      <td>{talla.Talla}</td>
+                  {currentRoles.map((rol) => (
+                    <tr key={rol.IdRol}>
+                      <td>{rol.NombreRol}</td>
                       <td>
                         <label className="switch">
                           <input
                             type="checkbox"
-                            checked={talla.Estado === "Activo"}
-                            onChange={() => cambiarEstadoTalla(talla.IdTalla)}
+                            checked={rol.Estado === "Activo"}
+                            onChange={() => cambiarEstadoRol(rol.IdRol)}
                             className={
-                              talla.Estado === "Activo"
+                              rol.Estado === "Activo"
                                 ? "switch-green"
                                 : "switch-red"
                             }
@@ -410,35 +552,46 @@ export const Configuracion = () => {
                           <span className="slider round"></span>
                         </label>
                       </td>
-
                       <td>
                         <div
                           className="btn-group"
                           role="group"
                           aria-label="Acciones"
                         >
-                          {/* boton de actualizar */}
+                          {/* Botón de actualizar */}
                           <button
                             className="btn btn-warning btn-sm mr-2"
                             data-toggle="modal"
-                            data-target="#modalTallas"
+                            data-target="#modalRoles"
                             onClick={() =>
-                              openModal(2, talla.IdTalla, talla.Talla)
+                              openModal(
+                                2,
+                                rol.IdRol,
+                                rol.NombreRol,
+                                rol.Permisos
+                              )
                             }
-                            disabled={talla.Estado != "Activo"}
+                            disabled={rol.Estado !== "Activo"}
                           >
                             <i className="fas fa-solid fa-edit"></i>
                           </button>
-                          {/* boton de eliminar */}
-                          &nbsp;
+                          {/* Botón de eliminar */}
                           <button
                             className="btn btn-danger btn-sm mr-2"
-                            onClick={() =>
-                              deletetalla(talla.IdTalla, talla.Talla)
-                            }
-                            disabled={talla.Estado != "Activo"}
+                            onClick={() => deleteRol(rol.IdRol, rol.NombreRol)}
+                            disabled={rol.Estado !== "Activo"}
                           >
                             <i className="fas fa-solid fa-trash"></i>
+                          </button>
+                          {/* Botón de detalle */}
+                          <button
+                            className="btn btn-info btn-sm"
+                            data-toggle="modal"
+                            data-target="#modalDetalleRol"
+                            onClick={() => openDetailModal(rol)}
+                            disabled={rol.Estado !== "Activo"}
+                          >
+                            <i className="fas fa-solid fa-info-circle"></i>
                           </button>
                         </div>
                       </td>
@@ -454,7 +607,7 @@ export const Configuracion = () => {
             />
           </div>
         </div>
-        {/* Fin tabla tallas */}
+        {/* Fin tabla roles */}
       </div>
     </>
   );
