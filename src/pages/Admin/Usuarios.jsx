@@ -46,7 +46,9 @@ export const Usuarios = () => {
   const getRoles = async () => {
     try {
       const response = await axios.get(rolesUrl);
-      setRoles(response.data);
+      // Filtrar solo los roles activos
+      const rolesActivos = response.data.filter((rol) => rol.Estado === "Activo");
+      setRoles(rolesActivos);
     } catch (error) {
       console.error("Error fetching roles:", error);
     }
@@ -56,6 +58,8 @@ export const Usuarios = () => {
     const rol = roles.find((rol) => rol.IdRol === roleId);
     return rol ? rol.NombreRol : "Rol no encontrado";
   };
+
+  
 
   const openModal = (op, usuario = null) => {
     if (op === 1) {
