@@ -248,12 +248,13 @@ h5 {
 }
 
 .page-link {
-  font-size: 16px; /* Ajusta el tamaño del texto */
+  font-size: 14px; /* Ajusta el tamaño del texto */
   padding: 8px 16px; /* Ajusta el espaciado interno */
 }
 
 input.Buscador {
-  padding: 8px; /* Reducir el padding */
+  padding: 5px; /* Reducir el padding */
+  margin-top: 5px;
   margin-left: auto;
   border: 1px solid #ccc;
   border-radius: 15px; /* Reducir el radio de los bordes */

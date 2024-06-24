@@ -11,6 +11,53 @@
     height: auto;
   }
   
+
+  
+
+
+  .tooltipSizesShirt {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .tooltipSizesShirt .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    font-size: 15px;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 150%;
+    left: 50%;
+    margin-left: -60px;
+    
+    /* Fade in tooltip - takes 1 second to go from 0% to 100% opac: */
+    opacity: 0;
+    transition: opacity 1s;
+  }          
+
+
+  .tooltipSizesShirt .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+  }
+  
+  .tooltipSizesShirt:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+  }
+
+
   /* @media (max-width: 1200px) {
     #canvas-container {
       max-width: 500px;
@@ -30,8 +77,9 @@
   } */
   
   @media (max-width: 576px) {
-    #canvas-container {
-      max-width: 250px;
+    .canvas-container {
+      /* max-width: 250px; */
+      margin: 0 0 0 10px;
     }
   }
   
