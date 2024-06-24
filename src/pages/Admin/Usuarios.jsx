@@ -124,27 +124,25 @@ export const Usuarios = () => {
     setIdRol(e.target.value); // Actualizar el estado del rol seleccionado
   };
 
-  
-
   const validateUsuario = (value) => {
     if (!value) {
       return "Escribe el usuario";
     }
-    
+
     // Expresión regular ajustada para permitir solo letras, tildes y 'ñ' con un solo espacio entre palabras
-    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value.trim())) {
+    if (
+      !/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value.trim())
+    ) {
       return "El usuario solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
     }
-    
+
     // Verificar si hay espacios al inicio o al final
     if (value !== value.trim()) {
       return "El usuario no puede contener espacios al inicio ni al final";
     }
-    
+
     return "";
   };
-  
-
 
   const validateCorreo = (value) => {
     if (!value) {
@@ -164,7 +162,7 @@ export const Usuarios = () => {
       return "La contraseña debe tener entre 8 y 15 caracteres";
     }
     return "";
-  };  
+  };
 
   const handleChangeUsuario = (e) => {
     setUsuario(e.target.value); // Actualiza el estado del nombre de usuario
@@ -330,26 +328,21 @@ export const Usuarios = () => {
     }
   };
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-
   const filteredUsuarios = Usuarios.filter((usuario) =>
     usuario.Usuario.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const currentItems = filteredUsuarios.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-
-  const paginate = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
 
   const handleSearchTermChange = (newSearchTerm) => {
     setSearchTerm(newSearchTerm);
     setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
   };
+
+  // Aplicar paginación a los proveedores filtrados
+  const totalPages = Math.ceil(filteredUsuarios.length / itemsPerPage);
+  const currentUsuarios = filteredUsuarios.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <>
@@ -519,7 +512,7 @@ export const Usuarios = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentItems.map((usuario, index) => (
+                  {currentUsuarios.map((usuario, index) => (
                     <tr key={usuario.IdUsuario}>
                       <td>{usuario.Usuario}</td>
                       <td>{usuario.Correo}</td>
@@ -592,62 +585,76 @@ export const Usuarios = () => {
               </table>
             </div>
             <Pagination
-              itemsPerPage={itemsPerPage}
-              totalItems={filteredUsuarios.length}
               currentPage={currentPage}
-              paginate={paginate}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
             />
           </div>
         </div>
         {/* Fin tabla usuarios */}
       </div>
       {/* Modal para detalles de usuario */}
-      <div className="modal fade" id="modalDetalleUsuario" tabIndex="-1" role="dialog" aria-labelledby="modalDetalleUsuarioLabel" aria-hidden="true">
-  <div className="modal-dialog" role="document">
-    <div className="modal-content">
-      <div className="modal-header">
-        <h5 className="modal-title" id="modalDetalleUsuarioLabel">
-          Detalles del Usuario
-        </h5>
-        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      <div
+        className="modal fade"
+        id="modalDetalleUsuario"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="modalDetalleUsuarioLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="modalDetalleUsuarioLabel">
+                Detalles del Usuario
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              {usuarioSeleccionado && (
+                <table className="table">
+                  <tbody>
+                    <tr>
+                      <th scope="row">ID:</th>
+                      <td>{usuarioSeleccionado.IdUsuario}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Usuario:</th>
+                      <td>{usuarioSeleccionado.Usuario}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Correo:</th>
+                      <td>{usuarioSeleccionado.Correo}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Estado:</th>
+                      <td>{usuarioSeleccionado.Estado}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Rol:</th>
+                      <td>{getRolName(usuarioSeleccionado.IdRol)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="modal-body">
-        {usuarioSeleccionado && (
-          <table className="table">
-            <tbody>
-              <tr>
-                <th scope="row">ID:</th>
-                <td>{usuarioSeleccionado.IdUsuario}</td>
-              </tr>
-              <tr>
-                <th scope="row">Usuario:</th>
-                <td>{usuarioSeleccionado.Usuario}</td>
-              </tr>
-              <tr>
-                <th scope="row">Correo:</th>
-                <td>{usuarioSeleccionado.Correo}</td>
-              </tr>
-              <tr>
-                <th scope="row">Estado:</th>
-                <td>{usuarioSeleccionado.Estado}</td>
-              </tr>
-              <tr>
-                <th scope="row">Rol:</th>
-                <td>{getRolName(usuarioSeleccionado.IdRol)}</td>
-              </tr>
-            </tbody>
-          </table>
-        )}
-      </div>
-      <div className="modal-footer">
-        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">
-          Cerrar
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
     </>
   );
 };
