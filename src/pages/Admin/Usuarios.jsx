@@ -595,66 +595,101 @@ export const Usuarios = () => {
       </div>
       {/* Modal para detalles de usuario */}
       <div
-        className="modal fade"
-        id="modalDetalleUsuario"
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="modalDetalleUsuarioLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="modalDetalleUsuarioLabel">
-                Detalles del Usuario
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body">
-              {usuarioSeleccionado && (
-                <table className="table">
-                  <tbody>
-                    <tr>
-                      <th scope="row">ID:</th>
-                      <td>{usuarioSeleccionado.IdUsuario}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Usuario:</th>
-                      <td>{usuarioSeleccionado.Usuario}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Correo:</th>
-                      <td>{usuarioSeleccionado.Correo}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Estado:</th>
-                      <td>{usuarioSeleccionado.Estado}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Rol:</th>
-                      <td>{getRolName(usuarioSeleccionado.IdRol)}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              )}
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+  className="modal fade"
+  id="modalDetalleUsuario"
+  tabIndex="-1"
+  role="dialog"
+  aria-labelledby="modalDetalleUsuarioLabel"
+  aria-hidden="true"
+  data-backdrop="static"
+  data-keyboard="false"
+>
+  <div className="modal-dialog modal-l" role="document">
+    <div className="modal-content">
+      <div className="modal-header">
+        <h5 className="modal-title" id="modalDetalleUsuarioLabel">
+          Detalles del Usuario
+        </h5>
+        <button
+          type="button"
+          className="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
+      <div className="modal-body">
+        {usuarioSeleccionado && (
+          <form>
+            <div className="form-group">
+              <label htmlFor="idUsuario">ID:</label>
+              <input
+                type="text"
+                className="form-control"
+                id="idUsuario"
+                value={usuarioSeleccionado.IdUsuario}
+                disabled
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="usuario">Usuario:</label>
+              <input
+                type="text"
+                className="form-control"
+                id="usuario"
+                value={usuarioSeleccionado.Usuario}
+                disabled
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="correo">Correo:</label>
+              <input
+                type="email"
+                className="form-control"
+                id="correo"
+                value={usuarioSeleccionado.Correo}
+                disabled
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="contrasena">Contraseña:</label>
+              <input
+                type="password"
+                className="form-control"
+                id="contrasena"
+                value={usuarioSeleccionado.Contrasenia}
+                disabled
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="rol">Rol:</label>
+              <input
+                type="text"
+                className="form-control"
+                id="rol"
+                value={getRolName(usuarioSeleccionado.IdRol)}
+                disabled
+              />
+            </div>
+          </form>
+        )}
+      </div>
+      <div className="modal-footer">
+        <button
+          type="button"
+          className="btn btn-secondary"
+          data-dismiss="modal"
+          id="btnCerrarDetalle"
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
     </>
   );
 };
