@@ -47,7 +47,9 @@ export const Usuarios = () => {
     try {
       const response = await axios.get(rolesUrl);
       // Filtrar solo los roles activos
-      const rolesActivos = response.data.filter((rol) => rol.Estado === "Activo");
+      const rolesActivos = response.data.filter(
+        (rol) => rol.Estado === "Activo"
+      );
       setRoles(rolesActivos);
     } catch (error) {
       console.error("Error fetching roles:", error);
@@ -58,8 +60,6 @@ export const Usuarios = () => {
     const rol = roles.find((rol) => rol.IdRol === roleId);
     return rol ? rol.NombreRol : "Rol no encontrado";
   };
-
-  
 
   const openModal = (op, usuario = null) => {
     if (op === 1) {
@@ -425,19 +425,24 @@ export const Usuarios = () => {
                 />
                 <button
                   type="button"
-                  className="btn btn-outline-secondary"
+                  className="btn btn-outline-secondary ml-2"
                   onClick={toggleShowPassword}
                 >
-                  {showPassword ? "Ocultar" : "Mostrar"}
+                  {showPassword ? (
+                    <i className="fas fa-eye-slash"></i>
+                  ) : (
+                    <i className="fas fa-eye"></i>
+                  )}
                 </button>
                 {renderErrorMessage(errors.contrasenia)}
               </div>
 
               {/* Selección de rol */}
               <div className="input-group mb-3">
+                <div className="input-group-prepend"></div>
                 <select
                   id="rol"
-                  className="form-select"
+                  className={`form-control ${errors.rol ? "is-invalid" : ""}`}
                   value={IdRol}
                   onChange={handleChangeRol}
                 >
@@ -448,6 +453,7 @@ export const Usuarios = () => {
                     </option>
                   ))}
                 </select>
+                {renderErrorMessage(errors.rol)}
               </div>
             </div>
 
@@ -599,101 +605,99 @@ export const Usuarios = () => {
       </div>
       {/* Modal para detalles de usuario */}
       <div
-  className="modal fade"
-  id="modalDetalleUsuario"
-  tabIndex="-1"
-  role="dialog"
-  aria-labelledby="modalDetalleUsuarioLabel"
-  aria-hidden="true"
-  data-backdrop="static"
-  data-keyboard="false"
->
-  <div className="modal-dialog modal-l" role="document">
-    <div className="modal-content">
-      <div className="modal-header">
-        <h5 className="modal-title" id="modalDetalleUsuarioLabel">
-          Detalles del Usuario
-        </h5>
-        <button
-          type="button"
-          className="close"
-          data-dismiss="modal"
-          aria-label="Close"
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
+        className="modal fade"
+        id="modalDetalleUsuario"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="modalDetalleUsuarioLabel"
+        aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
+      >
+        <div className="modal-dialog modal-l" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="modalDetalleUsuarioLabel">
+                Detalles del Usuario
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              {usuarioSeleccionado && (
+                <form>
+                  <div className="form-group">
+                    <label htmlFor="idUsuario">ID:</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="idUsuario"
+                      value={usuarioSeleccionado.IdUsuario}
+                      disabled
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="usuario">Usuario:</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="usuario"
+                      value={usuarioSeleccionado.Usuario}
+                      disabled
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="correo">Correo:</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      id="correo"
+                      value={usuarioSeleccionado.Correo}
+                      disabled
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="contrasena">Contraseña:</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      id="contrasena"
+                      value={usuarioSeleccionado.Contrasenia}
+                      disabled
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="rol">Rol:</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="rol"
+                      value={getRolName(usuarioSeleccionado.IdRol)}
+                      disabled
+                    />
+                  </div>
+                </form>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-dismiss="modal"
+                id="btnCerrarDetalle"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="modal-body">
-        {usuarioSeleccionado && (
-          <form>
-            <div className="form-group">
-              <label htmlFor="idUsuario">ID:</label>
-              <input
-                type="text"
-                className="form-control"
-                id="idUsuario"
-                value={usuarioSeleccionado.IdUsuario}
-                disabled
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="usuario">Usuario:</label>
-              <input
-                type="text"
-                className="form-control"
-                id="usuario"
-                value={usuarioSeleccionado.Usuario}
-                disabled
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="correo">Correo:</label>
-              <input
-                type="email"
-                className="form-control"
-                id="correo"
-                value={usuarioSeleccionado.Correo}
-                disabled
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="contrasena">Contraseña:</label>
-              <input
-                type="password"
-                className="form-control"
-                id="contrasena"
-                value={usuarioSeleccionado.Contrasenia}
-                disabled
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="rol">Rol:</label>
-              <input
-                type="text"
-                className="form-control"
-                id="rol"
-                value={getRolName(usuarioSeleccionado.IdRol)}
-                disabled
-              />
-            </div>
-          </form>
-        )}
-      </div>
-      <div className="modal-footer">
-        <button
-          type="button"
-          className="btn btn-secondary"
-          data-dismiss="modal"
-          id="btnCerrarDetalle"
-        >
-          Cerrar
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
     </>
   );
 };
