@@ -677,7 +677,7 @@ export const Proveedores = () => {
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">
+          <h1 className="h3 mb-3 text-center text-dark">
             Gestión de Proveedores
           </h1>
           <div className="text-right">
@@ -695,8 +695,8 @@ export const Proveedores = () => {
 
         {/* <!-- Tabla Proveedores --> */}
         <div className="card shadow mb-4">
-          <div className="card-header py-2">
-            <h6 className="m-0 font-weight-bold text-primary">Proveedores</h6>
+          <div className="card-header py-1 d-flex">
+            <h6 className="m-2 font-weight-bold text-primary">Proveedores</h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
@@ -712,8 +712,8 @@ export const Proveedores = () => {
               >
                 <thead>
                   <tr>
-                    <th>Tipo de Documento</th>
-                    <th>Número de Documento</th>
+                    <th>Documento</th>
+                    <th>N°Documento</th>
                     <th>Proveedor</th>
                     <th>Contacto</th>
                     <th>Teléfono</th>

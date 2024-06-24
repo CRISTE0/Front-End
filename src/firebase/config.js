@@ -31,6 +31,19 @@ export async function subirImageDesign(fileD)  {
   return url;
 }
 
+
+export async function subirImageDesignAdmin(fileD)  {
+  if (!fileD) {
+    return ("No aplica");
+  }
+  const storageRef= ref(storage,`Disenios/${v4()}`)
+  const blob = await fetch(fileD).then((res) => res.blob());
+  await uploadBytes(storageRef,blob)
+  const url = await getDownloadURL(storageRef)
+  console.log(url);
+  return url;
+}
+
 export async function subirImageReference(fileR)  {
   const storageRef= ref(storage,`Referencias/${v4()}`)
   const blob = await fetch(fileR).then((res) => res.blob());

@@ -19,9 +19,12 @@ export const Canvas = () => {
   const [imageElement, setImageElement] = useState(null);
   const [imageElementContainer,setImageElementContent] = useState(null);
 
-  let [camisaDefault, setCamisaDefault] = useState(camisetasDiseniador[0]);
   let targetG = null;
 
+
+  const [currentShirtColor, setCurrentShirtColor] = useState('Blanca');
+  const [currentPartIndex, setCurrentPartIndex] = useState(0);
+  const [camisaDefault, setCamisaDefault] = useState(camisetasDiseniador['Blanca'][0].elemento);
   // variables diseñador
 
 
@@ -33,12 +36,15 @@ export const Canvas = () => {
     const bufferContext = bufferCanvas.getContext("2d");
 
 
+    
+    setCamisaDefault(camisetasDiseniador[currentShirtColor][currentPartIndex].elemento);
 
-    let shirtSelect = shirtSelectRef.current;
-    shirtSelect.addEventListener("change", function () {
-      camisaDefault = setCamisaDefault(shirtSelect.value);
-      drawElements();
-    });
+
+    // let shirtSelect = shirtSelectRef.current;
+    // shirtSelect.addEventListener("change", function () {
+    //   setCamisaDefault(shirtSelect.value);
+    //   // drawElements();
+    // });
 
 
 
@@ -67,6 +73,7 @@ export const Canvas = () => {
       shirtImage.src = camisaDefault;
     };
     // Fin dibujar elementos
+
 
     // const resizeBufferCanvas = function () {
     //   bufferCanvas.width = canvas.width;
@@ -156,25 +163,6 @@ export const Canvas = () => {
     // canvas.addEventListener("mouseup", endDrag);
     // // canvas.addEventListener("touchend", endDrag);
 
-    // // Genera imagen referencia
-    // // const downloadButton = downloadButtonRef.current;
-    // // downloadButton.addEventListener("click", function () {
-    // //   console.log("refff");
-    //     // Asegúrate de que el contenido esté completamente renderizado
-        
-    //     // cambie la funct
-    //     // drawElements();
-    //     // context.drawImage(bufferCanvas, 0, 0); 
-        
-    //     // Usar setTimeout para asegurar que el contenido se haya renderizado completamente
-    //     //setTimeout(() => {
-    //       // const dataURL = canvasRef.current.toDataURL("image/png"); 
-    //       // setImagenReferencia(dataURL);
-    //       // console.log(dataURL);
-    //     //   downloadButton.href = dataURL;
-    //     //   downloadButton.download = "mi_diseño.png";
-    //     //}, 100); // Esperar 100 ms para asegurar el renderizado
-    //   // });
 
     //   // drawElementsVisible();
       
@@ -193,8 +181,13 @@ export const Canvas = () => {
       window.removeEventListener('resize', resizeBufferCanvas);
     };
 
-    }, [textElement, imageElement,camisaDefault]);
+    }, [textElement, imageElement,camisaDefault,currentShirtColor,
+      currentPartIndex]);
     
+    // Fin useEffect
+
+
+
 
 
     // Inicio agregar texto
@@ -207,20 +200,20 @@ export const Canvas = () => {
       let y; 
   
       if (selectTextPosition == "Arriba Izquierda") {
-        x = 222;
-        y = 80; 
+        x = 275;
+          y = 85; 
       }else if(selectTextPosition == "Arriba Derecha"){
-        x = 222;
-        y = 60; 
+        x = 135;
+        y = 85; 
       }else if(selectTextPosition =="Abajo Izquierda"){
-        x = 122;
-        y = 30; 
+        x = 275;
+        y = 285;
       }else if(selectTextPosition =="Abajo Derecha"){
-        x = 200;
-        y = 20; 
+        x = 140;
+        y = 285; 
       }else if(selectTextPosition =="Centro"){
-        x = 180;
-        y = 20; 
+        x = 210;
+        y = 115;
       }else{
         location.reload();
       }
@@ -253,41 +246,75 @@ export const Canvas = () => {
 
       let selectImageSize = document.getElementById("image-size").value;
 
-
       let selectImagePosition = document.getElementById("image-position").value;
+
       let x;
       let y; 
 
 
       if (selectImagePosition == "Arriba Izquierda") {
-        x = 245;
-        y = 85; 
+        if (selectImageSize == "35") {
+          x = 275;
+          y = 85;  
+
+        }else{
+          x = 245;
+          y = 85; 
+        }
       }else if(selectImagePosition == "Arriba Derecha"){
         x = 135;
         y = 85; 
       }else if(selectImagePosition =="Abajo Izquierda"){
-        x = 122;
-        y = 30; 
+        if (selectImageSize == "35") {
+          x = 275;
+          y = 285;
+        }else{
+          x = 245;
+          y = 285; 
+        }
       }else if(selectImagePosition =="Abajo Derecha"){
-        x = 200;
-        y = 20; 
+        x = 140;
+        y = 285; 
       }else if(selectImagePosition =="Centro"){
-        x = 180;
-        y = 20; 
+        if (selectImageSize == "75") {
+          x = 190;
+          y = 115; 
+        }else if (selectImageSize == "35") {
+          x = 210;
+          y = 115;
+        }else{
+          x = 154;
+          y = 115; 
+        }
+      }else if(selectImagePosition =="CentroM"){
+        x = 190;
+        y = 115; 
+      }else if(selectImagePosition =="CentroP"){
+        x = 210;
+        y = 115; 
+      }else if(selectImagePosition =="Arriba "){
+        x = 165;
+        y = 175; 
+      }else if(selectImagePosition =="Centro "){
+        x = 165;
+        y = 235; 
+      }else if(selectImagePosition =="Abajo "){
+        x = 165;
+        y = 285; 
+      }else if(selectImagePosition =="Arriba  "){
+        x = 210;
+        y = 175; 
+      }else if(selectImagePosition =="Centro  "){
+        x = 210;
+        y = 235; 
+      }else if(selectImagePosition =="Abajo  "){
+        x = 210;
+        y = 285; 
       }else{  
         x = 0;
         y = 0; 
 
       }
-  
-      // if (selectImageSize == "Grande") {
-      //   imageSize = 
-      // }else if (selectImageSize == "Mediana"){
-
-      // }else if (selectImageSize == "Mediana"){
-        
-      // }
-
       
       const img = new Image();
       img.src = URL.createObjectURL(target.files[0]);
@@ -322,37 +349,88 @@ export const Canvas = () => {
       setShowImageSize(null);
       setShowImagePosition(null)
       setShowClearButton(null);
-
-      
-      
-      //sizeImageRef.current.style.display = 'none';
-      // sizeImage.style.display = "none";
-      // drawElements();
     };
 
-    // const clearButton = clearButtonRef.current;
-    // clearButton.addEventListener("click", clearCanvas);
+    const setElements = () =>{
+      setTextElement(null);
+      setImageElement(null);
+      document.getElementById("text-input").value="";
 
-  //Inicio genera imagen referencia
-  const generateImageRefence = () =>{
-  console.log("refff");
-  const dataURL = canvasRef.current.toDataURL("image/png"); 
-  setImagenReferencia(dataURL);
+      
+      
+      // document.getElementById("file-input").value="";
+      setShowCreateButton(null);
+      setShowTextFont(null);
+      setShowTextFontSize(null);
+      setShowTextColor(null);
+      setShowTextPosition(null);
+      // setShowImageSize(null);
+      setShowImagePosition(null)
+      setShowClearButton(null);
+      
+      handleShowSizeImage();
+      console.log("setElements");
+      
+      if (showImageSize) {
+        document.getElementById("image-size").selectedIndex=0;
+      }
+    }
 
-  console.log(dataURL);
-  }
-  //Fin genera imagen referencia
 
 
-  const handleTwoFunctionsButtonModal = () =>{
-    generateImageRefence();
-    
-    setTimeout(() => {
-      openModal(1);
-    }, 100);
+    //Inicio genera imagen referencia
+    const generateImageReference = () =>{
+      console.log("refff");
+      const dataURL = canvasRef.current.toDataURL("image/png"); 
+      setImagenReferencia(dataURL);
+
+      console.log(dataURL);
+    }
+    //Fin genera imagen referencia
 
 
-  }
+    const insertSizesDesign = () =>{
+
+      const sizesDesign = {
+        150: {
+          ancho: '21cm',
+          largo: '27cm',
+        },
+        75: {
+          ancho: '15cm',
+          largo: '20cm',
+        },
+        35: {
+          ancho: '10cm',
+          largo: '15cm',
+        },
+      };
+
+      const selectSizes = document.getElementById("image-size");
+      let selectedValue = selectSizes.value;
+      console.log(selectedValue);
+      const selectedMeasures = sizesDesign[selectedValue];
+
+      const container= document.getElementById("sizesDesign");
+
+      container.innerHTML= `
+        <div className="my-3 p-2">
+        <p className="my-3"> <b>Ancho:</b> ${selectedMeasures.ancho}</p>  
+        <p className="my-3"> <b>Largo:</b> ${selectedMeasures.largo}</p>
+        </div>
+      `;
+    }
+
+    // manejar funciones de generar imagen de referencia y abrir modal
+    const handleTwoFunctionsButtonModal = () =>{
+      generateImageReference();
+
+      insertSizesDesign();
+      
+      setTimeout(() => {
+        openModal(1);
+      }, 100);
+    }
 
 
 
@@ -372,19 +450,100 @@ export const Canvas = () => {
   
 
 
-  const handleImageSizeChange = () => {
-    
+  const handleImageSizeChange = (e) => {
     setShowImagePosition(true);
-    // loadImage();
+    setShowCreateButton(false);
+    setShowClearButton(false);
+    
+    setTimeout(() => {
+      let selectImagePosition = document.getElementById("image-position");
+        
+      let selectSizeImage= e.target.value;
+      let selectSizeImageOptions= e.target.options;
 
+
+      
+      // condicion para imagen grande (eliminar las demas opciones)
+      if (selectSizeImage === '150') {
+
+        for (let i = selectImagePosition.length-2; i >=1 ; i--) {
+          selectImagePosition.remove(i);
+        }
+        selectImagePosition.selectedIndex=0;
+
+      }else{
+        if (selectImagePosition.length <= 2) {
+          setShowImagePosition(false);
+          setTimeout(()=> {
+          setShowImagePosition(true);
+          
+          },10);
+        }
+        selectImagePosition.selectedIndex=0;
+
+      }
+
+
+      let currentPositionShirt = document.getElementById("textPositionShirt").textContent;
+
+      // evalua si la posicion actual esta en el hombro derecho
+      if (currentPositionShirt == "Hombro Derecho") {
+        if (selectSizeImage === '75') {
+
+          const newOptions = [
+            { value: 'Arriba ', text: 'Arriba' },
+            { value: 'Centro ', text: 'Centro' },
+            { value: 'Abajo ', text: 'Abajo' }
+          ];
+
+          // elimino todos los option excepto 1
+          while (selectImagePosition.options.length > 1) {
+            selectImagePosition.remove(1);
+          }
+
+          // agrego las nuevas opciones al select
+          newOptions.forEach(optionData => {
+            const option = document.createElement("option");
+            option.value = optionData.value;
+            option.text = optionData.text;
+            selectImagePosition.appendChild(option);
+          });
+        }
+
+      // evalua si la posicion actual esta en el hombro izquierdo
+      }else if(currentPositionShirt == "Hombro Izquierdo"){
+        if (selectSizeImage === '75') {
+
+          const newOptions = [
+            { value: 'Arriba  ', text: 'Arriba' },
+            { value: 'Centro  ', text: 'Centro' },
+            { value: 'Abajo  ', text: 'Abajo' }
+          ];
+
+          // elimino todos los option excepto 1
+          while (selectImagePosition.options.length > 1) {
+            selectImagePosition.remove(1);
+          }
+
+          // agrego las nuevas opciones al select
+          newOptions.forEach(optionData => {
+            const option = document.createElement("option");
+            option.value = optionData.value;
+            option.text = optionData.text;
+            selectImagePosition.appendChild(option);
+          });
+        }
+
+      }  
+    }, 100);
   }
 
   const handleImagePositionChange = (e) => {
+
     setPosicionImagen(e.target.value);
     loadImage();
+    setShowClearButton(true);
     setShowCreateButton(true);
-
-
   }
 
 
@@ -604,36 +763,185 @@ export const Canvas = () => {
       }
     });
   };
-  //Inicio configuracion mensaje de alerta 
+  //Fin configuracion mensaje de alerta 
 
-  const [preview, setPreview] = useState(null);
 
-  const handleImagePreview = (e) => {
+  
+  //inicio manejo mostrar select tamaño (mediano) imagen
+  const handleShowSizeImage = () =>{
+
+    // if(imageElement){
+    //   setImageElement(null);
+    //   document.getElementById("image-size").selectedIndex=0;
+    //   setShowImagePosition(null);
+
+    // }
+    // else{
+      // si hay un archivo (imagen) entra
+      if (document.getElementById("file-input").value) {
+        setShowImageSize(true);
+        
+      setTimeout(()=>{
+        let currentPositionShirt = document.getElementById("textPositionShirt").textContent;
+        
+        
+        let selectSizeImage= document.getElementById("image-size");
+        
+        // evalua si esta en uno de los dos hombros
+        if (currentPositionShirt == "Hombro Izquierdo" || currentPositionShirt == "Hombro Derecho") {
+          
+          const valuesToRemove = ['150','35'];
+          
+          // Iterar sobre las opciones del select de manera inversa para evitar problemas de índice
+          for (let i = selectSizeImage.options.length - 1; i >= 0; i--) {
+            // eliminar los valores deseados (Grande y pequeño)
+            if (valuesToRemove.includes(selectSizeImage.options[i].value)) {
+              selectSizeImage.remove(i);
+            }
+          }
+          console.log("tamaños eliminados");
+        
+          // si no esta en los hombros esta en los dos restantes
+        }else if (document.getElementById("file-input").value) {
+          setShowImageSize(false);
+          setTimeout(() => {
+          setShowImageSize(true);
+          console.log("image size select reseteado");
+
+        }, 30);
+        }else{
+          setShowImageSize(false);
+          console.log("image size select false");
+
+        }
+      },30)
+  }
+  // else{
+  //   console.log("else vacio show size image");
+  // }
+    
+  // }
+}
+  //fin manejo mostrar select tamaño (mediano) imagen
+
+  
+  const [imagenDisenio, setimagenDisenio] = useState(null);
+
+  // cargar la imagen que se usara en el diseño
+  const handleImageimagenDisenio = (e) => {
     const file = e.target.files[0];
     setImagenDisenio(file);
     console.log(file);
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreview(reader.result);
+        setimagenDisenio(reader.result);
       };
       reader.readAsDataURL(file);
     } else {
-      setPreview(null);
+      
+      setImageElement(null);
+      setimagenDisenio(null);
+      setShowImageSize(null);
+      setShowImagePosition(null);
+      setShowCreateButton(null);
+      setShowClearButton(null);
+
     }
 
-    // manejo mostrar input tamaño imagen
-    if(imageElement){
-      setImageElement(null);
-      document.getElementById("image-size").selectedIndex=0;
-      // selectSizeImage.selectedIndex=0;
-      setShowImagePosition(null);
-    }else{
-      setShowImageSize(true);
-      setShowClearButton(true);
-    }
+    handleShowSizeImage();
+
   };
 
+  
+
+
+  const handleShirtChange = () => {
+    const selectedShirtColor = shirtSelectRef.current.value;
+    setCurrentShirtColor(selectedShirtColor);
+    setCurrentPartIndex(0); // Reset the index to show the first part of the new shirt
+    setCamisaDefault(camisetasDiseniador[currentShirtColor][currentPartIndex].elemento);
+
+  };
+
+  // funcion para menejar el boton siguiente
+  const handleNextPart = () => {
+    setCurrentPartIndex((prevIndex) =>
+      prevIndex < camisetasDiseniador[currentShirtColor].length - 1 ? prevIndex + 1 : 0
+    );
+
+    setElements();
+  };
+
+  // funcion para menejar el boton anterior
+  const handlePreviousPart = () => {
+    setCurrentPartIndex((prevIndex) =>
+      prevIndex > 0 ? prevIndex - 1 : camisetasDiseniador[currentShirtColor].length - 1
+    );
+
+    setElements();
+
+  };
+
+  const testChangeShirt= () => {
+    setCamisaDefault(testChangeShirt);
+  }
+
+  const insertTableMeasures = () =>{
+
+    const measures = {
+      XXS: {
+          ancho: '45cm',
+          largo: '64cm',
+          manga: '18.5cm'
+      },
+      XS: {
+          ancho: '47cm',
+          largo: '66cm',
+          manga: '19cm'
+      },
+      S: {
+          ancho: '50cm',
+          largo: '69cm',
+          manga: '20cm'
+      },
+      M: {
+        ancho: '53cm',
+        largo: '72cm',
+        manga: '21cm'
+      },
+      L: {
+        ancho: '56cm',
+        largo: '74cm',
+        manga: '22cm'
+      },
+      XL: {
+        ancho: '59cm',
+        largo: '76cm',
+        manga: '22cm'
+      },
+      XXL: {
+        ancho: '62cm',
+        largo: '78cm',
+        manga: '23cm'
+      },
+    };
+
+    const selectSizes = document.getElementById("selectSizes");
+    let selectedValue = selectSizes.value;
+    const selectedMeasures = measures[selectedValue];
+
+    const container= document.getElementById("tableSizesShirt");
+
+    container.innerHTML= `
+      <div className="my-3 p-2">
+        <p> <b>Ancho:</b> ${selectedMeasures.ancho}</p>
+        <p className="my-3"> <b>Largo:</b> ${selectedMeasures.largo}</p>
+        <p className="my-3"> <b>Manga:</b> ${selectedMeasures.manga}</p>
+      </div>
+    `;
+
+  }
 
   // Fin creacion diseño
 
@@ -749,36 +1057,32 @@ export const Canvas = () => {
                   <i className="fas fa-solid fa-ruler-combined"></i>
                 </span>
 
-                {preview && (
+                {imagenDisenio && (
                     <img
-                      src={preview}
-                      alt="Vista previa de la imagen"
+                      src={imagenDisenio}
+                      alt="Vista previa imagen del diseño"
                       style={{ maxWidth: '200px', display: 'block' }}
                     />
                 )}
 
-                {/* <input
-                  type="text"
-                  id="precio"
-                  className="form-control"
-                  placeholder="Talla"
-                  defaultValue={ImagenDisenio}
-                  // onChange={handleChangeTalla}
-                ></input> */}
+                <div className="mx-2">
+                  <p>Tamaño de Diseño</p>
+
+                  <div id="sizesDesign"></div>
+                </div>
+
+                <div className=" mx-1">
+                  <i className="tooltipSizesShirt fas fa-info-circle">
+                    <span className="tooltiptext">Segun el tamaño elegido, se mostrara el ancho y largo que tendra la imagen </span>
+                  </i>
+                </div>
+
               </div>
 
               <div className="input-group mb-3">
                 <span className="input-group-text mx-2">
                   <i className="fas fa-solid fa-ruler-combined"></i>
                 </span>
-                {/* <input
-                  type="text"
-                  id="precio"
-                  className="form-control"
-                  placeholder="Talla"
-                  defaultValue={ImagenReferencia}
-                  // onChange={handleChangeTalla}
-                ></input> */}
 
                 {ImagenReferencia && (
                     <img
@@ -787,9 +1091,34 @@ export const Canvas = () => {
                       style={{ maxWidth: '200px', display: 'block' }}
                     />
                 )}
+
+                <div className="mx-2">
+
+                  <select name="" id="selectSizes" defaultValue={""} onChange={insertTableMeasures}>
+                    <option value="" disabled>Cuál es tu talla</option>
+                    <option value="XXS">XXS</option>
+                    <option value="XS">XS</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                    <option value="XXL">XXL</option>
+                  </select>
+                  
+                  <div id="tableSizesShirt" className="my-3"></div>
+
+                </div>
+
+                <div className=" mx-2">
+                  <i className="tooltipSizesShirt fas fa-info-circle">
+                    <span className="tooltiptext">Segun la opcion, se mostrara el tamaño de cada camiseta</span>
+                  </i>
+                </div>
+
+
               </div>
 
-              <div className="modal-footer">
+              <div className="modal-footer bg-light">
                 <div className="text-right">
                   <button
                     type="button"
@@ -816,6 +1145,17 @@ export const Canvas = () => {
     <div className="row">
       <div className="canvas-container">
         <canvas ref={canvasRef} id="canvas" width={500} height={500}></canvas>
+
+        <div className="d-flex align-items-center justify-content-between">
+            <button onClick={handlePreviousPart}>Anterior</button>
+            
+            <span >
+              <p id="textPositionShirt"> 
+              {camisetasDiseniador[currentShirtColor][currentPartIndex].nombre}
+              </p>
+            </span>
+            <button onClick={handleNextPart}>Siguiente</button>
+          </div>
       </div>
 
       <div className="col-sm pl-5">
@@ -845,6 +1185,7 @@ export const Canvas = () => {
         
         </>
         )}
+
 
         {showTextColor &&(
         <>
@@ -881,7 +1222,7 @@ export const Canvas = () => {
         <br />
           
         {/* Inicio atributos imagen */}
-        <input type="file" id="file-input" ref={fileInputRef} onChange={handleImagePreview}/>
+        <input type="file" id="file-input" ref={fileInputRef} onChange={handleImageimagenDisenio}/>
 
         {showImageSize &&(
         <>
@@ -947,13 +1288,30 @@ export const Canvas = () => {
 
 
         <div className="p-5">
-          <select id="shirtSelect" ref={shirtSelectRef}>
-            <option value= {camisetasDiseniador[0]}>Blanca</option>
-            <option value= {camisetasDiseniador[2]}>
-              Negra
-            </option>
+          <select id="shirtSelect" ref={shirtSelectRef} onChange={handleShirtChange}>
+            <option value="Blanca">Blanca</option>
+            <option value="Negra">Negra</option>
           </select>
+
+          
+          
         </div>
+
+
+        
+
+
+
+        {/* <div className="p-5">
+          <select id="shirtSelect"  onChange={testChangeShirt}>
+            <option value= {camisetasDiseniador['Blanca'][0]}>Blanca</option>
+            <option value= {camisetasDiseniador['Blanca'][1]}>Negra</option>
+            <option value="" >BHI</option>
+          </select>
+        </div> */}
+
+
+
       </div>
     </div>
     </>
