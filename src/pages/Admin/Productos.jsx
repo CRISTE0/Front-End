@@ -44,12 +44,12 @@ export const Catalogo = () => {
 
   const getDisenios = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/disenios");
-    // const DiseniosActivos = respuesta.data.filter(
-    //   (color) => color.Estado === "Activo"
-    // );
-    setDisenios(respuesta.data);
+    const DiseniosActivos = respuesta.data.filter(
+      (disenio) => disenio.Estado === "Activo"
+    );
+    setDisenios(DiseniosActivos);
   };
-
+  
   const getInsumos = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/insumos");
     const InsumosActivas = respuesta.data.filter(
