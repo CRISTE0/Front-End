@@ -96,17 +96,30 @@ export const Insumos = () => {
   };
 
   const guardarInsumo = async () => {
+    // Verificar errores de validación antes de enviar los datos
+    const errors = {
+      Referencia: validateReferencia(Referencia),
+    };
+    setErrors(errors);
+
+    // Comprobar si hay errores
+    const hasErrors = Object.values(errors).some(error => error !== "");
+    if (hasErrors) {
+      show_alerta("Corrige los errores antes de guardar", "error");
+      return; // Detener la ejecución si hay errores
+    }
+
     if (operation === 1) {
-      // Crear Cliente
+      // Crear Insumo
       await enviarSolicitud("POST", {
         IdColor,
         IdTalla,
         Referencia: Referencia.trim(),
-        Cantidad: 0,
-        ValorCompra: 0,
+        Cantidad,
+        ValorCompra,
       });
     } else if (operation === 2) {
-      // Actualizar Cliente
+      // Actualizar Insumo
       await enviarSolicitud("PUT", {
         IdInsumo,
         IdColor,
@@ -117,6 +130,7 @@ export const Insumos = () => {
       });
     }
   };
+
 
   // Función para validar la referencia
   const validateReferencia = (value) => {
@@ -317,69 +331,113 @@ export const Insumos = () => {
   //     }
   //   });
   // };
-  const deleteInsumo = async (idInsumo) => {
-    try {
-      const response = await fetch(`http://localhost:3000/api/insumos/${idInsumo}`, {
-        method: 'DELETE',
-      });
-  
-      if (response.status === 409) {
-        const data = await response.json();
+  const deleteInsumo = async (idInsumo, referencia) => {
+    const MySwal = withReactContent(Swal);
+
+    // Mostrar el mensaje de confirmación
+    MySwal.fire({
+      title: `¿Seguro de eliminar el insumo ${referencia}?`,
+      icon: "question",
+      text: "No se podrá dar marcha atrás",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      showClass: {
+        popup: "swal2-show",
+        backdrop: "swal2-backdrop-show",
+        icon: "swal2-icon-show",
+      },
+      hideClass: {
+        popup: "swal2-hide",
+        backdrop: "swal2-backdrop-hide",
+        icon: "swal2-icon-hide",
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`http://localhost:3000/api/insumos/${idInsumo}`, {
+            method: 'DELETE',
+          });
+
+          if (response.status === 409) {
+            const data = await response.json();
+            Swal.fire({
+              icon: 'error',
+              title: 'No se puede eliminar',
+              text: data.message,
+              timer: 3000, // 3 segundos
+              showConfirmButton: false // Oculta el botón "OK"
+            });
+          } else if (response.status === 200) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Eliminado',
+              text: 'Insumo eliminado correctamente',
+              timer: 3000, // 3 segundos
+              showConfirmButton: false // Oculta el botón "OK"
+            });
+            // Actualizar la tabla de insumos
+            getInsumos();
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'El insumo está asociado a una compra, no se puede eliminar',
+              timer: 3000, // 3 segundos
+              showConfirmButton: false // Oculta el botón "OK"
+            });
+          }
+        } catch (error) {
+          console.error('Error al eliminar el insumo:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error al eliminar el insumo',
+            timer: 3000, // 3 segundos
+            showConfirmButton: false // Oculta el botón "OK"
+          });
+        }
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
         Swal.fire({
-          icon: 'error',
-          title: 'No se puede eliminar',
-          text: data.message, 
+          icon: 'info',
+          title: 'Cancelado',
+          text: 'El insumo NO fue eliminado',
           timer: 3000, // 3 segundos
           showConfirmButton: false // Oculta el botón "OK"
         });
-      } else if (response.status === 200) {
+      } else if (
+        result.dismiss === Swal.DismissReason.backdrop ||
+        result.dismiss === Swal.DismissReason.esc
+      ) {
         Swal.fire({
-          icon: 'success',
-          title: 'Eliminado',
-          text: 'Insumo eliminado correctamente',
-          timer: 3000, // 3 segundos
-          showConfirmButton: false // Oculta el botón "OK"
-        });
-        // Actualizar la tabla de insumos
-        getInsumos();
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'El insumo está asociado a una compra, no se puede eliminar',
+          icon: 'info',
+          title: 'Cancelado',
+          text: 'El insumo NO fue eliminado',
           timer: 3000, // 3 segundos
           showConfirmButton: false // Oculta el botón "OK"
         });
       }
-    } catch (error) {
-      console.error('Error al eliminar el insumo:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al eliminar el insumo',
-        timer: 3000, // 3 segundos
-        showConfirmButton: false // Oculta el botón "OK"
-      });
-    }
-};
+    });
+  };
 
 
-  
+
+
 
   const cambiarEstadoInsumo = async (IdInsumo) => {
     try {
       const insumoActual = Insumos.find(
         (insumo) => insumo.IdInsumo === IdInsumo
       );
-  
+
       if (insumoActual.Cantidad > 0) {
         show_alerta("No se puede desactivar el insumo porque la cantidad es mayor a 0", "warning");
         return;
       }
-  
+
       const nuevoEstado =
         insumoActual.Estado === "Activo" ? "Inactivo" : "Activo";
-  
+
       const MySwal = withReactContent(Swal);
       MySwal.fire({
         title: `¿Seguro de cambiar el estado del insumo ${insumoActual.Referencia}?`,
@@ -399,7 +457,7 @@ export const Insumos = () => {
             ValorCompra: insumoActual.ValorCompra,
             Estado: nuevoEstado,
           };
-  
+
           const response = await axios.put(`${url}/${IdInsumo}`, parametros);
           if (response.status === 200) {
             setInsumos((prevInsumos) =>
@@ -409,7 +467,7 @@ export const Insumos = () => {
                   : insumo
               )
             );
-  
+
             show_alerta("Estado del insumo cambiado con éxito", "success", {
               timer: 2000,
             });
@@ -423,8 +481,8 @@ export const Insumos = () => {
       show_alerta("Error cambiando el estado del insumo", "error");
     }
   };
-  
-  
+
+
 
   const convertColorIdToName = (colorId) => {
     const color = Colores.find((color) => color.IdColor === colorId);
@@ -555,9 +613,8 @@ export const Insumos = () => {
                     </label>
                     <input
                       type="text"
-                      className={`form-control ${
-                        errors.Referencia ? "is-invalid" : ""
-                      }`}
+                      className={`form-control ${errors.Referencia ? "is-invalid" : ""
+                        }`}
                       id="nroDocumentoCliente"
                       placeholder="Ingrese la referencia del insumo"
                       required
@@ -570,9 +627,8 @@ export const Insumos = () => {
                     <label htmlFor="nombreCliente">Cantidad:</label>
                     <input
                       type="text"
-                      className={`form-control ${
-                        errors.Cantidad ? "is-invalid" : ""
-                      }`}
+                      className={`form-control ${errors.Cantidad ? "is-invalid" : ""
+                        }`}
                       id="nombreCliente"
                       placeholder="Ingrese la cantidad del insumo"
                       required
@@ -591,9 +647,8 @@ export const Insumos = () => {
                     </label>
                     <input
                       type="text"
-                      className={`form-control ${
-                        errors.ValorCompra ? "is-invalid" : ""
-                      }`}
+                      className={`form-control ${errors.ValorCompra ? "is-invalid" : ""
+                        }`}
                       id="direccionCliente"
                       placeholder="Ingrese el valor de la compra"
                       required
