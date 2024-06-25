@@ -9,14 +9,16 @@ export const Pedidos = () => {
   const url = "http://localhost:3000/api/pedidos";
   const [pedidos, setPedidos] = useState([]);
   const [IdPedido, setIdPedido] = useState("");
+  const [IdPedidoActualizar, setIdPedidoActualizar] = useState("");
+  
   const [Clientes, setClientes] = useState([]);
   const [IdCliente, setIdCliente] = useState("");
   const [Fecha, setFecha] = useState("");
   const [Total, setTotal] = useState("");
-  const [estadosPedidos, setEstadosPedidos] = useState("");
-  const [Detalles, setDetalles] = useState([
-    { IdProducto: "", cantidad: "", precio: "" },
-  ]);
+  const [idEstadosPedidos, setIdEstadosPedidos] = useState("");
+
+  const [estadosPedidos, setEstadosPedidos] = useState([]);
+  const [Detalles, setDetalles] = useState([]);
   const [Productos, setProductos] = useState([]);
   const [showDetalleField, setShowDetalleField] = useState(false);
   const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
@@ -29,8 +31,8 @@ export const Pedidos = () => {
   const itemsPerPage = 4;
 
   useEffect(() => {
-    getEstadosPedidos();
     getPedidos();
+    getEstadosPedidos();
     getProductos();
     getClientes();
   }, []);
@@ -119,6 +121,26 @@ export const Pedidos = () => {
     }
   };
 
+  const formatPrice = (price) => {
+    // Convertir el precio a número si es una cadena
+    const formattedPrice =
+      typeof price === "string" ? parseFloat(price) : price;
+
+    // Verificar si el precio es un número válido
+    if (!isNaN(formattedPrice)) {
+      // Formatear el número con separadores de miles y coma decimal
+      const formattedNumber = formattedPrice.toLocaleString("es-ES", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
+      // Retornar el número con el símbolo de peso
+      return `$${formattedNumber}`;
+    }
+
+    return `$0.00`; // Valor predeterminado si no es un número válido
+  };
+
   const openModal = () => {
     setIdPedido(""); // Resetear el IdCompra al abrir el modal para indicar una nueva compra
     setIdCliente("");
@@ -147,61 +169,87 @@ export const Pedidos = () => {
   const hayAlertas = () => {
     return alertas.some(alerta => alerta !== '');
   };
+
   const handleDetailChange = (index, e) => {
     const { name, value } = e.target;
     const updatedDetalles = [...Detalles];
-    updatedDetalles[index][name] = value;
-    setDetalles(updatedDetalles);
-
-    // Actualizar el precio en el insumo seleccionado
-    const selectedProductoId = updatedDetalles[index].IdProducto;
-    console.log(selectedProductoId);
-    
-    const selectedInsumoIndex = Productos.findIndex(
-      (producto) => producto.IdProducto === selectedProductoId
-    );
-
-
-    const selectedProduct = Productos.find(producto => producto.IdProducto == selectedProductoId);
-    console.log(selectedProduct);
-    console.log(Productos);
-
-    if (selectedProductoId) {
-      // Actualizar el precio en el detalle
-      updatedDetalles[index].precio = selectedProduct.ValorVenta;
-    }
+    const updatedAlertas = [...alertas];
   
-    if (selectedProduct) {
-      console.log("entro selectedP");
-      // Validar la cantidad
-      const newAlertas = [...alertas]; 
-      if (parseInt(value) > selectedProduct.Cantidad) {
-        newAlertas[index] = 'La cantidad ingresada es mayor que la cantidad disponible';
-        setAlertas(newAlertas);
-      } else {
-        // const newAlertas = [...alertas];
-        // newAlertas[index] = null;
-        // setAlertas(newAlertas);
-        newAlertas[index] = '';
+    console.log(name);
+
+    if (name === "IdProducto") {
+      // Verificar si el producto ya está en los detalles
+      const productoDuplicado = updatedDetalles.some(
+        (detalle, detalleIndex) =>
+          detalle.IdProducto === value && detalleIndex !== index
+      );
+  
+      if (productoDuplicado) {
+        show_alerta("Este producto ya está agregado en los detalles", "error");
+        return; // No permitir la selección del producto duplicado
       }
-      setAlertas(newAlertas);
+  
+      // Actualizar el IdProducto en el detalle
+      updatedDetalles[index][name] = value;
+      setDetalles(updatedDetalles);
+  
+      // Encontrar el producto seleccionado
+      const selectedProduct = Productos.find(producto => producto.IdProducto == value);
+  
+      if (selectedProduct) {
+        // Actualizar el precio en el detalle
+        updatedDetalles[index].precio = selectedProduct.ValorVenta;
+        setDetalles(updatedDetalles);
+      }
+    } 
 
-      console.log(alertas);
+  
+    if (name == "cantidad") {
+      // Actualizar la cantidad en el detalle
+      updatedDetalles[index][name] = value;
+      setDetalles(updatedDetalles);
+  
+      const selectedProductoId = updatedDetalles[index].IdProducto;
+      const selectedProduct = Productos.find(producto => producto.IdProducto == selectedProductoId);
+      console.log(selectedProduct);
 
-      console.log(alertas.length);
+      if (selectedProduct) {
+        // Validar la cantidad
+        if (parseInt(value) > selectedProduct.Cantidad) {
+          updatedAlertas[index] = 'La cantidad ingresada es mayor que la cantidad disponible';
+        } else {
+          updatedAlertas[index] = '';
+        }
+        setAlertas(updatedAlertas);
+      }
+
+
+      const cantidad = parseFloat(updatedDetalles[index].cantidad || 0);
+      const precio = parseFloat(updatedDetalles[index].precio || 0);
+      updatedDetalles[index].subtotal = cantidad * precio;
     }
+  };
 
 
+  const handleChangeIdEstadoPedido = (e) => {
+    const value = e.target.value;
+    setIdEstadosPedidos(value);
+  };
 
-    if (selectedInsumoIndex !== -1) {
-      const updatedInsumos = [...Productos];
-      updatedInsumos[selectedInsumoIndex].ValorCompra = value;
-      setProductos(updatedInsumos);
-    }
+  
+  const getFilteredProductos = (index) => {
+    // Obtener los IDs de los insumos seleccionados en las otras filas de detalles
+    const productosSeleccionados = Detalles.reduce((acc, detalle, i) => {
+      if (i !== index && detalle.IdProducto) {
+        acc.push(detalle.IdProducto);
+      }
+      return acc;
+    }, []);
 
-    
-    
-
+    // Filtrar los insumos disponibles excluyendo los ya seleccionados
+    return Productos.filter(
+      (producto) => !productosSeleccionados.includes(producto.IdProducto)
+    );
   };
 
 
@@ -212,6 +260,7 @@ export const Pedidos = () => {
       IdProducto: "",
       cantidad: "",
       precio: "",
+      subtotal: 0,
     };
 
     // Crear una nueva matriz de detalles con el nuevo detalle agregado
@@ -301,10 +350,11 @@ export const Pedidos = () => {
     }
   };
 
-  const cancelCompra = async (id) => {
+  const cambiarEstadoPedido = async () => {
+    let idPed=idEstadosPedidos;
     const MySwal = withReactContent(Swal);
     MySwal.fire({
-      title: "¿Seguro de cancelar la compra?",
+      title: "¿Seguro de cancelar el pedido?",
       icon: "question",
       text: "No se podrá dar marcha atrás",
       showCancelButton: true,
@@ -313,9 +363,10 @@ export const Pedidos = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
+          console.log(idPed);
           // Cambiar el estado de la compra a "Cancelado"
-          await axios.put(`http://localhost:3000/api/compras/${id}`, {
-            Estado: "Cancelado",
+          await axios.put(`http://localhost:3000/api/pedidos/${idPed}`, {
+            Estado: idEstadosPedidos,
           });
 
           // Actualizar la lista de compras
@@ -330,6 +381,16 @@ export const Pedidos = () => {
       }
     });
   };
+
+
+  const openModalEstado = (pedido) =>{
+    
+    setTitle("Actualizar Estado");
+    setIdPedidoActualizar(pedido.IdPedido);
+    // setIdPedido(pedido.IdPedido);
+    setIdEstadosPedidos(pedido.IdEstadoPedido);
+  };
+
 
   const show_alerta = (message, type) => {
     const MySwal = withReactContent(Swal);
@@ -370,6 +431,90 @@ export const Pedidos = () => {
 
   return (
     <>
+
+      {/* Inicio modal de editar estado */}
+      <div
+          className="modal fade"
+          id="modalEstadoPedido"
+          tabIndex="-1"
+          role="dialog"
+          aria-labelledby="ModalEditarEstadoLabel"
+          aria-hidden="true"
+          data-backdrop="static"
+          data-keyboard="false"
+        >
+          <div className="modal-dialog modal-md" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="ModalEditarEstadoLabel">
+                  {title}
+                </h5>
+                <button
+                  type="button"
+                  className="close"
+                  data-dismiss="modal"
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+
+              <div className="modal-body">
+                <input type="text" id="IdCompra" value={IdPedidoActualizar}></input>
+
+                <div className="form-row">
+                {/* Seleccionar estado */}
+                <div className="form-group col-md-12">
+                  <label>Estados:</label>
+                  <select
+                    className="form-control"
+                    name="IdCliente" 
+                    value={idEstadosPedidos}
+                    onChange={handleChangeIdEstadoPedido}
+                  >
+                    <option disabled value="">Selecciona un estado</option>
+                    {estadosPedidos.map((estado) => (
+                      <option
+                        key={estado.IdEstadoPedido}
+                        value={estado.IdEstadoPedido}
+                      >
+                        {estado.NombreEstado}
+                      </option>
+                    ))}
+                  </select>
+                  {/* {renderErrorMessage(errors.IdCliente)} */}
+                </div>
+                </div>
+
+              </div>
+
+              <div className="modal-footer">
+              <button
+                type="button"
+                id="btnCerrar"
+                className="btn btn-secondary"
+                data-dismiss="modal"
+              >
+                Cerrar
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => cambiarEstadoPedido()}
+              >
+                Actualizar
+              </button>
+              
+              </div>
+
+
+            </div>
+          </div>
+
+      </div>
+      {/* fin modal de editar estado */}
+
+
       {/* Inicio modal de crear pedido con su detalle */}
       <div
         className="modal fade"
@@ -396,8 +541,11 @@ export const Pedidos = () => {
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
+
             <div className="modal-body">
               <input type="hidden" id="IdCompra"></input>
+
+            {/* Seleccionar cliente */}
               <div className="form-group">
                 <label>Cliente:</label>
                 <select
@@ -421,6 +569,7 @@ export const Pedidos = () => {
                 {renderErrorMessage(errors.IdCliente)}
               </div>
 
+              {/* Fecha */}
               <div className="form-group">
                 <label>Fecha:</label>
                 <input
@@ -441,6 +590,7 @@ export const Pedidos = () => {
                       <th>Producto</th>
                       <th>Cantidad</th>
                       <th>Precio</th>
+                      <th>SubTotal</th>
                       <th>Acción</th>
                     </tr>
                   </thead>
@@ -450,18 +600,20 @@ export const Pedidos = () => {
 
                         <td>
                           <select
-                            className="form-control"
+                            className={`form-control ${
+                              errors.Detalles &&
+                              errors.Detalles[index] &&
+                              errors.Detalles[index].IdProducto
+                                ? "is-invalid"
+                                : ""
+                            }`}
                             name="IdProducto"
                             value={detalle.IdProducto}
                             onChange={(e) => handleDetailChange(index, e)}
                           >
                             <option value="">Selecciona un producto</option>
-                            {Productos.filter(
-                              (producto) =>
-                                !Detalles.some(
-                                  (det) => det.IdProducto === producto.IdProducto
-                                )
-                            ).map((producto) => (
+                            {getFilteredProductos(index).map((producto)=> 
+                            (
                               <option
                                 key={producto.IdProducto}
                                 value={producto.IdProducto}
@@ -471,6 +623,14 @@ export const Pedidos = () => {
                             ))}
 
                           </select>
+
+                          {errors.Detalles &&
+                            errors.Detalles[index] &&
+                            errors.Detalles[index].IdProducto && (
+                              <div className="invalid-feedback">
+                                {errors.Detalles[index].IdProducto}
+                              </div>
+                            )}
                         </td>
 
                         <td>
@@ -496,6 +656,19 @@ export const Pedidos = () => {
                             disabled
                           />
                         </td>
+
+
+                        <td>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="subtotal"
+                            placeholder="Subtotal"
+                            value={formatPrice(detalle.subtotal)}
+                            disabled
+                          />
+                        </td>
+
 
                         <td>
                           <button
@@ -538,6 +711,7 @@ export const Pedidos = () => {
                 />
               </div>
             </div>
+
             <div className="modal-footer">
               <button
                 type="button"
@@ -657,8 +831,8 @@ export const Pedidos = () => {
           </div>
         </div>
       </div>
-
       {/* Fin modal ver detalle compra */}
+
 
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
@@ -703,7 +877,7 @@ export const Pedidos = () => {
                     <tr
                       key={compra.IdPedido}
                       className={
-                        compra.Estado === "Cancelado" ? "table-secondary" : ""
+                        compra.IdEstadoPedido === 4 || compra.IdEstadoPedido === 3 ? "table-secondary" : ""
                       }
                     >
                       <td>{getClienteName(compra.IdCliente)}</td>
@@ -717,13 +891,17 @@ export const Pedidos = () => {
                       <td>{convertEstadoPedidoIdToName(compra.IdEstadoPedido)}</td>
 
                       <td>
-                        {compra.Estado === "Cancelado" ? (
+                        {compra.IdEstadoPedido === 4 || compra.IdEstadoPedido === 3 ? (
                           <button className="btn btn-secondary mr-2" disabled>
                             <i className="fas fa-times-circle"></i>
                           </button>
+
                         ) : (
+
                           <button
-                            onClick={() => cancelCompra(compra.IdPedido)}
+                          data-toggle="modal"
+                          data-target="#modalEstadoPedido"
+                            onClick={() => openModalEstado(compra)}
                             className="btn btn-danger mr-2"
                           >
                             <i className="fas fa-times-circle"></i>
@@ -733,11 +911,11 @@ export const Pedidos = () => {
                         <button
                           onClick={() => handleDetalleCompra(compra.IdPedido)}
                           className={`btn ${
-                            compra.Estado === "Cancelado"
+                            compra.IdEstadoPedido === 4 || compra.IdEstadoPedido === 3
                               ? "btn-secondary mr-2"
                               : "btn-info"
                           }`}
-                          disabled={compra.Estado === "Cancelado"}
+                          disabled={compra.IdEstadoPedido === 4 || compra.IdEstadoPedido === 3}
                           data-toggle="modal"
                           data-target="#modalDetalleCompra"
                         >
@@ -745,6 +923,7 @@ export const Pedidos = () => {
                           <i className="fas fa-eye"></i>
                         </button>
                       </td>
+
                     </tr>
                   ))}
                 </tbody>
