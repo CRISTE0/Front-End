@@ -460,7 +460,7 @@ export const Pedidos = () => {
               </div>
 
               <div className="modal-body">
-                <input type="text" id="IdCompra" value={IdPedidoActualizar}></input>
+                {/* <input type="text" id="IdCompra" value={IdPedidoActualizar}></input> */}
 
                 <div className="form-row">
                 {/* Seleccionar estado */}
