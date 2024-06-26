@@ -24,6 +24,7 @@ export const Compras = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+  
 
   useEffect(() => {
     getCompras();
@@ -860,7 +861,7 @@ export const Compras = () => {
                     >
                       <td>{getProveedorName(compra.IdProveedor)}</td>
                       <td>
-                        {new Date(compra.Fecha).toLocaleDateString("es-MX")}
+                        {compra.Fecha}
                       </td>
                       <td>{formatPrice(compra.Total)}</td>
                       <td>
