@@ -539,7 +539,7 @@ export const Clientes = () => {
                   <div className="form-group col-md-6">
                     <label htmlFor="correoCliente">Correo Electrónico:</label>
                     <input
-                      type="email"
+                      type="text"
                       className={`form-control ${
                         errors.correo ? "is-invalid" : ""
                       }`}
