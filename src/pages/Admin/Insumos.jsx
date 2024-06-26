@@ -352,6 +352,14 @@ export const Insumos = () => {
         backdrop: "swal2-backdrop-hide",
         icon: "swal2-icon-hide",
       },
+      didOpen: () => {
+        const timerProgressBar = MySwal.getTimerProgressBar();
+        if (timerProgressBar) {
+          timerProgressBar.style.backgroundColor = "black";
+          timerProgressBar.style.height = "6px";
+        }}
+
+
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -365,16 +373,18 @@ export const Insumos = () => {
               icon: 'error',
               title: 'No se puede eliminar',
               text: data.message,
-              timer: 3000, // 3 segundos
-              showConfirmButton: false // Oculta el botón "OK"
+              timer: 2000, 
+              showConfirmButton: false, // Oculta el botón "OK"
+              timerProgressBar: true
             });
           } else if (response.status === 200) {
             Swal.fire({
               icon: 'success',
               title: 'Eliminado',
               text: 'Insumo eliminado correctamente',
-              timer: 3000, // 3 segundos
-              showConfirmButton: false // Oculta el botón "OK"
+              timer: 2000, 
+              showConfirmButton: false, // Oculta el botón "OK"
+              timerProgressBar: true
             });
             // Actualizar la tabla de insumos
             getInsumos();
@@ -383,9 +393,11 @@ export const Insumos = () => {
               icon: 'error',
               title: 'Error',
               text: 'El insumo está asociado a una compra, no se puede eliminar',
-              timer: 3000, // 3 segundos
-              showConfirmButton: false // Oculta el botón "OK"
-            });
+              timer: 2000, 
+              showConfirmButton: false, // Oculta el botón "OK"
+              timerProgressBar: true
+
+            })
           }
         } catch (error) {
           console.error('Error al eliminar el insumo:', error);
