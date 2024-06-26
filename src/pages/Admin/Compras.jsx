@@ -24,7 +24,6 @@ export const Compras = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
-  
 
   useEffect(() => {
     getCompras();
@@ -155,37 +154,37 @@ export const Compras = () => {
     setShowDetalleField(false); // Ocultar el campo de detalles al abrir el modal
   };
 
-    // Función para manejar cambios en el formulario
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-  
-      if (name === "IdProveedor") {
-        setIdProveedor(value);
-      } else if (name === "Fecha") {
-        const selectedDate = new Date(value);
-        const currentDate = new Date();
-  
-        // Calcular la fecha hace 8 días
-        const minDate = new Date();
-        minDate.setDate(currentDate.getDate() - 8);
-  
-        if (selectedDate > currentDate) {
-          // Si la fecha seleccionada es después de la fecha actual,
-          // establecer la fecha actual como valor de Fecha
-          const formattedCurrentDate = currentDate.toISOString().split("T")[0];
-          setFecha(formattedCurrentDate);
-        } else if (selectedDate < minDate) {
-          // Si la fecha seleccionada es anterior a 8 días atrás, establecer la fecha mínima
-          const formattedMinDate = minDate.toISOString().split("T")[0];
-          setFecha(formattedMinDate);
-        } else {
-          // Establecer la fecha seleccionada sin modificarla
-          setFecha(value);
-        }
-      } else if (name === "Total") {
-        setTotal(value);
+  // Función para manejar cambios en el formulario
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "IdProveedor") {
+      setIdProveedor(value);
+    } else if (name === "Fecha") {
+      const selectedDate = new Date(value);
+      const currentDate = new Date();
+
+      // Calcular la fecha hace 8 días
+      const minDate = new Date();
+      minDate.setDate(currentDate.getDate() - 8);
+
+      if (selectedDate > currentDate) {
+        // Si la fecha seleccionada es después de la fecha actual,
+        // establecer la fecha actual como valor de Fecha
+        const formattedCurrentDate = currentDate.toISOString().split("T")[0];
+        setFecha(formattedCurrentDate);
+      } else if (selectedDate < minDate) {
+        // Si la fecha seleccionada es anterior a 8 días atrás, establecer la fecha mínima
+        const formattedMinDate = minDate.toISOString().split("T")[0];
+        setFecha(formattedMinDate);
+      } else {
+        // Establecer la fecha seleccionada sin modificarla
+        setFecha(value);
       }
-    };
+    } else if (name === "Total") {
+      setTotal(value);
+    }
+  };
 
   // Función para manejar los cambios en los detalles de la compra
   const handleDetailChange = (index, e) => {
@@ -204,7 +203,7 @@ export const Compras = () => {
     }
 
     if (name === "cantidad") {
-      // Validar que la cantidad sea un número positivo
+      // Validar que la cantidad sea un número positivo y no contenga caracteres inválidos
       if (value === "" || /^\d+$/.test(value)) {
         updatedDetalles[index][name] = value;
 
@@ -213,7 +212,11 @@ export const Compras = () => {
         const precio = parseFloat(updatedDetalles[index].precio || 0);
         updatedDetalles[index].subtotal = cantidad * precio;
       } else {
-        return; // No actualizar si no es un número positivo
+        show_alerta(
+          "La cantidad debe ser un número positivo sin caracteres inválidos",
+          "error"
+        );
+        return; // No actualizar si no es un número positivo sin caracteres inválidos
       }
     } else if (name === "precio") {
       // Validar que el precio sea un número positivo y no supere los 10 millones
@@ -242,6 +245,10 @@ export const Compras = () => {
           );
         }
       } else {
+        show_alerta(
+          "El precio debe ser un número válido y no superar los 10 millones",
+          "error"
+        );
         return; // No actualizar si no es un número válido o excede el límite
       }
     } else {
@@ -344,12 +351,21 @@ export const Compras = () => {
         errors.IdInsumo = "Selecciona un insumo";
       }
 
-      if (!detalle.cantidad || detalle.cantidad <= 0) {
+      if (
+        !detalle.cantidad ||
+        detalle.cantidad <= 0 ||
+        !/^\d+$/.test(detalle.cantidad)
+      ) {
         errors.cantidad = "Ingresa una cantidad válida";
       }
 
-      if (!detalle.precio || detalle.precio <= 0) {
-        errors.precio = "Ingresa un precio válido";
+      if (
+        !detalle.precio ||
+        detalle.precio <= 0 ||
+        parseFloat(detalle.precio) > 10000000
+      ) {
+        errors.precio =
+          "Ingresa un precio válido que no supere los 10 millones";
       }
 
       if (Object.keys(errors).length > 0) {
@@ -860,9 +876,7 @@ export const Compras = () => {
                       }
                     >
                       <td>{getProveedorName(compra.IdProveedor)}</td>
-                      <td>
-                        {compra.Fecha}
-                      </td>
+                      <td>{compra.Fecha}</td>
                       <td>{formatPrice(compra.Total)}</td>
                       <td>
                         {compra.Estado === "Cancelado" ? (
