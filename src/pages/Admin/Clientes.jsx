@@ -117,6 +117,9 @@ export const Clientes = () => {
     if (!/^\d+$/.test(value)) {
       return "El número de documento solo puede contener dígitos";
     }
+    if (value.startsWith("0")) {
+      return "El número de documento no puede empezar con cero";
+    }
     if (value.length < 6 || value.length > 10) {
       return "El número de documento debe tener entre 6 y 10 dígitos";
     }
@@ -141,6 +144,9 @@ export const Clientes = () => {
     if (!/^\d+$/.test(value)) {
       return "El teléfono solo puede contener dígitos";
     }
+    if (value.startsWith("0")) {
+      return "El teléfono no puede empezar con cero";
+    }
     if (value.length !== 10) {
       return "El teléfono debe tener exactamente 10 dígitos";
     }
@@ -152,12 +158,12 @@ export const Clientes = () => {
     if (!value) {
       return "Escribe la dirección";
     }
+    if (/^\s/.test(value)) {
+      return "La dirección no puede comenzar con un espacio";
+    }
     if (!/^[a-zA-Z0-9#-\s]*$/.test(value)) {
       return "La dirección solo puede contener letras, números, # y -";
     }
-    // if (!/^[a-zA-Z0-9#-\s]*$/.test(value)) {
-    //   return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
-    // }
     return "";
   };
 
@@ -166,10 +172,15 @@ export const Clientes = () => {
     if (!value) {
       return "Ingresa tu correo electrónico";
     }
-    // Expresión regular para validar correo electrónico
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(value)) {
+    if (/\s/.test(value)) {
+      return "El correo electrónico no puede contener espacios";
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
       return "Ingresa un correo electrónico válido";
+    }
+    const length = value.length;
+    if (length < 10 || length > 50) {
+      return "El correo debe tener entre 10 y 50 caracteres";
     }
     return "";
   };
@@ -236,11 +247,15 @@ export const Clientes = () => {
   // Función para manejar cambios en el correo electrónico
   const handleChangeCorreo = (e) => {
     const value = e.target.value;
-    setCorreo(value);
+    setCorreo(value); // Actualiza el estado del correo electrónico
+
+    // Valida el correo electrónico y obtiene el mensaje de error
     const errorMessage = validateCorreo(value);
+
+    // Actualiza el estado de los errores con el mensaje de error correspondiente
     setErrors((prevState) => ({
       ...prevState,
-      correo: errorMessage,
+      correo: errorMessage, // Actualiza el error de correo con el mensaje de error obtenido
     }));
   };
 
