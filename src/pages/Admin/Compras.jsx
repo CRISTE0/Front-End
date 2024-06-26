@@ -34,7 +34,11 @@ export const Compras = () => {
   const getCompras = async () => {
     try {
       const respuesta = await axios.get(url);
-      setCompras(respuesta.data);
+      const comprasOrdenadas = respuesta.data.sort((a, b) => {
+        // Ordenar por fecha de forma descendente (de la más reciente a la más antigua)
+        return new Date(b.Fecha) - new Date(a.Fecha);
+      });
+      setCompras(comprasOrdenadas);
     } catch (error) {
       show_alerta("Error al obtener las compras", "error");
     }
@@ -150,36 +154,37 @@ export const Compras = () => {
     setShowDetalleField(false); // Ocultar el campo de detalles al abrir el modal
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "IdProveedor") {
-      setIdProveedor(value);
-    } else if (name === "Fecha") {
-      const selectedDate = new Date(value);
-      const currentDate = new Date();
-      
-      // Calcular la fecha hace 8 días
-      const minDate = new Date();
-      minDate.setDate(currentDate.getDate() - 8);
-      
-      if (selectedDate > currentDate) {
-        // Si la fecha seleccionada es después de la fecha actual,
-        // establecer la fecha actual como valor de Fecha
-        const formattedCurrentDate = currentDate.toISOString().split("T")[0];
-        setFecha(formattedCurrentDate);
-      } else if (selectedDate < minDate) {
-        // Si la fecha seleccionada es anterior a 8 días atrás, establecer la fecha mínima
-        const formattedMinDate = minDate.toISOString().split("T")[0];
-        setFecha(formattedMinDate);
-      } else {
-        // Establecer la fecha seleccionada
-        setFecha(value);
-      }
-    } else if (name === "Total") {
-      setTotal(value);
-    }
-  };
+    // Función para manejar cambios en el formulario
+    const handleChange = (e) => {
+      const { name, value } = e.target;
   
+      if (name === "IdProveedor") {
+        setIdProveedor(value);
+      } else if (name === "Fecha") {
+        const selectedDate = new Date(value);
+        const currentDate = new Date();
+  
+        // Calcular la fecha hace 8 días
+        const minDate = new Date();
+        minDate.setDate(currentDate.getDate() - 8);
+  
+        if (selectedDate > currentDate) {
+          // Si la fecha seleccionada es después de la fecha actual,
+          // establecer la fecha actual como valor de Fecha
+          const formattedCurrentDate = currentDate.toISOString().split("T")[0];
+          setFecha(formattedCurrentDate);
+        } else if (selectedDate < minDate) {
+          // Si la fecha seleccionada es anterior a 8 días atrás, establecer la fecha mínima
+          const formattedMinDate = minDate.toISOString().split("T")[0];
+          setFecha(formattedMinDate);
+        } else {
+          // Establecer la fecha seleccionada sin modificarla
+          setFecha(value);
+        }
+      } else if (name === "Total") {
+        setTotal(value);
+      }
+    };
 
   // Función para manejar los cambios en los detalles de la compra
   const handleDetailChange = (index, e) => {
@@ -197,35 +202,46 @@ export const Compras = () => {
       }
     }
 
-    if (name === "cantidad" || name === "precio") {
-      const regex = /^[0-9\b]+$/;
-      if (value === "" || regex.test(value)) {
+    if (name === "cantidad") {
+      // Validar que la cantidad sea un número positivo
+      if (value === "" || /^\d+$/.test(value)) {
         updatedDetalles[index][name] = value;
 
-        // Actualizar el subtotal si se modificó cantidad o precio
-        if (name === "cantidad" || name === "precio") {
-          const cantidad = parseFloat(updatedDetalles[index].cantidad || 0);
-          const precio = parseFloat(updatedDetalles[index].precio || 0);
-          updatedDetalles[index].subtotal = cantidad * precio;
-        }
+        // Actualizar el subtotal si se modificó cantidad
+        const cantidad = parseFloat(value || 0);
+        const precio = parseFloat(updatedDetalles[index].precio || 0);
+        updatedDetalles[index].subtotal = cantidad * precio;
+      } else {
+        return; // No actualizar si no es un número positivo
+      }
+    } else if (name === "precio") {
+      // Validar que el precio sea un número positivo y no supere los 10 millones
+      if (
+        value === "" ||
+        (/^\d*\.?\d*$/.test(value) && parseFloat(value) <= 10000000)
+      ) {
+        updatedDetalles[index][name] = value;
 
-        // Si el precio es menor al actual, mostrar una advertencia
-        if (name === "precio") {
-          const idInsumo = updatedDetalles[index].IdInsumo;
-          const currentPrice = getCurrentPrice(idInsumo);
-          const newPrice = parseFloat(value);
+        // Actualizar el subtotal si se modificó precio
+        const cantidad = parseFloat(updatedDetalles[index].cantidad || 0);
+        const precio = parseFloat(value || 0);
+        updatedDetalles[index].subtotal = cantidad * precio;
 
-          if (newPrice < currentPrice) {
-            show_alerta(
-              `El precio no puede ser menor al actual (${formatPrice(
-                currentPrice
-              )})`,
-              "warning"
-            );
-          }
+        // Mostrar advertencia si el precio es menor al actual
+        const idInsumo = updatedDetalles[index].IdInsumo;
+        const currentPrice = getCurrentPrice(idInsumo);
+        const newPrice = parseFloat(value);
+
+        if (newPrice < currentPrice) {
+          show_alerta(
+            `El precio no puede ser menor al actual (${formatPrice(
+              currentPrice
+            )})`,
+            "warning"
+          );
         }
       } else {
-        return;
+        return; // No actualizar si no es un número válido o excede el límite
       }
     } else {
       updatedDetalles[index][name] = value;
@@ -300,6 +316,7 @@ export const Compras = () => {
   const validar = () => {
     let errorMessage = "";
 
+    // Validar campos de la compra (Proveedor, Fecha, Detalles)
     if (!IdProveedor) {
       errorMessage = "Selecciona un proveedor";
       setErrors({ IdProveedor: errorMessage });
@@ -312,14 +329,13 @@ export const Compras = () => {
       return;
     }
 
-    // Validar que haya al menos un detalle
+    // Validar detalles de la compra
     if (Detalles.length === 0) {
       errorMessage = "Agrega al menos un detalle de compra";
       showDetalleAlert(errorMessage); // Mostrar la alerta cuando no hay detalles
       return;
     }
 
-    // Validación de los detalles de la compra
     const detallesValidados = Detalles.map((detalle, index) => {
       const errors = {};
 
@@ -353,6 +369,7 @@ export const Compras = () => {
       return;
     }
 
+    // Si pasa la validación, enviar la solicitud
     enviarSolicitud("POST", {
       IdProveedor: IdProveedor,
       Fecha: Fecha,
@@ -461,6 +478,7 @@ export const Compras = () => {
   return (
     <>
       {/* Inicio modal de crear compra con su detalle */}
+      {/* Modal para crear o editar una compra con detalles */}
       <div
         className="modal fade"
         id="modalCompras"
@@ -523,7 +541,9 @@ export const Compras = () => {
                   onChange={handleChange}
                   max={new Date().toISOString().split("T")[0]}
                 />
-                <small>Seleeciona una fecha que este en un rango de 8 dias</small>
+                <small>
+                  Selecciona una fecha dentro de los últimos 8 días.
+                </small>
                 {renderErrorMessage(errors.Fecha)}
               </div>
 
@@ -688,6 +708,7 @@ export const Compras = () => {
           </div>
         </div>
       </div>
+
       {/* fin modal de crear compra con el detalle */}
 
       {/* Inicio modal ver detalle compra */}
@@ -839,7 +860,7 @@ export const Compras = () => {
                     >
                       <td>{getProveedorName(compra.IdProveedor)}</td>
                       <td>
-                        {new Date(compra.Fecha).toLocaleDateString("es-ES")}
+                        {new Date(compra.Fecha).toLocaleDateString("es-MX")}
                       </td>
                       <td>{formatPrice(compra.Total)}</td>
                       <td>

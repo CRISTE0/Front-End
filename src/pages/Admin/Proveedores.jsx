@@ -132,19 +132,26 @@ export const Proveedores = () => {
   };
 
   // Función para validar el número de documento
-  const validateNroDocumento = (value) => {
+  const validateNroDocumento = (value, tipoDocumento) => {
     if (!value) {
       return "Escribe el número de documento";
     }
     if (!/^\d+$/.test(value)) {
       return "El número de documento solo puede contener dígitos";
     }
-    if (TipoDocumento === "NIT" && (value.length < 9 || value.length > 10)) {
+    if (value.startsWith("0")) {
+      return "El número de documento no puede comenzar con 0";
+    }
+    if (/^0+$/.test(value)) {
+      return "El número de documento no puede ser todo ceros";
+    }
+    const length = value.length;
+    if (tipoDocumento === "NIT" && (length < 9 || length > 10)) {
       return "El NIT debe tener entre 9 y 10 dígitos";
     }
     if (
-      (TipoDocumento === "CC" || TipoDocumento === "CE") &&
-      (value.length < 6 || value.length > 10)
+      (tipoDocumento === "CC" || tipoDocumento === "CE") &&
+      (length < 6 || length > 10)
     ) {
       return "El número de documento debe tener entre 6 y 10 dígitos";
     }
@@ -156,18 +163,27 @@ export const Proveedores = () => {
     if (!value) {
       return "Escribe el nombre y apellido";
     }
-    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value)) {
-      return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
+    if (!/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]*$/.test(value)) {
+      return "El nombre y apellido solo puede contener letras con tildes, números, la letra 'ñ' y espacios";
+    }
+    const length = value.length;
+    if (length < 2 || length > 60) {
+      return "El nombre y apellido debe tener entre 2 y 60 caracteres";
     }
     return "";
   };
 
+  // Función para validar el contacto
   const validateContacto = (value) => {
     if (!value) {
-      return "Escribe el nombre y apellido";
+      return "Escribe el nombre del contacto";
     }
-    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value)) {
-      return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
+    if (!/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]*$/.test(value)) {
+      return "El contacto solo puede contener letras con tildes, números, la letra 'ñ' y espacios";
+    }
+    const length = value.length;
+    if (length < 2 || length > 60) {
+      return "El contacto debe tener entre 2 y 60 caracteres";
     }
     return "";
   };
@@ -180,20 +196,31 @@ export const Proveedores = () => {
     if (!/^\d+$/.test(value)) {
       return "El teléfono solo puede contener dígitos";
     }
+    if (value.startsWith("0")) {
+      return "El teléfono no puede comenzar con 0";
+    }
+    if (/^0+$/.test(value)) {
+      return "El teléfono no puede ser todo ceros";
+    }
     if (value.length !== 10) {
       return "El teléfono debe tener exactamente 10 dígitos";
     }
     return "";
   };
 
+  // Función para validar la dirección
   const validateDireccion = (value) => {
     if (!value) {
       return "Escribe la dirección";
     }
-    if (!/^[a-zA-Z0-9#\-_\s]+(?:[a-zA-Z0-9#\-_\s])*[^\s]$/.test(value)) {
-      return "La dirección solo puede contener letras, números, espacios, # y -";
+    if (!/^[a-zA-Z0-9\s#-]*$/.test(value)) {
+      return "La dirección solo puede contener letras, números, espacios, '#' y '-'";
     }
-    return ""; // La dirección es válida
+    const length = value.length;
+    if (length < 10 || length > 50) {
+      return "La dirección debe tener entre 10 y 50 caracteres";
+    }
+    return "";
   };
 
   // Función para validar el correo electrónico
@@ -201,21 +228,16 @@ export const Proveedores = () => {
     if (!value) {
       return "Ingresa tu correo electrónico";
     }
-
-    // Expresión regular para validar correo electrónico sin espacios
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // Verifica si el correo contiene espacios
     if (/\s/.test(value)) {
       return "El correo electrónico no puede contener espacios";
     }
-
-    // Verifica si el correo sigue el formato estándar
-    if (!emailRegex.test(value)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
       return "Ingresa un correo electrónico válido";
     }
-
-    // Si pasa todas las validaciones, retorna una cadena vacía
+    const length = value.length;
+    if (length < 10 || length > 50) {
+      return "El correo debe tener entre 10 y 50 caracteres";
+    }
     return "";
   };
 
@@ -237,7 +259,7 @@ export const Proveedores = () => {
       value = value.slice(0, 10);
     }
     setNroDocumento(value);
-    const errorMessage = validateNroDocumento(value);
+    const errorMessage = validateNroDocumento(value, TipoDocumento);
     setErrors((prevState) => ({
       ...prevState,
       nroDocumento: errorMessage,
@@ -258,6 +280,12 @@ export const Proveedores = () => {
     // Rellenar Contacto si TipoDocumento es "CC" o "CE"
     if (TipoDocumento === "CC" || TipoDocumento === "CE") {
       setContacto(value);
+      // También validar y actualizar error de contacto
+      const contactoErrorMessage = validateContacto(value);
+      setErrors((prevState) => ({
+        ...prevState,
+        contacto: contactoErrorMessage,
+      }));
     }
   };
 
