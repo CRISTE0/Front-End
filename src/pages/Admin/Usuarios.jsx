@@ -588,6 +588,18 @@ export const Usuarios = () => {
                           <i className="fas fa-eye"></i>
                         </button>
                         {/* Fin de botón de detalle */}
+
+                        {/* Botón de ver cambiar contra */}
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          data-toggle="modal"
+                          data-target="#modalCambiarContrasenia"
+                        >
+                        <i className="fas fa-key"></i>
+                        </button>
+
+                        {/* Fin de botón de cambiar contra */}
                       </td>
                     </tr>
                   ))}
@@ -662,16 +674,7 @@ export const Usuarios = () => {
                       disabled
                     />
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="contrasena">Contraseña:</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      id="contrasena"
-                      value={usuarioSeleccionado.Contrasenia}
-                      disabled
-                    />
-                  </div>
+
                   <div className="form-group">
                     <label htmlFor="rol">Rol:</label>
                     <input
@@ -698,6 +701,7 @@ export const Usuarios = () => {
           </div>
         </div>
       </div>
+
     </>
   );
 };
