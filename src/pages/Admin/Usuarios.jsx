@@ -477,6 +477,80 @@ export const Usuarios = () => {
       </div>
       {/* Fin modal crear/editar usuario */}
 
+      {/* Modal para cambiar contra */}
+      <div
+        className="modal fade"
+        id="modalCambiarContrasenia"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="modalUsuariosLabel"
+        aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
+      >
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="modalUsuariosLabel">
+                {title}
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+
+              <div className="input-group mb-3">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="contrasenia"
+                  className={`form-control ${
+                    errors.contrasenia ? "is-invalid" : ""
+                  }`}
+                  placeholder="Contraseña"
+                  value={Contrasenia}
+                  onChange={handleChangeContrasenia}
+                />
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary ml-2"
+                  onClick={toggleShowPassword}
+                >
+                  {showPassword ? (
+                    <i className="fas fa-eye-slash"></i>
+                  ) : (
+                    <i className="fas fa-eye"></i>
+                  )}
+                </button>
+                {renderErrorMessage(errors.contrasenia)}
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <div className="text-right">
+                <button
+                  type="button"
+                  id="btnCerrar"
+                  className="btn btn-secondary"
+                  data-dismiss="modal"
+                >
+                  Cancelar
+                </button>
+                <button onClick={guardarUsuario} className="btn btn-success">
+                  Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Fin modal cambiar la contra*/}
+
       {/* Inicio de usuarios */}
       <div className="container-fluid">
         {/* Page Heading */}
