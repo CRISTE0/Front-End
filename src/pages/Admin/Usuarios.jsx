@@ -504,7 +504,6 @@ export const Usuarios = () => {
               </button>
             </div>
             <div className="modal-body">
-
               <div className="input-group mb-3">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -530,18 +529,23 @@ export const Usuarios = () => {
                 {renderErrorMessage(errors.contrasenia)}
               </div>
             </div>
-
             <div className="modal-footer">
               <div className="text-right">
                 <button
                   type="button"
-                  id="btnCerrar"
                   className="btn btn-secondary"
                   data-dismiss="modal"
                 >
                   Cancelar
                 </button>
-                <button onClick={guardarUsuario} className="btn btn-success">
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={() => {
+                    guardarUsuario();
+                    $("#modalCambiarContrasenia").modal("hide"); // Esto cierra el modal manualmente usando jQuery
+                  }}
+                >
                   Guardar
                 </button>
               </div>
