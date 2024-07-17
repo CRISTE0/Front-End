@@ -1,0 +1,89 @@
+
+  .tooltipReferenceImage {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .tooltipReferenceImage .tooltiptext {
+    visibility: hidden;
+    width: 180px;
+    background-color: rgb(150, 150, 150);
+    font-size: 15px;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 150%;
+    left: 50%;
+    margin-left: -60px;
+    
+    /* Fade in tooltip - takes 1 second to go from 0% to 100% opac: */
+    opacity: 0;
+    transition: opacity 1s;
+  }          
+
+
+  .tooltipReferenceImage .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -35px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+  }
+  
+  .tooltipReferenceImage:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+  }
+
+
+
+/* ToolTip talla del insumo */
+
+
+.tooltipSizeSupply {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltipSizeSupply .tooltiptext {
+  visibility: hidden;
+  width: 180px;
+  background-color: rgb(150, 150, 150);
+  font-size: 15px;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -60px;
+  
+  /* Fade in tooltip - takes 1 second to go from 0% to 100% opac: */
+  opacity: 0;
+  transition: opacity 1s;
+}          
+
+
+.tooltipSizeSupply .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -35px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+
+.tooltipSizeSupply:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}

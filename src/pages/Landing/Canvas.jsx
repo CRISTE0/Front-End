@@ -221,6 +221,7 @@ export const Canvas = () => {
       const font = size + tFont;
       console.log(font);
       const color = document.getElementById("text-color").value;
+      console.log(color);
   
   
       const element = {
@@ -1167,9 +1168,11 @@ export const Canvas = () => {
           <>
             <select id="text-font" onChange={handleTextFontChange} defaultValue={""}>
               <option value="" disabled>Elige la fuente del texto</option>
-              <option value="Arial">Arial</option>
-              <option value="Verdana">Verdana</option>
+              <option value="Palatino">Palatino</option>
+              <option value="Trebuchet MS">Trebuchet MS</option>
               <option value="Comic Sans MS">Comic Sans</option>
+              <option value="Courier New">Courier New</option>
+              <option value="Consolas">Consolas</option>
             </select>
             
             <br />
