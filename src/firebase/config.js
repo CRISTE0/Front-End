@@ -20,6 +20,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const storage=getStorage(app)
 
+
+function generateIdImageDesign() {
+  return v4();
+}
+
+function generateIdImageReference  () { 
+  return v4();
+}
+
+
 export async function subirImageDesign(fileD)  {
   if (!fileD) {
     return ("No aplica");
@@ -32,24 +42,60 @@ export async function subirImageDesign(fileD)  {
 }
 
 
+// sirve para el admin(aunque se debe cambiar la otra func)
 export async function subirImageDesignAdmin(fileD)  {
   if (!fileD) {
     return ("No aplica");
   }
-  const storageRef= ref(storage,`Disenios/${v4()}`)
+
+  const idImagenDisenio = generateIdImageDesign();
+
+  const storageRef= ref(storage,`Disenios/${idImagenDisenio}`)
   const blob = await fetch(fileD).then((res) => res.blob());
   await uploadBytes(storageRef,blob)
   const url = await getDownloadURL(storageRef)
-  console.log(url);
-  return url;
+
+  console.log(`id del diseño: ${idImagenDisenio}`);
+  console.log(`url del diseño: ${url}`);
+
+  return [idImagenDisenio,url] ;
 }
 
 export async function subirImageReference(fileR)  {
-  const storageRef= ref(storage,`Referencias/${v4()}`)
+  const idImagenReferencia = await generateIdImageReference();
+
+  const storageRef= ref(storage,`Referencias/${idImagenReferencia}`)
   const blob = await fetch(fileR).then((res) => res.blob());
   await uploadBytes(storageRef,blob)
   const url = await getDownloadURL(storageRef)
   console.log(url);
-  return url;
+  return [url,idImagenReferencia];
+
+}
+
+export async function editImageDesign(idFileD,newFileD)  {
+
+  const storageRef= ref(storage,`Disenios/${idFileD}`)
+  const blob = await fetch(newFileD).then((res) => res.blob());
+  console.log(blob);
+  await uploadBytes(storageRef,blob)
+  const url = await getDownloadURL(storageRef)
+  console.log(url);
+  // return url;
+}
+
+
+export async function editImageReference(idFileR,newFileR)  {
+  
+  console.log(idFileR);
+  console.log(newFileR);
+
+
+  const storageRef= ref(storage,`Referencias/${idFileR}`)
+  const blob = await fetch(newFileR).then((res) => res.blob());
+  await uploadBytes(storageRef,blob)
+  const url = await getDownloadURL(storageRef)
+  console.log(url);
+  // return url;
 
 }
