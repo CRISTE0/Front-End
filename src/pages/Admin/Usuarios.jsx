@@ -76,7 +76,6 @@ export const Usuarios = () => {
       setIdUsuario(usuario.IdUsuario);
       setUsuario(usuario.Usuario);
       setCorreo(usuario.Correo);
-      setContrasenia(""); // No mostrar la contraseña existente
       setIdRol(usuario.IdRol); // Establecer el Id del rol seleccionado al actualizar usuario
       setOperation(2);
       setTitle("Actualizar Usuario");
@@ -95,8 +94,9 @@ export const Usuarios = () => {
 
   const openModalCambiarContrasenia = (usuario) => {
     setIdUsuario(usuario.IdUsuario);
-    setContrasenia(usuario.Contrasenia);
+    setContrasenia(usuario.Contrasenia || ""); // Asegúrate de manejar el caso donde no hay contraseña inicial
     setTitle("Cambiar Contraseña");
+    setOperation(3); // Indica que la operación es cambiar contraseña
     setErrors({
       contrasenia: "",
     });
@@ -110,16 +110,45 @@ export const Usuarios = () => {
 
 
   const guardarUsuario = async () => {
+    setErrors({
+      usuario: "",
+      correo: "",
+      contrasenia: "",
+      rol: "", // Asegúrate de limpiar el error del rol también
+    });
+  
     const cleanedUsuario = Usuario.trim();
     const cleanedCorreo = Correo.trim();
     const cleanedContrasenia = Contrasenia.trim();
-
-    if (!cleanedUsuario || !cleanedCorreo || !cleanedContrasenia || !IdRol) {
-      // Validar campos requeridos
-      show_alerta("Todos los campos son requeridos", "error");
+  
+    if (operation === 1 || operation === 2) {
+      // Validar campos requeridos para crear o editar usuario completo
+      if (!cleanedUsuario) {
+        setErrors(prevState => ({ ...prevState, usuario: "El nombre de usuario es requerido" }));
+      }
+      if (!cleanedCorreo) {
+        setErrors(prevState => ({ ...prevState, correo: "El correo electrónico es requerido" }));
+      }
+      if (!IdRol) {
+        setErrors(prevState => ({ ...prevState, rol: "El rol es requerido" }));
+      }
+    }
+  
+    if (operation === 1 && !cleanedContrasenia) {
+      // Validar contraseña solo en creación de usuario
+      setErrors(prevState => ({ ...prevState, contrasenia: "La contraseña es requerida" }));
+    }
+  
+    // Validar errores específicos para cambiar contraseña
+    const contraseniaError = validateContrasenia(cleanedContrasenia);
+  
+    if (contraseniaError && operation === 3) {
+      // Mostrar error solo si estás cambiando la contraseña
+      setErrors(prevState => ({ ...prevState, contrasenia: contraseniaError }));
+      show_alerta("Verifique los errores en el formulario", "error");
       return;
     }
-
+  
     if (operation === 1) {
       // Crear Usuario
       await enviarSolicitud("POST", {
@@ -135,15 +164,31 @@ export const Usuarios = () => {
         IdUsuario,
         Usuario: cleanedUsuario,
         Correo: cleanedCorreo,
-        Contrasenia: cleanedContrasenia,
+        Contrasenia: cleanedContrasenia, // Incluso si no cambia, enviar la contraseña
         IdRol: IdRol,
+      });
+    } else if (operation === 3) {
+      // Cambiar Contraseña
+      await enviarSolicitud("PUT", {
+        IdUsuario,
+        Contrasenia: cleanedContrasenia,
       });
     }
   };
+  
+
+
+
 
   const handleChangeRol = (e) => {
-    setIdRol(e.target.value); // Actualizar el estado del rol seleccionado
+    setIdRol(e.target.value);
+    if (!e.target.value) {
+      setErrors(prevState => ({ ...prevState, rol: "El rol es requerido" }));
+    } else {
+      setErrors(prevState => ({ ...prevState, rol: "" }));
+    }
   };
+
 
   const validateUsuario = (value) => {
     if (!value) {
@@ -292,6 +337,7 @@ export const Usuarios = () => {
     }
   };
 
+
   const deleteUsuario = (idUsuario, Usuario) => {
     const MySwal = withReactContent(Swal);
     MySwal.fire({
@@ -429,7 +475,7 @@ export const Usuarios = () => {
                 <div className="input-group mb-3">
                   <input
                     type={showPassword ? "text" : "password"}
-                    id="contrasenia"
+                    id="contraseniaNuevo"
                     className={`form-control ${errors.contrasenia ? "is-invalid" : ""}`}
                     placeholder="Contraseña"
                     value={Contrasenia}
@@ -492,28 +538,14 @@ export const Usuarios = () => {
       {/* Fin modal crear/editar usuario */}
 
       {/* Modal para cambiar contra */}
-      <div
-        className="modal fade"
-        id="modalCambiarContrasenia"
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="modalUsuariosLabel"
-        aria-hidden="true"
-        data-backdrop="static"
-        data-keyboard="false"
-      >
+      <div className="modal fade" id="modalCambiarContrasenia" tabIndex="-1" role="dialog" aria-labelledby="modalUsuariosLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
-              <h5 className="modal-title" id="modalUsuariosLabel">
+              <h5 className="modal-title" id="modalCambiarContrasenia">
                 {title}
               </h5>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
+              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
@@ -522,8 +554,7 @@ export const Usuarios = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   id="contrasenia"
-                  className={`form-control ${errors.contrasenia ? "is-invalid" : ""
-                    }`}
+                  className={`form-control ${errors.contrasenia ? "is-invalid" : ""}`}
                   placeholder="Contraseña"
                   value={Contrasenia}
                   onChange={handleChangeContrasenia}
@@ -544,25 +575,20 @@ export const Usuarios = () => {
             </div>
             <div className="modal-footer">
               <div className="text-right">
-                <button
-                  type="button"
-                  className="btn btn-secondary mr-2"
-                  data-dismiss="modal"
-                >
+                <button 
+                type="button"
+                id="btnCerrar"
+                className="btn btn-secondary mr-2" 
+                data-dismiss="modal">
                   Cancelar
                 </button>
                 <button
-                  type="button"
-                  className="btn btn-success"
-                  onClick={() => {
-                    guardarUsuario();
-                    $("#modalCambiarContrasenia").modal("hide"); // Esto cierra el modal manualmente usando jQuery
-                  }}
-                >
+                  className="btn btn-primary" onClick={guardarUsuario} >
                   Guardar
                 </button>
               </div>
             </div>
+
           </div>
         </div>
       </div>
@@ -666,7 +692,7 @@ export const Usuarios = () => {
                         <button
                           className={`btn btn-info btn-sm mr-2`}
                           onClick={() => handleDetalleUsuario(usuario.IdUsuario)}
-                          disabled={usuario.Estado === "Cancelado"}
+                          disabled={usuario.Estado === "Inactivo"}
                           data-toggle="modal"
                           data-target="#modalDetalleUsuario"
                         >
@@ -679,6 +705,8 @@ export const Usuarios = () => {
                           type="button"
                           className="btn btn-primary btn-sm mr-2"
                           onClick={() => openModalCambiarContrasenia(usuario)}
+                          disabled={usuario.Estado === "Inactivo"}
+
                         >
                           <i className="fas fa-key"></i>
                         </button>
