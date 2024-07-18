@@ -388,9 +388,8 @@ export const Usuarios = () => {
                 <input
                   type="text"
                   id="usuario"
-                  className={`form-control ${
-                    errors.usuario ? "is-invalid" : ""
-                  }`}
+                  className={`form-control ${errors.usuario ? "is-invalid" : ""
+                    }`}
                   placeholder="Nombre de usuario"
                   value={Usuario}
                   onChange={handleChangeUsuario}
@@ -402,9 +401,8 @@ export const Usuarios = () => {
                 <input
                   type="email"
                   id="correo"
-                  className={`form-control ${
-                    errors.correo ? "is-invalid" : ""
-                  }`}
+                  className={`form-control ${errors.correo ? "is-invalid" : ""
+                    }`}
                   placeholder="Correo electrónico"
                   value={Correo}
                   onChange={handleChangeCorreo}
@@ -416,9 +414,8 @@ export const Usuarios = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   id="contrasenia"
-                  className={`form-control ${
-                    errors.contrasenia ? "is-invalid" : ""
-                  }`}
+                  className={`form-control ${errors.contrasenia ? "is-invalid" : ""
+                    }`}
                   placeholder="Contraseña"
                   value={Contrasenia}
                   onChange={handleChangeContrasenia}
@@ -508,9 +505,8 @@ export const Usuarios = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   id="contrasenia"
-                  className={`form-control ${
-                    errors.contrasenia ? "is-invalid" : ""
-                  }`}
+                  className={`form-control ${errors.contrasenia ? "is-invalid" : ""
+                    }`}
                   placeholder="Contraseña"
                   value={Contrasenia}
                   onChange={handleChangeContrasenia}
@@ -651,14 +647,8 @@ export const Usuarios = () => {
                         </div>
                         {/* Botón de ver detalle */}
                         <button
-                          onClick={() =>
-                            handleDetalleUsuario(usuario.IdUsuario)
-                          }
-                          className={`btn ${
-                            usuario.Estado === "Cancelado"
-                              ? "btn-secondary mr-2"
-                              : "btn-info"
-                          }`}
+                          className={`btn btn-info btn-sm mr-2`}
+                          onClick={() => handleDetalleUsuario(usuario.IdUsuario)}
                           disabled={usuario.Estado === "Cancelado"}
                           data-toggle="modal"
                           data-target="#modalDetalleUsuario"
@@ -670,11 +660,11 @@ export const Usuarios = () => {
                         {/* Botón de ver cambiar contra */}
                         <button
                           type="button"
-                          className="btn btn-primary"
+                          className="btn btn-primary btn-sm mr-2"
                           data-toggle="modal"
                           data-target="#modalCambiarContrasenia"
                         >
-                        <i className="fas fa-key"></i>
+                          <i className="fas fa-key"></i>
                         </button>
 
                         {/* Fin de botón de cambiar contra */}
