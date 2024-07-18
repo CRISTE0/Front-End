@@ -1274,6 +1274,7 @@ const validateReferencia = (value) => {
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
+                           
 
                           <button
                             className="btn btn-info btn-sm mr-2"
