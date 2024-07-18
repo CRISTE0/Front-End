@@ -310,7 +310,7 @@ export const Colores = () => {
                   Cerrar
                 </button>
                 <button onClick={() => validar()} className="btn btn-success">
-                  <i className="fa-solid fa-floppy-disk"></i> Guardar Color
+                  <i className="fa-solid fa-floppy-disk"></i> Guardar
                 </button>
               </div>
             </div>

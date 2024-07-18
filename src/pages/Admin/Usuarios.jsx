@@ -67,7 +67,7 @@ export const Usuarios = () => {
       setIdUsuario("");
       setUsuario("");
       setCorreo("");
-      setContrasenia("");
+      setContrasenia(""); // Limpiar el estado de la contraseña
       setIdRol(""); // Limpiar el estado del rol seleccionado al crear usuario
       setOperation(1);
       setTitle("Crear Usuario");
@@ -76,7 +76,7 @@ export const Usuarios = () => {
       setIdUsuario(usuario.IdUsuario);
       setUsuario(usuario.Usuario);
       setCorreo(usuario.Correo);
-      setContrasenia(usuario.Contrasenia);
+      setContrasenia(""); // No mostrar la contraseña existente
       setIdRol(usuario.IdRol); // Establecer el Id del rol seleccionado al actualizar usuario
       setOperation(2);
       setTitle("Actualizar Usuario");
@@ -91,6 +91,23 @@ export const Usuarios = () => {
     const modal = new bootstrap.Modal(document.getElementById("modalUsuarios"));
     modal.show();
   };
+
+
+  const openModalCambiarContrasenia = (usuario) => {
+    setIdUsuario(usuario.IdUsuario);
+    setContrasenia(usuario.Contrasenia);
+    setTitle("Cambiar Contraseña");
+    setErrors({
+      contrasenia: "",
+    });
+
+    // Mostrar el modal de cambiar contraseña
+    const modal = new bootstrap.Modal(
+      document.getElementById("modalCambiarContrasenia")
+    );
+    modal.show();
+  };
+
 
   const guardarUsuario = async () => {
     const cleanedUsuario = Usuario.trim();
@@ -388,8 +405,7 @@ export const Usuarios = () => {
                 <input
                   type="text"
                   id="usuario"
-                  className={`form-control ${errors.usuario ? "is-invalid" : ""
-                    }`}
+                  className={`form-control ${errors.usuario ? "is-invalid" : ""}`}
                   placeholder="Nombre de usuario"
                   value={Usuario}
                   onChange={handleChangeUsuario}
@@ -401,8 +417,7 @@ export const Usuarios = () => {
                 <input
                   type="email"
                   id="correo"
-                  className={`form-control ${errors.correo ? "is-invalid" : ""
-                    }`}
+                  className={`form-control ${errors.correo ? "is-invalid" : ""}`}
                   placeholder="Correo electrónico"
                   value={Correo}
                   onChange={handleChangeCorreo}
@@ -410,29 +425,30 @@ export const Usuarios = () => {
                 {renderErrorMessage(errors.correo)}
               </div>
 
-              <div className="input-group mb-3">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="contrasenia"
-                  className={`form-control ${errors.contrasenia ? "is-invalid" : ""
-                    }`}
-                  placeholder="Contraseña"
-                  value={Contrasenia}
-                  onChange={handleChangeContrasenia}
-                />
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary ml-2"
-                  onClick={toggleShowPassword}
-                >
-                  {showPassword ? (
-                    <i className="fas fa-eye-slash"></i>
-                  ) : (
-                    <i className="fas fa-eye"></i>
-                  )}
-                </button>
-                {renderErrorMessage(errors.contrasenia)}
-              </div>
+              {operation === 1 && (
+                <div className="input-group mb-3">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="contrasenia"
+                    className={`form-control ${errors.contrasenia ? "is-invalid" : ""}`}
+                    placeholder="Contraseña"
+                    value={Contrasenia}
+                    onChange={handleChangeContrasenia}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary ml-2"
+                    onClick={toggleShowPassword}
+                  >
+                    {showPassword ? (
+                      <i className="fas fa-eye-slash"></i>
+                    ) : (
+                      <i className="fas fa-eye"></i>
+                    )}
+                  </button>
+                  {renderErrorMessage(errors.contrasenia)}
+                </div>
+              )}
 
               {/* Selección de rol */}
               <div className="input-group mb-3">
@@ -454,6 +470,7 @@ export const Usuarios = () => {
               </div>
             </div>
 
+
             <div className="modal-footer">
               <div className="text-right">
                 <button
@@ -464,7 +481,7 @@ export const Usuarios = () => {
                 >
                   Cancelar
                 </button>
-                <button onClick={guardarUsuario} className="btn btn-success">
+                <button onClick={guardarUsuario} className="btn btn-primary">
                   Guardar
                 </button>
               </div>
@@ -657,17 +674,16 @@ export const Usuarios = () => {
                         </button>
                         {/* Fin de botón de detalle */}
 
-                        {/* Botón de ver cambiar contra */}
+                        {/* Botón de cambiar contraseña */}
                         <button
                           type="button"
                           className="btn btn-primary btn-sm mr-2"
-                          data-toggle="modal"
-                          data-target="#modalCambiarContrasenia"
+                          onClick={() => openModalCambiarContrasenia(usuario)}
                         >
                           <i className="fas fa-key"></i>
                         </button>
+                        {/* Fin de botón de cambiar contraseña */}
 
-                        {/* Fin de botón de cambiar contra */}
                       </td>
                     </tr>
                   ))}
