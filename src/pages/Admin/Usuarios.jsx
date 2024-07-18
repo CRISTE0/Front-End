@@ -459,7 +459,7 @@ export const Usuarios = () => {
                 <button
                   type="button"
                   id="btnCerrar"
-                  className="btn btn-secondary"
+                  className="btn btn-secondary mr-2"
                   data-dismiss="modal"
                 >
                   Cancelar
@@ -529,7 +529,7 @@ export const Usuarios = () => {
               <div className="text-right">
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="btn btn-secondary mr-2"
                   data-dismiss="modal"
                 >
                   Cancelar
