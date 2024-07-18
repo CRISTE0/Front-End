@@ -21,6 +21,7 @@ import { Tallas } from "../pages/Admin/Tallas";
 import { Colores } from "../pages/Admin/Colores";
 import { Carrito } from "../pages/Landing/Carrito";
 import { Insumos } from "../pages/Admin/Insumos"
+import { ProductoSolo } from "../pages/Landing/ProductoSolo";
 
 export const Rutas = () => {
   return (
@@ -28,6 +29,7 @@ export const Rutas = () => {
       <Routes>
         <Route exat path="/" Component={()=> <LandingLayout> <Inicio /> </LandingLayout> } />
         <Route path="/Productos" Component={()=> <LandingLayout> <Productos /> </LandingLayout>  } />
+        <Route path="/ProductoSolo" Component={()=> <LandingLayout> <ProductoSolo /> </LandingLayout>  } />
         <Route path="/Carrito" Component={()=> <LandingLayout> <Carrito /> </LandingLayout>  } />
         <Route path="/Contactenos" Component={()=> <LandingLayout> <Contactenos /> </LandingLayout> } />
         <Route path="/Diseniador" Component={()=> <LandingLayout> <Diseniador /> </LandingLayout> } />

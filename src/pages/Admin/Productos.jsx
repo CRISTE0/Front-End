@@ -402,6 +402,66 @@ const validateReferencia = (value) => {
   };
   
 
+
+  const cambiarPublicacionProducto = async (IdProducto) => {
+    try {
+      const productoActual = productosAdmin.find((producto) => producto.IdProducto === IdProducto);
+
+      const nuevoEstado =
+        productoActual.Estado === "Activo" ? "Inactivo" : "Activo";
+
+      const MySwal = withReactContent(Swal);
+      MySwal.fire({
+        title: `¿Seguro de cambiar la publicación del producto ${productoActual.Referencia}?`,
+        icon: "question",
+        text: `La publicación actual del producto es: ${productoActual.Publicacion}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        showCancelButton: true,
+        confirmButtonText: "Sí, cambiar publicación",
+        cancelButtonText: "Cancelar",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const parametros = {
+            IdProducto,
+            IdDisenio: productoActual.IdDisenio,
+            IdInsumo: productoActual.IdInsumo,
+            Referencia: productoActual.Referencia,
+            Cantidad: productoActual.Cantidad,
+            ValorVenta: productoActual.ValorVenta,
+            Publicacion: nuevoEstado,
+            Estado: productoActual.Estado,
+          };
+
+          const response = await axios.put(
+            `${url}/${IdProducto}`,
+            parametros
+          );
+
+          if (response.status === 200) {
+            setProductosAdmin((prevProducto) =>
+              prevProducto.map((producto) =>
+                producto.IdProducto === IdProducto
+                  ? { ...producto, Publicacion: nuevoEstado }
+                  : producto
+              )
+            );
+
+            show_alerta("La publicación del producto cambiada con éxito", "success", {
+              timer: 8000,
+            });
+          }
+        } else {
+          show_alerta("No se ha cambiado la publicación del producto", "info");
+        }
+      });
+    } catch (error) {
+      console.error("Error updating state:", error);
+      show_alerta("Error cambiando la publicación del producto", "error");
+    }
+  };
+
+
+
+
   const cambiarEstadoProducto = async (IdProducto) => {
     try {
       const productoActual = productosAdmin.find((producto) => producto.IdProducto === IdProducto);
@@ -457,6 +517,8 @@ const validateReferencia = (value) => {
     }
   };
   
+
+
 
   const convertDisenioIdToName = (disenioId) => {
     const disenio = Disenios.find((disenio) => disenio.IdDisenio === disenioId);
@@ -1219,6 +1281,7 @@ const validateReferencia = (value) => {
                     <th>Insumo</th>
                     <th>Cantidad</th>
                     <th>Valor de la Venta</th>
+                    <th>Publicación</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
@@ -1231,6 +1294,24 @@ const validateReferencia = (value) => {
                       <td>{convertInsumoIdToName(producto.IdInsumo)}</td>
                       <td>{producto.Cantidad}</td>
                       <td>{formatCurrency(producto.ValorVenta)}</td>
+                      <td>
+                          <label className="switch">
+                            <input
+                              type="checkbox"
+                              checked={producto.Publicacion === "Activo"}
+                              onChange={() =>
+                                cambiarPublicacionProducto(producto.IdProducto)
+                              }
+                              className={
+                                producto.Publicacion === "Activo"
+                                  ? "switch-green"
+                                  : "switch-red"
+                              }
+                            />
+                            <span className="slider round"></span>
+                          </label>
+                      </td>
+
                       <td>
                           <label className="switch">
                             <input
