@@ -86,8 +86,8 @@ export const Compras = () => {
   const totalCompra =
     Detalles && Detalles.length > 0
       ? Detalles.reduce((total, detalle) => {
-        return total + (detalle.cantidad * detalle.precio || 0);
-      }, 0)
+          return total + (detalle.cantidad * detalle.precio || 0);
+        }, 0)
       : 0;
 
   const handleDetalleCompra = async (idCompra) => {
@@ -203,8 +203,8 @@ export const Compras = () => {
     }
 
     if (name === "cantidad") {
-      // Validar que la cantidad sea un número positivo y no contenga caracteres inválidos
-      if (value === "" || /^\d+$/.test(value)) {
+      // Validar que la cantidad sea un número entero positivo sin signos más o menos al principio
+      if (value === "" || /^[0-9]+$/.test(value)) {
         updatedDetalles[index][name] = value;
 
         // Actualizar el subtotal si se modificó cantidad
@@ -212,17 +212,19 @@ export const Compras = () => {
         const precio = parseFloat(updatedDetalles[index].precio || 0);
         updatedDetalles[index].subtotal = cantidad * precio;
       } else {
-        show_alerta(
-          "La cantidad debe ser un número positivo sin caracteres inválidos",
-          "error"
-        );
-        return; // No actualizar si no es un número positivo sin caracteres inválidos
+        if (value !== "") {
+          show_alerta(
+            "La cantidad debe ser un número entero positivo sin signos más o menos al principio",
+            "error"
+          );
+        }
+        return; // No actualizar si no es un número entero positivo y no está vacío
       }
     } else if (name === "precio") {
-      // Validar que el precio sea un número positivo y no supere los 10 millones
+      // Validar que el precio sea un número positivo y no supere los 10 millones, sin signos más o menos al principio
       if (
         value === "" ||
-        (/^\d*\.?\d*$/.test(value) && parseFloat(value) <= 10000000)
+        (/^\d+(\.\d+)?$/.test(value) && parseFloat(value) <= 10000000)
       ) {
         updatedDetalles[index][name] = value;
 
@@ -245,11 +247,13 @@ export const Compras = () => {
           );
         }
       } else {
-        show_alerta(
-          "El precio debe ser un número válido y no superar los 10 millones",
-          "error"
-        );
-        return; // No actualizar si no es un número válido o excede el límite
+        if (value !== "") {
+          show_alerta(
+            "El precio debe ser un número válido y no superar los 10 millones, sin signos más o menos al principio",
+            "error"
+          );
+        }
+        return; // No actualizar si no es un número válido, si excede el límite o si no está vacío
       }
     } else {
       updatedDetalles[index][name] = value;
@@ -338,7 +342,12 @@ export const Compras = () => {
     }
 
     // Validar detalles de la compra
-    if (Detalles.length === 0 || Detalles.some(detalle => !detalle.IdInsumo || !detalle.cantidad || !detalle.precio)) {
+    if (
+      Detalles.length === 0 ||
+      Detalles.some(
+        (detalle) => !detalle.IdInsumo || !detalle.cantidad || !detalle.precio
+      )
+    ) {
       errorMessage = "Agrega detalles válidos de compra";
       showDetalleAlert(errorMessage); // Mostrar la alerta cuando no hay detalles válidos
       return;
@@ -351,25 +360,36 @@ export const Compras = () => {
         errors.IdInsumo = "Selecciona un insumo";
       }
 
-      if (!detalle.cantidad || detalle.cantidad <= 0 || !/^\d+$/.test(detalle.cantidad)) {
+      if (
+        !detalle.cantidad ||
+        detalle.cantidad <= 0 ||
+        !/^\d+$/.test(detalle.cantidad)
+      ) {
         errors.cantidad = "Ingresa una cantidad válida";
       }
 
-      if (!detalle.precio || detalle.precio <= 0 || parseFloat(detalle.precio) > 10000000) {
-        errors.precio = "Ingresa un precio válido que no supere los 10 millones";
+      if (
+        !detalle.precio ||
+        detalle.precio <= 0 ||
+        parseFloat(detalle.precio) > 10000000
+      ) {
+        errors.precio =
+          "Ingresa un precio válido que no supere los 10 millones";
       }
 
       if (Object.keys(errors).length > 0) {
-        setErrors(prevErrors => ({
+        setErrors((prevErrors) => ({
           ...prevErrors,
-          Detalles: { ...prevErrors.Detalles, [index]: errors }
+          Detalles: { ...prevErrors.Detalles, [index]: errors },
         }));
       }
 
       return errors;
     });
 
-    const hasErrors = detallesValidados.some(errors => Object.keys(errors).length > 0);
+    const hasErrors = detallesValidados.some(
+      (errors) => Object.keys(errors).length > 0
+    );
 
     if (hasErrors) {
       return;
@@ -383,8 +403,6 @@ export const Compras = () => {
       detalles: Detalles,
     });
   };
-
-
 
   const enviarSolicitud = async (metodo, parametros) => {
     try {
@@ -517,8 +535,9 @@ export const Compras = () => {
               <div className="form-group">
                 <label>Proveedor:</label>
                 <select
-                  className={`form-control ${errors.IdProveedor ? "is-invalid" : ""
-                    }`}
+                  className={`form-control ${
+                    errors.IdProveedor ? "is-invalid" : ""
+                  }`}
                   name="IdProveedor"
                   value={IdProveedor}
                   onChange={(e) => setIdProveedor(e.target.value)}
@@ -570,12 +589,13 @@ export const Compras = () => {
                       <tr key={index}>
                         <td>
                           <select
-                            className={`form-control ${errors.Detalles &&
+                            className={`form-control ${
+                              errors.Detalles &&
                               errors.Detalles[index] &&
                               errors.Detalles[index].IdInsumo
-                              ? "is-invalid"
-                              : ""
-                              }`}
+                                ? "is-invalid"
+                                : ""
+                            }`}
                             name="IdInsumo"
                             value={detalle.IdInsumo}
                             onChange={(e) => handleDetailChange(index, e)}
@@ -601,12 +621,13 @@ export const Compras = () => {
                         <td>
                           <input
                             type="number"
-                            className={`form-control ${errors.Detalles &&
+                            className={`form-control ${
+                              errors.Detalles &&
                               errors.Detalles[index] &&
                               errors.Detalles[index].cantidad
-                              ? "is-invalid"
-                              : ""
-                              }`}
+                                ? "is-invalid"
+                                : ""
+                            }`}
                             name="cantidad"
                             placeholder="Cantidad"
                             value={detalle.cantidad}
@@ -623,12 +644,13 @@ export const Compras = () => {
                         <td>
                           <input
                             type="number"
-                            className={`form-control ${errors.Detalles &&
+                            className={`form-control ${
+                              errors.Detalles &&
                               errors.Detalles[index] &&
                               errors.Detalles[index].precio
-                              ? "is-invalid"
-                              : ""
-                              }`}
+                                ? "is-invalid"
+                                : ""
+                            }`}
                             name="precio"
                             placeholder="Precio"
                             value={detalle.precio}
@@ -880,10 +902,11 @@ export const Compras = () => {
                         )}
                         <button
                           onClick={() => handleDetalleCompra(compra.IdCompra)}
-                          className={`btn ${compra.Estado === "Cancelado"
-                            ? "btn-secondary mr-2"
-                            : "btn-info"
-                            }`}
+                          className={`btn ${
+                            compra.Estado === "Cancelado"
+                              ? "btn-secondary mr-2"
+                              : "btn-info"
+                          }`}
                           disabled={compra.Estado === "Cancelado"}
                           data-toggle="modal"
                           data-target="#modalDetalleCompra"

@@ -23,19 +23,21 @@ export const Configuracion = () => {
 
   const [showErrors, setShowErrors] = useState(false);
 
-// Función para validar el nombre del rol
-const validateNombreRol = (value) => {
-  // Expresión regular para validar que solo contiene letras con tildes, la letra ñ y espacios
-  const regex = /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/;
+  // Función para validar el nombre del rol
+  const validateNombreRol = (value) => {
+    // Expresión regular para validar que solo contiene letras con tildes, la letra ñ y espacios
+    const regex = /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/;
 
-  if (!value.trim()) {
-    return "El nombre del rol es requerido";
-  } else if (!regex.test(value)) {
-    return "El nombre del rol solo puede contener letras con tildes, la letra ñ y espacios";
-  }
+    if (!value.trim()) {
+      return "El nombre del rol es requerido";
+    } else if (!regex.test(value)) {
+      return "El nombre del rol solo puede contener letras con tildes, la letra ñ y espacios";
+    } else if (value.trim().length !== value.length) {
+      return "El nombre del rol no debe tener espacios al principio ni al final";
+    }
 
-  return "";
-};
+    return "";
+  };
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
