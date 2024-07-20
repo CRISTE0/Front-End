@@ -749,7 +749,6 @@ export const Proveedores = () => {
           </div>
         </div>
       </div>
-
       {/* <!-- Fin modal crear/actualizar proveedor --> */}
 
       {/* Botón para abrir el modal de crear proveedor */}
