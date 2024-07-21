@@ -11,7 +11,7 @@ export const Colores = () => {
   const [Colores, setColores] = useState([]);
   const [IdColor, setIdColor] = useState("");
   const [Color, setColor] = useState("");
-  const [Referencia, setReferencia] = useState("");
+  const [Referencia, setReferencia] = useState("#000000");
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [errors, setErrors] = useState({});
@@ -89,17 +89,20 @@ export const Colores = () => {
   const validar = () => {
     const errorMessage = validateColores(Color);
     setErrors({ colores: errorMessage });
-
+  
     if (!errorMessage) {
+      // Si Referencia es un valor predeterminado, usa el valor predeterminado
+      const referenciaFinal = Referencia || "#000000";
+  
       let parametros, metodo;
       if (operation === 1) {
-        parametros = { Color: Color.trim(), Referencia, Estado: "Activo" };
+        parametros = { Color: Color.trim(), Referencia: referenciaFinal, Estado: "Activo" };
         metodo = "POST";
       } else {
         parametros = {
           IdColor,
           Color: Color.trim(),
-          Referencia,
+          Referencia: referenciaFinal,
           Estado: "Activo",
         };
         metodo = "PUT";
@@ -107,7 +110,7 @@ export const Colores = () => {
       enviarSolicitud(metodo, parametros);
     }
   };
-
+  
   const enviarSolicitud = async (metodo, parametros) => {
     try {
       let urlRequest = url;
@@ -309,7 +312,7 @@ export const Colores = () => {
                 >
                   Cerrar
                 </button>
-                <button onClick={() => validar()} className="btn btn-success">
+                <button onClick={() => validar()} className="btn btn-primary">
                   <i className="fa-solid fa-floppy-disk"></i> Guardar
                 </button>
               </div>
