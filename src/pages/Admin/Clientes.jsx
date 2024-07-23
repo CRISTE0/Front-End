@@ -580,7 +580,7 @@ export const Clientes = () => {
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">Clientes</h1>
+          <h1 className="h3 mb-3 text-center text-dark">Gestión de Clientes</h1>
           <div className="text-right">
             <button
               type="button"
@@ -596,14 +596,14 @@ export const Clientes = () => {
 
         {/* <!-- Tabla de Clientes --> */}
         <div className="card shadow mb-4">
-          <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Clientes</h6>
-          </div>
-          <div className="card-body">
+          <div className="card-header py-1 d-flex">
+            <h6 className="m-2 font-weight-bold text-primary">Clientes</h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+          </div>
+          <div className="card-body">
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -657,7 +657,7 @@ export const Clientes = () => {
                         >
                           <button
                             className="btn btn-warning btn-sm mr-2"
-                            title="Actualizar"
+                            title="Editar"
                             data-toggle="modal"
                             data-target="#modalCliente"
                             onClick={() => openModal(2, cliente)}
@@ -674,6 +674,7 @@ export const Clientes = () => {
                               )
                             }
                             disabled={cliente.Estado != "Activo"}
+                            title="Eliminar"
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>

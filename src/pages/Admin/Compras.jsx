@@ -879,7 +879,7 @@ export const Compras = () => {
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">Compras</h1>
+          <h1 className="h3 mb-3 text-center text-dark">Gestión de Compras</h1>
           <div className="text-right">
             <button
               type="button"
@@ -888,23 +888,28 @@ export const Compras = () => {
               data-target="#modalCompras"
               onClick={() => proveedores.length > 0 && openModal(1)}
             >
-              <i className="fas fa-pencil-alt"></i> Añadir Compra
+              <i className="fas fa-pencil-alt"></i> Crear Compra
             </button>
           </div>
         </div>
 
         {/* <!-- Tabla de Compras --> */}
         <div className="card shadow mb-4">
-          <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Compras</h6>
-          </div>
-          <div className="card-body">
+          <div className="card-header py-1 d-flex">
+            <h6 className="m-2 font-weight-bold text-primary">Compras</h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+          </div>
+          <div className="card-body">
             <div className="table-responsive">
-              <table className="table table-striped table-bordered">
+              <table
+                className="table table-bordered"
+                id="dataTable"
+                width="100%"
+                cellSpacing="0"
+              >
                 <thead>
                   <tr>
                     <th>Proveedor</th>
@@ -926,7 +931,10 @@ export const Compras = () => {
                       <td>{formatPrice(compra.Total)}</td>
                       <td>
                         {compra.Estado === "Cancelado" ? (
-                          <button className="btn btn-secondary mr-2" disabled>
+                          <button
+                            className="btn btn-secondary mr-2"
+                            disabled
+                          >
                             <i className="fas fa-times-circle"></i>
                           </button>
                         ) : (
@@ -943,12 +951,12 @@ export const Compras = () => {
                             compra.Estado === "Cancelado"
                               ? "btn-secondary mr-2"
                               : "btn-info"
-                          }`}
+                          } rounded-icon`}
                           disabled={compra.Estado === "Cancelado"}
                           data-toggle="modal"
                           data-target="#modalDetalleCompra"
                         >
-                          <i className="fas fa-eye"></i>
+                          <i className="fas fa-info-circle"></i>
                         </button>
                       </td>
                     </tr>
@@ -963,6 +971,7 @@ export const Compras = () => {
             />
           </div>
         </div>
+
         {/* Fin tabla de compras */}
       </div>
     </>

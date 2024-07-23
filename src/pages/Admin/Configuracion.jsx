@@ -361,7 +361,7 @@ export const Configuracion = () => {
                     {showErrors && errors.nombreRol && (
                       <div className="invalid-feedback">{errors.nombreRol}</div>
                     )}
-                  <small>Ingresa por favor el nombre del rol</small>
+                    <small>Ingresa por favor el nombre del rol</small>
                   </div>
                 </form>
 
@@ -497,11 +497,11 @@ export const Configuracion = () => {
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">
+          <h1 className="h3 mb-3 text-center text-dark">
             Gestión de Configuración
           </h1>
 
-          <div className="text-center p-3">
+          <div className="text-right">
             <button
               onClick={() => openModal(1)}
               type="button"
@@ -516,14 +516,14 @@ export const Configuracion = () => {
 
         {/* <!-- Tabla Roles --> */}
         <div className="card shadow mb-4">
-          <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Roles</h6>
-          </div>
-          <div className="card-body">
+          <div className="card-header py-1 d-flex">
+            <h6 className="m-2 font-weight-bold text-primary">Configuración</h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+          </div>
+          <div className="card-body">
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -565,7 +565,7 @@ export const Configuracion = () => {
                         >
                           {/* Botón de actualizar */}
                           <button
-                            className="btn btn-warning btn-sm mr-2"
+                            className="btn btn-warning btn-sm mr-2 rounded-icon"
                             data-toggle="modal"
                             data-target="#modalRoles"
                             onClick={() =>
@@ -577,26 +577,29 @@ export const Configuracion = () => {
                               )
                             }
                             disabled={rol.Estado !== "Activo"}
+                            title="Editar"
                           >
-                            <i className="fas fa-solid fa-edit"></i>
+                            <i className="fas fa-sync-alt"></i>
                           </button>
                           {/* Botón de eliminar */}
                           <button
-                            className="btn btn-danger btn-sm mr-2"
+                            className="btn btn-danger btn-sm mr-2 rounded-icon"
                             onClick={() => deleteRol(rol.IdRol, rol.NombreRol)}
                             disabled={rol.Estado !== "Activo"}
+                            title="Eliminar"
                           >
-                            <i className="fas fa-solid fa-trash"></i>
+                            <i className="fas fa-trash-alt"></i>
                           </button>
                           {/* Botón de detalle */}
                           <button
-                            className="btn btn-info btn-sm"
+                            className="btn btn-info btn-sm rounded-icon"
                             data-toggle="modal"
                             data-target="#modalDetalleRol"
                             onClick={() => openDetailModal(rol)}
                             disabled={rol.Estado !== "Activo"}
+                            title="Detalle"
                           >
-                            <i className="fas fa-solid fa-info-circle"></i>
+                            <i className="fas fa-info-circle"></i>
                           </button>
                         </div>
                       </td>

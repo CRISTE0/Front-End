@@ -103,7 +103,7 @@ export const Insumos = () => {
     setErrors(errors);
 
     // Comprobar si hay errores
-    const hasErrors = Object.values(errors).some(error => error !== "");
+    const hasErrors = Object.values(errors).some((error) => error !== "");
     if (hasErrors) {
       show_alerta("Corrige los errores antes de guardar", "error");
       return; // Detener la ejecución si hay errores
@@ -130,7 +130,6 @@ export const Insumos = () => {
       });
     }
   };
-
 
   // Función para validar la referencia
   const validateReferencia = (value) => {
@@ -357,84 +356,81 @@ export const Insumos = () => {
         if (timerProgressBar) {
           timerProgressBar.style.backgroundColor = "black";
           timerProgressBar.style.height = "6px";
-        }}
-
-
+        }
+      },
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await fetch(`http://localhost:3000/api/insumos/${idInsumo}`, {
-            method: 'DELETE',
-          });
+          const response = await fetch(
+            `http://localhost:3000/api/insumos/${idInsumo}`,
+            {
+              method: "DELETE",
+            }
+          );
 
           if (response.status === 409) {
             const data = await response.json();
             Swal.fire({
-              icon: 'error',
-              title: 'No se puede eliminar',
+              icon: "error",
+              title: "No se puede eliminar",
               text: data.message,
-              timer: 2000, 
+              timer: 2000,
               showConfirmButton: false, // Oculta el botón "OK"
-              timerProgressBar: true
+              timerProgressBar: true,
             });
           } else if (response.status === 200) {
             Swal.fire({
-              icon: 'success',
-              title: 'Eliminado',
-              text: 'Insumo eliminado correctamente',
-              timer: 2000, 
+              icon: "success",
+              title: "Eliminado",
+              text: "Insumo eliminado correctamente",
+              timer: 2000,
               showConfirmButton: false, // Oculta el botón "OK"
-              timerProgressBar: true
+              timerProgressBar: true,
             });
             // Actualizar la tabla de insumos
             getInsumos();
           } else {
             Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'El insumo está asociado a una compra, no se puede eliminar',
-              timer: 2000, 
+              icon: "error",
+              title: "Error",
+              text: "El insumo está asociado a una compra, no se puede eliminar",
+              timer: 2000,
               showConfirmButton: false, // Oculta el botón "OK"
-              timerProgressBar: true
-
-            })
+              timerProgressBar: true,
+            });
           }
         } catch (error) {
-          console.error('Error al eliminar el insumo:', error);
+          console.error("Error al eliminar el insumo:", error);
           Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Error al eliminar el insumo',
+            icon: "error",
+            title: "Error",
+            text: "Error al eliminar el insumo",
             timer: 3000, // 3 segundos
-            showConfirmButton: false // Oculta el botón "OK"
+            showConfirmButton: false, // Oculta el botón "OK"
           });
         }
       } else if (result.dismiss === Swal.DismissReason.cancel) {
         Swal.fire({
-          icon: 'info',
-          title: 'Cancelado',
-          text: 'El insumo NO fue eliminado',
+          icon: "info",
+          title: "Cancelado",
+          text: "El insumo NO fue eliminado",
           timer: 3000, // 3 segundos
-          showConfirmButton: false // Oculta el botón "OK"
+          showConfirmButton: false, // Oculta el botón "OK"
         });
       } else if (
         result.dismiss === Swal.DismissReason.backdrop ||
         result.dismiss === Swal.DismissReason.esc
       ) {
         Swal.fire({
-          icon: 'info',
-          title: 'Cancelado',
-          text: 'El insumo NO fue eliminado',
+          icon: "info",
+          title: "Cancelado",
+          text: "El insumo NO fue eliminado",
           timer: 3000, // 3 segundos
-          showConfirmButton: false // Oculta el botón "OK"
+          showConfirmButton: false, // Oculta el botón "OK"
         });
       }
     });
   };
-
-
-
-
 
   const cambiarEstadoInsumo = async (IdInsumo) => {
     try {
@@ -443,7 +439,10 @@ export const Insumos = () => {
       );
 
       if (insumoActual.Cantidad > 0) {
-        show_alerta("No se puede desactivar el insumo porque la cantidad es mayor a 0", "warning");
+        show_alerta(
+          "No se puede desactivar el insumo porque la cantidad es mayor a 0",
+          "warning"
+        );
         return;
       }
 
@@ -493,8 +492,6 @@ export const Insumos = () => {
       show_alerta("Error cambiando el estado del insumo", "error");
     }
   };
-
-
 
   const convertColorIdToName = (colorId) => {
     const color = Colores.find((color) => color.IdColor === colorId);
@@ -625,8 +622,9 @@ export const Insumos = () => {
                     </label>
                     <input
                       type="text"
-                      className={`form-control ${errors.Referencia ? "is-invalid" : ""
-                        }`}
+                      className={`form-control ${
+                        errors.Referencia ? "is-invalid" : ""
+                      }`}
                       id="nroDocumentoCliente"
                       placeholder="Ingrese la referencia del insumo"
                       required
@@ -639,8 +637,9 @@ export const Insumos = () => {
                     <label htmlFor="nombreCliente">Cantidad:</label>
                     <input
                       type="text"
-                      className={`form-control ${errors.Cantidad ? "is-invalid" : ""
-                        }`}
+                      className={`form-control ${
+                        errors.Cantidad ? "is-invalid" : ""
+                      }`}
                       id="nombreCliente"
                       placeholder="Ingrese la cantidad del insumo"
                       required
@@ -659,8 +658,9 @@ export const Insumos = () => {
                     </label>
                     <input
                       type="text"
-                      className={`form-control ${errors.ValorCompra ? "is-invalid" : ""
-                        }`}
+                      className={`form-control ${
+                        errors.ValorCompra ? "is-invalid" : ""
+                      }`}
                       id="direccionCliente"
                       placeholder="Ingrese el valor de la compra"
                       required
@@ -699,7 +699,7 @@ export const Insumos = () => {
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">Gestión de Insumos</h1>
+          <h1 className="h3 mb-3 text-center text-dark">Gestión de Insumos</h1>
           <div className="text-right">
             <button
               type="button"
@@ -715,14 +715,14 @@ export const Insumos = () => {
 
         {/* <!-- Tabla de Clientes --> */}
         <div className="card shadow mb-4">
-          <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Insumos</h6>
-          </div>
-          <div className="card-body">
+          <div className="card-header py-1 d-flex">
+            <h6 className="m-2 font-weight-bold text-primary">Insumos</h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+          </div>
+          <div className="card-body">
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -774,7 +774,7 @@ export const Insumos = () => {
                         >
                           <button
                             className="btn btn-warning btn-sm mr-2"
-                            title="Actualizar"
+                            title="Editar"
                             data-toggle="modal"
                             data-target="#modalCliente"
                             onClick={() => openModal(2, insumo)}
@@ -789,6 +789,7 @@ export const Insumos = () => {
                                 deleteInsumo(insumo.IdInsumo, insumo.Referencia)
                               }
                               disabled={insumo.Estado !== "Activo"}
+                              title="Eliminar"
                             >
                               <i className="fas fa-trash-alt"></i>
                             </button>

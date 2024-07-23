@@ -33,7 +33,7 @@ export const Catalogo = () => {
   const [selectedDisenio, setSelectedDisenio] = useState(null);
   const [selectedInsumo, setSelectedInsumo] = useState(null);
 
-  // Variables para el detalle del producto 
+  // Variables para el detalle del producto
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [insumoSeleccionado, setInsumoSeleccionado] = useState(null);
   const [disenioSeleccionado, setDisenioSeleccionado] = useState(null);
@@ -54,7 +54,6 @@ export const Catalogo = () => {
     console.log(respuesta.data);
   };
 
-
   const getDisenios = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/disenios");
     const DiseniosActivos = respuesta.data.filter(
@@ -64,7 +63,7 @@ export const Catalogo = () => {
 
     setDisenios(DiseniosActivos);
   };
-  
+
   const getInsumos = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/insumos");
     const InsumosActivas = respuesta.data.filter(
@@ -103,7 +102,6 @@ export const Catalogo = () => {
         ValorVenta: "",
       };
       setErrors(errors);
-
     } else if (op === 2 && insumo) {
       // Actualizar Cliente
       setIdProducto(insumo.IdProducto);
@@ -135,22 +133,28 @@ export const Catalogo = () => {
     const insumoSeleccionado = Insumos.find(
       (insumo) => insumo.IdInsumo == IdInsumo
     );
-  
+
     if (!insumoSeleccionado) {
       show_alerta("Insumo no encontrado", "error");
       return;
     }
-  
+
     if (parseInt(Cantidad) > insumoSeleccionado.Cantidad) {
-      show_alerta("La cantidad de productos no puede ser mayor que la cantidad de insumos disponibles", "error");
+      show_alerta(
+        "La cantidad de productos no puede ser mayor que la cantidad de insumos disponibles",
+        "error"
+      );
       return;
     }
-  
+
     if (parseFloat(ValorVenta) <= parseFloat(insumoSeleccionado.ValorCompra)) {
-      show_alerta("El valor de venta debe ser mayor que el valor de compra del insumo", "error");
+      show_alerta(
+        "El valor de venta debe ser mayor que el valor de compra del insumo",
+        "error"
+      );
       return;
     }
-  
+
     if (operation === 1) {
       await enviarSolicitud("POST", {
         IdDisenio,
@@ -170,20 +174,18 @@ export const Catalogo = () => {
       });
     }
   };
-  
-  
 
-// Función para validar la referencia
-const validateReferencia = (value) => {
-  if (!value) {
-    return "Escribe la referencia";
-  }
-  // Validar que la referencia siga el patrón TST-001
-  if (!/^[A-Z]{3}-\d{3}$/.test(value)) {
-    return "La referencia debe ser en el formato AAA-000";
-  }
-  return "";
-};
+  // Función para validar la referencia
+  const validateReferencia = (value) => {
+    if (!value) {
+      return "Escribe la referencia";
+    }
+    // Validar que la referencia siga el patrón TST-001
+    if (!/^[A-Z]{3}-\d{3}$/.test(value)) {
+      return "La referencia debe ser en el formato AAA-000";
+    }
+    return "";
+  };
 
   // Función para validar la cantidad
   const validateCantidad = (value) => {
@@ -206,19 +208,18 @@ const validateReferencia = (value) => {
     }
     return "";
   };
-  
+
   const convertTallaIdToName = (tallaId) => {
     const talla = Tallas.find((talla) => talla.IdTalla == tallaId);
     console.log(talla);
     return talla ? talla.Talla : "";
   };
 
-
   const handleChangeIdDisenio = (e) => {
     const value = e.target.value;
-    
-    const disenio = Disenios.find(d => d.IdDisenio == value);
-    
+
+    const disenio = Disenios.find((d) => d.IdDisenio == value);
+
     setIdDisenio(value);
     setSelectedDisenio(disenio);
   };
@@ -226,8 +227,8 @@ const validateReferencia = (value) => {
   const handleChangeIdInsumo = (e) => {
     const value = e.target.value;
 
-    const insumo = Insumos.find(i => i.IdInsumo == value);
-    
+    const insumo = Insumos.find((i) => i.IdInsumo == value);
+
     console.log(insumo);
 
     setSelectedInsumo(insumo);
@@ -247,42 +248,44 @@ const validateReferencia = (value) => {
       Referencia: errorMessage,
     }));
   };
-  
 
   // Función para manejar cambios en la cantidad
   const handleChangeCantidad = async (e) => {
     let value = e.target.value;
     setCantidad(value);
-    
+
     const errorMessage = validateCantidad(value);
     setErrors((prevState) => ({
       ...prevState,
       Cantidad: errorMessage,
     }));
   };
-  
+
   // Función para manejar cambios en el valorVenta
   const handleChangeValorVenta = async (e) => {
     let value = e.target.value;
     setValorVenta(value);
-  
+
     const insumoSeleccionado = Insumos.find(
       (insumo) => insumo.IdInsumo === IdInsumo
     );
-  
-    let errorMessage = '';
-    if (insumoSeleccionado && parseFloat(value) <= parseFloat(insumoSeleccionado.ValorCompra)) {
-      errorMessage = 'El valor de venta debe ser mayor que el valor de compra del insumo';
+
+    let errorMessage = "";
+    if (
+      insumoSeleccionado &&
+      parseFloat(value) <= parseFloat(insumoSeleccionado.ValorCompra)
+    ) {
+      errorMessage =
+        "El valor de venta debe ser mayor que el valor de compra del insumo";
     } else {
       errorMessage = validateValorVenta(value);
     }
-  
+
     setErrors((prevState) => ({
       ...prevState,
       ValorVenta: errorMessage,
     }));
   };
-  
 
   const show_alerta = (message, type) => {
     const MySwal = withReactContent(Swal);
@@ -362,15 +365,15 @@ const validateReferencia = (value) => {
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
       showClass: {
-        popup: 'swal2-show',
-        backdrop: 'swal2-backdrop-show',
-        icon: 'swal2-icon-show'
+        popup: "swal2-show",
+        backdrop: "swal2-backdrop-show",
+        icon: "swal2-icon-show",
       },
       hideClass: {
-        popup: 'swal2-hide',
-        backdrop: 'swal2-backdrop-hide',
-        icon: 'swal2-icon-hide'
-      }
+        popup: "swal2-hide",
+        backdrop: "swal2-backdrop-hide",
+        icon: "swal2-icon-hide",
+      },
     }).then((result) => {
       if (result.isConfirmed) {
         setIdProducto(IdProducto);
@@ -379,32 +382,39 @@ const validateReferencia = (value) => {
           const index = filteredproductosAdmin.findIndex(
             (insumo) => insumo.IdProducto === IdProducto
           );
-  
+
           // Determinar la página en la que debería estar el insumo después de la eliminación
-          const newPage = Math.ceil((filteredproductosAdmin.length - 1) / itemsPerPage) || 1;
-  
+          const newPage =
+            Math.ceil((filteredproductosAdmin.length - 1) / itemsPerPage) || 1;
+
           // Establecer la nueva página como la página actual
           setCurrentPage(newPage);
-  
+
           // Actualizar la lista de productosAdmin eliminando el insumo eliminado
           setProductosAdmin((prevproductosAdmin) =>
-            prevproductosAdmin.filter((insumo) => insumo.IdProducto !== IdProducto)
+            prevproductosAdmin.filter(
+              (insumo) => insumo.IdProducto !== IdProducto
+            )
           );
-  
+
           show_alerta("El producto fue eliminado correctamente", "success");
         });
       } else if (result.dismiss === Swal.DismissReason.cancel) {
         show_alerta("El producto NO fue eliminado", "info");
-      } else if (result.dismiss === Swal.DismissReason.backdrop || result.dismiss === Swal.DismissReason.esc) {
+      } else if (
+        result.dismiss === Swal.DismissReason.backdrop ||
+        result.dismiss === Swal.DismissReason.esc
+      ) {
         show_alerta("El producto NO fue eliminado", "info");
       }
     });
   };
-  
 
   const cambiarEstadoProducto = async (IdProducto) => {
     try {
-      const productoActual = productosAdmin.find((producto) => producto.IdProducto === IdProducto);
+      const productoActual = productosAdmin.find(
+        (producto) => producto.IdProducto === IdProducto
+      );
 
       const nuevoEstado =
         productoActual.Estado === "Activo" ? "Inactivo" : "Activo";
@@ -429,10 +439,7 @@ const validateReferencia = (value) => {
             Estado: nuevoEstado,
           };
 
-          const response = await axios.put(
-            `${url}/${IdProducto}`,
-            parametros
-          );
+          const response = await axios.put(`${url}/${IdProducto}`, parametros);
 
           if (response.status === 200) {
             setProductosAdmin((prevProducto) =>
@@ -456,7 +463,6 @@ const validateReferencia = (value) => {
       show_alerta("Error cambiando el estado del producto", "error");
     }
   };
-  
 
   const convertDisenioIdToName = (disenioId) => {
     const disenio = Disenios.find((disenio) => disenio.IdDisenio === disenioId);
@@ -480,19 +486,17 @@ const validateReferencia = (value) => {
         `http://localhost:3000/api/insumos/${producto.IdInsumo}`
       );
 
-      
       const respuestaDisenio = await axios.get(
         `http://localhost:3000/api/disenios/${producto.IdDisenio}`
       );
-      
+
       const insumo = respuestaInsumo.data;
       const disenio = respuestaDisenio.data;
-      
-      
+
       const respuestaColorInsumo = await axios.get(
         `http://localhost:3000/api/colores/${insumo.IdColor}`
       );
-      
+
       const respuestaTallaInsumo = await axios.get(
         `http://localhost:3000/api/tallas/${insumo.IdTalla}`
       );
@@ -511,7 +515,6 @@ const validateReferencia = (value) => {
       setInsumoSeleccionado(insumo);
       setColorDetalle(colorInsumo);
       setTallaDetalle(tallaInsumo);
-
 
       $("#modalDetalleProducto").modal("show");
     } catch (error) {
@@ -532,7 +535,6 @@ const validateReferencia = (value) => {
     const cantidad = insumo.Cantidad ? insumo.Cantidad.toString() : "";
     const valorVenta = insumo.ValorVenta ? insumo.ValorVenta.toString() : "";
     const estado = insumo.Estado ? insumo.Estado.toString() : "";
-
 
     return (
       colorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -589,7 +591,6 @@ const validateReferencia = (value) => {
             <div className="modal-body">
               <form id="crearClienteForm">
                 <div className="form-row">
-
                   <div className="form-group col-md-5">
                     <label htmlFor="idDisenio">Diseño del Producto:</label>
                     <select
@@ -599,14 +600,18 @@ const validateReferencia = (value) => {
                       onChange={(e) => handleChangeIdDisenio(e)}
                       required
                     >
-                      <option value="" disabled>Seleccione un Diseño</option>
+                      <option value="" disabled>
+                        Seleccione un Diseño
+                      </option>
                       {Disenios.map((disenio) => (
-                        <option key={disenio.IdDisenio} value={disenio.IdDisenio}>
+                        <option
+                          key={disenio.IdDisenio}
+                          value={disenio.IdDisenio}
+                        >
                           {disenio.NombreDisenio}
                         </option>
                       ))}
                     </select>
-
 
                     {IdDisenio === "" && (
                       <p className="text-danger">
@@ -615,13 +620,16 @@ const validateReferencia = (value) => {
                     )}
                   </div>
 
-
                   <div className="col-md-1 mt-4 pt-3">
                     <i className="tooltipReferenceImage fas fa-info-circle">
                       {selectedDisenio && (
-                      <span className="tooltiptext"> 
-                        <img src={selectedDisenio.ImagenReferencia} alt={selectedDisenio.NombreDisenio} style={{ width: '150px', height: '100px' }} />
-                      </span>
+                        <span className="tooltiptext">
+                          <img
+                            src={selectedDisenio.ImagenReferencia}
+                            alt={selectedDisenio.NombreDisenio}
+                            style={{ width: "150px", height: "100px" }}
+                          />
+                        </span>
                       )}
                     </i>
                   </div>
@@ -635,7 +643,9 @@ const validateReferencia = (value) => {
                       onChange={(e) => handleChangeIdInsumo(e)}
                       required
                     >
-                      <option value="" disabled>Seleccione un Insumo</option>
+                      <option value="" disabled>
+                        Seleccione un Insumo
+                      </option>
                       {Insumos.map((insumo) => (
                         <option key={insumo.IdInsumo} value={insumo.IdInsumo}>
                           {insumo.Referencia}
@@ -650,18 +660,20 @@ const validateReferencia = (value) => {
                   </div>
 
                   <div className="col-md-1 mt-4 pt-3">
-                      <i className="tooltipReferenceImage fas fa-info-circle">
-                        {selectedInsumo && (
-                        <span className="tooltiptext"> {`La talla del insumo es: ${ convertTallaIdToName(selectedInsumo.IdTalla)}`} </span>
-                        )}
-                      </i>
+                    <i className="tooltipReferenceImage fas fa-info-circle">
+                      {selectedInsumo && (
+                        <span className="tooltiptext">
+                          {" "}
+                          {`La talla del insumo es: ${convertTallaIdToName(
+                            selectedInsumo.IdTalla
+                          )}`}{" "}
+                        </span>
+                      )}
+                    </i>
                   </div>
 
-
                   <div className="form-group col-md-6">
-                    <label htmlFor="Referencia">
-                      Referencia del Producto:
-                    </label>
+                    <label htmlFor="Referencia">Referencia del Producto:</label>
                     <input
                       type="text"
                       className={`form-control ${
@@ -684,11 +696,14 @@ const validateReferencia = (value) => {
                         errors.Cantidad ? "is-invalid" : ""
                       }`}
                       id="nombreCliente"
-                      placeholder= {selectedInsumo ? `La cantidad maxima del insumo es: ${selectedInsumo.Cantidad}` : "Ingrese la cantidad del insumo"}
+                      placeholder={
+                        selectedInsumo
+                          ? `La cantidad maxima del insumo es: ${selectedInsumo.Cantidad}`
+                          : "Ingrese la cantidad del insumo"
+                      }
                       required
-                      value={Cantidad} 
+                      value={Cantidad}
                       onChange={handleChangeCantidad}
-                      
                     />
                     {renderErrorMessage(errors.Cantidad)}
                   </div>
@@ -703,16 +718,19 @@ const validateReferencia = (value) => {
                         errors.ValorVenta ? "is-invalid" : ""
                       }`}
                       id="direccionCliente"
-                      placeholder= {selectedInsumo ? `El precio de compra del insumo es: ${formatCurrency(selectedInsumo.ValorCompra)}` : "Ingrese el valor del producto"}
+                      placeholder={
+                        selectedInsumo
+                          ? `El precio de compra del insumo es: ${formatCurrency(
+                              selectedInsumo.ValorCompra
+                            )}`
+                          : "Ingrese el valor del producto"
+                      }
                       required
                       value={ValorVenta}
                       onChange={handleChangeValorVenta}
-                      
                     />
                     {renderErrorMessage(errors.ValorVenta)}
                   </div>
-
-
                 </div>
               </form>
             </div>
@@ -740,7 +758,6 @@ const validateReferencia = (value) => {
       </div>
       {/* Modal producto */}
 
-
       {/* Inicio modal ver detalle diseño */}
       <div
         className="modal fade"
@@ -756,7 +773,7 @@ const validateReferencia = (value) => {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="ModalDetalleDisenioLabel">
-                Detalle del diseño 
+                Detalle del diseño
               </h5>
               <button
                 type="button"
@@ -768,399 +785,424 @@ const validateReferencia = (value) => {
               </button>
             </div>
 
-
             <div className="modal-body">
-                
-                  <div className="modal-body">
-                    <form >
-                      <div className="form-row">
-
-
-                        <div className="accordion col-md-12" id="accordionExample">
-
-                          {/* Acordeon detalles del producto */}
-                          <div className="card">
-                            <div className="card-header" id="headingOne">
-                              <h2 className="mb-0">
-                                <button className="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                  Detalles del Producto
-                                </button>
-                              </h2>
-                            </div>
-
-
-                            {productoSeleccionado && (
-                              <div id="collapseOne" className="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
-                                <div className="card-body">
-                                  <div className="form-row">
-                                            
-                                    {/* Nombre del diseño */}
-                                    <div className="form-group col-md-6">
-                                    <label htmlFor="idDisenio">Diseño del Producto:</label>
-                                    <input
-                                      className="form-control"
-                                      id="idDisenio"
-                                      value={convertDisenioIdToName(productoSeleccionado.IdDisenio)}
-                                      disabled
-                                    />
-                                    </div>
-                              
-                                    {/* Referencia del insumo */}
-                                    <div className="form-group col-md-6">
-                                      <label htmlFor="idInsumo">Insumo del Producto:</label>
-                                      <input
-                                        className="form-control"
-                                        id="idInsumo"
-                                        value={convertInsumoIdToName(productoSeleccionado.IdInsumo) }
-                                        disabled
-                                      />
-                                      
-                                    </div>
-
-                                    {/* Referencia del producto */}
-                                    <div className="form-group col-md-6">
-                                      <label htmlFor="Referencia">
-                                        Referencia del Producto:
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        id="Referencia"
-                                        value={productoSeleccionado.Referencia}
-                                        disabled
-                                      />
-                                    </div>
-
-                                    {/* Cantidad del producto */}
-                                    <div className="form-group col-md-6">
-                                      <label htmlFor="nombreCliente">Cantidad:</label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        id="nombreCliente"
-                                        value={productoSeleccionado.Cantidad}
-                                        disabled 
-                                      />
-                                    </div>
-
-                                    {/*Valor de la venta del producto */}
-                                    <div className="form-group col-md-12">
-                                      <label htmlFor="direccionCliente">
-                                        Valor de la venta del producto:
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        id="direccionCliente"
-                                        value={productoSeleccionado.ValorVenta}
-                                        disabled
-                                      />
-                                    </div>
-
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-
-                          {/* Acordeon detalles del insumo */}
-                          <div className="card">
-                            <div className="card-header" id="headingTwo">
-                              <h2 className="mb-0">
-                                <button className="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                  Detalles del Insumo
-                                </button>
-                              </h2>
-                            </div>
-
-                            {insumoSeleccionado && (
-                              <div id="collapseTwo" className="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
-                                <div className="card-body">
-                                  <div className="form-row">
-
-                                    {/* Color del Insumo */}
-                                    <div className="form-group col-md-6">
-                                      <label htmlFor="idColor">Color del Insumo:</label>
-                                      <input
-                                        className="form-control"
-                                        id="idColor"
-                                        value={ColorDetalle.Color}
-                                        disabled
-                                      />
-                                    </div>
-
-                                    {/* Talla del insumo */}
-                                    <div className="form-group col-md-6">
-                                      <label htmlFor="idTalla">Talla del insumo:</label>
-                                      <input
-                                        className="form-control"
-                                        id="idTalla"
-                                        value={TallaDetalle.Talla}
-                                        disabled
-                                      />
-                                    </div>
-
-                                    {/* Referencia del insumo */}
-                                    <div className="form-group col-md-6">
-                                      <label htmlFor="nroDocumentoCliente">
-                                        Referencia del insumo:
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        id="nroDocumentoCliente"
-                                        value={insumoSeleccionado.Referencia}
-                                        disabled
-                                      />
-                                    </div>
-
-                                    {/* Cantidad del insumo */}
-                                    <div className="form-group col-md-6">
-                                      <label htmlFor="nombreCliente">Cantidad:</label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        id="nombreCliente"
-                                        value={insumoSeleccionado.Cantidad} 
-                                        disabled
-                                      />
-                                    </div>
-
-                                    {/* Valor de la compra del insumo */}
-                                    <div className="form-group col-md-12">
-                                      <label htmlFor="direccionCliente">
-                                        Valor de la compra del insumo:
-                                      </label>
-                                      <input
-                                        type="text"
-                                        className="form-control"
-                                        id="direccionCliente"
-                                        value={formatCurrency(insumoSeleccionado.ValorCompra)}
-                                        disabled
-                                      />
-                                    </div>
-                                      
-
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-
-                          {/* Acordeon detalles del diseño */}
-                          <div className="card">
-                            <div className="card-header" id="headingThree">
-                              <h2 className="mb-0">
-                                <button className="btn btn-link btn-block text-left collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                  Detalles del Diseño
-                                </button>
-                              </h2>
-                            </div>
-
-                            {disenioSeleccionado && (
-                              <div id="collapseThree" className="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
-                                <div className="card-body">
-                                  <div className="form-row">
-
-
-                                    {/* Nombre de diseño */}
-                                    <div className="form-group col-md-6">
-                                        <label htmlFor="nombreDiseño">Nombre del Diseño:</label>
-                                        <input
-                                          type="text"
-                                          className="form-control"
-                                          id="nombreDiseño"
-                                          value={disenioSeleccionado.NombreDisenio}
-                                          disabled
-                                        />
-                                    </div>
-
-
-                                    {/* Nombre de fuente*/}
-                                    <div className="form-group col-md-6">
-                                      <label htmlFor="nombreFuente">
-                                        Fuente:
-                                      </label>
-                                      <input
-                                        className="form-control"
-                                        id="nombreFuente"
-                                        value={disenioSeleccionado.Fuente}
-                                        disabled
-                                      />
-                                    </div>
-
-
-                                    {/* Tamaño de fuente*/}
-                                    <div className="form-group col-md-6">
-                                      <label htmlFor="tamanioFuente">
-                                        Tamaño de Fuente:
-                                      </label>
-                                      <input
-                                        className="form-control"
-                                        id="tamanioFuente"
-                                        value={disenioSeleccionado.TamanioFuente}
-                                        disabled
-                                      />
-                                    </div>
-
-
-                                    {/* Color de fuente*/}
-                                    <div className="form-group col-md-6">
-                                      <label htmlFor="colorFuente">Color de Fuente:</label>
-
-                                      {disenioSeleccionado.ColorFuente !== "No aplica" ? (
-                                        <div className="d-flex align-items-center">
-                                          <input
-                                            type="color"
-                                            className="form-control col-md-4"
-                                            id="colorFuente"
-                                            value={disenioSeleccionado.ColorFuente}
-                                            disabled
-                                          />
-
-                                          <span className="ml-3" id="spanColor">{disenioSeleccionado.ColorFuente}</span>
-
-                                        </div>
-                                        ) :
-                                        <input
-                                          type="text"
-                                          className="form-control"
-                                          disabled
-                                          required
-                                          value={"No aplica"}
-                                        />
-                                      }
-
-
-                                    </div>
-
-
-                                    {/* Posicion de fuente*/}
-                                    <div className="form-group col-md-6">
-                                      <label htmlFor="posicionFuente">
-                                        Posicion de Fuente:
-                                      </label>
-                                      <input
-                                        className="form-control"
-                                        id="posicionFuente"
-                                        value={disenioSeleccionado.PosicionFuente}
-                                        disabled
-                                      />
-                                    </div>
-
-                                    {/* Tamaño de imagen*/}
-                                    <div className="form-group col-md-6">
-                                      <label htmlFor="tamanioImagen">
-                                        Tamaño de Imagen:
-                                      </label>
-                                      <input
-                                        className="form-control"
-                                        id="tamanioImagen"
-                                        value={disenioSeleccionado.TamanioImagen}
-                                        disabled
-                                      />
-
-                                    </div>
-                                  
-
-                                    {/* Posicion de imagen*/}
-                                    <div className="form-group col-md-6">
-                                      <label htmlFor="posicionImagen">
-                                        Posicion de Imagen:
-                                      </label>
-
-                                      <input
-                                        className="form-control"
-                                        id="posicionImagen"
-                                        value={disenioSeleccionado.PosicionImagen}
-                                        disabled
-                                      />
-                                    </div>
-
-
-
-                                    {/* Precio de diseño */}
-                                    <div className="form-group col-md-6">
-                                        <label htmlFor="precioDiseño">Precio del Diseño:</label>
-                                        <input
-                                          type="text"
-                                          className="form-control"
-                                          id="precioDiseño"
-                                          value={formatCurrency(disenioSeleccionado.PrecioDisenio)}
-                                          disabled
-                                        />
-                                    </div>
-
-
-
-
-                                    {/* Imagen diseño*/}
-                                    <div className="form-group col-md-6">
-                                      <label>Imagen Diseño :</label>
-                                      <br />
-
-                                      {disenioSeleccionado.ImagenDisenio !== "No aplica" ? (
-                                        <div className="container py-5 mx-3">
-                                          <img
-                                            src={disenioSeleccionado.ImagenDisenio}
-                                            alt="Vista previa imagen del diseño"
-                                            style={{ maxWidth: '200px', display: 'block', border: "1px solid black"}}
-                                            />
-                                        </div>
-                                        ):
-                                        <input
-                                        type="text"
-                                        className="form-control"
-                                        disabled
-                                        value={"No aplica"}
-                                        />
-                                      }
-                                      
-
-                                    </div>
-
-
-
-                                    {/* Imagen referencia*/}
-                                    <div className="form-group col-md-6">
-                                      <label htmlFor="ImagenDisenioCliente">Imagen Referencia :</label>
-
-                                      <br />
-
-                                      <div className="container py-5 mx-3">
-                                      <img
-                                        src={disenioSeleccionado.ImagenReferencia}
-                                        alt="Vista previa imagen del diseño"
-                                        style={{ maxWidth: '200px', display: 'block', border: "1px solid black"}}
-                                      />
-                                      </div>
-
-                                    </div>
-                                  
-
-
-
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-
-                          </div>
-
-
+              <div className="modal-body">
+                <form>
+                  <div className="form-row">
+                    <div className="accordion col-md-12" id="accordionExample">
+                      {/* Acordeon detalles del producto */}
+                      <div className="card">
+                        <div className="card-header" id="headingOne">
+                          <h2 className="mb-0">
+                            <button
+                              className="btn btn-link btn-block text-left"
+                              type="button"
+                              data-toggle="collapse"
+                              data-target="#collapseOne"
+                              aria-expanded="true"
+                              aria-controls="collapseOne"
+                            >
+                              Detalles del Producto
+                            </button>
+                          </h2>
                         </div>
 
+                        {productoSeleccionado && (
+                          <div
+                            id="collapseOne"
+                            className="collapse show"
+                            aria-labelledby="headingOne"
+                            data-parent="#accordionExample"
+                          >
+                            <div className="card-body">
+                              <div className="form-row">
+                                {/* Nombre del diseño */}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="idDisenio">
+                                    Diseño del Producto:
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    id="idDisenio"
+                                    value={convertDisenioIdToName(
+                                      productoSeleccionado.IdDisenio
+                                    )}
+                                    disabled
+                                  />
+                                </div>
 
+                                {/* Referencia del insumo */}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="idInsumo">
+                                    Insumo del Producto:
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    id="idInsumo"
+                                    value={convertInsumoIdToName(
+                                      productoSeleccionado.IdInsumo
+                                    )}
+                                    disabled
+                                  />
+                                </div>
 
+                                {/* Referencia del producto */}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="Referencia">
+                                    Referencia del Producto:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    id="Referencia"
+                                    value={productoSeleccionado.Referencia}
+                                    disabled
+                                  />
+                                </div>
 
-                        
-                        
+                                {/* Cantidad del producto */}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="nombreCliente">
+                                    Cantidad:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    id="nombreCliente"
+                                    value={productoSeleccionado.Cantidad}
+                                    disabled
+                                  />
+                                </div>
+
+                                {/*Valor de la venta del producto */}
+                                <div className="form-group col-md-12">
+                                  <label htmlFor="direccionCliente">
+                                    Valor de la venta del producto:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    id="direccionCliente"
+                                    value={productoSeleccionado.ValorVenta}
+                                    disabled
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </form>
+
+                      {/* Acordeon detalles del insumo */}
+                      <div className="card">
+                        <div className="card-header" id="headingTwo">
+                          <h2 className="mb-0">
+                            <button
+                              className="btn btn-link btn-block text-left collapsed"
+                              type="button"
+                              data-toggle="collapse"
+                              data-target="#collapseTwo"
+                              aria-expanded="false"
+                              aria-controls="collapseTwo"
+                            >
+                              Detalles del Insumo
+                            </button>
+                          </h2>
+                        </div>
+
+                        {insumoSeleccionado && (
+                          <div
+                            id="collapseTwo"
+                            className="collapse"
+                            aria-labelledby="headingTwo"
+                            data-parent="#accordionExample"
+                          >
+                            <div className="card-body">
+                              <div className="form-row">
+                                {/* Color del Insumo */}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="idColor">
+                                    Color del Insumo:
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    id="idColor"
+                                    value={ColorDetalle.Color}
+                                    disabled
+                                  />
+                                </div>
+
+                                {/* Talla del insumo */}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="idTalla">
+                                    Talla del insumo:
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    id="idTalla"
+                                    value={TallaDetalle.Talla}
+                                    disabled
+                                  />
+                                </div>
+
+                                {/* Referencia del insumo */}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="nroDocumentoCliente">
+                                    Referencia del insumo:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    id="nroDocumentoCliente"
+                                    value={insumoSeleccionado.Referencia}
+                                    disabled
+                                  />
+                                </div>
+
+                                {/* Cantidad del insumo */}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="nombreCliente">
+                                    Cantidad:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    id="nombreCliente"
+                                    value={insumoSeleccionado.Cantidad}
+                                    disabled
+                                  />
+                                </div>
+
+                                {/* Valor de la compra del insumo */}
+                                <div className="form-group col-md-12">
+                                  <label htmlFor="direccionCliente">
+                                    Valor de la compra del insumo:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    id="direccionCliente"
+                                    value={formatCurrency(
+                                      insumoSeleccionado.ValorCompra
+                                    )}
+                                    disabled
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Acordeon detalles del diseño */}
+                      <div className="card">
+                        <div className="card-header" id="headingThree">
+                          <h2 className="mb-0">
+                            <button
+                              className="btn btn-link btn-block text-left collapsed"
+                              type="button"
+                              data-toggle="collapse"
+                              data-target="#collapseThree"
+                              aria-expanded="false"
+                              aria-controls="collapseThree"
+                            >
+                              Detalles del Diseño
+                            </button>
+                          </h2>
+                        </div>
+
+                        {disenioSeleccionado && (
+                          <div
+                            id="collapseThree"
+                            className="collapse"
+                            aria-labelledby="headingThree"
+                            data-parent="#accordionExample"
+                          >
+                            <div className="card-body">
+                              <div className="form-row">
+                                {/* Nombre de diseño */}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="nombreDiseño">
+                                    Nombre del Diseño:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    id="nombreDiseño"
+                                    value={disenioSeleccionado.NombreDisenio}
+                                    disabled
+                                  />
+                                </div>
+
+                                {/* Nombre de fuente*/}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="nombreFuente">Fuente:</label>
+                                  <input
+                                    className="form-control"
+                                    id="nombreFuente"
+                                    value={disenioSeleccionado.Fuente}
+                                    disabled
+                                  />
+                                </div>
+
+                                {/* Tamaño de fuente*/}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="tamanioFuente">
+                                    Tamaño de Fuente:
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    id="tamanioFuente"
+                                    value={disenioSeleccionado.TamanioFuente}
+                                    disabled
+                                  />
+                                </div>
+
+                                {/* Color de fuente*/}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="colorFuente">
+                                    Color de Fuente:
+                                  </label>
+
+                                  {disenioSeleccionado.ColorFuente !==
+                                  "No aplica" ? (
+                                    <div className="d-flex align-items-center">
+                                      <input
+                                        type="color"
+                                        className="form-control col-md-4"
+                                        id="colorFuente"
+                                        value={disenioSeleccionado.ColorFuente}
+                                        disabled
+                                      />
+
+                                      <span className="ml-3" id="spanColor">
+                                        {disenioSeleccionado.ColorFuente}
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <input
+                                      type="text"
+                                      className="form-control"
+                                      disabled
+                                      required
+                                      value={"No aplica"}
+                                    />
+                                  )}
+                                </div>
+
+                                {/* Posicion de fuente*/}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="posicionFuente">
+                                    Posicion de Fuente:
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    id="posicionFuente"
+                                    value={disenioSeleccionado.PosicionFuente}
+                                    disabled
+                                  />
+                                </div>
+
+                                {/* Tamaño de imagen*/}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="tamanioImagen">
+                                    Tamaño de Imagen:
+                                  </label>
+                                  <input
+                                    className="form-control"
+                                    id="tamanioImagen"
+                                    value={disenioSeleccionado.TamanioImagen}
+                                    disabled
+                                  />
+                                </div>
+
+                                {/* Posicion de imagen*/}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="posicionImagen">
+                                    Posicion de Imagen:
+                                  </label>
+
+                                  <input
+                                    className="form-control"
+                                    id="posicionImagen"
+                                    value={disenioSeleccionado.PosicionImagen}
+                                    disabled
+                                  />
+                                </div>
+
+                                {/* Precio de diseño */}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="precioDiseño">
+                                    Precio del Diseño:
+                                  </label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    id="precioDiseño"
+                                    value={formatCurrency(
+                                      disenioSeleccionado.PrecioDisenio
+                                    )}
+                                    disabled
+                                  />
+                                </div>
+
+                                {/* Imagen diseño*/}
+                                <div className="form-group col-md-6">
+                                  <label>Imagen Diseño :</label>
+                                  <br />
+
+                                  {disenioSeleccionado.ImagenDisenio !==
+                                  "No aplica" ? (
+                                    <div className="container py-5 mx-3">
+                                      <img
+                                        src={disenioSeleccionado.ImagenDisenio}
+                                        alt="Vista previa imagen del diseño"
+                                        style={{
+                                          maxWidth: "200px",
+                                          display: "block",
+                                          border: "1px solid black",
+                                        }}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <input
+                                      type="text"
+                                      className="form-control"
+                                      disabled
+                                      value={"No aplica"}
+                                    />
+                                  )}
+                                </div>
+
+                                {/* Imagen referencia*/}
+                                <div className="form-group col-md-6">
+                                  <label htmlFor="ImagenDisenioCliente">
+                                    Imagen Referencia :
+                                  </label>
+
+                                  <br />
+
+                                  <div className="container py-5 mx-3">
+                                    <img
+                                      src={disenioSeleccionado.ImagenReferencia}
+                                      alt="Vista previa imagen del diseño"
+                                      style={{
+                                        maxWidth: "200px",
+                                        display: "block",
+                                        border: "1px solid black",
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                
+                </form>
+              </div>
             </div>
             <div className="modal-footer">
               <button
@@ -1176,12 +1218,12 @@ const validateReferencia = (value) => {
       </div>
       {/* Fin modal ver detalle diseño */}
 
-
-
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">Gestión de Productos</h1>
+          <h1 className="h3 mb-3 text-center text-dark">
+            Gestión de Productos
+          </h1>
           <div className="text-right">
             <button
               type="button"
@@ -1197,14 +1239,14 @@ const validateReferencia = (value) => {
 
         {/* <!-- Tabla de Productos --> */}
         <div className="card shadow mb-4">
-          <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Productos</h6>
-          </div>
-          <div className="card-body">
+        <div className="card-header py-1 d-flex">
+            <h6 className="m-2 font-weight-bold text-primary">Productos</h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+          </div>
+          <div className="card-body">
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -1232,21 +1274,21 @@ const validateReferencia = (value) => {
                       <td>{producto.Cantidad}</td>
                       <td>{formatCurrency(producto.ValorVenta)}</td>
                       <td>
-                          <label className="switch">
-                            <input
-                              type="checkbox"
-                              checked={producto.Estado === "Activo"}
-                              onChange={() =>
-                                cambiarEstadoProducto(producto.IdProducto)
-                              }
-                              className={
-                                producto.Estado === "Activo"
-                                  ? "switch-green"
-                                  : "switch-red"
-                              }
-                            />
-                            <span className="slider round"></span>
-                          </label>
+                        <label className="switch">
+                          <input
+                            type="checkbox"
+                            checked={producto.Estado === "Activo"}
+                            onChange={() =>
+                              cambiarEstadoProducto(producto.IdProducto)
+                            }
+                            className={
+                              producto.Estado === "Activo"
+                                ? "switch-green"
+                                : "switch-red"
+                            }
+                          />
+                          <span className="slider round"></span>
+                        </label>
                       </td>
                       <td>
                         <div
@@ -1256,7 +1298,7 @@ const validateReferencia = (value) => {
                         >
                           <button
                             className="btn btn-warning btn-sm mr-2"
-                            title="Actualizar"
+                            title="Editar"
                             data-toggle="modal"
                             data-target="#modalCliente"
                             onClick={() => openModal(2, producto)}
@@ -1268,13 +1310,16 @@ const validateReferencia = (value) => {
                           <button
                             className="btn btn-danger btn-sm mr-2"
                             onClick={() =>
-                              deleteInsumo(producto.IdProducto, producto.Referencia)
+                              deleteInsumo(
+                                producto.IdProducto,
+                                producto.Referencia
+                              )
                             }
                             disabled={producto.Estado != "Activo"}
+                            title="Eliminar"
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                           
 
                           <button
                             className="btn btn-info btn-sm mr-2"
@@ -1282,13 +1327,12 @@ const validateReferencia = (value) => {
                               handleDetalleProducto(producto.IdProducto)
                             }
                             disabled={producto.Estado != "Activo"}
-
                             data-toggle="modal"
-                            data-target="#modalDetalleProducto" 
+                            data-target="#modalDetalleProducto"
+                            title="Detalle"
                           >
-                            <i className="fas fa-eye"></i>
+                            <i className="fas fa-info-circle"></i>
                           </button>
-
                         </div>
                       </td>
                     </tr>

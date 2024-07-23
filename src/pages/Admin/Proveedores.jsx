@@ -753,7 +753,6 @@ export const Proveedores = () => {
 
       {/* Botón para abrir el modal de crear proveedor */}
       <div className="container-fluid">
-        {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
           <h1 className="h3 mb-3 text-center text-dark">
             Gestión de Proveedores
@@ -836,7 +835,7 @@ export const Proveedores = () => {
                         >
                           <button
                             className="btn btn-warning btn-sm mr-2"
-                            title="Actualizar"
+                            title="Editar"
                             data-toggle="modal"
                             data-target="#modalProveedor"
                             onClick={() => openModal(2, proveedor)}
@@ -846,6 +845,7 @@ export const Proveedores = () => {
                           </button>
                           <button
                             className="btn btn-danger btn-sm mr-2"
+                            title="Eliminar"
                             onClick={() =>
                               deleteProveedor(
                                 proveedor.IdProveedor,
@@ -863,6 +863,7 @@ export const Proveedores = () => {
                 </tbody>
               </table>
             </div>
+
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

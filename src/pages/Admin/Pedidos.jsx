@@ -10,7 +10,7 @@ export const Pedidos = () => {
   const [pedidos, setPedidos] = useState([]);
   const [IdPedido, setIdPedido] = useState("");
   const [IdPedidoActualizar, setIdPedidoActualizar] = useState("");
-  
+
   const [Clientes, setClientes] = useState([]);
   const [IdCliente, setIdCliente] = useState("");
   const [Fecha, setFecha] = useState("");
@@ -47,9 +47,7 @@ export const Pedidos = () => {
   };
 
   const getClienteName = (idCliente) => {
-    const cliente = Clientes.find(
-      (prov) => prov.IdCliente === idCliente
-    );
+    const cliente = Clientes.find((prov) => prov.IdCliente === idCliente);
     return cliente ? cliente.NombreApellido : "Cliente no encontrado";
   };
 
@@ -59,15 +57,15 @@ export const Pedidos = () => {
   };
 
   const convertEstadoPedidoIdToName = (estadoPedidoId) => {
-    const estadoPedido = estadosPedidos.find((pedido) => pedido.IdEstadoPedido === estadoPedidoId);
+    const estadoPedido = estadosPedidos.find(
+      (pedido) => pedido.IdEstadoPedido === estadoPedidoId
+    );
     return estadoPedido ? estadoPedido.NombreEstado : "";
   };
 
   const getClientes = async () => {
     try {
-      const respuesta = await axios.get(
-        "http://localhost:3000/api/clientes"
-      );
+      const respuesta = await axios.get("http://localhost:3000/api/clientes");
       const ClientesActivos = respuesta.data.filter(
         (cliente) => cliente.Estado === "Activo"
       );
@@ -91,7 +89,9 @@ export const Pedidos = () => {
 
   const getEstadosPedidos = async () => {
     try {
-      const respuesta = await axios.get("http://localhost:3000/api/estadosPedidos");
+      const respuesta = await axios.get(
+        "http://localhost:3000/api/estadosPedidos"
+      );
 
       setEstadosPedidos(respuesta.data);
     } catch (error) {
@@ -167,14 +167,14 @@ export const Pedidos = () => {
   const [alertas, setAlertas] = useState([]);
 
   const hayAlertas = () => {
-    return alertas.some(alerta => alerta !== '');
+    return alertas.some((alerta) => alerta !== "");
   };
 
   const handleDetailChange = (index, e) => {
     const { name, value } = e.target;
     const updatedDetalles = [...Detalles];
     const updatedAlertas = [...alertas];
-  
+
     console.log(name);
 
     if (name === "IdProducto") {
@@ -183,46 +183,49 @@ export const Pedidos = () => {
         (detalle, detalleIndex) =>
           detalle.IdProducto === value && detalleIndex !== index
       );
-  
+
       if (productoDuplicado) {
         show_alerta("Este producto ya está agregado en los detalles", "error");
         return; // No permitir la selección del producto duplicado
       }
-  
+
       // Actualizar el IdProducto en el detalle
       updatedDetalles[index][name] = value;
       setDetalles(updatedDetalles);
-  
+
       // Encontrar el producto seleccionado
-      const selectedProduct = Productos.find(producto => producto.IdProducto == value);
-  
+      const selectedProduct = Productos.find(
+        (producto) => producto.IdProducto == value
+      );
+
       if (selectedProduct) {
         // Actualizar el precio en el detalle
         updatedDetalles[index].precio = selectedProduct.ValorVenta;
         setDetalles(updatedDetalles);
       }
-    } 
+    }
 
-  
     if (name == "cantidad") {
       // Actualizar la cantidad en el detalle
       updatedDetalles[index][name] = value;
       setDetalles(updatedDetalles);
-  
+
       const selectedProductoId = updatedDetalles[index].IdProducto;
-      const selectedProduct = Productos.find(producto => producto.IdProducto == selectedProductoId);
+      const selectedProduct = Productos.find(
+        (producto) => producto.IdProducto == selectedProductoId
+      );
       console.log(selectedProduct);
 
       if (selectedProduct) {
         // Validar la cantidad
         if (parseInt(value) > selectedProduct.Cantidad) {
-          updatedAlertas[index] = 'La cantidad ingresada es mayor que la cantidad disponible';
+          updatedAlertas[index] =
+            "La cantidad ingresada es mayor que la cantidad disponible";
         } else {
-          updatedAlertas[index] = '';
+          updatedAlertas[index] = "";
         }
         setAlertas(updatedAlertas);
       }
-
 
       const cantidad = parseFloat(updatedDetalles[index].cantidad || 0);
       const precio = parseFloat(updatedDetalles[index].precio || 0);
@@ -230,13 +233,11 @@ export const Pedidos = () => {
     }
   };
 
-
   const handleChangeIdEstadoPedido = (e) => {
     const value = e.target.value;
     setIdEstadosPedidos(value);
   };
 
-  
   const getFilteredProductos = (index) => {
     // Obtener los IDs de los insumos seleccionados en las otras filas de detalles
     const productosSeleccionados = Detalles.reduce((acc, detalle, i) => {
@@ -251,8 +252,6 @@ export const Pedidos = () => {
       (producto) => !productosSeleccionados.includes(producto.IdProducto)
     );
   };
-
-
 
   const addDetail = () => {
     // Crear un nuevo detalle con valores predeterminados
@@ -315,7 +314,7 @@ export const Pedidos = () => {
       Fecha: Fecha,
       Total: totalCompra,
       Detalles: Detalles,
-      IdEstadoPedido:1
+      IdEstadoPedido: 1,
     });
   };
 
@@ -338,7 +337,6 @@ export const Pedidos = () => {
       document.getElementById("btnCerrar").click();
       getPedidos();
       getProductos();
-
     } catch (error) {
       if (error.response) {
         show_alerta(error.response.data.message, "error");
@@ -351,7 +349,7 @@ export const Pedidos = () => {
   };
 
   const cambiarEstadoPedido = async () => {
-    let idPed=idEstadosPedidos;
+    let idPed = idEstadosPedidos;
     const MySwal = withReactContent(Swal);
     MySwal.fire({
       title: "¿Seguro de cancelar el pedido?",
@@ -382,15 +380,12 @@ export const Pedidos = () => {
     });
   };
 
-
-  const openModalEstado = (pedido) =>{
-    
+  const openModalEstado = (pedido) => {
     setTitle("Actualizar Estado");
     setIdPedidoActualizar(pedido.IdPedido);
     // setIdPedido(pedido.IdPedido);
     setIdEstadosPedidos(pedido.IdEstadoPedido);
   };
-
 
   const show_alerta = (message, type) => {
     const MySwal = withReactContent(Swal);
@@ -431,48 +426,49 @@ export const Pedidos = () => {
 
   return (
     <>
-
       {/* Inicio modal de editar estado */}
       <div
-          className="modal fade"
-          id="modalEstadoPedido"
-          tabIndex="-1"
-          role="dialog"
-          aria-labelledby="ModalEditarEstadoLabel"
-          aria-hidden="true"
-          data-backdrop="static"
-          data-keyboard="false"
-        >
-          <div className="modal-dialog modal-md" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="ModalEditarEstadoLabel">
-                  {title}
-                </h5>
-                <button
-                  type="button"
-                  className="close"
-                  data-dismiss="modal"
-                  aria-label="Close"
-                >
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
+        className="modal fade"
+        id="modalEstadoPedido"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="ModalEditarEstadoLabel"
+        aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
+      >
+        <div className="modal-dialog modal-md" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="ModalEditarEstadoLabel">
+                {title}
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
 
-              <div className="modal-body">
-                {/* <input type="text" id="IdCompra" value={IdPedidoActualizar}></input> */}
+            <div className="modal-body">
+              {/* <input type="text" id="IdCompra" value={IdPedidoActualizar}></input> */}
 
-                <div className="form-row">
+              <div className="form-row">
                 {/* Seleccionar estado */}
                 <div className="form-group col-md-12">
                   <label>Estados:</label>
                   <select
                     className="form-control"
-                    name="IdCliente" 
+                    name="IdCliente"
                     value={idEstadosPedidos}
                     onChange={handleChangeIdEstadoPedido}
                   >
-                    <option disabled value="">Selecciona un estado</option>
+                    <option disabled value="">
+                      Selecciona un estado
+                    </option>
                     {estadosPedidos.map((estado) => (
                       <option
                         key={estado.IdEstadoPedido}
@@ -484,11 +480,10 @@ export const Pedidos = () => {
                   </select>
                   {/* {renderErrorMessage(errors.IdCliente)} */}
                 </div>
-                </div>
-
               </div>
+            </div>
 
-              <div className="modal-footer">
+            <div className="modal-footer">
               <button
                 type="button"
                 id="btnCerrar"
@@ -504,16 +499,11 @@ export const Pedidos = () => {
               >
                 Actualizar
               </button>
-              
-              </div>
-
-
             </div>
           </div>
-
+        </div>
       </div>
       {/* fin modal de editar estado */}
-
 
       {/* Inicio modal de crear pedido con su detalle */}
       <div
@@ -545,7 +535,7 @@ export const Pedidos = () => {
             <div className="modal-body">
               <input type="hidden" id="IdCompra"></input>
 
-            {/* Seleccionar cliente */}
+              {/* Seleccionar cliente */}
               <div className="form-group">
                 <label>Cliente:</label>
                 <select
@@ -558,10 +548,7 @@ export const Pedidos = () => {
                 >
                   <option value="">Selecciona un cliente</option>
                   {Clientes.map((cliente) => (
-                    <option
-                      key={cliente.IdCliente}
-                      value={cliente.IdCliente}
-                    >
+                    <option key={cliente.IdCliente} value={cliente.IdCliente}>
                       {cliente.NombreApellido}
                     </option>
                   ))}
@@ -597,7 +584,6 @@ export const Pedidos = () => {
                   <tbody>
                     {Detalles.map((detalle, index) => (
                       <tr key={index}>
-
                         <td>
                           <select
                             className={`form-control ${
@@ -612,8 +598,7 @@ export const Pedidos = () => {
                             onChange={(e) => handleDetailChange(index, e)}
                           >
                             <option value="">Selecciona un producto</option>
-                            {getFilteredProductos(index).map((producto)=> 
-                            (
+                            {getFilteredProductos(index).map((producto) => (
                               <option
                                 key={producto.IdProducto}
                                 value={producto.IdProducto}
@@ -621,7 +606,6 @@ export const Pedidos = () => {
                                 {producto.Referencia}
                               </option>
                             ))}
-
                           </select>
 
                           {errors.Detalles &&
@@ -642,7 +626,11 @@ export const Pedidos = () => {
                             value={detalle.cantidad}
                             onChange={(e) => handleDetailChange(index, e)}
                           />
-                            {alertas[index] && <span style={{ color: 'red' }} className="alerta">{alertas[index]}</span>}
+                          {alertas[index] && (
+                            <span style={{ color: "red" }} className="alerta">
+                              {alertas[index]}
+                            </span>
+                          )}
                         </td>
 
                         <td>
@@ -657,7 +645,6 @@ export const Pedidos = () => {
                           />
                         </td>
 
-
                         <td>
                           <input
                             type="text"
@@ -668,7 +655,6 @@ export const Pedidos = () => {
                             disabled
                           />
                         </td>
-
 
                         <td>
                           <button
@@ -733,8 +719,6 @@ export const Pedidos = () => {
         </div>
       </div>
       {/* fin modal de crear compra con el detalle */}
-
-
 
       {/* Inicio modal ver detalle compra */}
       <div
@@ -833,11 +817,10 @@ export const Pedidos = () => {
       </div>
       {/* Fin modal ver detalle compra */}
 
-
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">Pedidos</h1>
+          <h1 className="h3 mb-3 text-center text-dark">Gestión de Pedidos</h1>
           <div className="text-right">
             <button
               type="button"
@@ -853,14 +836,14 @@ export const Pedidos = () => {
 
         {/* <!-- Tabla de Pedidos --> */}
         <div className="card shadow mb-4">
-          <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Pedidos</h6>
-          </div>
-          <div className="card-body">
+        <div className="card-header py-1 d-flex">
+            <h6 className="m-2 font-weight-bold text-primary">Pedidos</h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+          </div>
+          <div className="card-body">
             <div className="table-responsive">
               <table className="table table-striped table-bordered">
                 <thead>
@@ -877,7 +860,10 @@ export const Pedidos = () => {
                     <tr
                       key={compra.IdPedido}
                       className={
-                        compra.IdEstadoPedido === 4 || compra.IdEstadoPedido === 3 ? "table-secondary" : ""
+                        compra.IdEstadoPedido === 4 ||
+                        compra.IdEstadoPedido === 3
+                          ? "table-secondary"
+                          : ""
                       }
                     >
                       <td>{getClienteName(compra.IdCliente)}</td>
@@ -888,21 +874,23 @@ export const Pedidos = () => {
 
                       <td>{compra.Total}</td>
 
-                      <td>{convertEstadoPedidoIdToName(compra.IdEstadoPedido)}</td>
+                      <td>
+                        {convertEstadoPedidoIdToName(compra.IdEstadoPedido)}
+                      </td>
 
                       <td>
-                        {compra.IdEstadoPedido === 4 || compra.IdEstadoPedido === 3 ? (
+                        {compra.IdEstadoPedido === 4 ||
+                        compra.IdEstadoPedido === 3 ? (
                           <button className="btn btn-secondary mr-2" disabled>
                             <i className="fas fa-times-circle"></i>
                           </button>
-
                         ) : (
-
                           <button
-                          data-toggle="modal"
-                          data-target="#modalEstadoPedido"
+                            data-toggle="modal"
+                            data-target="#modalEstadoPedido"
                             onClick={() => openModalEstado(compra)}
                             className="btn btn-danger mr-2"
+                            title="Editar"
                           >
                             <i className="fas fa-times-circle"></i>
                           </button>
@@ -911,19 +899,22 @@ export const Pedidos = () => {
                         <button
                           onClick={() => handleDetalleCompra(compra.IdPedido)}
                           className={`btn ${
-                            compra.IdEstadoPedido === 4 || compra.IdEstadoPedido === 3
+                            compra.IdEstadoPedido === 4 ||
+                            compra.IdEstadoPedido === 3
                               ? "btn-secondary mr-2"
                               : "btn-info"
                           }`}
-                          disabled={compra.IdEstadoPedido === 4 || compra.IdEstadoPedido === 3}
+                          disabled={
+                            compra.IdEstadoPedido === 4 ||
+                            compra.IdEstadoPedido === 3
+                          }
                           data-toggle="modal"
                           data-target="#modalDetalleCompra"
+                          title="Detalle"
                         >
-
-                          <i className="fas fa-eye"></i>
+                            <i className="fas fa-info-circle"></i>
                         </button>
                       </td>
-
                     </tr>
                   ))}
                 </tbody>
