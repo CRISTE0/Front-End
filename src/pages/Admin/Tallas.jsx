@@ -346,11 +346,10 @@ export const Tallas = () => {
 
       {/* <!-- Inicio de tallas --> */}
       <div className="container-fluid">
-        {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">Tallas</h1>
+          <h1 className="h3 mb-3 text-center text-dark">Gestión de Tallas</h1>
 
-          <div className="text-center p-3">
+          <div className="text-right">
             <button
               onClick={() => openModal(1)}
               type="button"
@@ -358,21 +357,21 @@ export const Tallas = () => {
               data-toggle="modal"
               data-target="#modalTallas"
             >
-              <i className="fas fa-pencil-alt"></i> Crear talla
+              <i className="fas fa-pencil-alt"></i> Crear Talla
             </button>
           </div>
         </div>
 
         {/* <!-- Tabla Proveedor --> */}
         <div className="card shadow mb-4">
-          <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Tallas</h6>
-          </div>
-          <div className="card-body">
+        <div className="card-header py-1 d-flex">
+            <h6 className="m-2 font-weight-bold text-primary">Tallas</h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+          </div>
+          <div className="card-body">
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -382,7 +381,6 @@ export const Tallas = () => {
               >
                 <thead>
                   <tr>
-                    <th>#</th>
                     <th>Talla</th>
                     <th>Estado</th>
                     <th>Acciones</th>
@@ -390,10 +388,8 @@ export const Tallas = () => {
                 </thead>
 
                 <tbody>
-                  {currenTallas.map((talla, i) => (
+                  {currenTallas.map((talla) => (
                     <tr key={talla.IdTalla}>
-                      <td>{i + 1}</td>
-
                       <td>{talla.Talla}</td>
                       <td>
                         <label className="switch">
@@ -410,35 +406,34 @@ export const Tallas = () => {
                           <span className="slider round"></span>
                         </label>
                       </td>
-
                       <td>
                         <div
                           className="btn-group"
                           role="group"
                           aria-label="Acciones"
                         >
-                          {/* boton de actualizar */}
                           <button
                             className="btn btn-warning btn-sm mr-2"
+                            title="Editar"
                             data-toggle="modal"
                             data-target="#modalTallas"
                             onClick={() =>
                               openModal(2, talla.IdTalla, talla.Talla)
                             }
-                            disabled={talla.Estado != "Activo"}
+                            disabled={talla.Estado !== "Activo"}
                           >
-                            <i className="fas fa-solid fa-edit"></i>
+                            <i className="fas fa-sync-alt"></i>
                           </button>
-                          {/* boton de eliminar */}
                           &nbsp;
                           <button
                             className="btn btn-danger btn-sm mr-2"
                             onClick={() =>
                               deletetalla(talla.IdTalla, talla.Talla)
                             }
-                            disabled={talla.Estado != "Activo"}
+                            disabled={talla.Estado !== "Activo"}
+                            title="Eliminar"
                           >
-                            <i className="fas fa-solid fa-trash"></i>
+                            <i className="fas fa-trash-alt"></i>
                           </button>
                         </div>
                       </td>
@@ -447,6 +442,7 @@ export const Tallas = () => {
                 </tbody>
               </table>
             </div>
+
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

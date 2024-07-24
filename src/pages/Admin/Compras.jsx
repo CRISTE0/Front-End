@@ -86,8 +86,8 @@ export const Compras = () => {
   const totalCompra =
     Detalles && Detalles.length > 0
       ? Detalles.reduce((total, detalle) => {
-        return total + (detalle.cantidad * detalle.precio || 0);
-      }, 0)
+          return total + (detalle.cantidad * detalle.precio || 0);
+        }, 0)
       : 0;
 
   const handleDetalleCompra = async (idCompra) => {
@@ -203,40 +203,43 @@ export const Compras = () => {
     }
 
     if (name === "cantidad") {
-      // Validar que la cantidad sea un número positivo y no contenga caracteres inválidos
-      if (value === "" || /^\d+$/.test(value)) {
+      // Validar que la cantidad sea un número entero positivo sin signos más o menos al principio
+      if (value === "" || /^[1-9]\d*$/.test(value)) {
+        // Aceptar solo números enteros positivos
         updatedDetalles[index][name] = value;
 
         // Actualizar el subtotal si se modificó cantidad
         const cantidad = parseFloat(value || 0);
         const precio = parseFloat(updatedDetalles[index].precio || 0);
         updatedDetalles[index].subtotal = cantidad * precio;
+
+        // Mostrar alerta si la cantidad es 0 y no se está eliminando el detalle
+        if (cantidad === 0 && Detalles[index].cantidad !== "") {
+          show_alerta("La cantidad no puede ser 0", "error");
+        }
       } else {
-        show_alerta(
-          "La cantidad debe ser un número positivo sin caracteres inválidos",
-          "error"
-        );
-        return; // No actualizar si no es un número positivo sin caracteres inválidos
+        if (value !== "") {
+          show_alerta(
+            "La cantidad debe ser un número entero positivo sin signos más o menos al principio",
+            "error"
+          );
+        }
+        return; // No actualizar si no es un número entero positivo y no está vacío
       }
     } else if (name === "precio") {
-      // Validar que el precio sea un número positivo y no supere los 10 millones
+      // Validar que el precio sea un número positivo sin signos más o menos al principio
       if (
         value === "" ||
-        (/^\d*\.?\d*$/.test(value) && parseFloat(value) <= 10000000)
+        (/^\d+(\.\d+)?$/.test(value) && parseFloat(value) <= 10000000)
       ) {
-        updatedDetalles[index][name] = value;
-
-        // Actualizar el subtotal si se modificó precio
-        const cantidad = parseFloat(updatedDetalles[index].cantidad || 0);
-        const precio = parseFloat(value || 0);
-        updatedDetalles[index].subtotal = cantidad * precio;
+        // Aceptar solo números válidos y que no superen los 10 millones
+        const newPrice = parseFloat(value || 0);
 
         // Mostrar advertencia si el precio es menor al actual
         const idInsumo = updatedDetalles[index].IdInsumo;
         const currentPrice = getCurrentPrice(idInsumo);
-        const newPrice = parseFloat(value);
 
-        if (newPrice < currentPrice) {
+        if (newPrice < currentPrice && value !== "") {
           show_alerta(
             `El precio no puede ser menor al actual (${formatPrice(
               currentPrice
@@ -244,12 +247,25 @@ export const Compras = () => {
             "warning"
           );
         }
+
+        // Validar que el precio no sea 0, solo si el campo no está vacío
+        if (newPrice === 0 && value !== "") {
+          show_alerta("El precio no puede ser 0", "error");
+          updatedDetalles[index][name] = ""; // Limpiar el campo de precio
+        } else {
+          // Actualizar el subtotal si se modificó precio
+          const cantidad = parseFloat(updatedDetalles[index].cantidad || 0);
+          updatedDetalles[index][name] = value;
+          updatedDetalles[index].subtotal = cantidad * newPrice;
+        }
       } else {
-        show_alerta(
-          "El precio debe ser un número válido y no superar los 10 millones",
-          "error"
-        );
-        return; // No actualizar si no es un número válido o excede el límite
+        if (value !== "") {
+          show_alerta(
+            "El precio debe ser un número válido y no superar los 10 millones, sin signos más o menos al principio",
+            "error"
+          );
+        }
+        return; // No actualizar si no es un número válido o si supera el límite
       }
     } else {
       updatedDetalles[index][name] = value;
@@ -338,7 +354,17 @@ export const Compras = () => {
     }
 
     // Validar detalles de la compra
-    if (Detalles.length === 0 || Detalles.some(detalle => !detalle.IdInsumo || !detalle.cantidad || !detalle.precio)) {
+    if (
+      Detalles.length === 0 ||
+      Detalles.some(
+        (detalle) =>
+          !detalle.IdInsumo ||
+          !detalle.cantidad ||
+          !detalle.precio ||
+          detalle.cantidad === "0" ||
+          detalle.precio === "0"
+      )
+    ) {
       errorMessage = "Agrega detalles válidos de compra";
       showDetalleAlert(errorMessage); // Mostrar la alerta cuando no hay detalles válidos
       return;
@@ -351,25 +377,46 @@ export const Compras = () => {
         errors.IdInsumo = "Selecciona un insumo";
       }
 
-      if (!detalle.cantidad || detalle.cantidad <= 0 || !/^\d+$/.test(detalle.cantidad)) {
+      if (
+        !detalle.cantidad ||
+        detalle.cantidad <= 0 ||
+        !/^\d+$/.test(detalle.cantidad) ||
+        detalle.cantidad === "0"
+      ) {
         errors.cantidad = "Ingresa una cantidad válida";
+        if (detalle.cantidad === "0") {
+          show_alerta("La cantidad no puede ser 0", "error");
+        }
       }
 
-      if (!detalle.precio || detalle.precio <= 0 || parseFloat(detalle.precio) > 10000000) {
-        errors.precio = "Ingresa un precio válido que no supere los 10 millones";
+      if (
+        !detalle.precio ||
+        detalle.precio <= 0 ||
+        parseFloat(detalle.precio) > 10000000 ||
+        detalle.precio === "0"
+      ) {
+        errors.precio =
+          "Ingresa un precio válido que no supere los 10 millones y no sea 0";
+        if (detalle.precio === "") {
+          show_alerta("El precio no puede estar vacío", "error");
+        } else if (detalle.precio === "0") {
+          show_alerta("El precio no puede ser 0", "error");
+        }
       }
 
       if (Object.keys(errors).length > 0) {
-        setErrors(prevErrors => ({
+        setErrors((prevErrors) => ({
           ...prevErrors,
-          Detalles: { ...prevErrors.Detalles, [index]: errors }
+          Detalles: { ...prevErrors.Detalles, [index]: errors },
         }));
       }
 
       return errors;
     });
 
-    const hasErrors = detallesValidados.some(errors => Object.keys(errors).length > 0);
+    const hasErrors = detallesValidados.some(
+      (errors) => Object.keys(errors).length > 0
+    );
 
     if (hasErrors) {
       return;
@@ -383,8 +430,6 @@ export const Compras = () => {
       detalles: Detalles,
     });
   };
-
-
 
   const enviarSolicitud = async (metodo, parametros) => {
     try {
@@ -485,7 +530,6 @@ export const Compras = () => {
 
   return (
     <>
-      {/* Inicio modal de crear compra con su detalle */}
       {/* Modal para crear o editar una compra con detalles */}
       <div
         className="modal fade"
@@ -514,44 +558,57 @@ export const Compras = () => {
             </div>
             <div className="modal-body">
               <input type="hidden" id="IdCompra"></input>
-              <div className="form-group">
-                <label>Proveedor:</label>
-                <select
-                  className={`form-control ${errors.IdProveedor ? "is-invalid" : ""
-                    }`}
-                  name="IdProveedor"
-                  value={IdProveedor}
-                  onChange={(e) => setIdProveedor(e.target.value)}
-                >
-                  <option value="">Selecciona un proveedor</option>
-                  {proveedores.map((proveedor) => (
-                    <option
-                      key={proveedor.IdProveedor}
-                      value={proveedor.IdProveedor}
+
+              <div className="row">
+                <div className="col-md-6">
+                  <div className="form-group">
+                    <label>Proveedor:</label>
+                    <select
+                      className={`form-control ${
+                        errors.IdProveedor ? "is-invalid" : ""
+                      }`}
+                      name="IdProveedor"
+                      value={IdProveedor}
+                      onChange={(e) => setIdProveedor(e.target.value)}
                     >
-                      {proveedor.NombreApellido}
-                    </option>
-                  ))}
-                </select>
-                {errors.IdProveedor && (
-                  <div className="invalid-feedback">{errors.IdProveedor}</div>
-                )}
-              </div>
-              <div className="form-group">
-                <label>Fecha:</label>
-                <input
-                  type="date"
-                  className={`form-control ${errors.Fecha ? "is-invalid" : ""}`}
-                  id="Fecha"
-                  name="Fecha"
-                  value={Fecha}
-                  onChange={handleChange}
-                  max={new Date().toISOString().split("T")[0]}
-                />
-                <small>
-                  Selecciona una fecha dentro de los últimos 8 días.
-                </small>
-                {renderErrorMessage(errors.Fecha)}
+                      <option value="">Selecciona un proveedor</option>
+                      {proveedores.map((proveedor) => (
+                        <option
+                          key={proveedor.IdProveedor}
+                          value={proveedor.IdProveedor}
+                        >
+                          {proveedor.NombreApellido}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.IdProveedor && (
+                      <div className="invalid-feedback">
+                        {errors.IdProveedor}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="col-md-6">
+                  <div className="form-group">
+                    <label>Fecha:</label>
+                    <input
+                      type="date"
+                      className={`form-control ${
+                        errors.Fecha ? "is-invalid" : ""
+                      }`}
+                      id="Fecha"
+                      name="Fecha"
+                      value={Fecha}
+                      onChange={handleChange}
+                      max={new Date().toISOString().split("T")[0]}
+                    />
+                    <small>
+                      Selecciona una fecha dentro de los últimos 8 días.
+                    </small>
+                    {renderErrorMessage(errors.Fecha)}
+                  </div>
+                </div>
               </div>
 
               <div className="table-responsive">
@@ -570,12 +627,13 @@ export const Compras = () => {
                       <tr key={index}>
                         <td>
                           <select
-                            className={`form-control ${errors.Detalles &&
+                            className={`form-control ${
+                              errors.Detalles &&
                               errors.Detalles[index] &&
                               errors.Detalles[index].IdInsumo
-                              ? "is-invalid"
-                              : ""
-                              }`}
+                                ? "is-invalid"
+                                : ""
+                            }`}
                             name="IdInsumo"
                             value={detalle.IdInsumo}
                             onChange={(e) => handleDetailChange(index, e)}
@@ -601,12 +659,13 @@ export const Compras = () => {
                         <td>
                           <input
                             type="number"
-                            className={`form-control ${errors.Detalles &&
+                            className={`form-control ${
+                              errors.Detalles &&
                               errors.Detalles[index] &&
                               errors.Detalles[index].cantidad
-                              ? "is-invalid"
-                              : ""
-                              }`}
+                                ? "is-invalid"
+                                : ""
+                            }`}
                             name="cantidad"
                             placeholder="Cantidad"
                             value={detalle.cantidad}
@@ -623,12 +682,13 @@ export const Compras = () => {
                         <td>
                           <input
                             type="number"
-                            className={`form-control ${errors.Detalles &&
+                            className={`form-control ${
+                              errors.Detalles &&
                               errors.Detalles[index] &&
                               errors.Detalles[index].precio
-                              ? "is-invalid"
-                              : ""
-                              }`}
+                                ? "is-invalid"
+                                : ""
+                            }`}
                             name="precio"
                             placeholder="Precio"
                             value={detalle.precio}
@@ -712,7 +772,6 @@ export const Compras = () => {
           </div>
         </div>
       </div>
-
       {/* fin modal de crear compra con el detalle */}
 
       {/* Inicio modal ver detalle compra */}
@@ -820,7 +879,7 @@ export const Compras = () => {
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">Compras</h1>
+          <h1 className="h3 mb-3 text-center text-dark">Gestión de Compras</h1>
           <div className="text-right">
             <button
               type="button"
@@ -829,23 +888,28 @@ export const Compras = () => {
               data-target="#modalCompras"
               onClick={() => proveedores.length > 0 && openModal(1)}
             >
-              <i className="fas fa-pencil-alt"></i> Añadir Compra
+              <i className="fas fa-pencil-alt"></i> Crear Compra
             </button>
           </div>
         </div>
 
         {/* <!-- Tabla de Compras --> */}
         <div className="card shadow mb-4">
-          <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Compras</h6>
-          </div>
-          <div className="card-body">
+          <div className="card-header py-1 d-flex">
+            <h6 className="m-2 font-weight-bold text-primary">Compras</h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+          </div>
+          <div className="card-body">
             <div className="table-responsive">
-              <table className="table table-striped table-bordered">
+              <table
+                className="table table-bordered"
+                id="dataTable"
+                width="100%"
+                cellSpacing="0"
+              >
                 <thead>
                   <tr>
                     <th>Proveedor</th>
@@ -867,7 +931,10 @@ export const Compras = () => {
                       <td>{formatPrice(compra.Total)}</td>
                       <td>
                         {compra.Estado === "Cancelado" ? (
-                          <button className="btn btn-secondary mr-2" disabled>
+                          <button
+                            className="btn btn-secondary mr-2"
+                            disabled
+                          >
                             <i className="fas fa-times-circle"></i>
                           </button>
                         ) : (
@@ -880,15 +947,16 @@ export const Compras = () => {
                         )}
                         <button
                           onClick={() => handleDetalleCompra(compra.IdCompra)}
-                          className={`btn ${compra.Estado === "Cancelado"
-                            ? "btn-secondary mr-2"
-                            : "btn-info"
-                            }`}
+                          className={`btn ${
+                            compra.Estado === "Cancelado"
+                              ? "btn-secondary mr-2"
+                              : "btn-info"
+                          } rounded-icon`}
                           disabled={compra.Estado === "Cancelado"}
                           data-toggle="modal"
                           data-target="#modalDetalleCompra"
                         >
-                          <i className="fas fa-eye"></i>
+                          <i className="fas fa-info-circle"></i>
                         </button>
                       </td>
                     </tr>
@@ -903,6 +971,7 @@ export const Compras = () => {
             />
           </div>
         </div>
+
         {/* Fin tabla de compras */}
       </div>
     </>

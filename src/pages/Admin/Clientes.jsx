@@ -15,6 +15,7 @@ export const Clientes = () => {
   const [Telefono, setTelefono] = useState("");
   const [Direccion, setDireccion] = useState("");
   const [Correo, setCorreo] = useState("");
+  const [Contrasenia, setContrasenia] = useState("");
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [errors, setErrors] = useState({
@@ -23,11 +24,13 @@ export const Clientes = () => {
     telefono: "",
     direccion: "",
     correo: "",
+    contrasenia: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
 
   useEffect(() => {
     getClientes();
@@ -49,6 +52,7 @@ export const Clientes = () => {
       setTelefono("");
       setDireccion("");
       setCorreo("");
+      setContrasenia(""); // Limpiar el estado de la contraseña
       setOperation(1);
       setTitle("Crear Cliente");
     } else if (op === 2 && cliente) {
@@ -68,6 +72,7 @@ export const Clientes = () => {
         telefono: "",
         direccion: "",
         correo: "",
+        contrasenia: "",
       });
       const errors = {
         nroDocumento: validateNroDocumento(cliente.NroDocumento),
@@ -80,9 +85,47 @@ export const Clientes = () => {
     }
   };
 
+  const openModalCambiarContrasenia = (cliente) => {
+    setIdCliente(cliente.IdCliente);
+    setContrasenia(cliente.Contrasenia || ""); // Asegúrate de manejar el caso donde no hay contraseña inicial
+    setTitle("Cambiar Contraseña");
+    setOperation(3); // Indica que la operación es cambiar contraseña
+    setErrors({
+      contrasenia: "",
+    });
+
+    // Mostrar el modal de cambiar contraseña
+    const modal = new bootstrap.Modal(
+      document.getElementById("modalCambiarContrasenia")
+    );
+    modal.show();
+  };
+
   const guardarCliente = async () => {
     const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
     const cleanedDireccion = Direccion.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+    const cleanedContrasenia = Contrasenia.trim();
+
+    if (operation === 1 && !cleanedContrasenia) {
+      // Validar contraseña solo en creación de usuario
+      setErrors((prevState) => ({
+        ...prevState,
+        contrasenia: "La contraseña es requerida",
+      }));
+    }
+
+    // Validar errores específicos para cambiar contraseña
+    const contraseniaError = validateContrasenia(cleanedContrasenia);
+
+    if (contraseniaError && operation === 3) {
+      // Mostrar error solo si estás cambiando la contraseña
+      setErrors((prevState) => ({
+        ...prevState,
+        contrasenia: contraseniaError,
+      }));
+      show_alerta("Verifique los errores en el formulario", "error");
+      return;
+    }
 
     if (operation === 1) {
       // Crear Cliente
@@ -93,6 +136,7 @@ export const Clientes = () => {
         Telefono,
         Direccion: cleanedDireccion,
         Correo,
+        Contrasenia: cleanedContrasenia,
         Estado: "Activo",
       });
     } else if (operation === 2) {
@@ -105,6 +149,13 @@ export const Clientes = () => {
         Telefono,
         Direccion: cleanedDireccion,
         Correo,
+        Contrasenia: cleanedContrasenia,
+      });
+    } else if (operation === 3) {
+      // Cambiar Contraseña
+      await enviarSolicitud("PUT", {
+        IdCliente,
+        Contrasenia: cleanedContrasenia,
       });
     }
   };
@@ -185,6 +236,15 @@ export const Clientes = () => {
     return "";
   };
 
+  const validateContrasenia = (value) => {
+    if (!value) {
+      return "La contraseña es requerida";
+    } else if (value.length < 8 || value.length > 15) {
+      return "La contraseña debe tener entre 8 y 15 caracteres";
+    }
+    return "";
+  };
+
   const handleChangeTipoDocumento = (e) => {
     const value = e.target.value;
     setTipoDocumento(value);
@@ -257,6 +317,19 @@ export const Clientes = () => {
       ...prevState,
       correo: errorMessage, // Actualiza el error de correo con el mensaje de error obtenido
     }));
+  };
+
+  const handleChangeContrasenia = (e) => {
+    setContrasenia(e.target.value); // Actualiza el estado de la contraseña
+    const errorMessage = validateContrasenia(e.target.value);
+    setErrors((prevState) => ({
+      ...prevState,
+      contrasenia: errorMessage, // Actualiza el error de contraseña con el mensaje de error obtenido
+    }));
+  };
+
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword); // Alternar el estado para mostrar/ocultar contraseña
   };
 
   const show_alerta = (message, type) => {
@@ -551,6 +624,36 @@ export const Clientes = () => {
                     />
                     {renderErrorMessage(errors.correo)}
                   </div>
+
+                  {operation === 1 && (
+                    <div className="form-group col-md-6">
+                      <label htmlFor="contraseniaCliente">Contraseña :</label>
+                      <div className="d-flex align-items-center">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          id="contraseniaNuevo"
+                          className={`form-control ${
+                            errors.contrasenia ? "is-invalid" : ""
+                          }`}
+                          placeholder="Contraseña"
+                          value={Contrasenia}
+                          onChange={handleChangeContrasenia}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary ml-2"
+                          onClick={toggleShowPassword}
+                        >
+                          {showPassword ? (
+                            <i className="fas fa-eye-slash"></i>
+                          ) : (
+                            <i className="fas fa-eye"></i>
+                          )}
+                        </button>
+                      </div>
+                      {renderErrorMessage(errors.contrasenia)}
+                    </div>
+                  )}
                 </div>
               </form>
             </div>
@@ -577,10 +680,82 @@ export const Clientes = () => {
         </div>
       </div>
 
+      {/* Modal para cambiar contra */}
+      <div
+        className="modal fade"
+        id="modalCambiarContrasenia"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="modalUsuariosLabel"
+        aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
+      >
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="modalCambiarContrasenia">
+                {title}
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="input-group mb-3">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="contrasenia"
+                  className={`form-control ${
+                    errors.contrasenia ? "is-invalid" : ""
+                  }`}
+                  placeholder="Contraseña"
+                  value={Contrasenia}
+                  onChange={handleChangeContrasenia}
+                />
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary ml-2"
+                  onClick={toggleShowPassword}
+                >
+                  {showPassword ? (
+                    <i className="fas fa-eye-slash"></i>
+                  ) : (
+                    <i className="fas fa-eye"></i>
+                  )}
+                </button>
+                {renderErrorMessage(errors.contrasenia)}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <div className="text-right">
+                <button
+                  type="button"
+                  id="btnCerrar"
+                  className="btn btn-secondary mr-2"
+                  data-dismiss="modal"
+                >
+                  Cancelar
+                </button>
+                <button className="btn btn-primary" onClick={guardarCliente}>
+                  Guardar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Fin modal cambiar la contra*/}
+
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">Clientes</h1>
+          <h1 className="h3 mb-3 text-center text-dark">Gestión de Clientes</h1>
           <div className="text-right">
             <button
               type="button"
@@ -596,14 +771,14 @@ export const Clientes = () => {
 
         {/* <!-- Tabla de Clientes --> */}
         <div className="card shadow mb-4">
-          <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Clientes</h6>
-          </div>
-          <div className="card-body">
+          <div className="card-header py-1 d-flex">
+            <h6 className="m-2 font-weight-bold text-primary">Clientes</h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+          </div>
+          <div className="card-body">
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -657,7 +832,7 @@ export const Clientes = () => {
                         >
                           <button
                             className="btn btn-warning btn-sm mr-2"
-                            title="Actualizar"
+                            title="Editar"
                             data-toggle="modal"
                             data-target="#modalCliente"
                             onClick={() => openModal(2, cliente)}
@@ -674,8 +849,18 @@ export const Clientes = () => {
                               )
                             }
                             disabled={cliente.Estado != "Activo"}
+                            title="Eliminar"
                           >
                             <i className="fas fa-trash-alt"></i>
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-sm mr-2"
+                            title="Cambiar Contraseña"
+                            onClick={() => openModalCambiarContrasenia(cliente)}
+                            disabled={cliente.Estado === "Inactivo"}
+                          >
+                            <i className="fas fa-key"></i>
                           </button>
                         </div>
                       </td>

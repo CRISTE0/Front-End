@@ -4,7 +4,13 @@ import Swal from "sweetalert2";
 import Pagination from "../../assets/js/Pagination";
 import SearchBar from "../../assets/js/SearchBar";
 import imagenesAdmin from "../../assets/img/imagenesAdmin";
-import { editImageDesign, editImageReference, subirImageDesign, subirImageDesignAdmin, subirImageReference } from "../../firebase/config";
+import {
+  editImageDesign,
+  editImageReference,
+  subirImageDesign,
+  subirImageDesignAdmin,
+  subirImageReference,
+} from "../../firebase/config";
 import withReactContent from "sweetalert2-react-content";
 
 export const Disenios = () => {
@@ -25,33 +31,35 @@ export const Disenios = () => {
   const [IdImagenReferencia, setIdImagenReferencia] = useState("");
   const [disenioSeleccionado, setDisenioSeleccionado] = useState(null);
 
-
   let IdImagenDisenioCreate;
   let ImagenDisenioCreate;
 
-  
   let IdImagenDisenioUpdate;
   let ImagenDisenioUpdate;
 
   // variables temporales de para el modal de actualizar diseño
 
   const [FuenteTemporalEdit, setFuenteTemporalEdit] = useState("");
-  const [TamanioFuenteTemporalEdit, setTamanioFuenteTemporalEdit] = useState("");
+  const [TamanioFuenteTemporalEdit, setTamanioFuenteTemporalEdit] =
+    useState("");
   const [ColorFuenteTemporalEdit, setColorFuenteTemporalEdit] = useState("");
-  const [PosicionFuenteTemporalEdit, setPosicionFuenteTemporalEdit] = useState("");
+  const [PosicionFuenteTemporalEdit, setPosicionFuenteTemporalEdit] =
+    useState("");
 
-  const [TamanioImagenTemporalEdit, setTamanioImagenTemporalEdit] = useState("");
-  const [PosicionImagenTemporalEdit, setPosicionImagenTemporalEdit] = useState("");
-  const [ImagenDisenioTemporalEdit, setImagenDisenioTemporalEdit] = useState("");
-  const [ImagenReferenciaTemporalEdit, setImagenReferenciaTemporalEdit] = useState("");
-
-  
+  const [TamanioImagenTemporalEdit, setTamanioImagenTemporalEdit] =
+    useState("");
+  const [PosicionImagenTemporalEdit, setPosicionImagenTemporalEdit] =
+    useState("");
+  const [ImagenDisenioTemporalEdit, setImagenDisenioTemporalEdit] =
+    useState("");
+  const [ImagenReferenciaTemporalEdit, setImagenReferenciaTemporalEdit] =
+    useState("");
 
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [errors, setErrors] = useState({
-    NombreDisenio:"",
-    PrecioDisenio:"",
+    NombreDisenio: "",
+    PrecioDisenio: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -68,21 +76,21 @@ export const Disenios = () => {
     console.log(respuesta.data);
   };
 
-  const [showInputsFile,setShowInputsFile] = useState(null);
+  const [showInputsFile, setShowInputsFile] = useState(null);
 
-  const [showSavedImages,setShowSavedImages] = useState(null);
+  const [showSavedImages, setShowSavedImages] = useState(null);
 
-  const[showColorInput,setShowColorInput] = useState(null);
-  const[showColor,setShowColor] = useState(null);
+  const [showColorInput, setShowColorInput] = useState(null);
+  const [showColor, setShowColor] = useState(null);
 
-  const[showDisenio,setShowDisenio]= useState(null);
-  const[showDisenioInput,setShowDisenioInput]= useState(null);
+  const [showDisenio, setShowDisenio] = useState(null);
+  const [showDisenioInput, setShowDisenioInput] = useState(null);
 
-  const[showExistsColor,setShowExistsColor]= useState(null);
+  const [showExistsColor, setShowExistsColor] = useState(null);
 
-  const renderInputDisenio = showDisenio && (operation === 1 || (operation === 2 && ImagenDisenio !== "No aplica"));
-
-
+  const renderInputDisenio =
+    showDisenio &&
+    (operation === 1 || (operation === 2 && ImagenDisenio !== "No aplica"));
 
   function formatCurrency(value) {
     return new Intl.NumberFormat("es-CO", {
@@ -91,8 +99,7 @@ export const Disenios = () => {
     }).format(value);
   }
 
-
-  const openModal = (op, disenio ) => {
+  const openModal = (op, disenio) => {
     if (op === 1) {
       // Crear diseño
       setTitle("Crear Diseño");
@@ -114,7 +121,7 @@ export const Disenios = () => {
       setShowInputsFile(true);
 
       setShowDisenioInput(false);
-      
+
       setShowColorInput(false);
       setShowColor(true);
       setShowDisenio(true);
@@ -123,12 +130,10 @@ export const Disenios = () => {
       // document.getElementById("tamanioFuente").selectedIndex=0;
       // document.getElementById("posicionFuente").selectedIndex=0;
 
-
-      
       const selectFuente = document.getElementById("nombreFuente");
       const selectTamanioFuente = document.getElementById("tamanioFuente");
       const selectPosicionFuente = document.getElementById("posicionFuente");
-      
+
       const selectTamanioImagen = document.getElementById("tamanioImagen");
       const selectPosicionImagen = document.getElementById("posicionImagen");
 
@@ -145,31 +150,24 @@ export const Disenios = () => {
       if (selectTamanioImagen.options.length == 4) {
         const nuevaOpcionSelectTamImg = new Option("No aplica", "No aplica");
         const nuevaOpcionSelectPosImg = new Option("No aplica", "No aplica");
-  
+
         selectTamanioImagen.add(nuevaOpcionSelectTamImg);
         selectPosicionImagen.add(nuevaOpcionSelectPosImg);
-        
       }
 
-
-
-
       setTimeout(() => {
-        document.getElementById("spanInputFileDisenio").innerHTML = "Seleccionar archivo";
-        document.getElementById("spanInputFileReferencia").innerHTML = "Seleccionar archivo";
-        
+        document.getElementById("spanInputFileDisenio").innerHTML =
+          "Seleccionar archivo";
+        document.getElementById("spanInputFileReferencia").innerHTML =
+          "Seleccionar archivo";
       }, 10);
 
-
-      
       // Opcion actualizar diseño
     } else if (op === 2 && disenio) {
-
       setImagenReferencia("0");
 
       setTitle("Actualizar Datos");
       setOperation(2);
-
 
       setIdDisenio(disenio.IdDisenio);
       setNombreDisenio(disenio.NombreDisenio);
@@ -182,12 +180,10 @@ export const Disenios = () => {
       setPrecioDisenio(disenio.PrecioDisenio);
       setImagenDisenio(disenio.ImagenDisenio);
       setImagenReferencia(disenio.ImagenReferencia);
-      
+
       setIdImagenDisenio(disenio.IdImagenDisenio);
       setIdImagenReferencia(disenio.IdImagenReferencia);
 
-
-      
       setFuenteTemporalEdit(disenio.Fuente);
       setTamanioFuenteTemporalEdit(disenio.TamanioFuente);
       setColorFuenteTemporalEdit(disenio.ColorFuente);
@@ -199,7 +195,7 @@ export const Disenios = () => {
       setImagenReferenciaTemporalEdit(disenio.ImagenReferencia);
 
       // console.log(IdImagenDisenio);
-      
+
       setShowInputsFile(false);
 
       const selectPosicionImagen = document.getElementById("posicionImagen");
@@ -209,8 +205,6 @@ export const Disenios = () => {
       const selectTamanioFuente = document.getElementById("tamanioFuente");
       const selectPosicionFuente = document.getElementById("posicionFuente");
 
-
-      
       if (disenio.Fuente === "No aplica") {
         // Si las opciones de la fuente tiene un tamaño de 6 se agregara opcs a los atributos de fuente
         if (selectFuente.options.length === 6) {
@@ -225,45 +219,38 @@ export const Disenios = () => {
 
         selectPosicionImagen.remove(6);
         selectTamanioImagen.remove(4);
-
-      }else{
-
+      } else {
         if (selectTamanioImagen.options.length <= 4) {
           const nuevaOpcionSelectTamImg = new Option("No aplica", "No aplica");
           const nuevaOpcionSelectPosImg = new Option("No aplica", "No aplica");
 
           selectTamanioImagen.add(nuevaOpcionSelectTamImg);
           selectPosicionImagen.add(nuevaOpcionSelectPosImg);
-
         }
       }
-      
+
       if (disenio.ColorFuente !== "No aplica") {
         setShowColorInput(false);
         setShowColor(false);
         setShowExistsColor(true);
-      
-      }else{
+      } else {
         setShowExistsColor(false);
         setShowColor(false);
         setShowColorInput(true);
       }
 
-
       // if (disenio.TamanioFuente === "No aplica") {
-        
+
       // }
 
-      
-      if (disenio.ImagenDisenio === "No aplica" ) {
-        
+      if (disenio.ImagenDisenio === "No aplica") {
         setShowDisenioInput(true);
 
-        // Elimina las opciones de ("No aplica") de los selects de los atributos de fuente 
+        // Elimina las opciones de ("No aplica") de los selects de los atributos de fuente
         if (selectFuente.options.length >= 7) {
           selectFuente.remove(6);
           selectTamanioFuente.remove(4);
-          selectPosicionFuente.remove(6);          
+          selectPosicionFuente.remove(6);
         }
 
         if (selectTamanioImagen.options.length <= 4) {
@@ -271,30 +258,25 @@ export const Disenios = () => {
           selectTamanioFuente.remove(4);
           selectPosicionFuente.remove(6);
 
-
           const nuevaOpcionSelectTamImg = new Option("No aplica", "No aplica");
           const nuevaOpcionSelectPosImg = new Option("No aplica", "No aplica");
 
           selectTamanioImagen.add(nuevaOpcionSelectTamImg);
           selectPosicionImagen.add(nuevaOpcionSelectPosImg);
-
-
         }
-      }else{
+      } else {
         setShowDisenioInput(false);
         setShowDisenio(true);
         setTimeout(() => {
-          document.getElementById("spanInputFileDisenio").innerHTML = "Seleccionar archivo";
+          document.getElementById("spanInputFileDisenio").innerHTML =
+            "Seleccionar archivo";
         }, 10);
       }
 
-      
       // setShowColor(false);
-      
 
-      
-      document.getElementById("spanInputFileReferencia").innerHTML = "Seleccionar archivo";
-
+      document.getElementById("spanInputFileReferencia").innerHTML =
+        "Seleccionar archivo";
 
       setErrors({
         NombreDisenio: "",
@@ -315,10 +297,8 @@ export const Disenios = () => {
         PosicionImagen: validatePosicionImagen(disenio.PosicionImagen),
       };
       setErrors(errors);
-
     }
   };
-
 
   const handleDetalleDisenio = async (idDisenio) => {
     try {
@@ -335,57 +315,57 @@ export const Disenios = () => {
     }
   };
 
-
-  const [editDesignFile,setEditDesignFile] = useState("");
+  const [editDesignFile, setEditDesignFile] = useState("");
   // const [editReferenceFile,setEditReferenceFile] = useState("");
 
   const guardarDisenio = async () => {
-    
     // const cleanedColorFuente = ColorFuente.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
     // const cleanedPosicionImagen = PosicionImagen.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
 
     if (NombreDisenio === "") {
       show_alerta("Se necesita un nombre para el diseño", "error");
       return;
-
-    }else{
+    } else {
       console.log(Disenios.NombreDisenio);
-      const existe = Disenios.some(disenio => disenio.NombreDisenio === NombreDisenio);
-  
+      const existe = Disenios.some(
+        (disenio) => disenio.NombreDisenio === NombreDisenio
+      );
+
       if (existe) {
         show_alerta("Ya existe un diseño con ese nombre", "error");
         return;
       }
     }
 
-    
     if (Fuente === "") {
       show_alerta("Se necesita una fuente para el diseño", "error");
       return;
     }
-    if (TamanioFuente=== "") {
+    if (TamanioFuente === "") {
       show_alerta("Se necesita un tamaño para la fuente", "error");
       return;
     }
 
-    
     if (ColorFuente === "") {
       show_alerta("Se necesita un color para la fuente", "error");
       return;
     }
-    
+
     if (PosicionFuente === "") {
       show_alerta("Se necesita una posición para la fuente", "error");
       return;
     }
-    
+
     if (TamanioImagen === "") {
       show_alerta("Se necesita un tamaño para la imagen del diseño", "error");
       return;
     }
-    
+
     if (PosicionImagen === "") {
-      show_alerta("Se necesita una posición para la imagen del diseño", "error");
+      show_alerta(
+        "Se necesita una posición para la imagen del diseño",
+        "error"
+      );
       return;
     }
 
@@ -393,53 +373,48 @@ export const Disenios = () => {
       show_alerta("El precio del diseño es invalido", "error");
       return;
     }
-    
-    if (ImagenDisenio === "0" /*|| ImagenDisenio !== "No aplica"*/ ) {
+
+    if (ImagenDisenio === "0" /*|| ImagenDisenio !== "No aplica"*/) {
       console.log(ImagenDisenio);
       show_alerta("Se necesita una imagen del diseño", "error");
       return;
     }
- 
 
     if (ImagenReferencia === "0") {
       show_alerta("Se necesita una imagen de referencia del diseño", "error");
       return;
     }
 
-
-
     if (operation === 1) {
-
       if (ImagenDisenio !== "No aplica") {
-        const [idDesign,ulrDesign ]= await subirImageDesignAdmin(ImagenDisenio);
+        const [idDesign, ulrDesign] = await subirImageDesignAdmin(
+          ImagenDisenio
+        );
 
-        
-        IdImagenDisenioCreate=idDesign;
-        ImagenDisenioCreate=ulrDesign;
+        IdImagenDisenioCreate = idDesign;
+        ImagenDisenioCreate = ulrDesign;
 
         // setTimeout(() => {
         //   console.log("valorsitos desg");
         //   console.log(IdImagenDisenio);
         //   console.log(ImagenDisenio);
 
-          
         //   console.log(`iddes${idDesign}`);
         //   console.log(`urldes${ulrDesign}`);
         // }, 1000);
-      }else{
-        IdImagenDisenioCreate= "No aplica";
-        ImagenDisenioCreate= "No aplica";
+      } else {
+        IdImagenDisenioCreate = "No aplica";
+        ImagenDisenioCreate = "No aplica";
         // setIdImagenDisenio("No aplica");
         // setImagenDisenio("No aplica");
       }
 
-
-      
-      const [ulrReference,idReference]= await subirImageReference(ImagenReferencia);
+      const [ulrReference, idReference] = await subirImageReference(
+        ImagenReferencia
+      );
 
       console.log(`url Reference ${ulrReference}`);
       console.log(`id Reference ${idReference}`);
-
 
       // console.log(`idDis ${idDesign}`);
       // console.log(`idRef ${idReference}`);
@@ -456,27 +431,23 @@ export const Disenios = () => {
         PrecioDisenio,
         IdImagenDisenio: IdImagenDisenioCreate,
         ImagenDisenio: ImagenDisenioCreate,
-        IdImagenReferencia:idReference,
-        ImagenReferencia:ulrReference,
+        IdImagenReferencia: idReference,
+        ImagenReferencia: ulrReference,
         Estado: "Activo",
       });
     } else if (operation === 2) {
-
-      let inputDisenioFile; 
+      let inputDisenioFile;
       // let editReferenceFile;
 
       if (TamanioImagen !== "No aplica") {
         inputDisenioFile = document.getElementById("inputFileDisenio").files[0];
       }
 
+      const inputReferenciaFile = document.getElementById("inputFileReferencia")
+        .files[0];
 
-      const inputReferenciaFile = document.getElementById("inputFileReferencia").files[0];
-
-      
       // Actualizar imagen de diseño si existe un archivo cargado
       if (inputDisenioFile) {
-
-
         const readerDesignFile = new FileReader();
         readerDesignFile.onloadend = () => {
           setEditDesignFile(readerDesignFile.result);
@@ -484,41 +455,38 @@ export const Disenios = () => {
         };
         readerDesignFile.readAsDataURL(inputDisenioFile);
 
-
-
         // Si el id de imagen diseño es "No aplica" se llamara la funcion de subirImageDesignAdmin
-        if (IdImagenDisenio === "No aplica" ) {
-          const [idImageDesign,urlDesign ] = await subirImageDesignAdmin(ImagenDisenio);
+        if (IdImagenDisenio === "No aplica") {
+          const [idImageDesign, urlDesign] = await subirImageDesignAdmin(
+            ImagenDisenio
+          );
 
           IdImagenDisenioUpdate = idImageDesign;
           ImagenDisenioUpdate = urlDesign;
 
-        // Si ya tiene un id la imagen de diseño, se llamara a la funcion editImageDesign
-        }else{
-          await editImageDesign(IdImagenDisenio,ImagenDisenio);
+          // Si ya tiene un id la imagen de diseño, se llamara a la funcion editImageDesign
+        } else {
+          await editImageDesign(IdImagenDisenio, ImagenDisenio);
 
-          IdImagenDisenioUpdate = IdImagenDisenio; 
+          IdImagenDisenioUpdate = IdImagenDisenio;
           ImagenDisenioUpdate = ImagenDisenioTemporalEdit;
         }
-        
 
         // setImagenDisenio(nuevaImagenDisenio);
         console.log("entro EditDis");
 
-      //  Si no hay archivo cargado y los atributos de la imagen son "No aplica" se editaran las variables 
-      }else if (TamanioImagen === "No aplica") {
-        IdImagenDisenioUpdate = "No aplica"
-        ImagenDisenioUpdate = "No aplica"
+        //  Si no hay archivo cargado y los atributos de la imagen son "No aplica" se editaran las variables
+      } else if (TamanioImagen === "No aplica") {
+        IdImagenDisenioUpdate = "No aplica";
+        ImagenDisenioUpdate = "No aplica";
       }
 
       // Actualizar imagen de referencia si existe un archivo cargado
-      if(inputReferenciaFile){
-        
-        await editImageReference(IdImagenReferencia,ImagenReferencia);
-        
+      if (inputReferenciaFile) {
+        await editImageReference(IdImagenReferencia, ImagenReferencia);
+
         console.log("entro EditRef");
       }
-
 
       // Actualizar Diseño
       await enviarSolicitud("PUT", {
@@ -534,17 +502,14 @@ export const Disenios = () => {
         IdImagenDisenio: IdImagenDisenioUpdate,
         ImagenDisenio: ImagenDisenioUpdate,
         IdImagenReferencia,
-        ImagenReferencia: ImagenReferenciaTemporalEdit
+        ImagenReferencia: ImagenReferenciaTemporalEdit,
       });
 
-      setTimeout(() =>{
+      setTimeout(() => {
         setImagenReferencia(null);
-      },1000);
-
+      }, 1000);
     }
   };
-
-
 
   const validateNombreDisenio = (value) => {
     if (!value) {
@@ -568,7 +533,6 @@ export const Disenios = () => {
 
   // Función para validar el número de documento
   const validateTamanioFuente = (value) => {
-
     if (!value) {
       return "Escribe el tamaño de la fuente";
     }
@@ -576,8 +540,6 @@ export const Disenios = () => {
       return "El tamaño de la fuente solo puede contener letras, tildes, la letra 'ñ' y numeros con un solo espacio entre palabras";
     }
     return "";
-
-    
   };
 
   // Funcion para validar el color de la fuente
@@ -623,27 +585,23 @@ export const Disenios = () => {
     return "";
   };
 
-  // Función para validar el ImagenDisenio 
+  // Función para validar el ImagenDisenio
   const validateImagenDisenio = () => {
     if (!ImagenDisenio) {
       return "Ingresa una imagen para tu diseño";
     }
     return "";
   };
-  
-  
-  // Función para validar la ImagenReferencia 
+
+  // Función para validar la ImagenReferencia
   const validateImagenReferencia = () => {
     console.log("imgRef");
-      return "Ingresa la imagen de referencia para tu diseño";
-   
+    return "Ingresa la imagen de referencia para tu diseño";
   };
-
 
   // Función para manejar cambios en el nombre de diseño
   const handleChangeNombreDisenio = (e) => {
     let value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
-    
 
     // Limitar la longitud del valor ingresado a entre 6 y 10 caracteres
     // if (value.length > 10) {
@@ -657,14 +615,11 @@ export const Disenios = () => {
     }));
   };
 
-
-  
   // Función para manejar cambios en la fuente
   const handleChangeFuente = (e) => {
     const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
 
     setFuente(value);
-
 
     const errorMessage = validateFuente(value);
     setErrors((prevState) => ({
@@ -676,45 +631,39 @@ export const Disenios = () => {
     const selectTamanioImagen = document.getElementById("tamanioImagen");
 
     if (e.target.value === "No aplica") {
-
       console.log("ChangeFuente if (no aplica)");
 
-      document.getElementById("tamanioFuente").selectedIndex=4;
-      document.getElementById("posicionFuente").selectedIndex=4;
+      document.getElementById("tamanioFuente").selectedIndex = 4;
+      document.getElementById("posicionFuente").selectedIndex = 4;
       setTamanioFuente("No aplica");
       setPosicionFuente("No aplica");
-      
+
       selectTamanioImagen.remove(4);
       selectPosicionImagen.remove(6);
 
       if (operation == 2) {
         console.log(`valor de showcolor ${showColor}`);
         console.log(`valor de showcolorinput ${showColorInput}`);
-        
+
         if (showExistsColor) {
           console.log("Entro showExistsColor");
           setShowExistsColor(false);
           setShowColorInput(true);
           setColorFuente("No aplica");
-
-        }else if(FuenteTemporalEdit === "No aplica" ){
+        } else if (FuenteTemporalEdit === "No aplica") {
           setShowColor(false);
           setShowColorInput(true);
           setColorFuente("No aplica");
         }
-
-      }else if(operation == 1){
+      } else if (operation == 1) {
         console.log(`valor de showcolor ${showColor} (operation1)`);
 
         setColorFuente("No aplica");
         setShowColor(false);
         setShowColorInput(true);
       }
-
-    }else{
-
+    } else {
       if (selectPosicionImagen.options.length <= 6) {
-
         console.log("ChangeFuente else if (selectPosicionImagen.options < 6)");
         const nuevaOpcionSelectPosImg = new Option("No aplica", "No aplica");
         const nuevaOpcionSelectTamImg = new Option("No aplica", "No aplica");
@@ -729,8 +678,7 @@ export const Disenios = () => {
           setColorFuente("#000000");
           setShowColorInput(false);
           setShowColor(true);
-
-        }else if(operation == 2 && FuenteTemporalEdit !== "No aplica"){
+        } else if (operation == 2 && FuenteTemporalEdit !== "No aplica") {
           console.log("elseFuenteOperation2");
           console.log(FuenteTemporalEdit);
 
@@ -739,29 +687,22 @@ export const Disenios = () => {
           setColorFuente(ColorFuenteTemporalEdit);
           setShowColorInput(false);
           setShowExistsColor(true);
-
-        }else if(operation == 2 && FuenteTemporalEdit === "No aplica"){
+        } else if (operation == 2 && FuenteTemporalEdit === "No aplica") {
           console.log("elseFuenteOperation2&&");
           console.log(FuenteTemporalEdit);
-          
+
           setTamanioFuente("");
           setPosicionFuente("");
           setColorFuente("#000000");
           setShowColorInput(false);
           setShowColor(true);
-
         }
-        
       }
-
-
     }
   };
-  
-
 
   // Función para manejar cambios en el tamaño de la fuente
-    const handleChangeTamanioFuente = (e) => {
+  const handleChangeTamanioFuente = (e) => {
     const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setTamanioFuente(value);
 
@@ -771,7 +712,6 @@ export const Disenios = () => {
       ...prevState,
       TamanioFuente: errorMessage,
     }));
-
 
     const selectPosicionImagen = document.getElementById("posicionImagen");
 
@@ -791,30 +731,25 @@ export const Disenios = () => {
       if (operation == 2) {
         console.log(`valor de showcolor ${showColor}`);
         console.log(`valor de showcolorinput ${showColorInput}`);
-        
+
         if (showExistsColor) {
           console.log("Entro showExistsColor");
           setShowExistsColor(false);
           setShowColorInput(true);
           setColorFuente("No aplica");
-
-        }else if(FuenteTemporalEdit === "No aplica" ){
+        } else if (FuenteTemporalEdit === "No aplica") {
           setShowColor(false);
           setShowColorInput(true);
           setColorFuente("No aplica");
         }
-
-
-      }else if(operation == 1){
+      } else if (operation == 1) {
         console.log(`valor de showcolor ${showColor} (operation1)`);
 
         setColorFuente("No aplica");
         setShowColor(false);
         setShowColorInput(true);
       }
-
-    }else{
-
+    } else {
       if (selectPosicionImagen.options.length <= 6) {
         console.log("ChangeTamanioFuente else if (options < 6)");
         const nuevaOpcionSelectPosImg = new Option("No aplica", "No aplica");
@@ -830,38 +765,30 @@ export const Disenios = () => {
           setColorFuente("#000000");
           setShowColorInput(false);
           setShowColor(true);
-
-        }else if(operation == 2 && FuenteTemporalEdit !== "No aplica"){
+        } else if (operation == 2 && FuenteTemporalEdit !== "No aplica") {
           setFuente(FuenteTemporalEdit);
           setPosicionFuente(PosicionFuenteTemporalEdit);
           setColorFuente(ColorFuenteTemporalEdit);
           setShowColorInput(false);
           setShowExistsColor(true);
-
-        }else if(operation == 2 && FuenteTemporalEdit === "No aplica"){
+        } else if (operation == 2 && FuenteTemporalEdit === "No aplica") {
           console.log("elseFuenteOperation2&&");
           console.log(FuenteTemporalEdit);
-          
+
           setFuente("");
           setPosicionFuente("");
           setColorFuente("#000000");
           setShowColorInput(false);
           setShowColor(true);
-
         }
-
       }
-
-
     }
-
-
   };
-   
-  const[colorValue,setColorValue] = useState("");
 
-  const[showcolorValue,setShowColorValue] = useState("");
-  
+  const [colorValue, setColorValue] = useState("");
+
+  const [showcolorValue, setShowColorValue] = useState("");
+
   // Función para manejar cambios en el color de la fuente
   const handleChangeColorFuente = (e) => {
     const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
@@ -871,12 +798,9 @@ export const Disenios = () => {
 
     setTimeout(() => {
       let spanValueColor = document.getElementById("spanColor");
-  
-      spanValueColor.innerHTML=value;
-      
+
+      spanValueColor.innerHTML = value;
     }, 40);
-
-
 
     // Validar el nombre y apellido
     const errorMessage = validateColorFuente(value);
@@ -885,7 +809,6 @@ export const Disenios = () => {
       ColorFuente: errorMessage,
     }));
   };
-
 
   // Función para manejar cambios en la posicion de la fuente
   const handleChangePosicionFuente = (e) => {
@@ -897,7 +820,7 @@ export const Disenios = () => {
     // }
 
     setPosicionFuente(value);
-    
+
     const selectTamanioImagen = document.getElementById("tamanioImagen");
 
     const selectPosicionImagen = document.getElementById("posicionImagen");
@@ -912,38 +835,31 @@ export const Disenios = () => {
       // setShowColor(false);
       // setShowColorInput(true);
 
-
       selectTamanioImagen.remove(4);
       selectPosicionImagen.remove(6);
-
 
       if (operation == 2) {
         console.log(`valor de showcolor ${showColor}`);
         console.log(`valor de showcolorinput ${showColorInput}`);
-        
+
         if (showExistsColor) {
           console.log("Entro showExistsColor");
           setShowExistsColor(false);
           setShowColorInput(true);
           setColorFuente("No aplica");
-
-        }else if(FuenteTemporalEdit === "No aplica" ){
+        } else if (FuenteTemporalEdit === "No aplica") {
           setShowColor(false);
           setShowColorInput(true);
           setColorFuente("No aplica");
         }
-
-      }else if(operation == 1){
+      } else if (operation == 1) {
         console.log(`valor de showcolor ${showColor} (operation1)`);
 
         setColorFuente("No aplica");
         setShowColor(false);
         setShowColorInput(true);
       }
-
-      
-
-    }else{
+    } else {
       if (selectPosicionImagen.options.length <= 6) {
         console.log("ChangePosicionFuente else if (options < 6)");
         const nuevaOpcionSelectPosImg = new Option("No aplica", "No aplica");
@@ -959,77 +875,64 @@ export const Disenios = () => {
         // setShowColorInput(false);
         // setShowColor(true);
 
-
         if (operation == 1) {
           setFuente("");
           setTamanioFuente("");
           setColorFuente("#000000");
           setShowColorInput(false);
           setShowColor(true);
-
-        }else if(operation == 2 && FuenteTemporalEdit !== "No aplica"){
+        } else if (operation == 2 && FuenteTemporalEdit !== "No aplica") {
           setFuente(FuenteTemporalEdit);
           setTamanioFuente(TamanioFuenteTemporalEdit);
           setColorFuente(ColorFuenteTemporalEdit);
           setShowColorInput(false);
           setShowExistsColor(true);
-
-        }else if(operation == 2 && FuenteTemporalEdit === "No aplica"){
+        } else if (operation == 2 && FuenteTemporalEdit === "No aplica") {
           console.log("elseFuenteOperation2&&");
           console.log(FuenteTemporalEdit);
-          
+
           setFuente("");
           setTamanioFuente("");
           setColorFuente("#000000");
           setShowColorInput(false);
           setShowColor(true);
-
         }
       }
-
-
     }
   };
 
-
   // Función para manejar cambios en el tamaño de la imagen
   const handleChangeTamanioImagen = (e) => {
-    
     const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setTamanioImagen(value);
-    
-    
-    const selectNombreFuente=document.getElementById("nombreFuente");
+
+    const selectNombreFuente = document.getElementById("nombreFuente");
     const selectTamanioFuente = document.getElementById("tamanioFuente");
-    const selectPosicionFuente= document.getElementById("posicionFuente");
-    
+    const selectPosicionFuente = document.getElementById("posicionFuente");
+
     if (e.target.value === "No aplica") {
       console.log("ChangeTamanioImagen if (no aplica)");
       console.log("Change");
       console.log(selectNombreFuente.options.length);
-      
+
       setShowDisenio(false);
       setShowDisenioInput(true);
       setImagenDisenio("No aplica");
 
       setPosicionImagen("No aplica");
 
-
-      
       selectNombreFuente.remove(6);
       selectTamanioFuente.remove(4);
-      selectPosicionFuente.remove(6)
+      selectPosicionFuente.remove(6);
 
-      // sino es ("No aplica") pasa al else 
-    }else{
+      // sino es ("No aplica") pasa al else
+    } else {
       console.log("ChangeTamanioFuente else");
 
-
-      
-      
-
       if (selectNombreFuente.options.length <= 6) {
-        console.log("ChangeTamanioFuente else if selectNombreFuente.options < 6");
+        console.log(
+          "ChangeTamanioFuente else if selectNombreFuente.options < 6"
+        );
         const nuevaOpcion1 = new Option("No aplica", "No aplica");
         const nuevaOpcion2 = new Option("No aplica", "No aplica");
         const nuevaOpcion3 = new Option("No aplica", "No aplica");
@@ -1037,33 +940,28 @@ export const Disenios = () => {
         selectTamanioFuente.add(nuevaOpcion2);
         selectPosicionFuente.add(nuevaOpcion3);
 
-
         if (operation == 1) {
           console.log("ChangeTamanioFuente else - operation create");
-  
+
           setShowDisenioInput(false);
-          setShowDisenio(true);   
+          setShowDisenio(true);
           setPosicionImagen("");
           setImagenDisenio("0");
-          
-        }else if(operation == 2){
-  
+        } else if (operation == 2) {
           console.log("ChangeTamanioFuente else - operation update");
           setShowDisenioInput(false);
-          setShowDisenio(true);   
-  
+          setShowDisenio(true);
+
           console.log(TamanioFuenteTemporalEdit);
-  
+
           if (TamanioImagenTemporalEdit === "No aplica") {
             setPosicionImagen("");
             setImagenDisenio("0");
-          }else{
+          } else {
             setPosicionImagen(PosicionImagenTemporalEdit);
             setImagenDisenio(ImagenDisenioTemporalEdit);
-  
           }
-  
-        }     
+        }
 
         // if (operation == 2) {
         //   setImagenDisenio("1");
@@ -1071,44 +969,36 @@ export const Disenios = () => {
         // }else if (operation == 1){
         //   setImagenDisenio("0");
         // }
-
       }
     }
   };
-
 
   // Función para manejar cambios en la posicion de la imagen
   const handleChangePosicionImagen = (e) => {
     const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setPosicionImagen(value);
 
-
-    const selectNombreFuente=document.getElementById("nombreFuente");
+    const selectNombreFuente = document.getElementById("nombreFuente");
     const selectTamanioFuente = document.getElementById("tamanioFuente");
-    const selectPosicionFuente= document.getElementById("posicionFuente");
-    
+    const selectPosicionFuente = document.getElementById("posicionFuente");
+
     if (e.target.value === "No aplica") {
       console.log("ChangePosicionImagen no aplica");
       console.log(selectNombreFuente.options.length);
-      
+
       setShowDisenio(false);
       setShowDisenioInput(true);
       setImagenDisenio("No aplica");
 
       setTamanioImagen("No aplica");
 
-
-      
       selectNombreFuente.remove(6);
       selectTamanioFuente.remove(4);
-      selectPosicionFuente.remove(6)
+      selectPosicionFuente.remove(6);
 
-      // sino es ("No aplica") pasa al else 
-    }else{
+      // sino es ("No aplica") pasa al else
+    } else {
       console.log("ChangePosicionImagen else");
-
-      
-
 
       // setTamanioImagen("");
 
@@ -1121,30 +1011,23 @@ export const Disenios = () => {
         selectTamanioFuente.add(nuevaOpcion2);
         selectPosicionFuente.add(nuevaOpcion3);
 
-
-
         if (operation == 1) {
           setShowDisenioInput(false);
-          setShowDisenio(true);   
+          setShowDisenio(true);
           setTamanioImagen("");
           setImagenDisenio("0");
-          
-        }else if(operation == 2){
+        } else if (operation == 2) {
           setShowDisenioInput(false);
           setShowDisenio(true);
-  
+
           if (TamanioImagenTemporalEdit === "No aplica") {
             setTamanioImagen("");
             setImagenDisenio("0");
-          }else{
+          } else {
             setTamanioImagen(TamanioImagenTemporalEdit);
             setImagenDisenio(ImagenDisenioTemporalEdit);
-  
           }
-  
         }
-
-
 
         // if (operation == 2) {
         //   setImagenDisenio("1");
@@ -1152,16 +1035,13 @@ export const Disenios = () => {
         // }else if (operation == 1){
         //   setImagenDisenio("0");
         // }
-
       }
     }
   };
 
-
   // Función para manejar cambios en el precio de diseño
   const handleChangePrecioDisenio = (e) => {
     let value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
-    
 
     // Limitar la longitud del valor ingresado a entre 6 y 10 caracteres
     // if (value.length > 10) {
@@ -1175,14 +1055,12 @@ export const Disenios = () => {
     }));
   };
 
-
   // cargar la imagen que se usara en el diseño
   const handleChangeImagenDisenio = (e) => {
     const file = e.target.files[0];
     console.log(file);
     let spanDisenio = document.getElementById("spanInputFileDisenio");
     if (file) {
-
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagenDisenio(reader.result);
@@ -1190,20 +1068,16 @@ export const Disenios = () => {
       };
       reader.readAsDataURL(file);
 
-      var fileName = '';
-      fileName = e.target.value.split( '\\' ).pop();
+      var fileName = "";
+      fileName = e.target.value.split("\\").pop();
 
       spanDisenio.innerHTML = fileName;
-     
-    }else{
-      document.getElementById("inputFileDisenio").value=null;
+    } else {
+      document.getElementById("inputFileDisenio").value = null;
       setImagenDisenio("0");
       spanDisenio.innerHTML = "Seleccionar archivo";
 
-
-
       console.log(e.target.files[0]);
-
     }
   };
 
@@ -1219,22 +1093,18 @@ export const Disenios = () => {
       };
       reader.readAsDataURL(file);
 
-      var fileName = '';
-      fileName = e.target.value.split( '\\' ).pop();
+      var fileName = "";
+      fileName = e.target.value.split("\\").pop();
 
       spanReferencia.innerHTML = fileName;
-    }else{
+    } else {
       console.log("elseChanIR");
 
-      document.getElementById("inputFileReferencia").value=null;
+      document.getElementById("inputFileReferencia").value = null;
       setImagenReferencia("0");
       spanReferencia.innerHTML = "Seleccionar archivo";
     }
   };
-
-
-
-
 
   const show_alerta = (message, type) => {
     const MySwal = withReactContent(Swal);
@@ -1268,16 +1138,16 @@ export const Disenios = () => {
         ? `${url}/${parametros.IdDisenio}`
         : url;
 
-        console.log(NombreDisenio);
-        console.log(Fuente);
-        console.log(TamanioFuente);
-        console.log(ColorFuente);
-        console.log(PosicionFuente);
-        console.log(TamanioImagen);
-        console.log(PosicionImagen);
-        console.log(PrecioDisenio);
-        console.log(ImagenDisenio);
-        console.log(ImagenReferencia);
+    console.log(NombreDisenio);
+    console.log(Fuente);
+    console.log(TamanioFuente);
+    console.log(ColorFuente);
+    console.log(PosicionFuente);
+    console.log(TamanioImagen);
+    console.log(PosicionImagen);
+    console.log(PrecioDisenio);
+    console.log(ImagenDisenio);
+    console.log(ImagenReferencia);
 
     try {
       let respuesta;
@@ -1403,8 +1273,6 @@ export const Disenios = () => {
     currentPage * itemsPerPage
   );
 
-
-
   return (
     <>
       {/* modal diseño */}
@@ -1436,30 +1304,26 @@ export const Disenios = () => {
             <div className="modal-body">
               <form id="crearClienteForm">
                 <div className="form-row">
-
                   {/* Nombre de diseño */}
                   <div className="form-group col-md-6">
-                      <label htmlFor="nombreDiseño">Nombre del Diseño:</label>
-                      <input
-                        type="text"
-                        className={`form-control ${
-                          errors.NombreDisenio ? "is-invalid" : ""
-                        }`}
-                        id="nombreDiseño"
-                        placeholder="Ingrese el nombre del diseño"
-                        required
-                        value={NombreDisenio}
-                        onChange={handleChangeNombreDisenio}
-                      />
-                      {renderErrorMessage(errors.NombreDisenio)}
+                    <label htmlFor="nombreDiseño">Nombre del Diseño:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.NombreDisenio ? "is-invalid" : ""
+                      }`}
+                      id="nombreDiseño"
+                      placeholder="Ingrese el nombre del diseño"
+                      required
+                      value={NombreDisenio}
+                      onChange={handleChangeNombreDisenio}
+                    />
+                    {renderErrorMessage(errors.NombreDisenio)}
                   </div>
-
 
                   {/* Nombre de fuente*/}
                   <div className="form-group col-md-6">
-                    <label htmlFor="nombreFuente">
-                      Fuente:
-                    </label>
+                    <label htmlFor="nombreFuente">Fuente:</label>
                     <select
                       className="form-control"
                       id="nombreFuente"
@@ -1467,15 +1331,15 @@ export const Disenios = () => {
                       onChange={(e) => handleChangeFuente(e)}
                       required
                     >
-                      <option value="" disabled>Elige una fuente para el diseño</option>
+                      <option value="" disabled>
+                        Elige una fuente para el diseño
+                      </option>
                       <option value="Palatino">Palatino</option>
                       <option value="Trebuchet MS">Trebuchet MS</option>
                       <option value="Comic Sans MS">Comic Sans</option>
                       <option value="Courier New">Courier New</option>
                       <option value="Consolas">Consolas</option>
                       <option value="No aplica">No aplica</option>
-
-
                     </select>
 
                     {Fuente === "" && (
@@ -1485,12 +1349,9 @@ export const Disenios = () => {
                     )}
                   </div>
 
-
                   {/* Tamaño de fuente*/}
                   <div className="form-group col-md-6">
-                    <label htmlFor="tamanioFuente">
-                      Tamaño de Fuente:
-                    </label>
+                    <label htmlFor="tamanioFuente">Tamaño de Fuente:</label>
                     <select
                       className="form-control"
                       id="tamanioFuente"
@@ -1498,13 +1359,13 @@ export const Disenios = () => {
                       onChange={(e) => handleChangeTamanioFuente(e)}
                       required
                     >
-                      <option value="" disabled>Elige el tamaño de la fuente</option>
+                      <option value="" disabled>
+                        Elige el tamaño de la fuente
+                      </option>
                       <option value="Grande">Grande</option>
                       <option value="Mediana">Mediana</option>
                       <option value="Pequeña">Pequeña</option>
                       <option value="No aplica">No aplica</option>
-
-
                     </select>
 
                     {TamanioFuente === "" && (
@@ -1514,34 +1375,33 @@ export const Disenios = () => {
                     )}
                   </div>
 
-
                   {/* Color de fuente*/}
                   <div className="form-group col-md-6">
                     <label htmlFor="colorFuente">Color de Fuente:</label>
 
-                    {showColor &&(
-                    <div className="d-flex align-items-center">
-                      <input
-                        type="color"
-                        className={`form-control col-md-4 ${
-                          errors.ColorFuente ? "is-invalid" : ""
-                        }`}
-                        id="colorFuente"
-                        placeholder="Ingrese el color de la fuente"
-                        required
-                        value={ColorFuente}
-                        onChange={handleChangeColorFuente}
-                      />
+                    {showColor && (
+                      <div className="d-flex align-items-center">
+                        <input
+                          type="color"
+                          className={`form-control col-md-4 ${
+                            errors.ColorFuente ? "is-invalid" : ""
+                          }`}
+                          id="colorFuente"
+                          placeholder="Ingrese el color de la fuente"
+                          required
+                          value={ColorFuente}
+                          onChange={handleChangeColorFuente}
+                        />
 
-                      {showcolorValue &&(
-                      <span className="ml-3" id="spanColor">{colorValue}</span>
-                      )}
-
-                    </div>
+                        {showcolorValue && (
+                          <span className="ml-3" id="spanColor">
+                            {colorValue}
+                          </span>
+                        )}
+                      </div>
                     )}
 
-
-                    {showExistsColor &&(
+                    {showExistsColor && (
                       <div className="d-flex align-items-center">
                         <input
                           type="color"
@@ -1554,22 +1414,21 @@ export const Disenios = () => {
                           onChange={handleChangeColorFuente}
                         />
 
-                        <span className="ml-3" id="spanColor">{ColorFuente}</span>
-
+                        <span className="ml-3" id="spanColor">
+                          {ColorFuente}
+                        </span>
                       </div>
                     )}
 
-                    {showColorInput /*|| ColorFuente === "No aplica"*/ &&(
+                    {showColorInput /*|| ColorFuente === "No aplica"*/ && (
                       <input
-                      type="text"
-                      className="form-control"
-                      disabled
-                      required
-                      value={"No aplica"}
-                    />
+                        type="text"
+                        className="form-control"
+                        disabled
+                        required
+                        value={"No aplica"}
+                      />
                     )}
-
-
 
                     {ColorFuente === "#000000" && (
                       <p className="text-danger">
@@ -1578,12 +1437,9 @@ export const Disenios = () => {
                     )}
                   </div>
 
-
                   {/* Posicion de fuente*/}
                   <div className="form-group col-md-6">
-                    <label htmlFor="posicionFuente">
-                      Posicion de Fuente:
-                    </label>
+                    <label htmlFor="posicionFuente">Posicion de Fuente:</label>
                     <select
                       className="form-control"
                       id="posicionFuente"
@@ -1591,7 +1447,9 @@ export const Disenios = () => {
                       onChange={(e) => handleChangePosicionFuente(e)}
                       required
                     >
-                      <option value="" disabled>Seleccione una posición para la fuente</option>
+                      <option value="" disabled>
+                        Seleccione una posición para la fuente
+                      </option>
                       <option value="Arriba Izquierda">Arriba Izquierda</option>
                       <option value="Arriba Derecha">Arriba Derecha</option>
                       <option value="Abajo Izquierda">Abajo Izquierda</option>
@@ -1609,9 +1467,7 @@ export const Disenios = () => {
 
                   {/* Tamaño de imagen*/}
                   <div className="form-group col-md-6">
-                    <label htmlFor="tamanioImagen">
-                      Tamaño de Imagen:
-                    </label>
+                    <label htmlFor="tamanioImagen">Tamaño de Imagen:</label>
                     <select
                       className="form-control"
                       id="tamanioImagen"
@@ -1619,13 +1475,13 @@ export const Disenios = () => {
                       onChange={(e) => handleChangeTamanioImagen(e)}
                       required
                     >
-                      <option value="" disabled>Elige el tamaño de la imagen</option>
+                      <option value="" disabled>
+                        Elige el tamaño de la imagen
+                      </option>
                       <option value="Grande">Grande</option>
                       <option value="Mediana">Mediana</option>
                       <option value="Pequeña">Pequeña</option>
                       <option value="No aplica">No aplica</option>
-
-
                     </select>
 
                     {TamanioImagen === "" && (
@@ -1634,13 +1490,10 @@ export const Disenios = () => {
                       </p>
                     )}
                   </div>
-                
 
                   {/* Posicion de imagen*/}
                   <div className="form-group col-md-6">
-                    <label htmlFor="posicionImagen">
-                      Posicion de Imagen:
-                    </label>
+                    <label htmlFor="posicionImagen">Posicion de Imagen:</label>
 
                     <select
                       className="form-control"
@@ -1649,14 +1502,15 @@ export const Disenios = () => {
                       onChange={(e) => handleChangePosicionImagen(e)}
                       required
                     >
-                      <option value="" disabled>Seleccione una posición para la imagen</option>
+                      <option value="" disabled>
+                        Seleccione una posición para la imagen
+                      </option>
                       <option value="Arriba Izquierda">Arriba Izquierda</option>
                       <option value="Arriba Derecha">Arriba Derecha</option>
                       <option value="Abajo Izquierda">Abajo Izquierda</option>
                       <option value="Abajo Derecha">Abajo Derecha</option>
                       <option value="Centro">Centro</option>
                       <option value="No aplica">No aplica</option>
-
                     </select>
 
                     {PosicionImagen === "" && (
@@ -1666,107 +1520,145 @@ export const Disenios = () => {
                     )}
                   </div>
 
-
-
                   {/* Precio de diseño */}
                   <div className="form-group col-md-6">
-                      <label htmlFor="precioDiseño">Precio del Diseño:</label>
-                      <input
-                        type="text"
-                        className={`form-control ${
-                          errors.PrecioDisenio ? "is-invalid" : ""
-                        }`}
-                        id="precioDiseño"
-                        placeholder="Ingrese el precio del diseño"
-                        required
-                        value={PrecioDisenio}
-                        onChange={handleChangePrecioDisenio}
-                      />
-                      {renderErrorMessage(errors.PrecioDisenio)}
+                    <label htmlFor="precioDiseño">Precio del Diseño:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.PrecioDisenio ? "is-invalid" : ""
+                      }`}
+                      id="precioDiseño"
+                      placeholder="Ingrese el precio del diseño"
+                      required
+                      value={PrecioDisenio}
+                      onChange={handleChangePrecioDisenio}
+                    />
+                    {renderErrorMessage(errors.PrecioDisenio)}
                   </div>
-
-
-
 
                   {/* Imagen diseño*/}
                   <div className="form-group col-md-6">
                     <label>Imagen Diseño :</label>
                     <br />
 
-                    {renderInputDisenio  &&(
+                    {renderInputDisenio && (
                       <>
-                      <input type="file" name="file-2" id="inputFileDisenio" className={`inputfile inputfile-2 `} onChange={handleChangeImagenDisenio} draggable/>
-                      <label htmlFor="inputFileDisenio">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="iborrainputfile" width="20" height="17" viewBox="0 0 20 17">
-                      <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z">
-                      </path>
-                      </svg>
-                      <span className="iborrainputfile" id="spanInputFileDisenio">Seleccionar archivo</span>
-                      </label>
-                    </>
+                        <input
+                          type="file"
+                          name="file-2"
+                          id="inputFileDisenio"
+                          className={`inputfile inputfile-2 `}
+                          onChange={handleChangeImagenDisenio}
+                          draggable
+                        />
+                        <label htmlFor="inputFileDisenio">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="iborrainputfile"
+                            width="20"
+                            height="17"
+                            viewBox="0 0 20 17"
+                          >
+                            <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
+                          </svg>
+                          <span
+                            className="iborrainputfile"
+                            id="spanInputFileDisenio"
+                          >
+                            Seleccionar archivo
+                          </span>
+                        </label>
+                      </>
                     )}
 
                     {ImagenDisenio === "0" && (
                       <p className="text-danger">
-                        Por favor, ingresa una imagen para tu diseño, se permite (.png .jpg) .
+                        Por favor, ingresa una imagen para tu diseño, se permite
+                        (.png .jpg) .
                       </p>
                     )}
 
                     {ImagenDisenio !== "0" && ImagenDisenio !== "No aplica" && (
-                    <div className="container py-5 mx-3">
-                    <img
-                      src={ImagenDisenio}
-                      alt="Vista previa imagen del diseño"
-                      style={{ maxWidth: '200px', display: 'block', border: "1px solid black"}}
-                      />
-                    </div>
+                      <div className="container py-5 mx-3">
+                        <img
+                          src={ImagenDisenio}
+                          alt="Vista previa imagen del diseño"
+                          style={{
+                            maxWidth: "200px",
+                            display: "block",
+                            border: "1px solid black",
+                          }}
+                        />
+                      </div>
                     )}
-                    
-                    {showDisenioInput &&(
+
+                    {showDisenioInput && (
                       <input
-                      type="text"
-                      className="form-control"
-                      disabled
-                      value={"No aplica"}
+                        type="text"
+                        className="form-control"
+                        disabled
+                        value={"No aplica"}
                       />
                     )}
-
                   </div>
-
-
 
                   {/* Imagen referencia*/}
                   <div className="form-group col-md-6">
-                    <label htmlFor="ImagenDisenioCliente">Imagen Referencia :</label>
+                    <label htmlFor="ImagenDisenioCliente">
+                      Imagen Referencia :
+                    </label>
 
                     <br />
 
-                    <input type="file" name="file-3" id="inputFileReferencia" className={`inputfile inputfile-2 `} onChange={handleChangeImagenReferencia}/>
+                    <input
+                      type="file"
+                      name="file-3"
+                      id="inputFileReferencia"
+                      className={`inputfile inputfile-2 `}
+                      onChange={handleChangeImagenReferencia}
+                    />
                     <label htmlFor="inputFileReferencia">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="iborrainputfile" width="20" height="17" viewBox="0 0 20 17"><path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path></svg>
-                    <span className="iborrainputfile" id="spanInputFileReferencia">Seleccionar archivo</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="iborrainputfile"
+                        width="20"
+                        height="17"
+                        viewBox="0 0 20 17"
+                      >
+                        <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
+                      </svg>
+                      <span
+                        className="iborrainputfile"
+                        id="spanInputFileReferencia"
+                      >
+                        Seleccionar archivo
+                      </span>
                     </label>
-
 
                     {/* {renderErrorMessage(errors.ImagenReferencia)} */}
 
                     {ImagenReferencia === "0" && (
                       <p className="text-danger">
-                        Por favor, ingresa una imagen de referencia de tu diseño, se permite (.png .jpg) .
+                        Por favor, ingresa una imagen de referencia de tu
+                        diseño, se permite (.png .jpg) .
                       </p>
                     )}
 
                     <div className="container py-5 mx-3">
-                    {ImagenReferencia !== "0" && (
-                    <img
-                      src={ImagenReferencia}
-                      alt="Vista previa imagen del diseño"
-                      style={{ maxWidth: '200px', display: 'block', border: "1px solid black"}}
-                    />
-                    )}
+                      {ImagenReferencia !== "0" && (
+                        <img
+                          src={ImagenReferencia}
+                          alt="Vista previa imagen del diseño"
+                          style={{
+                            maxWidth: "200px",
+                            display: "block",
+                            border: "1px solid black",
+                          }}
+                        />
+                      )}
                     </div>
                   </div>
-                  
                 </div>
               </form>
             </div>
@@ -1795,9 +1687,6 @@ export const Disenios = () => {
       </div>
       {/* modal diseño */}
 
-
-
-
       {/* Inicio modal ver detalle diseño */}
       <div
         className="modal fade"
@@ -1813,7 +1702,7 @@ export const Disenios = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="ModalDetalleDisenioLabel">
-                Detalle del diseño 
+                Detalle del diseño
               </h5>
               <button
                 type="button"
@@ -1828,12 +1717,13 @@ export const Disenios = () => {
               {disenioSeleccionado && (
                 <>
                   <div className="modal-body">
-                    <form >
+                    <form>
                       <div className="form-row">
-
                         {/* Nombre de diseño detalle*/}
                         <div className="form-group col-md-6">
-                          <label htmlFor="nombreDiseño">Nombre del Diseño:</label>
+                          <label htmlFor="nombreDiseño">
+                            Nombre del Diseño:
+                          </label>
                           <input
                             type="text"
                             className="form-control"
@@ -1843,12 +1733,9 @@ export const Disenios = () => {
                           />
                         </div>
 
-
                         {/* Nombre de fuente detalle*/}
                         <div className="form-group col-md-6">
-                          <label htmlFor="nombreFuente">
-                            Fuente:
-                          </label>
+                          <label htmlFor="nombreFuente">Fuente:</label>
                           <input
                             type="text"
                             className="form-control"
@@ -1857,7 +1744,6 @@ export const Disenios = () => {
                             disabled
                           />
                         </div>
-
 
                         {/* Tamaño de fuente detalle*/}
                         <div className="form-group col-md-6">
@@ -1873,39 +1759,36 @@ export const Disenios = () => {
                           />
                         </div>
 
-
-
                         {/* Color de fuente detalle*/}
                         <div className="form-group col-md-6">
                           <label htmlFor="colorFuente">Color de Fuente:</label>
 
-                          {disenioSeleccionado.ColorFuente !== "No aplica" &&(
-                          <div className="d-flex align-items-center">
+                          {disenioSeleccionado.ColorFuente !== "No aplica" && (
+                            <div className="d-flex align-items-center">
+                              <input
+                                type="color"
+                                className="form-control col-md-4"
+                                id="colorFuente"
+                                value={disenioSeleccionado.ColorFuente}
+                                disabled
+                              />
+
+                              <span className="ml-3" id="spanColor">
+                                {disenioSeleccionado.ColorFuente}
+                              </span>
+                            </div>
+                          )}
+
+                          {disenioSeleccionado.ColorFuente === "No aplica" && (
                             <input
-                              type="color"
-                              className="form-control col-md-4"
-                              id="colorFuente"
-                              value={disenioSeleccionado.ColorFuente}
+                              type="text"
+                              className="form-control"
                               disabled
+                              required
+                              value={disenioSeleccionado.ColorFuente}
                             />
-
-                            <span className="ml-3" id="spanColor">{disenioSeleccionado.ColorFuente}</span>
-
-                          </div>
                           )}
-
-                          {disenioSeleccionado.ColorFuente === "No aplica" &&(
-                            <input
-                            type="text"
-                            className="form-control"
-                            disabled
-                            required
-                            value={disenioSeleccionado.ColorFuente}
-                          />
-                          )}
-
                         </div>
-
 
                         {/* Posicion de fuente detalle*/}
                         <div className="form-group col-md-6">
@@ -1922,10 +1805,6 @@ export const Disenios = () => {
                           />
                         </div>
 
-
-
-
-
                         {/* Tamaño de imagen detalle*/}
                         <div className="form-group col-md-6">
                           <label htmlFor="tamanioImagen">
@@ -1939,7 +1818,6 @@ export const Disenios = () => {
                             disabled
                           />
                         </div>
-                      
 
                         {/* Posicion de imagen detalle*/}
                         <div className="form-group col-md-6">
@@ -1956,66 +1834,70 @@ export const Disenios = () => {
                           />
                         </div>
 
-
-
-
                         {/* Precio de diseño detalle*/}
                         <div className="form-group col-md-6">
-                            <label htmlFor="precioDiseño">Precio del Diseño:</label>
-                            <input
-                              type="text"
-                              id="precioDiseño"
-                              className="form-control"
-                              value={formatCurrency(disenioSeleccionado.PrecioDisenio)}
-                              disabled
-                            />
+                          <label htmlFor="precioDiseño">
+                            Precio del Diseño:
+                          </label>
+                          <input
+                            type="text"
+                            id="precioDiseño"
+                            className="form-control"
+                            value={formatCurrency(
+                              disenioSeleccionado.PrecioDisenio
+                            )}
+                            disabled
+                          />
                         </div>
-
 
                         {/* Imagen diseño detalle*/}
                         <div className="form-group col-md-6">
                           <label>Imagen Diseño :</label>
 
-                          {disenioSeleccionado.ImagenDisenio !== "No aplica" &&(
-
+                          {disenioSeleccionado.ImagenDisenio !==
+                            "No aplica" && (
                             <div className="container py-4 mx-3">
                               <img
                                 src={disenioSeleccionado.ImagenDisenio}
                                 alt="Vista previa imagen del diseño"
-                                style={{ width: '170px', height:'150px', display: 'block', border: "1px solid black"}}
-                                />
+                                style={{
+                                  width: "170px",
+                                  height: "150px",
+                                  display: "block",
+                                  border: "1px solid black",
+                                }}
+                              />
                             </div>
                           )}
 
-                          {disenioSeleccionado.ImagenDisenio === "No aplica" &&(
+                          {disenioSeleccionado.ImagenDisenio ===
+                            "No aplica" && (
                             <input
-                            type="text"
-                            className="form-control"
-                            disabled
-                            value={disenioSeleccionado.ImagenDisenio}
+                              type="text"
+                              className="form-control"
+                              disabled
+                              value={disenioSeleccionado.ImagenDisenio}
                             />
                           )}
-
-
                         </div>
-
-
 
                         {/* Imagen referencia detalle*/}
                         <div className="form-group col-md-6">
                           <label>Imagen Referencia :</label>
 
                           <div className="container py-4 mx-3">
-                        
-                          <img
-                            src={disenioSeleccionado.ImagenReferencia}
-                            alt="Vista previa imagen del diseño"
-                            style={{ width: '170px', height:'150px', display: 'block', border: "1px solid black"}}
-                          />
-                      
+                            <img
+                              src={disenioSeleccionado.ImagenReferencia}
+                              alt="Vista previa imagen del diseño"
+                              style={{
+                                width: "170px",
+                                height: "150px",
+                                display: "block",
+                                border: "1px solid black",
+                              }}
+                            />
                           </div>
                         </div>
-                        
                       </div>
                     </form>
                   </div>
@@ -2036,12 +1918,10 @@ export const Disenios = () => {
       </div>
       {/* Fin modal ver detalle diseño */}
 
-
-
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">Diseños</h1>
+          <h1 className="h3 mb-3 text-center text-dark">Gestión de Diseños</h1>
           <div className="text-right">
             <button
               type="button"
@@ -2057,14 +1937,14 @@ export const Disenios = () => {
 
         {/* <!-- Tabla de diseños --> */}
         <div className="card shadow mb-4">
-          <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Diseños</h6>
-          </div>
-          <div className="card-body">
+          <div className="card-header py-1 d-flex">
+            <h6 className="m-2 font-weight-bold text-primary">Diseños</h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+          </div>
+          <div className="card-body">
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -2090,16 +1970,19 @@ export const Disenios = () => {
                       <td>{disenio.NombreDisenio}</td>
                       <td>{disenio.Fuente}</td>
                       <td>{disenio.TamanioFuente}</td>
-                      <td>{disenio.ColorFuente === "No aplica" ? "No aplica" : 
-                      <div
-                        style={{
-                          backgroundColor: disenio.ColorFuente,
-                          width: "25px",
-                          height: "25px",
-                          margin: "0px 0px 0px 50px"
-                        }}
-                      ></div>
-                      }
+                      <td>
+                        {disenio.ColorFuente === "No aplica" ? (
+                          "No aplica"
+                        ) : (
+                          <div
+                            style={{
+                              backgroundColor: disenio.ColorFuente,
+                              width: "25px",
+                              height: "25px",
+                              margin: "0px 0px 0px 50px",
+                            }}
+                          ></div>
+                        )}
                       </td>
                       {/* <td>{disenio.ColorFuente}</td> */}
                       {/* <td>{cliente.PosicionImagen}</td>
@@ -2130,7 +2013,7 @@ export const Disenios = () => {
                         >
                           <button
                             className="btn btn-warning btn-sm mr-2"
-                            title="Actualizar"
+                            title="Editar"
                             data-toggle="modal"
                             data-target="#modalDisenio"
                             onClick={() => openModal(2, disenio)}
@@ -2148,6 +2031,7 @@ export const Disenios = () => {
                               )
                             }
                             disabled={disenio.Estado != "Activo"}
+                            title="Eliminar"
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
@@ -2158,13 +2042,12 @@ export const Disenios = () => {
                               handleDetalleDisenio(disenio.IdDisenio)
                             }
                             disabled={disenio.Estado != "Activo"}
-
                             data-toggle="modal"
-                            data-target="#modalDetalleDisenio" 
+                            data-target="#modalDetalleDisenio"
+                            title="Detalle"
                           >
                             <i className="fas fa-eye"></i>
                           </button>
-
                         </div>
                       </td>
                     </tr>
@@ -2181,7 +2064,6 @@ export const Disenios = () => {
         </div>
         {/* Fin tabla de diseños */}
       </div>
-
     </>
   );
 };

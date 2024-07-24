@@ -91,7 +91,6 @@ export const Usuarios = () => {
     modal.show();
   };
 
-
   const openModalCambiarContrasenia = (usuario) => {
     setIdUsuario(usuario.IdUsuario);
     setContrasenia(usuario.Contrasenia || ""); // Asegúrate de manejar el caso donde no hay contraseña inicial
@@ -108,7 +107,6 @@ export const Usuarios = () => {
     modal.show();
   };
 
-
   const guardarUsuario = async () => {
     setErrors({
       usuario: "",
@@ -116,39 +114,54 @@ export const Usuarios = () => {
       contrasenia: "",
       rol: "", // Asegúrate de limpiar el error del rol también
     });
-  
+
     const cleanedUsuario = Usuario.trim();
     const cleanedCorreo = Correo.trim();
     const cleanedContrasenia = Contrasenia.trim();
-  
+
     if (operation === 1 || operation === 2) {
       // Validar campos requeridos para crear o editar usuario completo
       if (!cleanedUsuario) {
-        setErrors(prevState => ({ ...prevState, usuario: "El nombre de usuario es requerido" }));
+        setErrors((prevState) => ({
+          ...prevState,
+          usuario: "El nombre de usuario es requerido",
+        }));
       }
       if (!cleanedCorreo) {
-        setErrors(prevState => ({ ...prevState, correo: "El correo electrónico es requerido" }));
+        setErrors((prevState) => ({
+          ...prevState,
+          correo: "El correo electrónico es requerido",
+        }));
       }
       if (!IdRol) {
-        setErrors(prevState => ({ ...prevState, rol: "El rol es requerido" }));
+        setErrors((prevState) => ({
+          ...prevState,
+          rol: "El rol es requerido",
+        }));
       }
     }
-  
+
     if (operation === 1 && !cleanedContrasenia) {
       // Validar contraseña solo en creación de usuario
-      setErrors(prevState => ({ ...prevState, contrasenia: "La contraseña es requerida" }));
+      setErrors((prevState) => ({
+        ...prevState,
+        contrasenia: "La contraseña es requerida",
+      }));
     }
-  
+
     // Validar errores específicos para cambiar contraseña
     const contraseniaError = validateContrasenia(cleanedContrasenia);
-  
+
     if (contraseniaError && operation === 3) {
       // Mostrar error solo si estás cambiando la contraseña
-      setErrors(prevState => ({ ...prevState, contrasenia: contraseniaError }));
+      setErrors((prevState) => ({
+        ...prevState,
+        contrasenia: contraseniaError,
+      }));
       show_alerta("Verifique los errores en el formulario", "error");
       return;
     }
-  
+
     if (operation === 1) {
       // Crear Usuario
       await enviarSolicitud("POST", {
@@ -175,20 +188,15 @@ export const Usuarios = () => {
       });
     }
   };
-  
-
-
-
 
   const handleChangeRol = (e) => {
     setIdRol(e.target.value);
     if (!e.target.value) {
-      setErrors(prevState => ({ ...prevState, rol: "El rol es requerido" }));
+      setErrors((prevState) => ({ ...prevState, rol: "El rol es requerido" }));
     } else {
-      setErrors(prevState => ({ ...prevState, rol: "" }));
+      setErrors((prevState) => ({ ...prevState, rol: "" }));
     }
   };
-
 
   const validateUsuario = (value) => {
     if (!value) {
@@ -337,7 +345,6 @@ export const Usuarios = () => {
     }
   };
 
-
   const deleteUsuario = (idUsuario, Usuario) => {
     const MySwal = withReactContent(Swal);
     MySwal.fire({
@@ -451,7 +458,9 @@ export const Usuarios = () => {
                 <input
                   type="text"
                   id="usuario"
-                  className={`form-control ${errors.usuario ? "is-invalid" : ""}`}
+                  className={`form-control ${
+                    errors.usuario ? "is-invalid" : ""
+                  }`}
                   placeholder="Nombre de usuario"
                   value={Usuario}
                   onChange={handleChangeUsuario}
@@ -463,7 +472,9 @@ export const Usuarios = () => {
                 <input
                   type="email"
                   id="correo"
-                  className={`form-control ${errors.correo ? "is-invalid" : ""}`}
+                  className={`form-control ${
+                    errors.correo ? "is-invalid" : ""
+                  }`}
                   placeholder="Correo electrónico"
                   value={Correo}
                   onChange={handleChangeCorreo}
@@ -476,7 +487,9 @@ export const Usuarios = () => {
                   <input
                     type={showPassword ? "text" : "password"}
                     id="contraseniaNuevo"
-                    className={`form-control ${errors.contrasenia ? "is-invalid" : ""}`}
+                    className={`form-control ${
+                      errors.contrasenia ? "is-invalid" : ""
+                    }`}
                     placeholder="Contraseña"
                     value={Contrasenia}
                     onChange={handleChangeContrasenia}
@@ -516,7 +529,6 @@ export const Usuarios = () => {
               </div>
             </div>
 
-
             <div className="modal-footer">
               <div className="text-right">
                 <button
@@ -538,14 +550,28 @@ export const Usuarios = () => {
       {/* Fin modal crear/editar usuario */}
 
       {/* Modal para cambiar contra */}
-      <div className="modal fade" id="modalCambiarContrasenia" tabIndex="-1" role="dialog" aria-labelledby="modalUsuariosLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+      <div
+        className="modal fade"
+        id="modalCambiarContrasenia"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="modalUsuariosLabel"
+        aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
+      >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="modalCambiarContrasenia">
                 {title}
               </h5>
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
@@ -554,7 +580,9 @@ export const Usuarios = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   id="contrasenia"
-                  className={`form-control ${errors.contrasenia ? "is-invalid" : ""}`}
+                  className={`form-control ${
+                    errors.contrasenia ? "is-invalid" : ""
+                  }`}
                   placeholder="Contraseña"
                   value={Contrasenia}
                   onChange={handleChangeContrasenia}
@@ -575,20 +603,19 @@ export const Usuarios = () => {
             </div>
             <div className="modal-footer">
               <div className="text-right">
-                <button 
-                type="button"
-                id="btnCerrar"
-                className="btn btn-secondary mr-2" 
-                data-dismiss="modal">
+                <button
+                  type="button"
+                  id="btnCerrar"
+                  className="btn btn-secondary mr-2"
+                  data-dismiss="modal"
+                >
                   Cancelar
                 </button>
-                <button
-                  className="btn btn-primary" onClick={guardarUsuario} >
+                <button className="btn btn-primary" onClick={guardarUsuario}>
                   Guardar
                 </button>
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -598,9 +625,8 @@ export const Usuarios = () => {
       <div className="container-fluid">
         {/* Page Heading */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">Usuarios</h1>
-
-          <div className="text-center p-3">
+          <h1 className="h3 mb-3 text-center text-dark">Gestión de Usuarios</h1>
+          <div className="text-right">
             <button
               onClick={() => openModal(1)}
               type="button"
@@ -608,21 +634,21 @@ export const Usuarios = () => {
               data-toggle="modal"
               data-target="#modalUsuarios"
             >
-              Añadir Usuario
+              <i className="fas fa-pencil-alt"></i> Crear Usuario
             </button>
           </div>
         </div>
 
         {/* Tabla Usuarios */}
         <div className="card shadow mb-4">
-          <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Usuarios</h6>
-          </div>
-          <div className="card-body">
+          <div className="card-header py-1 d-flex">
+            <h6 className="m-2 font-weight-bold text-primary">Usuarios</h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+          </div>
+          <div className="card-body">
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -666,19 +692,17 @@ export const Usuarios = () => {
                           role="group"
                           aria-label="Acciones"
                         >
-                          {/* Botón de actualizar */}
                           <button
                             className="btn btn-warning btn-sm mr-2"
+                            title="Editar"
                             onClick={() => openModal(2, usuario)}
                             disabled={usuario.Estado !== "Activo"}
                           >
-                            <i className="fas fa-edit"></i>
+                            <i className="fas fa-sync-alt"></i>
                           </button>
-                          {/* Fin de botón de actualizar */}
-
-                          {/* Botón de actualizar */}
                           <button
                             className="btn btn-danger btn-sm mr-2"
+                            title="Eliminar"
                             onClick={() =>
                               deleteUsuario(usuario.IdUsuario, usuario.Usuario)
                             }
@@ -686,38 +710,35 @@ export const Usuarios = () => {
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                          {/* Fin de botón de eliminar */}
                         </div>
-                        {/* Botón de ver detalle */}
                         <button
-                          className={`btn btn-info btn-sm mr-2`}
-                          onClick={() => handleDetalleUsuario(usuario.IdUsuario)}
+                          className="btn btn-info btn-sm mr-2"
+                          title="Detalle"
+                          onClick={() =>
+                            handleDetalleUsuario(usuario.IdUsuario)
+                          }
                           disabled={usuario.Estado === "Inactivo"}
                           data-toggle="modal"
                           data-target="#modalDetalleUsuario"
                         >
-                          <i className="fas fa-eye"></i>
+                          <i className="fas fa-solid fa-info-circle"></i>
                         </button>
-                        {/* Fin de botón de detalle */}
-
-                        {/* Botón de cambiar contraseña */}
                         <button
                           type="button"
                           className="btn btn-primary btn-sm mr-2"
+                          title="Cambiar Contraseña"
                           onClick={() => openModalCambiarContrasenia(usuario)}
                           disabled={usuario.Estado === "Inactivo"}
-
                         >
                           <i className="fas fa-key"></i>
                         </button>
-                        {/* Fin de botón de cambiar contraseña */}
-
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -725,6 +746,7 @@ export const Usuarios = () => {
             />
           </div>
         </div>
+
         {/* Fin tabla usuarios */}
       </div>
       {/* Modal para detalles de usuario */}
@@ -813,7 +835,6 @@ export const Usuarios = () => {
           </div>
         </div>
       </div>
-
     </>
   );
 };

@@ -21,7 +21,12 @@ import { Tallas } from "../pages/Admin/Tallas";
 import { Colores } from "../pages/Admin/Colores";
 import { Carrito } from "../pages/Landing/Carrito";
 import { Insumos } from "../pages/Admin/Insumos"
+<<<<<<< HEAD
 import { ProductoSolo } from "../pages/Landing/ProductoSolo";
+=======
+import { Register } from "../pages/Landing/Register";
+import { RecuperarContraseña } from "../pages/Landing/RecuperarContraseña";
+>>>>>>> 06db7e2a0309d534b9f30f6d8e764b713a8b19a1
 
 export const Rutas = () => {
   return (
@@ -34,7 +39,8 @@ export const Rutas = () => {
         <Route path="/Contactenos" Component={()=> <LandingLayout> <Contactenos /> </LandingLayout> } />
         <Route path="/Diseniador" Component={()=> <LandingLayout> <Diseniador /> </LandingLayout> } />
         <Route path="/Login" Component={()=> <LandingLayout> <Login /> </LandingLayout> } />
-
+        <Route path="/Register" Component={()=> <LandingLayout> <Register /> </LandingLayout> } />
+        <Route path="/RecuperarContraseña" Component={()=> <LandingLayout> <RecuperarContraseña /> </LandingLayout> } />
         
         <Route path="/admin" Component={()=> <AdminLayout> <Dashboard /> </AdminLayout>  } />
         <Route path="/admin/Configuracion" Component={()=> <AdminLayout> <Configuracion /> </AdminLayout> } />

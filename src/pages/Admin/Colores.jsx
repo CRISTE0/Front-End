@@ -11,7 +11,7 @@ export const Colores = () => {
   const [Colores, setColores] = useState([]);
   const [IdColor, setIdColor] = useState("");
   const [Color, setColor] = useState("");
-  const [Referencia, setReferencia] = useState("");
+  const [Referencia, setReferencia] = useState("#000000");
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [errors, setErrors] = useState({});
@@ -91,15 +91,22 @@ export const Colores = () => {
     setErrors({ colores: errorMessage });
 
     if (!errorMessage) {
+      // Si Referencia es un valor predeterminado, usa el valor predeterminado
+      const referenciaFinal = Referencia || "#000000";
+
       let parametros, metodo;
       if (operation === 1) {
-        parametros = { Color: Color.trim(), Referencia, Estado: "Activo" };
+        parametros = {
+          Color: Color.trim(),
+          Referencia: referenciaFinal,
+          Estado: "Activo",
+        };
         metodo = "POST";
       } else {
         parametros = {
           IdColor,
           Color: Color.trim(),
-          Referencia,
+          Referencia: referenciaFinal,
           Estado: "Activo",
         };
         metodo = "PUT";
@@ -309,7 +316,7 @@ export const Colores = () => {
                 >
                   Cerrar
                 </button>
-                <button onClick={() => validar()} className="btn btn-success">
+                <button onClick={() => validar()} className="btn btn-primary">
                   <i className="fa-solid fa-floppy-disk"></i> Guardar
                 </button>
               </div>
@@ -320,8 +327,8 @@ export const Colores = () => {
 
       <div className="container-fluid">
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-4 text-center text-dark">Colores</h1>
-          <div className="text-center p-3">
+          <h1 className="h3 mb-3 text-center text-dark">Gestión de Colores</h1>
+          <div className="text-right">
             <button
               onClick={() => openModal(1)}
               type="button"
@@ -335,14 +342,14 @@ export const Colores = () => {
         </div>
 
         <div className="card shadow mb-4">
-          <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Colores</h6>
-          </div>
-          <div className="card-body">
+          <div className="card-header py-1 d-flex">
+            <h6 className="m-2 font-weight-bold text-primary">Colores</h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+          </div>
+          <div className="card-body">
             <div className="table-responsive">
               <table
                 className="table table-bordered"
@@ -400,6 +407,7 @@ export const Colores = () => {
                             }
                             disabled={color.Estado !== "Activo"}
                             className="btn btn-warning btn-sm mr-2"
+                            title="Editar"
                             data-toggle="modal"
                             data-target="#modalColores"
                           >
@@ -411,6 +419,7 @@ export const Colores = () => {
                             }
                             className="btn btn-danger btn-sm mr-2"
                             disabled={color.Estado !== "Activo"}
+                            title="Eliminar"
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>

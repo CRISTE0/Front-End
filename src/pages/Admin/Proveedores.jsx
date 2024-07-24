@@ -100,9 +100,13 @@ export const Proveedores = () => {
   };
 
   const guardarProveedor = async () => {
-    const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
-    const cleanedDireccion = Direccion.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
-    const cleanedContacto = Contacto.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+    if (!validateAllFields()) {
+      return; // No continuar si hay errores
+    }
+
+    const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, " ");
+    const cleanedDireccion = Direccion.trim().replace(/\s+/g, " ");
+    const cleanedContacto = Contacto.trim().replace(/\s+/g, " ");
 
     if (operation === 1) {
       // Crear Proveedor
@@ -149,11 +153,11 @@ export const Proveedores = () => {
     if (tipoDocumento === "NIT" && (length < 9 || length > 10)) {
       return "El NIT debe tener entre 9 y 10 dígitos";
     }
-    if (
-      (tipoDocumento === "CC" || tipoDocumento === "CE") &&
-      (length < 6 || length > 10)
-    ) {
+    if (tipoDocumento === "CC" && (length < 6 || length > 10)) {
       return "El número de documento debe tener entre 6 y 10 dígitos";
+    }
+    if (tipoDocumento === "CE" && (length < 6 || length > 7)) {
+      return "El número de documento debe tener entre 6 y 7 dígitos";
     }
     return "";
   };
@@ -193,17 +197,25 @@ export const Proveedores = () => {
     if (!value) {
       return "Escribe el teléfono";
     }
+    // El teléfono debe contener solo dígitos
     if (!/^\d+$/.test(value)) {
       return "El teléfono solo puede contener dígitos";
     }
+    // El teléfono debe comenzar con 3
+    if (!value.startsWith("3")) {
+      return "El número de teléfono móvil debe comenzar con 3";
+    }
+    // El teléfono debe tener exactamente 10 dígitos
+    if (!/^\d{10}$/.test(value)) {
+      return "El teléfono debe tener exactamente 10 dígitos";
+    }
+    // El teléfono no debe comenzar con 0
     if (value.startsWith("0")) {
       return "El teléfono no puede comenzar con 0";
     }
+    // El teléfono no debe ser todo ceros
     if (/^0+$/.test(value)) {
       return "El teléfono no puede ser todo ceros";
-    }
-    if (value.length !== 10) {
-      return "El teléfono debe tener exactamente 10 dígitos";
     }
     return "";
   };
@@ -244,17 +256,22 @@ export const Proveedores = () => {
   const handleChangeTipoDocumento = (e) => {
     const value = e.target.value;
     setTipoDocumento(value);
-    if (value === "NIT") {
-      setNombreApellidoLabel("Nombre de la Empresa");
-    } else {
-      setNombreApellidoLabel("Nombre del Proveedor");
-    }
+    setNombreApellidoLabel(
+      value === "NIT" ? "Nombre de la Empresa" : "Nombre del Proveedor"
+    );
+
+    // Validar el número de documento al cambiar el tipo de documento
+    const errorMessage = validateNroDocumento(NroDocumento, value);
+    setErrors((prevState) => ({
+      ...prevState,
+      nroDocumento: errorMessage,
+    }));
   };
 
   // Función para manejar cambios en el número de documento
   const handleChangeNroDocumento = (e) => {
     let value = e.target.value;
-    // Limitar la longitud del valor ingresado a entre 6 y 10 caracteres
+    // Limitar la longitud del valor ingresado a 10 caracteres
     if (value.length > 10) {
       value = value.slice(0, 10);
     }
@@ -342,6 +359,33 @@ export const Proveedores = () => {
       ...prevState,
       correo: errorMessage, // Actualiza el error de correo con el mensaje de error obtenido
     }));
+  };
+
+  const validateAllFields = () => {
+    const nroDocumentoError = validateNroDocumento(NroDocumento, TipoDocumento);
+    const nombreApellidoError = validateNombreApellido(NombreApellido);
+    const contactoError = validateContacto(Contacto);
+    const telefonoError = validateTelefono(Telefono);
+    const direccionError = validateDireccion(Direccion);
+    const correoError = validateCorreo(Correo);
+
+    setErrors({
+      nroDocumento: nroDocumentoError,
+      nombreApellido: nombreApellidoError,
+      contacto: contactoError,
+      telefono: telefonoError,
+      direccion: direccionError,
+      correo: correoError,
+    });
+
+    return (
+      !nroDocumentoError &&
+      !nombreApellidoError &&
+      !contactoError &&
+      !telefonoError &&
+      !direccionError &&
+      !correoError
+    );
   };
 
   const show_alerta = (message, type) => {
@@ -546,12 +590,19 @@ export const Proveedores = () => {
                       <option value="CE">Cédula de Extranjería</option>
                       <option value="NIT">NIT</option>
                     </select>
+                    <small className="form-text text-muted">
+                      Ingrese un tipo de Documento
+                    </small>
                     {TipoDocumento === "" && (
-                      <p className="text-danger">
-                        Por favor, seleccione un tipo de documento.
-                      </p>
+                      <div
+                        className="invalid-feedback"
+                        style={{ display: "block" }}
+                      >
+                        Este campo es obligatorio.
+                      </div>
                     )}
                   </div>
+
                   <div className="form-group col-md-6">
                     <label htmlFor="nroDocumentoProveedor">
                       Número de Documento:
@@ -698,12 +749,10 @@ export const Proveedores = () => {
           </div>
         </div>
       </div>
-
       {/* <!-- Fin modal crear/actualizar proveedor --> */}
 
       {/* Botón para abrir el modal de crear proveedor */}
       <div className="container-fluid">
-        {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
           <h1 className="h3 mb-3 text-center text-dark">
             Gestión de Proveedores
@@ -786,7 +835,7 @@ export const Proveedores = () => {
                         >
                           <button
                             className="btn btn-warning btn-sm mr-2"
-                            title="Actualizar"
+                            title="Editar"
                             data-toggle="modal"
                             data-target="#modalProveedor"
                             onClick={() => openModal(2, proveedor)}
@@ -796,6 +845,7 @@ export const Proveedores = () => {
                           </button>
                           <button
                             className="btn btn-danger btn-sm mr-2"
+                            title="Eliminar"
                             onClick={() =>
                               deleteProveedor(
                                 proveedor.IdProveedor,
@@ -813,6 +863,7 @@ export const Proveedores = () => {
                 </tbody>
               </table>
             </div>
+
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
