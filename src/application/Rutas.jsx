@@ -29,7 +29,7 @@ export const Rutas = () => {
       <Routes>
         <Route exat path="/" Component={()=> <LandingLayout> <Inicio /> </LandingLayout> } />
         <Route path="/Productos" Component={()=> <LandingLayout> <Productos /> </LandingLayout>  } />
-        <Route path="/ProductoSolo" Component={()=> <LandingLayout> <ProductoSolo /> </LandingLayout>  } />
+        <Route path="/ProductoSolo/:id" Component={()=> <LandingLayout> <ProductoSolo /> </LandingLayout>  } />
         <Route path="/Carrito" Component={()=> <LandingLayout> <Carrito /> </LandingLayout>  } />
         <Route path="/Contactenos" Component={()=> <LandingLayout> <Contactenos /> </LandingLayout> } />
         <Route path="/Diseniador" Component={()=> <LandingLayout> <Diseniador /> </LandingLayout> } />

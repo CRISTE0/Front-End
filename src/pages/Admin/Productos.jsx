@@ -408,7 +408,7 @@ const validateReferencia = (value) => {
       const productoActual = productosAdmin.find((producto) => producto.IdProducto === IdProducto);
 
       const nuevoEstado =
-        productoActual.Estado === "Activo" ? "Inactivo" : "Activo";
+        productoActual.Publicacion === "Activo" ? "Inactivo" : "Activo";
 
       const MySwal = withReactContent(Swal);
       MySwal.fire({
@@ -430,6 +430,8 @@ const validateReferencia = (value) => {
             Publicacion: nuevoEstado,
             Estado: productoActual.Estado,
           };
+
+          console.log(parametros);
 
           const response = await axios.put(
             `${url}/${IdProducto}`,
@@ -486,6 +488,7 @@ const validateReferencia = (value) => {
             Referencia: productoActual.Referencia,
             Cantidad: productoActual.Cantidad,
             ValorVenta: productoActual.ValorVenta,
+            Publicacion: productoActual.Publicacion,
             Estado: nuevoEstado,
           };
 

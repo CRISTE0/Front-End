@@ -1,48 +1,244 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import camisetas from "../../assets/img/camisetas";
+import withReactContent from "sweetalert2-react-content";
+import Swal from "sweetalert2";
+
+import axios from "axios";
 
 export const Carrito = () => {
+
+  // validar si no se estropea sin el filtro
+  
+  const [cartItems, setCartItems] = useState([]);
+
+  const fetchCartItems = async () => {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const itemDetails = await Promise.all(
+      cart.map(item =>
+        axios.get(`http://localhost:3000/api/productos/${item.IdProd}`)
+          .then(res => ({
+            ...res.data,
+            CantidadSeleccionada: item.CantidadSeleccionada
+          }))
+          .catch(() => null) // Manejo de error de fetch
+      )
+    );
+
+    // Filtra los elementos que no sean null y que tengan Publicacion como 'Activo'
+    const activeItems = itemDetails.filter(item => item && item.Publicacion === 'Activo');
+    setCartItems(activeItems);
+        
+    console.log(itemDetails);
+    
+    console.log(activeItems);
+    
+  };
+  
+  useEffect(() => {
+    
+    fetchCartItems();
+  }, []);
+
+  const show_alerta = (message, type) => {
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: message,
+      icon: type,
+      timer: 2000,
+      showConfirmButton: false,
+      timerProgressBar: true,
+      didOpen: () => {
+        // Selecciona la barra de progreso y ajusta su estilo
+        const progressBar = MySwal.getTimerProgressBar();
+        if (progressBar) {
+          progressBar.style.backgroundColor = "black";
+          progressBar.style.height = "6px";
+        }
+      },
+    });
+  };
+
+
+  const incrementarCantidad = (idProductoSeleccionado,cantidadProductoDisponible) => {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // Encuentra el índice del producto en el carrito
+    const productIndex = cart.findIndex(item => item.IdProd === idProductoSeleccionado);
+
+    if (productIndex !== -1) {
+
+      if (cart[productIndex].CantidadSeleccionada >= cantidadProductoDisponible) {
+        show_alerta("Cantidad maxima del producto alcanzada","error")
+        return;
+      }
+      // Incrementa la cantidad del producto en el carrito
+      cart[productIndex].CantidadSeleccionada += 1;
+
+      // Actualiza el carrito en el localStorage
+      localStorage.setItem('cart', JSON.stringify(cart));
+
+
+      // Actualiza el estado del carrito en React
+      setCartItems(prevCartItems => 
+        prevCartItems.map(item => 
+          item.id === idProductoSeleccionado 
+            ? { ...item, CantidadSeleccionada: item.CantidadSeleccionada + 1 } 
+            : item
+      ));
+      
+      fetchCartItems();
+    }
+  };
+
+
+
+  const disminuirCantidad = (idProductoSeleccionado,NombreDisenio) => {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // Encuentra el índice del producto en el carrito
+    const productIndex = cart.findIndex(item => item.IdProd === idProductoSeleccionado);
+
+    if (productIndex !== -1) {
+      if (cart[productIndex].CantidadSeleccionada > 1) {
+
+        // Reduce la cantidad del producto si es mayor que 1
+        cart[productIndex].CantidadSeleccionada -= 1;
+
+        // Actualiza el carrito en el localStorage
+        localStorage.setItem('cart', JSON.stringify(cart));
+
+        // Actualiza el estado del carrito en React
+        setCartItems(prevCartItems => 
+          prevCartItems.map(item => 
+            item.id === idProductoSeleccionado 
+              ? { ...item, CantidadSeleccionada: item.CantidadSeleccionada - 1 } 
+              : item
+        ));
+
+        fetchCartItems();
+
+        console.log(cart);
+
+
+      } else {
+
+        const MySwal = withReactContent(Swal);
+        MySwal.fire({
+          title: `¿Seguro de eliminar el producto ${NombreDisenio} del carrito  ?`,
+          icon: "question",
+          text: "No se podrá dar marcha atrás",
+          showCancelButton: true,
+          confirmButtonText: "Sí, eliminar",
+          cancelButtonText: "Cancelar",
+          showClass: {
+            popup: 'swal2-show',
+            backdrop: 'swal2-backdrop-show',
+            icon: 'swal2-icon-show'
+          },
+          hideClass: {
+            popup: 'swal2-hide',
+            backdrop: 'swal2-backdrop-hide',
+            icon: 'swal2-icon-hide'
+          }
+        }).then((result) => {
+
+          // Si se confirma eliminar el producto 
+          if (result.isConfirmed) {
+
+            // Elimina el producto del carrito si la cantidad es 1 y se intenta reducir más
+            cart.splice(productIndex, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            // Actualiza el estado del carrito en React
+            setCartItems(prevCartItems => prevCartItems.filter(item => item.id !== idProductoSeleccionado));
+
+
+            show_alerta("El producto fue eliminado del carrito", "success");
+
+          } else if (result.dismiss === Swal.DismissReason.cancel) {
+            show_alerta("El producto NO fue eliminado del carrito", "info");
+          } else if (result.dismiss === Swal.DismissReason.backdrop || result.dismiss === Swal.DismissReason.esc) {
+            show_alerta("El producto NO fue eliminadodel carrito", "info");
+          }
+        });
+      };
+
+
+      }
+  };
+
+
   return (
     <>
       <div className="container my-3 p-3 bg-light " style={{"borderRadius":"10px"}}>
         <div className="row">
           <div className="col-lg-7">
+
             {/* productos cliente */}
 
-            <div className="card mb-3">
-              <div className="card-body">
-                <div className="d-flex justify-content-between">
-                  <div className="d-flex flex-row align-items-center">
-                    <div>
-                      <img
-                        src={camisetas[0]}
-                        className="img-fluid rounded "
-                        alt="Shopping item"
-                        style={{"width": "65px"}}
-                      />
-                    </div>
-                    <div className="mx-3">
-                    {/* nombre producto */}
-                      <h5>Camiseta Espacio</h5>
-                    {/* precio producto */}
+            {cartItems.map((item) => (
+            
+              <div key={item.IdProducto} className="card mb-3">
+                <div className="card-body">
+                  <div className="d-flex justify-content-between">
+                    
+                    <div className="d-flex flex-row align-items-center">
 
-                      <p className="small mb-0">$ 4.000</p>
+                      {/* Imagen del producto */}
+                      <div>
+                        <img
+                          src={item.Disenio.ImagenReferencia}
+                          className="img-fluid rounded "
+                          alt="Shopping item"
+                          style={{"width": "65px"}}
+                        />
+                      </div>
+
+                      <div className="mx-3">
+                        {/* nombre producto */}
+                        <h5>{item.Disenio.NombreDisenio}</h5>
+
+                        {/* precio producto */}
+                        <p className="small mb-0">{item.ValorVenta}</p>
+                      </div>
+
                     </div>
-                  </div>
-                  <div className="d-flex flex-row align-items-center">
-                    <div style={{ "width": "40px" , "color":"black"}}>
-                    <i className="fas fa-trash-alt"></i>
+
+                    <div className="d-flex flex-row align-items-center">
+
+                      {/* Eliminar producto del carrito */}
+                      {item.CantidadSeleccionada == 1 &&(
+                        <button className="m-3" style={{ "width": "30px", "border" : "none" , "background": "transparent" }}>
+                          <i className="fas fa-trash-alt"></i>
+                        </button>
+
+                      )}
+
+
+                      {/* Disminuir cantidad del producto */}
+                      {item.CantidadSeleccionada > 1 &&(
+                        <button className="m-3" onClick={() => disminuirCantidad(item.IdProducto,item.Disenio.NombreDisenio) } 
+                          style={{ "width": "30px" , "color":"black" , "border" : "none" , "background": "transparent"}}>
+                          <i className="fas fa-minus-circle"></i>
+                        </button>
+                      )}
+
+
+                      <div style={{"width": "40px"}}>
+                        <h5 className="mb-0">{item.CantidadSeleccionada}</h5>
+                      </div>
+
+                      {/* Aumentar cantidad del producto */}
+                      <button className="" onClick={() => incrementarCantidad(item.IdProducto, item.Cantidad)} style={{"border" : "none",     "background": "transparent" } }>
+                        <i className="fas fa-plus-circle"></i>
+                      </button>
+
                     </div>
-                    <div style={{"width": "40px"}}>
-                      <h5 className="mb-0">2</h5>
-                    </div>
-                    <a href="#!" style={{"color":"black"}}>
-                      <i className="fas fa-plus-circle"></i>
-                    </a>
                   </div>
                 </div>
               </div>
-            </div>
+            ))}
+
 
           </div>
 
@@ -98,14 +294,14 @@ export const Carrito = () => {
                       >
                         <input
                           type="text"
-                          id="typeExp"
+                          id="typeExpp"
                           className="form-control form-control-lg"
                           placeholder=""
                           size="7"
                           minLength="7"
                           maxLength="7"
                         />
-                        <label className="form-label" htmlFor="typeExp">
+                        <label className="form-label" htmlFor="typeExpp">
                           Dirección
                         </label>
                       </div>
@@ -117,14 +313,14 @@ export const Carrito = () => {
                       >
                         <input
                           type="password"
-                          id="typeText"
+                          id="typeTextll"
                           className="form-control form-control-lg"
                           placeholder=""
                           size="1"
                           minLength="3"
                           maxLength="3"
                         />
-                        <label className="form-label" htmlFor="typeText">
+                        <label className="form-label" htmlFor="typeTextll">
                           Correo
                         </label>
                       </div>
@@ -166,6 +362,7 @@ export const Carrito = () => {
               </div>
             </div>
           </div>
+          
         </div>
       </div>
     </>
