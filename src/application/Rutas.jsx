@@ -5,6 +5,8 @@ import {Productos} from "../pages/Landing/Productos";
 import {Contactenos} from "../pages/Landing/Contactenos";
 import { Diseniador } from "../pages/Landing/Diseniador";
 import { Login } from "../pages/Landing/Login";
+import { Register } from "../pages/Landing/Register";
+import { RecuperarContraseña } from "../pages/Landing/RecuperarContraseña";
 import { LandingLayout } from "../layouts/LandingLayout";
 import { AdminLayout } from "../layouts/AdminLayout";
 import { Dashboard } from "../pages/Admin/Dashboard";
@@ -21,12 +23,7 @@ import { Tallas } from "../pages/Admin/Tallas";
 import { Colores } from "../pages/Admin/Colores";
 import { Carrito } from "../pages/Landing/Carrito";
 import { Insumos } from "../pages/Admin/Insumos"
-<<<<<<< HEAD
 import { ProductoSolo } from "../pages/Landing/ProductoSolo";
-=======
-import { Register } from "../pages/Landing/Register";
-import { RecuperarContraseña } from "../pages/Landing/RecuperarContraseña";
->>>>>>> 06db7e2a0309d534b9f30f6d8e764b713a8b19a1
 
 export const Rutas = () => {
   return (
