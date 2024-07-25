@@ -106,6 +106,54 @@ export const Clientes = () => {
     const cleanedDireccion = Direccion.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
     const cleanedContrasenia = Contrasenia.trim();
 
+    if (!TipoDocumento) {
+      show_alerta(
+        "El tipo documento es necesario",
+        "error"
+      );
+      return;
+    }
+
+    if (!NroDocumento) {
+      show_alerta(
+        "El número de documento es necesario",
+        "error"
+      );
+      return;
+    }
+
+    if (!NombreApellido) {
+      show_alerta(
+        "El nombre y apellido son necesario",
+        "error"
+      );
+      return;
+    }
+
+    if (!Telefono) {
+      show_alerta(
+        "El teléfono es necesario",
+        "error"
+      );
+      return;
+    }
+
+    if (!Direccion) {
+      show_alerta(
+        "La dirección es necesaria",
+        "error"
+      );
+      return;
+    }
+
+    if (!Correo) {
+      show_alerta(
+        "El correo es necesario",
+        "error"
+      );
+      return;
+    }
+
     if (operation === 1 && !cleanedContrasenia) {
       // Validar contraseña solo en creación de usuario
       setErrors((prevState) => ({
