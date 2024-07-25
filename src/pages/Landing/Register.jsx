@@ -102,8 +102,12 @@ const validateDireccion = (value) => {
   if (!/^[a-zA-Z0-9#-\s]*$/.test(value)) {
     return "La dirección solo puede contener letras, números, # y -";
   }
+  if (value.length < 10 || value.length > 50) {
+    return "La dirección debe tener entre 10 y 50 caracteres";
+  }
   return "";
 };
+
 
 // Función para validar el correo electrónico
 const validateCorreo = (value) => {
@@ -123,11 +127,22 @@ const validateCorreo = (value) => {
   return "";
 };
 
+// Función para validar la contraseña
 const validateContrasenia = (value) => {
   if (!value) {
     return "La contraseña es requerida";
   } else if (value.length < 8 || value.length > 15) {
     return "La contraseña debe tener entre 8 y 15 caracteres";
+  }
+  return "";
+};
+
+// Función para validar la contraseña
+const validateValContrasenia = (value, contrasenia) => {
+  if (!value) {
+    return "La validación de la contraseña es requerida";
+  } else if (value !== contrasenia) {
+    return "Las contraseñas no coinciden";
   }
   return "";
 };
@@ -212,9 +227,11 @@ const validateContrasenia = (value) => {
     }));
   };
 
+  
+
   const handleChangeValcontrasenia = (e) => {
     setValcontrasenia(e.target.value); // Actualiza el estado de la contraseña
-    const errorMessage = validateContrasenia(e.target.value);
+    const errorMessage = validateValContrasenia(e.target.value, Contrasenia);
     setErrors((prevState) => ({
       ...prevState,
       valcontrasenia: errorMessage, // Actualiza el error de contraseña con el mensaje de error obtenido
@@ -472,7 +489,7 @@ const validateContrasenia = (value) => {
 
                 {/* validar contra */}
                 <div className="mb-3">
-                  <label htmlFor="password" className="form-label">
+                  <label htmlFor="valcontrasenia" className="form-label">
                     Validar Contraseña
                   </label>
                   <div className="d-flex align-items-center">
@@ -481,7 +498,7 @@ const validateContrasenia = (value) => {
                     className={`form-control ${
                       errors.valcontrasenia ? "is-invalid" : ""
                     }`}
-                    name="password"
+                    name="valcontrasenia"
                     id="valcontraseña"
                     placeholder="Validar Contraseña"
                     value={Valcontrasenia}
@@ -547,7 +564,7 @@ const validateContrasenia = (value) => {
 
                 {/* contraseña */}
                   <div className="mb-3">
-                    <label htmlFor="password" className="form-label">
+                    <label htmlFor="contraseniaNuevo" className="form-label">
                       Contraseña
                     </label>
                     <div className="d-flex align-items-center">
@@ -556,7 +573,7 @@ const validateContrasenia = (value) => {
                       className={`form-control ${
                         errors.contrasenia ? "is-invalid" : ""
                       }`}
-                      name="password"
+                      name="contrasenia"
                       id="contraseniaNuevo"
                       placeholder="Contraseña"
                       value={Contrasenia}
