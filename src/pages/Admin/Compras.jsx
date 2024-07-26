@@ -759,7 +759,7 @@ export const Compras = () => {
                 className="btn btn-secondary"
                 data-dismiss="modal"
               >
-                Cerrar
+                Cancelar
               </button>
               <button
                 type="button"

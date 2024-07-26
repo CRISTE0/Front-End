@@ -311,10 +311,10 @@ export const Colores = () => {
                 <button
                   type="button"
                   id="btnCerrar"
-                  className="btn btn-secondary"
+                  className="btn btn-secondary mr-2"
                   data-dismiss="modal"
                 >
-                  Cerrar
+                  Cancelar
                 </button>
                 <button onClick={() => validar()} className="btn btn-primary">
                   <i className="fa-solid fa-floppy-disk"></i> Guardar

@@ -327,7 +327,7 @@ export const Tallas = () => {
                   <button
                     type="button"
                     id="btnCerrar"
-                    className="btn btn-secondary"
+                    className="btn btn-secondary mr-2"
                     data-dismiss="modal"
                   >
                     Cancelar

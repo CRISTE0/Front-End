@@ -702,10 +702,10 @@ export const Pedidos = () => {
               <button
                 type="button"
                 id="btnCerrar"
-                className="btn btn-secondary"
+                className="btn btn-secondary "
                 data-dismiss="modal"
               >
-                Cerrar
+                Cancelar
               </button>
               <button
                 type="button"
