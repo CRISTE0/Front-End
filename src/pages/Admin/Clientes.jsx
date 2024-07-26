@@ -12,6 +12,7 @@ export const Clientes = () => {
   const [TipoDocumento, setTipoDocumento] = useState("");
   const [NroDocumento, setNroDocumento] = useState("");
   const [NombreApellido, setNombreApellido] = useState("");
+  const [Usuario, setUsuario] = useState("");
   const [Telefono, setTelefono] = useState("");
   const [Direccion, setDireccion] = useState("");
   const [Correo, setCorreo] = useState("");
@@ -21,6 +22,7 @@ export const Clientes = () => {
   const [errors, setErrors] = useState({
     nroDocumento: "",
     nombreApellido: "",
+    usuario: "",
     telefono: "",
     direccion: "",
     correo: "",
@@ -49,6 +51,7 @@ export const Clientes = () => {
       setTipoDocumento("");
       setNroDocumento("");
       setNombreApellido("");
+      setUsuario("");
       setTelefono("");
       setDireccion("");
       setCorreo("");
@@ -61,6 +64,7 @@ export const Clientes = () => {
       setTipoDocumento(cliente.TipoDocumento);
       setNroDocumento(cliente.NroDocumento);
       setNombreApellido(cliente.NombreApellido);
+      setUsuario(usuario.Usuario);
       setTelefono(cliente.Telefono);
       setDireccion(cliente.Direccion);
       setCorreo(cliente.Correo);
@@ -69,6 +73,7 @@ export const Clientes = () => {
       setErrors({
         nroDocumento: "",
         nombreApellido: "",
+        usuario: "",
         telefono: "",
         direccion: "",
         correo: "",
@@ -77,6 +82,7 @@ export const Clientes = () => {
       const errors = {
         nroDocumento: validateNroDocumento(cliente.NroDocumento),
         nombreApellido: validateNombreApellido(cliente.NombreApellido),
+        usuario: validateUsuario(cliente.Usuario),
         telefono: validateTelefono(cliente.Telefono),
         direccion: validateDireccion(cliente.Direccion),
         correo: validateCorreo(cliente.Correo),
@@ -103,6 +109,7 @@ export const Clientes = () => {
 
   const guardarCliente = async () => {
     const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+    const cleanedUsuario = Usuario.trim().replace(/\s+/g, " ");
     const cleanedDireccion = Direccion.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
     const cleanedContrasenia = Contrasenia.trim();
 
@@ -125,6 +132,21 @@ export const Clientes = () => {
     if (!NombreApellido) {
       show_alerta(
         "El nombre y apellido son necesario",
+        "error"
+      );
+      return;
+    }
+
+    if (!Usuario) {
+      show_alerta(
+        "El usuario es necesario",
+        "error"
+      );
+      return;
+      
+    }else if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+)*$/.test(Usuario) ) {
+      show_alerta(
+        "El nombre de usuario puede contener letras, números, caracteres especiales, y un solo espacio entre palabras",
         "error"
       );
       return;
@@ -181,6 +203,7 @@ export const Clientes = () => {
         TipoDocumento,
         NroDocumento,
         NombreApellido: cleanedNombreApellido,
+        Usuario: cleanedUsuario,
         Telefono,
         Direccion: cleanedDireccion,
         Correo,
@@ -194,6 +217,7 @@ export const Clientes = () => {
         TipoDocumento,
         NroDocumento,
         NombreApellido: cleanedNombreApellido,
+        Usuario: cleanedUsuario,
         Telefono,
         Direccion: cleanedDireccion,
         Correo,
@@ -234,6 +258,16 @@ export const Clientes = () => {
     }
     return "";
   };
+
+  const validateUsuario = (value) => {
+    if (!value) {
+        return "Escribe el usuario";
+    }
+    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+)*$/.test(value)) {
+        return "El nombre de usuario puede contener letras, números, caracteres especiales, y un solo espacio entre palabras";
+    }
+    return "";
+};
 
   // Función para validar el teléfono
   const validateTelefono = (value) => {
@@ -322,6 +356,18 @@ export const Clientes = () => {
     setErrors((prevState) => ({
       ...prevState,
       nombreApellido: errorMessage,
+    }));
+  };
+
+  const handleChangeUsuario = (e) => {
+    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
+    setUsuario(value);
+
+    // Validar el usuario
+    const errorMessage = validateUsuario(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      usuario: errorMessage,
     }));
   };
 
@@ -625,6 +671,21 @@ export const Clientes = () => {
                     {renderErrorMessage(errors.nombreApellido)}
                   </div>
                   <div className="form-group col-md-6">
+                    <label htmlFor="nombreUsuario">Nombre de Usuario:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.usuario ? "is-invalid" : ""
+                      }`}
+                      id="nombreUsuario"
+                      placeholder="Ingrese el nombre de Usuario"
+                      required
+                      value={Usuario}
+                      onChange={handleChangeUsuario}
+                    />
+                    {renderErrorMessage(errors.usuario)}
+                  </div>
+                  <div className="form-group col-md-6">
                     <label htmlFor="telefonoCliente">Teléfono:</label>
                     <input
                       type="text"
@@ -839,6 +900,7 @@ export const Clientes = () => {
                     <th>Tipo de Documento</th>
                     <th>Número de Documento</th>
                     <th>Nombre y Apellido</th>
+                    <th>Usuario</th>
                     <th>Teléfono</th>
                     <th>Dirección</th>
                     <th>Correo Electrónico</th>
@@ -852,6 +914,7 @@ export const Clientes = () => {
                       <td>{cliente.TipoDocumento}</td>
                       <td>{cliente.NroDocumento}</td>
                       <td>{cliente.NombreApellido}</td>
+                      <td>{cliente.Usuario}</td>
                       <td>{cliente.Telefono}</td>
                       <td>{cliente.Direccion}</td>
                       <td>{cliente.Correo}</td>
