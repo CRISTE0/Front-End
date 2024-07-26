@@ -261,13 +261,16 @@ export const Clientes = () => {
 
   const validateUsuario = (value) => {
     if (!value) {
-        return "Escribe el usuario";
+      return "Escribe el usuario";
     }
-    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+)*$/.test(value)) {
-        return "El nombre de usuario puede contener letras, números, caracteres especiales, y un solo espacio entre palabras";
+    if (!/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ!@#$%^&*(),.?":{}|<>]+$/.test(value)) {
+      return "El nombre de usuario solo puede contener letras, números y caracteres especiales, sin espacios";
+    }
+    if (value.length < 10 || value.length > 60) {
+      return "El usuario debe tener entre 10 y 60 caracteres";
     }
     return "";
-};
+  };
 
   // Función para validar el teléfono
   const validateTelefono = (value) => {
@@ -360,16 +363,16 @@ export const Clientes = () => {
   };
 
   const handleChangeUsuario = (e) => {
-    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
-    setUsuario(value);
+  const value = e.target.value.replace(/\s+/g, ""); // Eliminar todos los espacios
+  setUsuario(value);
 
-    // Validar el usuario
-    const errorMessage = validateUsuario(value);
-    setErrors((prevState) => ({
-      ...prevState,
-      usuario: errorMessage,
-    }));
-  };
+  // Validar el usuario
+  const errorMessage = validateUsuario(value);
+  setErrors((prevState) => ({
+    ...prevState,
+    usuario: errorMessage,
+  }));
+};
 
   // Función para manejar cambios en el teléfono
   const handleChangeTelefono = (e) => {

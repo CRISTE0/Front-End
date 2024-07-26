@@ -10,6 +10,7 @@ export const Register = () => {
   const [TipoDocumento, setTipoDocumento] = useState("");
   const [NroDocumento, setNroDocumento] = useState("");
   const [NombreApellido, setNombreApellido] = useState("");
+  const [Usuario, setUsuario] = useState("");
   const [Telefono, setTelefono] = useState("");
   const [Direccion, setDireccion] = useState("");
   const [Correo, setCorreo] = useState("");
@@ -18,6 +19,7 @@ export const Register = () => {
   const [errors, setErrors] = useState({
     nroDocumento: "",
     nombreApellido: "",
+    usuario: "",
     telefono: "",
     direccion: "",
     correo: "",
@@ -70,6 +72,19 @@ const validateNombreApellido = (value) => {
   }
   if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value)) {
     return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
+  }
+  return "";
+};
+
+const validateUsuario = (value) => {
+  if (!value) {
+    return "Escribe el usuario";
+  }
+  if (!/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ!@#$%^&*(),.?":{}|<>]+$/.test(value)) {
+    return "El nombre de usuario solo puede contener letras, números y caracteres especiales, sin espacios";
+  }
+  if (value.length < 10 || value.length > 60) {
+    return "El usuario debe tener entre 10 y 60 caracteres";
   }
   return "";
 };
@@ -178,6 +193,18 @@ const validateValContrasenia = (value, contrasenia) => {
     }));
   };
 
+  const handleChangeUsuario = (e) => {
+    const value = e.target.value.replace(/\s+/g, ""); // Eliminar todos los espacios
+    setUsuario(value);
+  
+    // Validar el usuario
+    const errorMessage = validateUsuario(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      usuario: errorMessage,
+    }));
+  };
+
   const handleChangeTelefono = (e) => {
     let value = e.target.value;
     // Limitar la longitud del valor ingresado a 10 caracteres
@@ -257,6 +284,7 @@ const validateValContrasenia = (value, contrasenia) => {
     e.preventDefault(); // Evita que el formulario se recargue
   
     const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, " ");
+    const cleanedUsuario = Usuario.trim().replace(/\s+/g, " ");
     const cleanedDireccion = Direccion.trim().replace(/\s+/g, " ");
     const cleanedContrasenia = Contrasenia.trim();
   
@@ -273,6 +301,21 @@ const validateValContrasenia = (value, contrasenia) => {
   
     if (!NombreApellido) {
       show_alerta("El nombre y apellido son necesarios", "error");
+      return;
+    }
+
+    if (!Usuario) {
+      show_alerta(
+        "El usuario es necesario",
+        "error"
+      );
+      return;
+      
+    }else if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+)*$/.test(Usuario) ) {
+      show_alerta(
+        "El nombre de usuario puede contener letras, números, caracteres especiales, y un solo espacio entre palabras",
+        "error"
+      );
       return;
     }
   
@@ -304,6 +347,7 @@ const validateValContrasenia = (value, contrasenia) => {
           TipoDocumento,
           NroDocumento,
           NombreApellido: cleanedNombreApellido,
+          Usuario: cleanedUsuario,
           Telefono,
           Direccion: cleanedDireccion,
           Correo,
@@ -316,6 +360,7 @@ const validateValContrasenia = (value, contrasenia) => {
           TipoDocumento,
           NroDocumento,
           NombreApellido: cleanedNombreApellido,
+          Usuario: cleanedUsuario,
           Telefono,
           Direccion: cleanedDireccion,
           Correo,
@@ -329,6 +374,7 @@ const validateValContrasenia = (value, contrasenia) => {
       setTipoDocumento("");
       setNroDocumento("");
       setNombreApellido("");
+      setUsuario("");
       setTelefono("");
       setDireccion("");
       setCorreo("");
@@ -337,6 +383,7 @@ const validateValContrasenia = (value, contrasenia) => {
       setErrors({
         nroDocumento: "",
         nombreApellido: "",
+        usuario: "",
         telefono: "",
         direccion: "",
         correo: "",
@@ -486,6 +533,27 @@ const validateValContrasenia = (value, contrasenia) => {
                   {renderErrorMessage(errors.nombreApellido)}
                 </div>
                 {/* fin Nombre y Apellido */}
+
+                {/* Usuario */}
+                <div className="mb-3">
+                  <label htmlFor="nombreUsuario" className="form-label">
+                    Nombre de Usuario
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      errors.usuario ? "is-invalid" : ""
+                    }`}
+                    name="nombreUsuario"
+                    id="nombreUsuario"
+                    placeholder="Usuario"
+                    required
+                    value={Usuario}
+                    onChange={handleChangeUsuario}
+                  />
+                  {renderErrorMessage(errors.usuario)}
+                </div>
+                {/* fin Usuario */}
 
                 {/* validar contra */}
                 <div className="mb-3">
