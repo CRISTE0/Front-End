@@ -8,12 +8,14 @@ import SearchBar from "../../assets/js/SearchBar";
 export const Configuracion = () => {
   let url = "http://localhost:3000/api/roles";
   let urlPermisos = "http://localhost:3000/api/permisos"; // URL para obtener los permisos
+  let urlUsuarios = "http://localhost:3000/api/usuarios"; // URL para obtener los permisos
 
   const [Roles, setRoles] = useState([]);
   const [Permisos, setPermisos] = useState([]); // Estado para permisos
   const [SelectedPermisos, setSelectedPermisos] = useState([]); // Estado para permisos seleccionados
   const [IdRol, setIdRol] = useState("");
   const [NombreRol, setNombreRol] = useState("");
+  const [usuarios, setUsuarios] = useState([]);
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,7 +49,8 @@ export const Configuracion = () => {
 
   useEffect(() => {
     getRoles();
-    getPermisos(); // Obtener permisos al cargar el componente
+    getPermisos();
+    getUsuarios().then((usuariosData) => setUsuarios(usuariosData));
   }, []);
 
   useEffect(() => {
@@ -75,6 +78,16 @@ export const Configuracion = () => {
     const respuesta = await axios.get(urlPermisos);
     setPermisos(respuesta.data);
     console.log(respuesta.data);
+  };
+
+  const getUsuarios = async () => {
+    try {
+      const respuesta = await axios.get(urlUsuarios);
+      return respuesta.data;
+    } catch (error) {
+      console.error("Error al obtener usuarios:", error);
+      return [];
+    }
   };
 
   const handlePermisosChange = (permisoId) => {
@@ -539,72 +552,83 @@ export const Configuracion = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentRoles.map((rol) => (
-                    <tr key={rol.IdRol}>
-                      <td>{rol.NombreRol}</td>
-                      <td>
-                        <label className="switch">
-                          <input
-                            type="checkbox"
-                            checked={rol.Estado === "Activo"}
-                            onChange={() => cambiarEstadoRol(rol.IdRol)}
-                            className={
-                              rol.Estado === "Activo"
-                                ? "switch-green"
-                                : "switch-red"
-                            }
-                          />
-                          <span className="slider round"></span>
-                        </label>
-                      </td>
-                      <td>
-                        <div
-                          className="btn-group"
-                          role="group"
-                          aria-label="Acciones"
-                        >
-                          {/* Botón de actualizar */}
-                          <button
-                            className="btn btn-warning btn-sm mr-2 rounded-icon"
-                            data-toggle="modal"
-                            data-target="#modalRoles"
-                            onClick={() =>
-                              openModal(
-                                2,
-                                rol.IdRol,
-                                rol.NombreRol,
-                                rol.Permisos
-                              )
-                            }
-                            disabled={rol.Estado !== "Activo"}
-                            title="Editar"
+                  {currentRoles.map((rol) => {
+                    // Verificar si el rol está asociado a algún usuario
+                    const rolAsociado = usuarios.some(
+                      (usuario) => usuario.IdRol === rol.IdRol
+                    );
+
+                    return (
+                      <tr key={rol.IdRol}>
+                        <td>{rol.NombreRol}</td>
+                        <td>
+                          <label className="switch">
+                            <input
+                              type="checkbox"
+                              checked={rol.Estado === "Activo"}
+                              onChange={() => cambiarEstadoRol(rol.IdRol)}
+                              className={
+                                rol.Estado === "Activo"
+                                  ? "switch-green"
+                                  : "switch-red"
+                              }
+                            />
+                            <span className="slider round"></span>
+                          </label>
+                        </td>
+                        <td>
+                          <div
+                            className="btn-group"
+                            role="group"
+                            aria-label="Acciones"
                           >
-                            <i className="fas fa-sync-alt"></i>
-                          </button>
-                          {/* Botón de eliminar */}
-                          <button
-                            className="btn btn-danger btn-sm mr-2 rounded-icon"
-                            onClick={() => deleteRol(rol.IdRol, rol.NombreRol)}
-                            disabled={rol.Estado !== "Activo"}
-                            title="Eliminar"
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                          {/* Botón de detalle */}
-                          <button
-                            className="btn btn-info btn-sm rounded-icon"
-                            data-toggle="modal"
-                            data-target="#modalDetalleRol"
-                            onClick={() => openDetailModal(rol)}
-                            disabled={rol.Estado !== "Activo"}
-                            title="Detalle"
-                          >
-                            <i className="fas fa-info-circle"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            {/* Botón de actualizar */}
+                            <button
+                              className="btn btn-warning btn-sm mr-2 rounded-icon"
+                              data-toggle="modal"
+                              data-target="#modalRoles"
+                              onClick={() =>
+                                openModal(
+                                  2,
+                                  rol.IdRol,
+                                  rol.NombreRol,
+                                  rol.Permisos
+                                )
+                              }
+                              disabled={rol.Estado !== "Activo"}
+                              title="Editar"
+                            >
+                              <i className="fas fa-sync-alt"></i>
+                            </button>
+                            {/* Botón de eliminar */}
+                            {!rolAsociado && (
+                              <button
+                                className="btn btn-danger btn-sm mr-2 rounded-icon"
+                                onClick={() =>
+                                  deleteRol(rol.IdRol, rol.NombreRol)
+                                }
+                                disabled={rol.Estado !== "Activo"}
+                                title="Eliminar"
+                              >
+                                <i className="fas fa-trash-alt"></i>
+                              </button>
+                            )}
+                            {/* Botón de detalle */}
+                            <button
+                              className="btn btn-info btn-sm rounded-icon"
+                              data-toggle="modal"
+                              data-target="#modalDetalleRol"
+                              onClick={() => openDetailModal(rol)}
+                              disabled={rol.Estado !== "Activo"}
+                              title="Detalle"
+                            >
+                              <i className="fas fa-info-circle"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
