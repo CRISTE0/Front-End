@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 export const RecuperarContraseña = () => {
+  const [Correo, setCorreo] = useState("");
   return (
     <>
       {/* formulario */}
@@ -48,8 +49,3 @@ export const RecuperarContraseña = () => {
     </>
   );
 };
-
-
-
-
-
