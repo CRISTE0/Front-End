@@ -117,15 +117,15 @@ export const LandingHeader = () => {
         <div className="navbar align-self-center" style={{flexWrap:"inherit"}}>
           <div className="d-lg-none flex-sm-fill mt-3 mb-4 col-7 col-sm-auto pr-3"></div>
 
-          {/* <!-- Modal carrito --> */}
-          <a className="nav-icon text-decoration-none btn" href="#" data-toggle="modal" data-target="#exampleModal">
+          {/* <!-- Carrito --> */}
+          <Link className="nav-icon text-decoration-none btn" to={"/Carrito"}>
             <i className="fa fa-fw fa-cart-arrow-down text-black mr-1"></i>
-            <span className="position-absolute top-0 left-100 translate-middle badge rounded-pill bg-light text-dark">1</span>
-          </a>
+            <span className="position-absolute top-0 left-100 translate-middle badge rounded-pill bg-light text-dark" id="carritoNav">1</span>
+          </Link>
 
-          <a className="nav-icon text-decoration-none" href="#">
+          <Link className="nav-icon text-decoration-none" to={"/MAMAWEVO_EL_LOGIN"}>
             <i className="fa fa-fw fa-user text-black mr-3"></i>
-          </a>
+          </Link>
         </div>
         {/* <!-- Iconos nav --> */}
       </div>

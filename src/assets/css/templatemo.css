@@ -76,6 +76,10 @@ Table of contents
 #templatemo_main_nav a:hover { color: #69bb7e;}
 #templatemo_main_nav .navbar .nav-icon { margin-right: 20px;}
 
+#carritoNav{
+  margin: 8px -15px;
+}
+
 /* #navMainLanding{
   flex-wrap: inherit;
 } */

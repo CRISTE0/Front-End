@@ -11,6 +11,9 @@ export const Carrito = () => {
   
   const [cartItems, setCartItems] = useState([]);
 
+  // const [totalPedido, setTotalPedido] = useState(null);
+
+
   const fetchCartItems = async () => {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const itemDetails = await Promise.all(
@@ -119,7 +122,6 @@ export const Carrito = () => {
 
         console.log(cart);
 
-
       } else {
 
         const MySwal = withReactContent(Swal);
@@ -152,13 +154,16 @@ export const Carrito = () => {
             // Actualiza el estado del carrito en React
             setCartItems(prevCartItems => prevCartItems.filter(item => item.id !== idProductoSeleccionado));
 
+            console.log(JSON.parse(localStorage.getItem("cart")));
 
+
+            fetchCartItems();
             show_alerta("El producto fue eliminado del carrito", "success");
 
           } else if (result.dismiss === Swal.DismissReason.cancel) {
             show_alerta("El producto NO fue eliminado del carrito", "info");
           } else if (result.dismiss === Swal.DismissReason.backdrop || result.dismiss === Swal.DismissReason.esc) {
-            show_alerta("El producto NO fue eliminadodel carrito", "info");
+            show_alerta("El producto NO fue eliminado del carrito", "info");
           }
         });
       };
@@ -167,6 +172,19 @@ export const Carrito = () => {
       }
   };
 
+
+  const totalPedido = cartItems.reduce((total, item) => {
+    return total + (item.CantidadSeleccionada * item.ValorVenta || 0);
+  }, 0);
+
+
+  // Funcion para formatear el precio
+  function formatCurrency(value) {
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+    }).format(value);
+  }
 
   return (
     <>
@@ -199,7 +217,7 @@ export const Carrito = () => {
                         <h5>{item.Disenio.NombreDisenio}</h5>
 
                         {/* precio producto */}
-                        <p className="small mb-0">{item.ValorVenta}</p>
+                        <p className="small mb-0">{formatCurrency(item.ValorVenta) }</p>
                       </div>
 
                     </div>
@@ -208,7 +226,8 @@ export const Carrito = () => {
 
                       {/* Eliminar producto del carrito */}
                       {item.CantidadSeleccionada == 1 &&(
-                        <button className="m-3" style={{ "width": "30px", "border" : "none" , "background": "transparent" }}>
+                        <button className="m-3" onClick={() => disminuirCantidad(item.IdProducto,item.Disenio.NombreDisenio) }
+                         style={{ "width": "30px", "border" : "none" , "background": "transparent" }}>
                           <i className="fas fa-trash-alt"></i>
                         </button>
 
@@ -332,7 +351,8 @@ export const Carrito = () => {
 
                 <div className="d-flex justify-content-between">
                   <p className="mb-2">Subtotal</p>
-                  <p className="mb-2">$4.000.00</p>
+                  <p className="mb-2">{ formatCurrency(totalPedido)}</p>
+
                 </div>
 
                 {/* <div className="d-flex justify-content-between">
@@ -342,7 +362,7 @@ export const Carrito = () => {
 
                 <div className="d-flex justify-content-between mb-4">
                   <p className="mb-2">Total</p>
-                  <p className="mb-2">$4.000.00</p>
+                  <p className="mb-2">{ formatCurrency(totalPedido)}</p>
                 </div>
 
                 <button
