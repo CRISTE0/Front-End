@@ -18,12 +18,6 @@ export const Productos = () => {
   
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-  const getCantidadProducto = (productId) => {
-    const item = cart.find(item => item.IdProd == productId);
-    return item ? item.CantidadSeleccionada : 0;
-  };
-
-
   
   const getProductos = async () => {
     const respuesta = await axios.get(url);
@@ -35,6 +29,15 @@ export const Productos = () => {
     
   };
 
+
+  const getCantidadProducto = (productId) => {
+  
+    const item = cart.find(item => item.IdProd == productId);
+    
+    // Si encuentra el producto lo devuelve con la cantidad seleccionada
+    return item ? item.CantidadSeleccionada : 0;
+  };
+  
   const addToCart = (idProductoSeleccionado,cantidadProductoDisponible) => {
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
   
@@ -50,11 +53,17 @@ export const Productos = () => {
         
         // Si el producto existe y no supera la cantidad del producto, incrementa la cantidad
         cart[existingProductIndex].CantidadSeleccionada += 1;
+        getProductos();
+        getCantidadProducto(idProductoSeleccionado);
       }
 
     } else {
       // Si el producto no existe, agrégalo con una cantidad inicial de 1
       cart.push({ IdProd: idProductoSeleccionado, CantidadSeleccionada: 1 });
+      
+      getProductos();
+      getCantidadProducto(idProductoSeleccionado);
+    
     }
   
     localStorage.setItem('cart', JSON.stringify(cart));
@@ -82,6 +91,13 @@ export const Productos = () => {
     });
   };
   
+  // Funcion para formatear el precio
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+    }).format(value);
+  }
 
   useEffect(() => {
     getProductos();
@@ -139,7 +155,7 @@ export const Productos = () => {
                         <p>Cantidad Seleccionada : {getCantidadProducto(producto.IdProducto)} </p>
                       )}
 
-                      <p className="text-center mb-0">{producto.ValorVenta}</p>
+                      <p className="text-center mb-0">{formatCurrency(producto.ValorVenta)}</p>
                     </div>
 
                   </div>

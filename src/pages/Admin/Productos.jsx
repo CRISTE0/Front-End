@@ -130,23 +130,55 @@ export const Catalogo = () => {
 
   // funcion para guardar producto
   const guardarProducto = async () => {
+
+    const disenioSeleccionado = Disenios.find(
+      (disenio) => disenio.IdDisenio == IdDisenio
+    );
+
     const insumoSeleccionado = Insumos.find(
       (insumo) => insumo.IdInsumo == IdInsumo
     );
+    
+    // Validacion en el diseño
+    if (!IdDisenio) {
+      show_alerta("Diseño no seleccionado", "error");
+      return;
+    }else if (!disenioSeleccionado) {
+      show_alerta("Diseño no encontrado", "error");
+      return;
+    }
 
-    if (!insumoSeleccionado) {
+    // Validacion en el insumo
+    if (!IdInsumo) {
+      show_alerta("Insumo no seleccionado", "error");
+      return;
+    }else if (!insumoSeleccionado) {
       show_alerta("Insumo no encontrado", "error");
       return;
     }
 
+    //Validacion en la referencia
+    if (!Referencia) {
+      show_alerta("Escribe la referencia","error");
+      return;
+     
+      // Validar que la referencia siga el patrón TST-001
+    }else if (!/^[A-Z]{3}-\d{3}$/.test(Referencia)) {
+      show_alerta("La referencia debe ser en el formato AAA-000","error")
+      return;
+    }
+
+
+    //Validacion en la cantidad del producto
     if (parseInt(Cantidad) > insumoSeleccionado.Cantidad) {
       show_alerta(
-        "La cantidad de productos no puede ser mayor que la cantidad de insumos disponibles",
+        "La cantidad no puede superar a la del insumo seleccionado",
         "error"
       );
       return;
     }
 
+    //Validacion en valor del producto
     if (parseFloat(ValorVenta) <= parseFloat(insumoSeleccionado.ValorCompra)) {
       show_alerta(
         "El valor de venta debe ser mayor que el valor de compra del insumo",
@@ -175,6 +207,7 @@ export const Catalogo = () => {
     }
   };
 
+  
   // Función para validar la referencia
   const validateReferencia = (value) => {
     if (!value) {
@@ -194,6 +227,9 @@ export const Catalogo = () => {
     }
     if (!/^\d+$/.test(value)) {
       return "La cantidad solo puede contener números";
+    }
+    if (selectedInsumo && value > selectedInsumo.Cantidad) {
+      return "La cantidad no puede superar a la del insumo seleccionado";
     }
     return "";
   };
@@ -219,6 +255,9 @@ export const Catalogo = () => {
     const value = e.target.value;
 
     const disenio = Disenios.find((d) => d.IdDisenio == value);
+
+    console.log(disenio);
+
 
     setIdDisenio(value);
     setSelectedDisenio(disenio);
@@ -471,7 +510,6 @@ export const Catalogo = () => {
 
 
 
-
   const cambiarEstadoProducto = async (IdProducto) => {
     try {
       const productoActual = productosAdmin.find(
@@ -625,6 +663,14 @@ export const Catalogo = () => {
     }).format(value);
   }
 
+  const precioSugerido = (precioDisenio,precionInsumo) =>{
+    let subTotal = precioDisenio+precionInsumo;
+    let margen = subTotal*0.30;
+    let total = subTotal+margen;
+
+    return formatCurrency(total);
+  }
+
   return (
     <>
       {/* Modal producto */}
@@ -656,6 +702,8 @@ export const Catalogo = () => {
             <div className="modal-body">
               <form id="crearClienteForm">
                 <div className="form-row">
+
+                  {/* Diseño del Producto */}
                   <div className="form-group col-md-5">
                     <label htmlFor="idDisenio">Diseño del Producto:</label>
                     <select
@@ -685,6 +733,7 @@ export const Catalogo = () => {
                     )}
                   </div>
 
+                  {/* ToolTip imagen de referencia*/}
                   <div className="col-md-1 mt-4 pt-3">
                     <i className="tooltipReferenceImage fas fa-info-circle">
                       {selectedDisenio && (
@@ -699,6 +748,7 @@ export const Catalogo = () => {
                     </i>
                   </div>
 
+                  {/* Insumo del Producto */}
                   <div className="form-group col-md-5">
                     <label htmlFor="idInsumo">Insumo del Producto:</label>
                     <select
@@ -724,6 +774,7 @@ export const Catalogo = () => {
                     )}
                   </div>
 
+                  {/* ToolTip talla del producto*/}
                   <div className="col-md-1 mt-4 pt-3">
                     <i className="tooltipReferenceImage fas fa-info-circle">
                       {selectedInsumo && (
@@ -737,6 +788,7 @@ export const Catalogo = () => {
                     </i>
                   </div>
 
+                  {/* Referencia del Producto*/}
                   <div className="form-group col-md-6">
                     <label htmlFor="Referencia">Referencia del Producto:</label>
                     <input
@@ -753,14 +805,15 @@ export const Catalogo = () => {
                     {renderErrorMessage(errors.Referencia)}
                   </div>
 
+                  {/* Cantidad del producto */}
                   <div className="form-group col-md-6">
-                    <label htmlFor="nombreCliente">Cantidad:</label>
+                    <label htmlFor="cantidadProducto">Cantidad:</label>
                     <input
                       type="text"
                       className={`form-control ${
                         errors.Cantidad ? "is-invalid" : ""
                       }`}
-                      id="nombreCliente"
+                      id="cantidadProducto"
                       placeholder={
                         selectedInsumo
                           ? `La cantidad maxima del insumo es: ${selectedInsumo.Cantidad}`
@@ -773,6 +826,7 @@ export const Catalogo = () => {
                     {renderErrorMessage(errors.Cantidad)}
                   </div>
 
+                  {/* Valor venta del producto */}
                   <div className="form-group col-md-12">
                     <label htmlFor="direccionCliente">
                       Valor de la venta del producto:
@@ -785,9 +839,7 @@ export const Catalogo = () => {
                       id="direccionCliente"
                       placeholder={
                         selectedInsumo
-                          ? `El precio de compra del insumo es: ${formatCurrency(
-                              selectedInsumo.ValorCompra
-                            )}`
+                          ? `Precio sugerido para el producto es: ${precioSugerido(selectedDisenio.PrecioDisenio,selectedInsumo.ValorCompra )}`
                           : "Ingrese el valor del producto"
                       }
                       required
@@ -1358,21 +1410,7 @@ export const Catalogo = () => {
                       </td>
 
                       <td>
-                          <label className="switch">
-                            <input
-                              type="checkbox"
-                              checked={producto.Estado === "Activo"}
-                              onChange={() =>
-                                cambiarEstadoProducto(producto.IdProducto)
-                              }
-                              className={
-                                producto.Estado === "Activo"
-                                  ? "switch-green"
-                                  : "switch-red"
-                              }
-                            />
-                            <span className="slider round"></span>
-                          </label>
+                         
                         <label className="switch">
                           <input
                             type="checkbox"

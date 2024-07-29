@@ -6,6 +6,7 @@ import about from "./about.png";
 import cliente1 from "./clienteReciente1.jpg";
 import cliente2 from "./clienteReciente2.jpg";
 import cliente3 from "./clienteReciente3.jpg";
+import cuidados from "./cuidadosPrenda.png";
 
 
 export default [
@@ -17,4 +18,5 @@ export default [
   cliente1,
   cliente2,
   cliente3,
+  cuidados
 ];
