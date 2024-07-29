@@ -64,7 +64,7 @@ export const Clientes = () => {
       setTipoDocumento(cliente.TipoDocumento);
       setNroDocumento(cliente.NroDocumento);
       setNombreApellido(cliente.NombreApellido);
-      setUsuario(usuario.Usuario);
+      setUsuario(cliente.Usuario);
       setTelefono(cliente.Telefono);
       setDireccion(cliente.Direccion);
       setCorreo(cliente.Correo);

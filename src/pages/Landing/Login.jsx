@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
 export const Login = () => {
-  const [Correo, setCorreo] = useState("");
+  const [Usuario, setUsuario] = useState("");
   const [Contrasenia, setContrasenia] = useState("");
 
   const [errors, setErrors] = useState({
@@ -30,19 +30,15 @@ export const Login = () => {
     });
   };
 
-  const validateCorreo = (value) => {
+  const validateUsuario = (value) => {
     if (!value) {
-      return "Ingresa tu correo electrónico";
+      return "Escribe el usuario";
     }
-    if (/\s/.test(value)) {
-      return "El correo electrónico no puede contener espacios";
+    if (!/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ!@#$%^&*(),.?":{}|<>]+$/.test(value)) {
+      return "El nombre de usuario solo puede contener letras, números y caracteres especiales, sin espacios";
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      return "Ingresa un correo electrónico válido";
-    }
-    const length = value.length;
-    if (length < 10 || length > 50) {
-      return "El correo debe tener entre 10 y 50 caracteres";
+    if (value.length < 10 || value.length > 60) {
+      return "El usuario debe tener entre 10 y 60 caracteres";
     }
     return "";
   };
@@ -56,13 +52,15 @@ export const Login = () => {
     return "";
   };
 
-  const handleChangeCorreo = (e) => {
-    const value = e.target.value;
-    setCorreo(value);
-    const errorMessage = validateCorreo(value);
+  const handleChangeUsuario = (e) => {
+    const value = e.target.value.replace(/\s+/g, ""); // Eliminar todos los espacios
+    setUsuario(value);
+  
+    // Validar el usuario
+    const errorMessage = validateUsuario(value);
     setErrors((prevState) => ({
       ...prevState,
-      correo: errorMessage,
+      usuario: errorMessage,
     }));
   };
 
@@ -117,18 +115,18 @@ export const Login = () => {
           </div>
           <form action="#" className="w-100">
             <div className="mb-3 text-center">
-              <label htmlFor="correo" className="form-label">
-                Correo
+              <label htmlFor="usuario" className="form-label">
+                Usuario
               </label>
               <div className="col-12 col-md-3 mx-auto">
                 <input
                   type="text"
                   className="form-control"
-                  name="Correo"
-                  id="correo"
-                  placeholder="Correo"
-                  value={Correo}
-                  onChange={handleChangeCorreo}
+                  name="Usuario"
+                  id="usuario"
+                  placeholder="Usuario"
+                  value={Usuario}
+                  onChange={handleChangeUsuario}
                 />
                 {renderErrorMessage(errors.correo)}
               </div>
