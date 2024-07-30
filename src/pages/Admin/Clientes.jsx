@@ -793,7 +793,7 @@ export const Clientes = () => {
       </div>
 
       {/* Modal para cambiar contra */}
-      <div
+      {/* <div
         className="modal fade"
         id="modalCambiarContrasenia"
         tabIndex="-1"
@@ -861,7 +861,7 @@ export const Clientes = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* Fin modal cambiar la contra*/}
 
       <div className="container-fluid">
@@ -967,7 +967,7 @@ export const Clientes = () => {
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                          <button
+                          {/* <button
                             type="button"
                             className="btn btn-primary btn-sm mr-2"
                             title="Cambiar Contraseña"
@@ -975,7 +975,7 @@ export const Clientes = () => {
                             disabled={cliente.Estado === "Inactivo"}
                           >
                             <i className="fas fa-key"></i>
-                          </button>
+                          </button> */}
                         </div>
                       </td>
                     </tr>
