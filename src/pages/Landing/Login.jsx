@@ -2,13 +2,16 @@ import React, { useState } from "react"; // Asegúrate de importar useState
 import { Link } from "react-router-dom";
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 export const Login = () => {
   const [Usuario, setUsuario] = useState("");
   const [Contrasenia, setContrasenia] = useState("");
+  const url = "http://localhost:3000/api/authWeb/login";
 
   const [errors, setErrors] = useState({
-    correo: "",
+    usuario: "",
     contrasenia: "",
   });
 
@@ -82,8 +85,8 @@ export const Login = () => {
   const guardarCliente = async (e) => {
     e.preventDefault();
     const cleanedContrasenia = Contrasenia.trim();
-    if (!Correo) {
-      show_alerta("El correo es necesario", "error");
+    if (!Usuario) {
+      show_alerta("El usuario es necesario", "error");
       return;
     }
     if (!cleanedContrasenia) {
@@ -93,7 +96,44 @@ export const Login = () => {
 
     try {
       // Lógica para guardar el cliente
-      show_alerta("Operación exitosa", "success");
+        // Crear Cliente
+        await enviarSolicitud( {
+          Usuario,
+          Contrasenia,
+        });
+      
+      // show_alerta("Operación exitosa", "success");
+    } catch (error) {
+      if (error.response) {
+        show_alerta(error.response.data.message, "error");
+      } else if (error.request) {
+        show_alerta("Error en la solicitud", "error");
+      } else {
+        show_alerta("Error desconocido", "error");
+      }
+      console.log(error);
+    }
+  };
+
+  const enviarSolicitud = async (parametros) => {
+    console.log(parametros);
+    try {
+      let respuesta;
+      respuesta = await axios.post(url, parametros , {withCredentials:true});
+
+      const msj = respuesta.data.message;
+
+      console.log(respuesta);
+      show_alerta(msj, "success");
+
+      const token = respuesta.data.token;
+      const decoded = jwtDecode(token);
+
+      console.log(decoded.id);
+      console.log(decoded.name);
+      
+      // show_alerta("Cliente creado con éxito", "success", { timer: 2000 });
+      
     } catch (error) {
       if (error.response) {
         show_alerta(error.response.data.message, "error");
