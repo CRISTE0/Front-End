@@ -1159,14 +1159,14 @@ export const Canvas = () => {
           </div>
       </div>
 
-      <div className="col-sm pl-5">
-        <input type="text" id="text-input" placeholder="Escribe aquí" onChange={handleTextChange}/>
+      <div className="col-sm pl-5 form-control">
+        <input type="text" id="text-input" className="col-md-6" placeholder="Escribe aquí" onChange={handleTextChange}/>
         <br />
         <br />
 
         {showTextFont && (
           <>
-            <select id="text-font" onChange={handleTextFontChange} defaultValue={""}>
+            <select id="text-font" className="col-md-6" onChange={handleTextFontChange} defaultValue={""}>
               <option value="" disabled>Elige la fuente del texto</option>
               <option value="Palatino">Palatino</option>
               <option value="Trebuchet MS">Trebuchet MS</option>
@@ -1182,7 +1182,7 @@ export const Canvas = () => {
 
         {showTextFontSize && (
         <> 
-        <input type="number" defaultValue="30" min={30} max={90} id="text-size" onChange={handleFontSizeChange}/>
+        <input type="number" defaultValue="30" min={30} max={90} id="text-size" className="form-control col-md-6" onChange={handleFontSizeChange}/>
         <br />
         <br />
         
@@ -1192,7 +1192,7 @@ export const Canvas = () => {
 
         {showTextColor &&(
         <>
-        <input type="color" id="text-color" onChange={handleFontColorChange}/>
+        <input type="color" id="text-color" className="form-control col-md-2" onChange={handleFontColorChange}/>
 
         <br />
         <br />
@@ -1201,7 +1201,7 @@ export const Canvas = () => {
 
         {showTextPosition &&(
         <>
-          <select id="text-position" onChange={handleTextPositionChange} defaultValue={""}>
+          <select id="text-position" className="form-control col-md-6" onChange={handleTextPositionChange} defaultValue={""}>
             <option value="" disabled>Elige la posicion del texto</option>
             <option value="Arriba Izquierda">Arriba Izquierda</option>
             <option value="Arriba Derecha">Arriba Derecha</option>
