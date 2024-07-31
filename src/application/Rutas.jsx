@@ -24,6 +24,7 @@ import { Colores } from "../pages/Admin/Colores";
 import { Carrito } from "../pages/Landing/Carrito";
 import { Insumos } from "../pages/Admin/Insumos"
 import { ProductoSolo } from "../pages/Landing/ProductoSolo";
+import { LoginAdmin } from "../pages/Landing/LoginAdmin";
 
 export const Rutas = () => {
   return (
@@ -52,6 +53,7 @@ export const Rutas = () => {
         <Route path="/admin/Clientes" Component={()=> <AdminLayout> <Clientes /> </AdminLayout> } />
         <Route path="/admin/Ventas" Component={()=> <AdminLayout> <Ventas /> </AdminLayout> } />
         <Route path="/admin/Pedidos" Component={()=> <AdminLayout> <Pedidos /> </AdminLayout> } />
+        <Route path="/admin/login" Component={()=> <LandingLayout> < LoginAdmin/> </LandingLayout> } />
 
 
         <Route path="*" Component={() => <h1>404</h1>} />
