@@ -12,7 +12,7 @@ export const Login = () => {
 
   const [errors, setErrors] = useState({
     usuario: "",
-    contrasenia: "",
+    contrasenia: ""
   });
 
   const show_alerta = (message, type) => {
@@ -34,13 +34,19 @@ export const Login = () => {
   };
 
   const validateUsuario = (value) => {
+    
     if (!value) {
+      console.log("bazio:(");
       return "Escribe el usuario";
+
     }
-    if (!/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ!@#$%^&*(),.?":{}|<>]+$/.test(value)) {
-      return "El nombre de usuario solo puede contener letras, números y caracteres especiales, sin espacios";
+    if (!/^[a-zA-Z0-9ñÑ-]+$/.test(value)) {
+      console.log("carac :(");
+      return "El nombre de usuario solo puede contener letras, números y guiones, sin espacios ni caracteres especiales";
+
     }
-    if (value.length < 10 || value.length > 60) {
+    if (value.length < 10 || value.length > 60) { 
+      console.log("mecha corta :(");
       return "El usuario debe tener entre 10 y 60 caracteres";
     }
     return "";
@@ -59,6 +65,7 @@ export const Login = () => {
     const value = e.target.value.replace(/\s+/g, ""); // Eliminar todos los espacios
     setUsuario(value);
   
+    console.log(value);
     // Validar el usuario
     const errorMessage = validateUsuario(value);
     setErrors((prevState) => ({
@@ -68,8 +75,13 @@ export const Login = () => {
   };
 
   const handleChangeContrasenia = (e) => {
-    setContrasenia(e.target.value);
-    const errorMessage = validateContrasenia(e.target.value);
+    const value = e.target.value.replace(/\s+/g, ""); // Eliminar todos los espacios
+
+    setContrasenia(value);
+
+    console.log(value);
+
+    const errorMessage = validateContrasenia(value);
     setErrors((prevState) => ({
       ...prevState,
       contrasenia: errorMessage,
@@ -77,31 +89,48 @@ export const Login = () => {
   };
 
   const renderErrorMessage = (errorMessage) => {
+    console.log(errors.usuario);
+    console.log(errors.contrasenia);
     return errorMessage ? (
       <div className="invalid-feedback">{errorMessage}</div>
     ) : null;
   };
 
-  const guardarCliente = async (e) => {
-    e.preventDefault();
+  const loguearCliente = async () => {
+    // e.preventDefault();
     const cleanedContrasenia = Contrasenia.trim();
-    if (!Usuario) {
+    const cleanedUsuario = Usuario.trim();
+    
+    if (!cleanedUsuario) {
       show_alerta("El usuario es necesario", "error");
+      return;
+    }
+    console.log(cleanedUsuario);
+
+    if (!/^[a-zA-Z0-9ñÑ-]+$/.test(cleanedUsuario)) {
+      show_alerta("El nombre de usuario solo puede contener letras, números y caracteres especiales, sin espacios", "error");
+      return;
+    }
+    if (cleanedUsuario.length < 10 || cleanedUsuario.length > 60) {
+      show_alerta("El usuario debe tener entre 10 y 60 caracteres", "error");
       return;
     }
     if (!cleanedContrasenia) {
       show_alerta("La contraseña es requerida", "error");
       return;
     }
+    if (Contrasenia.length < 8 || Contrasenia.length > 15) {
+      show_alerta("La contraseña debe tener entre 8 y 15 caracteres", "error");
+      return;
+    };
 
     try {
       // Lógica para guardar el cliente
-        // Crear Cliente
-        await enviarSolicitud( {
-          Usuario,
-          Contrasenia,
-        });
-      
+      await enviarSolicitud( {
+        Usuario,
+        Contrasenia,
+      });
+
       // show_alerta("Operación exitosa", "success");
     } catch (error) {
       if (error.response) {
@@ -153,7 +182,7 @@ export const Login = () => {
           <div className="col-12 text-center">
             <h2 className="fw-bold my-4">Login</h2>
           </div>
-          <form action="#" className="w-100">
+          <div className="w-100">
             <div className="mb-3 text-center">
               <label htmlFor="usuario" className="form-label">
                 Usuario
@@ -161,16 +190,20 @@ export const Login = () => {
               <div className="col-12 col-md-3 mx-auto">
                 <input
                   type="text"
-                  className="form-control"
+                  className={`form-control ${
+                    errors.usuario ? "is-invalid" : ""
+                  }`}
                   name="Usuario"
                   id="usuario"
                   placeholder="Usuario"
                   value={Usuario}
                   onChange={handleChangeUsuario}
                 />
-                {renderErrorMessage(errors.correo)}
+            {renderErrorMessage(errors.usuario)}
               </div>
             </div>
+
+                {/* {renderErrorMessage(errors.usuario)} */}
             <div className="mb-3 text-center">
               <label htmlFor="password" className="form-label">
                 Contraseña
@@ -178,7 +211,9 @@ export const Login = () => {
               <div className="col-12 col-md-3 mx-auto">
                 <input
                   type="password"
-                  className="form-control"
+                  className={`form-control ${
+                    errors.contrasenia ? "is-invalid" : ""
+                  }`}
                   name="password"
                   id="password"
                   placeholder="Contraseña"
@@ -188,9 +223,10 @@ export const Login = () => {
                 {renderErrorMessage(errors.contrasenia)}
               </div>
             </div>
+
             <div className="d-grid text-center">
               <div className="col-12 col-md-3 mx-auto">
-                <button type="submit" className="btn btn-success" onClick={guardarCliente}>
+                <button className="btn btn-success" onClick={loguearCliente}>
                   Iniciar sesión
                 </button>
               </div>
@@ -204,7 +240,7 @@ export const Login = () => {
                 ¿Perdiste tu contraseña? <Link to={"/RecuperarContraseña"}>Recuperar contraseña</Link>
               </samp>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </>
