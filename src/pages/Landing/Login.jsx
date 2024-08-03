@@ -8,6 +8,7 @@ import { jwtDecode } from "jwt-decode";
 export const Login = () => {
   const [Usuario, setUsuario] = useState("");
   const [Contrasenia, setContrasenia] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // Estado para controlar la visibilidad de la contraseña
   const url = "http://localhost:3000/api/authWeb/login";
 
   const [errors, setErrors] = useState({
@@ -34,16 +35,13 @@ export const Login = () => {
   };
 
   const validateUsuario = (value) => {
-    
     if (!value) {
       console.log("bazio:(");
       return "Escribe el usuario";
-
     }
     if (!/^[a-zA-Z0-9ñÑ-]+$/.test(value)) {
       console.log("carac :(");
       return "El nombre de usuario solo puede contener letras, números y guiones, sin espacios ni caracteres especiales";
-
     }
     if (value.length < 10 || value.length > 60) { 
       console.log("mecha corta :(");
@@ -64,7 +62,7 @@ export const Login = () => {
   const handleChangeUsuario = (e) => {
     const value = e.target.value.replace(/\s+/g, ""); // Eliminar todos los espacios
     setUsuario(value);
-  
+
     console.log(value);
     // Validar el usuario
     const errorMessage = validateUsuario(value);
@@ -76,7 +74,6 @@ export const Login = () => {
 
   const handleChangeContrasenia = (e) => {
     const value = e.target.value.replace(/\s+/g, ""); // Eliminar todos los espacios
-
     setContrasenia(value);
 
     console.log(value);
@@ -126,7 +123,7 @@ export const Login = () => {
 
     try {
       // Lógica para guardar el cliente
-      await enviarSolicitud( {
+      await enviarSolicitud({
         Usuario,
         Contrasenia,
       });
@@ -148,7 +145,7 @@ export const Login = () => {
     console.log(parametros);
     try {
       let respuesta;
-      respuesta = await axios.post(url, parametros , {withCredentials:true});
+      respuesta = await axios.post(url, parametros, { withCredentials: true });
 
       const msj = respuesta.data.message;
 
@@ -199,18 +196,17 @@ export const Login = () => {
                   value={Usuario}
                   onChange={handleChangeUsuario}
                 />
-            {renderErrorMessage(errors.usuario)}
+                {renderErrorMessage(errors.usuario)}
               </div>
             </div>
 
-                {/* {renderErrorMessage(errors.usuario)} */}
             <div className="mb-3 text-center">
               <label htmlFor="password" className="form-label">
                 Contraseña
               </label>
-              <div className="col-12 col-md-3 mx-auto">
+              <div className="col-12 col-md-3 mx-auto input-group">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   className={`form-control ${
                     errors.contrasenia ? "is-invalid" : ""
                   }`}
@@ -220,6 +216,17 @@ export const Login = () => {
                   value={Contrasenia}
                   onChange={handleChangeContrasenia}
                 />
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary mx-1"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                        <i className="fas fa-eye-slash"></i>
+                      ) : (
+                        <i className="fas fa-eye"></i>
+                      )}
+                </button>
                 {renderErrorMessage(errors.contrasenia)}
               </div>
             </div>

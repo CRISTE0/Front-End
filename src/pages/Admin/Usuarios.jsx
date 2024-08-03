@@ -80,9 +80,9 @@ export const Usuarios = () => {
       setOperation(2);
       setTitle("Actualizar Usuario");
       setErrors({
-        usuario: "",
-        correo: "",
-        contrasenia: "",
+        usuario: usuario.usuario,
+        correo: usuario.usuario,
+        contrasenia: usuario.usuario,
       });
     }
 
@@ -550,7 +550,7 @@ export const Usuarios = () => {
       {/* Fin modal crear/editar usuario */}
 
       {/* Modal para cambiar contra */}
-      <div
+      {/* <div
         className="modal fade"
         id="modalCambiarContrasenia"
         tabIndex="-1"
@@ -618,7 +618,7 @@ export const Usuarios = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* Fin modal cambiar la contra*/}
 
       {/* Inicio de usuarios */}
@@ -723,7 +723,7 @@ export const Usuarios = () => {
                         >
                           <i className="fas fa-solid fa-info-circle"></i>
                         </button>
-                        <button
+                        {/* <button
                           type="button"
                           className="btn btn-primary btn-sm mr-2"
                           title="Cambiar Contraseña"
@@ -731,7 +731,7 @@ export const Usuarios = () => {
                           disabled={usuario.Estado === "Inactivo"}
                         >
                           <i className="fas fa-key"></i>
-                        </button>
+                        </button> */}
                       </td>
                     </tr>
                   ))}

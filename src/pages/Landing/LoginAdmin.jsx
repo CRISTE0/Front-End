@@ -8,9 +8,8 @@ import { jwtDecode } from "jwt-decode";
 export const LoginAdmin = () => {
   const [Usuario, setUsuario] = useState("");
   const [Contrasenia, setContrasenia] = useState("");
-
+  const [showPassword, setShowPassword] = useState(false); // Estado para controlar la visibilidad de la contraseña
   const url = "http://localhost:3000/api/authWeb/loginAdmin";
-
 
   const [errors, setErrors] = useState({
     usuario: "",
@@ -164,18 +163,6 @@ export const LoginAdmin = () => {
 
   return (
     <>
-      {/* <style jsx>{`
-        .divider:after,
-        .divider:before {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: #eee;
-        }
-
-      `}</style> */}
-
-
 <section className="my-5">
       <div className="container py-5 h-100">
         <div className="row d-flex align-items-center justify-content-center h-100">
@@ -191,7 +178,7 @@ export const LoginAdmin = () => {
             <h2 className="fw-bold my-4">Login</h2>
           </div>
             <div>
-              {/* Uusario */}
+              {/* Usuario */}
               <div data-mdb-input-init className="form-outline mb-4">
                 <input 
                   type="text" 
@@ -209,9 +196,9 @@ export const LoginAdmin = () => {
               </div>
 
               {/* Contraseña */}
-              <div data-mdb-input-init className="form-outline mb-4">
+              <div data-mdb-input-init className="form-outline mb-4 input-group">
                 <input 
-                  type="password" 
+                  type={showPassword ? "text" : "password"}
                   id="form1Example23" 
                   className={`form-control form-control-lg ${
                     errors.contrasenia ? "is-invalid" : ""
@@ -221,8 +208,18 @@ export const LoginAdmin = () => {
                   value={Contrasenia}
                   onChange={handleChangeContrasenia}
                 />
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary mx-1"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                        <i className="fas fa-eye-slash"></i>
+                      ) : (
+                        <i className="fas fa-eye"></i>
+                      )}
+                </button>
                 {renderErrorMessage(errors.contrasenia)}
-                <label className="form-label" htmlFor="form1Example23">Password</label>
               </div>
 
               <div className="d-flex justify-content-around align-items-center mb-4">
@@ -241,16 +238,11 @@ export const LoginAdmin = () => {
                 onClick={loguearUsuario}>
                 Iniciar sesión
               </button>
-
-
-             
             </div>
           </div>
         </div>
       </div>
     </section>
-
-
     </>
   );
 };

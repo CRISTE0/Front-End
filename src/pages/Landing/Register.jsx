@@ -506,10 +506,6 @@ const validateValContrasenia = (value, contrasenia) => {
                     onChange={handleChangeNroDocumento}
                   />
                   {renderErrorMessage(errors.nroDocumento)}
-                  <small className="form-text text-muted">
-                    Ingrese un documento válido (entre 6 y 10 dígitos
-                    numéricos).
-                  </small>
                 </div>
                 {/*Fin Documento */}
 
@@ -682,9 +678,6 @@ const validateValContrasenia = (value, contrasenia) => {
                     onChange={handleChangeTelefono}
                   />
                   {renderErrorMessage(errors.telefono)}
-                  <small className="form-text text-muted">
-                    Ingrese un número de teléfono válido (10 dígitos).
-                  </small>
                 </div>
                 {/*fin telefono */}
               </div>
