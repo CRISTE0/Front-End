@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import Cookies from "js-cookie";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import {Inicio} from "../pages/Landing/Inicio";
 import {Productos} from "../pages/Landing/Productos";
@@ -27,6 +28,9 @@ import { ProductoSolo } from "../pages/Landing/ProductoSolo";
 import { LoginAdmin } from "../pages/Landing/LoginAdmin";
 
 export const Rutas = () => {
+
+
+
   return (
     <BrowserRouter>
       <Routes>
