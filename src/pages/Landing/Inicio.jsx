@@ -151,7 +151,7 @@ export const Inicio = () => {
           <div className="col-md-6 col-lg-3 pb-5">
             <div className="h-100 py-5 services-icon-wap shadow">
               <div className="h1 text-success text-center">
-                <i className="fa fa-truck fa-lg"></i>
+                <i className="fa fa-shipping-fast fa-lg"></i>
               </div>
               <h2 className="h5 mt-4 text-center">Domicilios Área Metropolitana</h2>
             </div>

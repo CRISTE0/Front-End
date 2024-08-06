@@ -1,15 +1,21 @@
 import React, { useState } from "react"; // Asegúrate de importar useState
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { useAuth } from "../../context/AuthProvider";
 
 export const Login = () => {
   const [Usuario, setUsuario] = useState("");
   const [Contrasenia, setContrasenia] = useState("");
   const [showPassword, setShowPassword] = useState(false); // Estado para controlar la visibilidad de la contraseña
   const url = "http://localhost:3000/api/authWeb/login";
+
+  const {login} = useAuth();
+  const navigate = useNavigate();
+
+  const {auth} = useAuth();
 
   const [errors, setErrors] = useState({
     usuario: "",
@@ -153,10 +159,18 @@ export const Login = () => {
       show_alerta(msj, "success");
 
       const token = respuesta.data.token;
-      const decoded = jwtDecode(token);
+      // setToken(token);
 
-      console.log(decoded.id);
-      console.log(decoded.name);
+      
+      const decoded = jwtDecode(token);
+      login(decoded,token);
+      
+      navigate('/');
+
+
+      console.log(decoded);
+      console.log(decoded.idCliente);
+      console.log(decoded.nombre);
       
       // show_alerta("Cliente creado con éxito", "success", { timer: 2000 });
       

@@ -2,17 +2,34 @@ import React, { useEffect, useState } from "react";
 import camisetas from "../../assets/img/camisetas";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
+import {useAuth} from "../../context/AuthProvider";
 
 import axios from "axios";
 
 export const Carrito = () => {
 
+  const {auth} = useAuth();
+
+
+  console.log(auth);
+  
+
   // validar si no se estropea sin el filtro
   
   const [cartItems, setCartItems] = useState([]);
+  const [Cliente, setCliente] = useState("");
 
   // const [totalPedido, setTotalPedido] = useState(null);
 
+  const getCliente = async () => {
+    console.log(auth.idCliente);
+    
+    let respuesta = await axios.get(`http://localhost:3000/api/clientes/${auth.idCliente}`)
+
+    setCliente(respuesta.data);
+    // console.log(respuesta);
+    
+  } 
 
   const fetchCartItems = async () => {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -38,8 +55,9 @@ export const Carrito = () => {
   };
   
   useEffect(() => {
-    
+    getCliente();
     fetchCartItems();
+
   }, []);
 
   const show_alerta = (message, type) => {
@@ -270,82 +288,72 @@ export const Carrito = () => {
                   
                 </div>
 
-                <form className="mt-4">
+                <div className="mt-4">
                   <div
-                    data-mdb-input-init
                     className="form-outline form-white mb-4"
                   >
-                    <input
-                      type="text"
-                      id="typeName"
-                      className="form-control form-control-lg"
-                      size="17"
-                      placeholder=""
-                    />
-                    <label className="form-label" htmlFor="typeName">
+                    <label className="form-label" htmlFor="Nombre">
                       Nombre Completo
                     </label>
+                   
+                    <input
+                      type="text"
+                      id="Nombre"
+                      className="form-control form-control-lg"
+                      value={Cliente.NombreApellido}
+                    />
                   </div>
 
                   <div
-                    data-mdb-input-init
                     className="form-outline form-white mb-4"
                   >
-                    <input
-                      type="text"
-                      id="typeText"
-                      className="form-control form-control-lg"
-                      size="17"
-                      placeholder=""
-                      minLength="19"
-                      maxLength="19"
-                    />
-                    <label className="form-label" htmlFor="typeText">
+                    <label className="form-label" htmlFor="Telefono">
                       Teléfono
                     </label>
+
+                    <input
+                      type="text"
+                      id="Telefono"
+                      className="form-control form-control-lg"
+                      value={Cliente.Telefono}
+
+                    />
                   </div>
 
-                  <div className="row mb-4">
-                    <div className="col-md-6">
                       <div
-                        data-mdb-input-init
                         className="form-outline form-white"
                       >
+                        <label className="form-label" htmlFor="typeExpp">
+                          Dirección
+                        </label>
                         <input
                           type="text"
                           id="typeExpp"
                           className="form-control form-control-lg"
                           placeholder=""
-                          size="7"
-                          minLength="7"
-                          maxLength="7"
+                          value={Cliente.Direccion}
+
                         />
-                        <label className="form-label" htmlFor="typeExpp">
-                          Dirección
-                        </label>
                       </div>
-                    </div>
-                    <div className="col-md-6">
+                    
+                    
+
                       <div
-                        data-mdb-input-init
                         className="form-outline form-white"
                       >
-                        <input
-                          type="password"
-                          id="typeTextll"
-                          className="form-control form-control-lg"
-                          placeholder=""
-                          size="1"
-                          minLength="3"
-                          maxLength="3"
-                        />
-                        <label className="form-label" htmlFor="typeTextll">
+                        <label className="form-label" htmlFor="Correo">
                           Correo
                         </label>
+                        <input
+                          type="text"
+                          id="Correo"
+                          className="form-control form-control-lg"
+                          placeholder=""
+                          value={Cliente.Correo}
+                          />
                       </div>
-                    </div>
-                  </div>
-                </form>
+                   
+                </div>
 
                 <hr className="my-4" />
 
@@ -369,16 +377,16 @@ export const Carrito = () => {
                   type="button"
                   data-mdb-button-init
                   data-mdb-ripple-init
-                  className="btn btn-info btn-block btn-lg"
+                  className="btn btn-success btn-block btn-lg"
                 >
                   <div className="d-flex justify-content-between">
-                    <span>$4000.00</span>
+                    <span>Realizar Pedido</span>
                     <span>
-                      Realizar Pedido{" "}
-                      <i className="fas fa-long-arrow-alt-right ms-2"></i>
+                      <i className="fas fa-shopping-basket ms-2"></i>
                     </span>
                   </div>
                 </button>
+
               </div>
             </div>
           </div>
