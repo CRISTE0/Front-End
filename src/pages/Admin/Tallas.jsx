@@ -2,8 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import Pagination from "../../assets/js/Pagination";
-import SearchBar from "../../assets/js/SearchBar";
+import Pagination from "../../components/Pagination/Pagination";
+import SearchBar from "../../components/SearchBar/SearchBar";
 
 export const Tallas = () => {
   let url = "http://localhost:3000/api/tallas";

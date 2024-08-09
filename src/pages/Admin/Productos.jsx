@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-import Pagination from "../../assets/js/Pagination";
-import SearchBar from "../../assets/js/SearchBar";
+import Pagination from "../../components/Pagination/Pagination";
+import SearchBar from "../../components/SearchBar/SearchBar";
 
 export const Catalogo = () => {
   const url = "http://localhost:3000/api/productos";
