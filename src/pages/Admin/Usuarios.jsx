@@ -311,10 +311,8 @@ export const Usuarios = () => {
     });
   };
 
-  const renderErrorMessage = (errorMessage) => {
-    return errorMessage ? (
-      <div className="invalid-feedback">{errorMessage}</div>
-    ) : null;
+  const renderErrorMessage = (error) => {
+    return error ? <div className="invalid-feedback">{error}</div> : null;
   };
 
   const enviarSolicitud = async (metodo, parametros) => {
@@ -431,7 +429,7 @@ export const Usuarios = () => {
         data-backdrop="static"
         data-keyboard="false"
       >
-        <div className="modal-dialog" role="document">
+        <div className="modal-dialog modal-lg" role="document">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="modalUsuariosLabel">
@@ -447,106 +445,117 @@ export const Usuarios = () => {
               </button>
             </div>
             <div className="modal-body">
-              <input
-                type="hidden"
-                id="id"
-                value={IdUsuario}
-                onChange={(e) => setIdUsuario(e.target.value)}
-              />
+              <form id="crearUsuarioForm">
+                <div className="form-row">
+                  <div className="form-group col-md-6">
+                    <label htmlFor="usuario">Nombre de Usuario:</label>
+                    <input
+                      type="text"
+                      id="usuario"
+                      className={`form-control ${
+                        errors.usuario ? "is-invalid" : ""
+                      }`}
+                      placeholder="Nombre de usuario"
+                      value={Usuario}
+                      onChange={handleChangeUsuario}
+                    />
+                    {renderErrorMessage(errors.usuario)}
+                  </div>
 
-              <div className="input-group mb-3">
-                <input
-                  type="text"
-                  id="usuario"
-                  className={`form-control ${
-                    errors.usuario ? "is-invalid" : ""
-                  }`}
-                  placeholder="Nombre de usuario"
-                  value={Usuario}
-                  onChange={handleChangeUsuario}
-                />
-                {renderErrorMessage(errors.usuario)}
-              </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="correo">Correo Electrónico:</label>
+                    <input
+                      type="email"
+                      id="correo"
+                      className={`form-control ${
+                        errors.correo ? "is-invalid" : ""
+                      }`}
+                      placeholder="Correo electrónico"
+                      value={Correo}
+                      onChange={handleChangeCorreo}
+                    />
+                    {renderErrorMessage(errors.correo)}
+                  </div>
 
-              <div className="input-group mb-3">
-                <input
-                  type="email"
-                  id="correo"
-                  className={`form-control ${
-                    errors.correo ? "is-invalid" : ""
-                  }`}
-                  placeholder="Correo electrónico"
-                  value={Correo}
-                  onChange={handleChangeCorreo}
-                />
-                {renderErrorMessage(errors.correo)}
-              </div>
+                  {operation === 1 && (
+                    <div className="form-group col-md-6">
+                      <label htmlFor="contraseniaNuevo">Contraseña:</label>
+                      <div className="d-flex align-items-center">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          id="contraseniaNuevo"
+                          className={`form-control ${
+                            errors.contrasenia ? "is-invalid" : ""
+                          }`}
+                          placeholder="Contraseña"
+                          value={Contrasenia}
+                          onChange={handleChangeContrasenia}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary ml-2"
+                          onClick={toggleShowPassword}
+                        >
+                          {showPassword ? (
+                            <i className="fas fa-eye-slash"></i>
+                          ) : (
+                            <i className="fas fa-eye"></i>
+                          )}
+                        </button>
+                      </div>
+                      {/* Asegúrate de que el mensaje de error se muestre debajo del campo */}
+                      {errors.contrasenia && (
+                        <div className="invalid-feedback d-block">
+                          {errors.contrasenia}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-              {operation === 1 && (
-                <div className="input-group mb-3">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="contraseniaNuevo"
-                    className={`form-control ${
-                      errors.contrasenia ? "is-invalid" : ""
-                    }`}
-                    placeholder="Contraseña"
-                    value={Contrasenia}
-                    onChange={handleChangeContrasenia}
-                  />
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary ml-2"
-                    onClick={toggleShowPassword}
-                  >
-                    {showPassword ? (
-                      <i className="fas fa-eye-slash"></i>
-                    ) : (
-                      <i className="fas fa-eye"></i>
-                    )}
-                  </button>
-                  {renderErrorMessage(errors.contrasenia)}
+                  <div className="form-group col-md-6">
+                    <label htmlFor="rol">Rol:</label>
+                    <select
+                      id="rol"
+                      className={`form-control ${
+                        errors.rol ? "is-invalid" : ""
+                      }`}
+                      value={IdRol}
+                      onChange={handleChangeRol}
+                    >
+                      <option value="">Selecciona un rol</option>
+                      {roles
+                        .filter((rol) => rol.NombreRol !== "Admin")
+                        .map((rol) => (
+                          <option key={rol.IdRol} value={rol.IdRol}>
+                            {rol.NombreRol}
+                          </option>
+                        ))}
+                    </select>
+                    {renderErrorMessage(errors.rol)}
+                  </div>
                 </div>
-              )}
-
-              {/* Selección de rol */}
-              <div className="input-group mb-3">
-                <div className="input-group-prepend"></div>
-                <select
-                  id="rol"
-                  className={`form-control ${errors.rol ? "is-invalid" : ""}`}
-                  value={IdRol}
-                  onChange={handleChangeRol}
-                >
-                  <option value="">Selecciona un rol</option>
-                  {roles.map((rol) => (
-                    <option key={rol.IdRol} value={rol.IdRol}>
-                      {rol.NombreRol}
-                    </option>
-                  ))}
-                </select>
-                {renderErrorMessage(errors.rol)}
-              </div>
+              </form>
             </div>
-
             <div className="modal-footer">
-              <div className="text-right">
-                <button
-                  type="button"
-                  id="btnCerrar"
-                  className="btn btn-secondary mr-2"
-                  data-dismiss="modal"
-                >
-                  Cancelar
-                </button>
-                <button onClick={guardarUsuario} className="btn btn-primary">
-                  Guardar
-                </button>
-              </div>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-dismiss="modal"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={guardarUsuario}
+              >
+                Guardar
+              </button>
             </div>
           </div>
         </div>
       </div>
+
       {/* Fin modal crear/editar usuario */}
 
       {/* Modal para cambiar contra */}
@@ -760,7 +769,7 @@ export const Usuarios = () => {
         data-backdrop="static"
         data-keyboard="false"
       >
-        <div className="modal-dialog modal-l" role="document">
+        <div className="modal-dialog modal-lg" role="document">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="modalDetalleUsuarioLabel">
@@ -777,49 +786,40 @@ export const Usuarios = () => {
             </div>
             <div className="modal-body">
               {usuarioSeleccionado && (
-                <form>
-                  <div className="form-group">
-                    <label htmlFor="idUsuario">ID:</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="idUsuario"
-                      value={usuarioSeleccionado.IdUsuario}
-                      disabled
-                    />
+                <>
+                  <div className="row mb-3">
+                    <div className="col-md-6">
+                      <label htmlFor="usuario">Usuario:</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="usuario"
+                        value={usuarioSeleccionado.Usuario}
+                        disabled
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="correo">Correo:</label>
+                      <input
+                        type="email"
+                        className="form-control"
+                        id="correo"
+                        value={usuarioSeleccionado.Correo}
+                        disabled
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="rol">Rol:</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="rol"
+                        value={getRolName(usuarioSeleccionado.IdRol)}
+                        disabled
+                      />
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="usuario">Usuario:</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="usuario"
-                      value={usuarioSeleccionado.Usuario}
-                      disabled
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="correo">Correo:</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="correo"
-                      value={usuarioSeleccionado.Correo}
-                      disabled
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="rol">Rol:</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="rol"
-                      value={getRolName(usuarioSeleccionado.IdRol)}
-                      disabled
-                    />
-                  </div>
-                </form>
+                </>
               )}
             </div>
             <div className="modal-footer">

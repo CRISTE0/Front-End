@@ -381,7 +381,11 @@ export const Configuracion = () => {
                 <div className="form-group">
                   <label>Permisos:</label>
                   <div className="row">
-                    {Permisos.map((permiso) => (
+                    {Permisos.filter(
+                      (permiso) =>
+                        permiso.Permiso !== "Pedidos" &&
+                        permiso.Permiso !== "Diseños"
+                    ).map((permiso) => (
                       <div
                         key={permiso.IdPermiso}
                         className="col-lg-3 col-md-4 col-sm-6 mb-3"
