@@ -23,10 +23,10 @@ export const AuthProvider = ({ children }) => {
     if (userData.idUsuario) {
       const permisosUsuario = await fetchUserPermissions(userData.idUsuario);
       const permissions = permisosUsuario.Role.Permisos.map((p) => p.Permiso);
-      setAuth({ user: userData, permissions, token ,idUsuario: userData.idUsuario,});
+      setAuth({ user: userData.nombreUsuario, permissions, token ,idUsuario: userData.idUsuario,});
     } else {
       const permisosCliente = ["Productos", "Diseños", "Pedidos","Carrito"];
-      setAuth({ user: userData.nombre, permissions: permisosCliente, token,idCliente:userData.idCliente });
+      setAuth({ user: userData.nombreUsuario, permissions: permisosCliente, token,idCliente:userData.idCliente });
       
     }
   };
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
 // Función para obtener permisos del usuario
 async function fetchUserPermissions(id) {
   try {
-    const url = `http://localhost:3000/api/usuarios${id}`;
+    const url = `http://localhost:3000/api/usuarios/${id}`;
     let respuesta = await axios.get(url);
     return respuesta.data;
   } catch (error) {

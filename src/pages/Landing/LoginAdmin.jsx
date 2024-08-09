@@ -1,15 +1,21 @@
 import React, { useState } from "react"; // Asegúrate de importar useState
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { useAuth } from "../../context/AuthProvider";
+
 
 export const LoginAdmin = () => {
   const [Usuario, setUsuario] = useState("");
   const [Contrasenia, setContrasenia] = useState("");
   const [showPassword, setShowPassword] = useState(false); // Estado para controlar la visibilidad de la contraseña
   const url = "http://localhost:3000/api/authWeb/loginAdmin";
+  
+  const {login} = useAuth();
+  const navigate = useNavigate();
+
 
   const [errors, setErrors] = useState({
     usuario: "",
@@ -142,10 +148,18 @@ export const LoginAdmin = () => {
       show_alerta(msj, "success");
 
       const token = respuesta.data.token;
+      
       const decoded = jwtDecode(token);
 
-      console.log(decoded.id);
-      console.log(decoded.idRol);
+      await login(decoded,token);
+      
+      navigate('/admin');
+
+
+      console.log(decoded);
+
+      console.log(decoded.idUsuario);
+      console.log(decoded.nombreUsuario);
       
       // show_alerta("Cliente creado con éxito", "success", { timer: 2000 });
       

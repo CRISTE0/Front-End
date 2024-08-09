@@ -308,13 +308,20 @@ export const Pedidos = () => {
     if (hayAlertas()) {
       return;
     }
+    console.log(Detalles);
+    console.log(Fecha);
+    console.log(Total);
+
+    return;
+
+    
 
     enviarSolicitud("POST", {
       IdCliente: IdCliente,
       Fecha: Fecha,
       Total: totalCompra,
       Detalles: Detalles,
-      IdEstadoPedido: 1,
+      IdEstadoPedido: 2,
     });
   };
 
@@ -405,6 +412,11 @@ export const Pedidos = () => {
     });
   };
 
+  const formatearFecha = (fechaISO) => {
+    const [year, month, day] = fechaISO.split('-');
+    return `${day}/${month}/${year}`;
+  };
+  
   const handleSearchTermChange = (newSearchTerm) => {
     setSearchTerm(newSearchTerm);
     setCurrentPage(1); // Reset current page when changing the search term
@@ -861,16 +873,14 @@ export const Pedidos = () => {
                       key={compra.IdPedido}
                       className={
                         compra.IdEstadoPedido === 4 ||
-                        compra.IdEstadoPedido === 3
+                        compra.IdEstadoPedido === 2
                           ? "table-secondary"
                           : ""
                       }
                     >
                       <td>{getClienteName(compra.IdCliente)}</td>
 
-                      <td>
-                        {new Date(compra.Fecha).toLocaleDateString("es-ES")}
-                      </td>
+                      <td>{formatearFecha(compra.Fecha)}</td>
 
                       <td>{compra.Total}</td>
 
