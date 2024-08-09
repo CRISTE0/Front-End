@@ -192,7 +192,6 @@ export const LoginAdmin = () => {
                   onChange={handleChangeUsuario}
                 />
                 {renderErrorMessage(errors.usuario)}
-                <label className="form-label" htmlFor="form1Example13">Usuario</label>
               </div>
 
               {/* Contraseña */}
@@ -226,7 +225,7 @@ export const LoginAdmin = () => {
                 {/* Checkbox */}
                 <div className="form-check">
                   
-                <a href="#!">¿Perdiste tu contraseña?</a>
+                <Link to={"/RecuperarUsuario"}>¿Perdiste tu contraseña?</Link>
                 </div>
               </div>
 

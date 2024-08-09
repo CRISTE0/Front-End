@@ -6,10 +6,10 @@ import withReactContent from "sweetalert2-react-content";
 import axios from "axios";
 
 
-export const RecuperarContraseña = () => {
+export const RecuperarContraseñaUsuario= () => {
   const [Correo, setCorreo] = useState("");
 
-  const urlRecuperar = "http://localhost:3000/api/restablecerContraseniaCliente";
+  const urlRecuperar = "http://localhost:3000/api/restablecerContraseniaUsuario";
 
 
   const [errors, setErrors] = useState({
@@ -125,12 +125,12 @@ export const RecuperarContraseña = () => {
       <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
         <div className="row w-100">
           <div className="col-12 text-center">
-            <h2 className="fw-bold my-4">Recuperar Contraseña</h2>
+            <h2 className="fw-bold my-4">Recuperar Contraseña Usuario</h2>
           </div>
           <div className="w-100">
             <div className="mb-3 text-center">
               <label htmlFor="correo" className="form-label">
-                Correo
+                Correo Usuario
               </label>
               <div className="col-12 col-md-3 mx-auto">
                 <input
@@ -139,7 +139,7 @@ export const RecuperarContraseña = () => {
                     errors.correo ? "is-invalid" : ""
                   }`}
                   id="Correo"
-                  placeholder="Correo"
+                  placeholder="Correo Usuario"
                   onChange={handleChangeCorreo}
                 />
                  {renderErrorMessage(errors.correo)}

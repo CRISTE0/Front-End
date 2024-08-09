@@ -16,7 +16,7 @@ export const LandingHeader = () => {
 
   if (auth) {
     isClient = auth.idCliente != null ? true : false;
-  } else {
+
     isUser = auth.idUsuario != null ? true : false;
   }
 
@@ -128,14 +128,13 @@ export const LandingHeader = () => {
                   </Link>
                 </li>
 
-                {isClient ||
-                  (isUser && (
+                {!isClient && !isUser && (
                     <li className="nav-item">
                       <Link className="nav-link" to={"/Login"}>
                         Login
                       </Link>
                     </li>
-                  ))}
+                  )}
               </ul>
             </div>
 

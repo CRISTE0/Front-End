@@ -186,6 +186,8 @@ export const Login = () => {
     }
   };
 
+  
+
   return (
     <>
       <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
@@ -258,7 +260,7 @@ export const Login = () => {
               </samp>
               <br />
               <samp>
-                ¿Perdiste tu contraseña? <Link to={"/RecuperarContraseña"}>Recuperar contraseña</Link>
+                ¿Perdiste tu contraseña? <Link to={"/RecuperarCliente"} >Recuperar contraseña</Link>
               </samp>
             </div>
           </div>

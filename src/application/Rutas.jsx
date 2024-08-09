@@ -28,6 +28,9 @@ import { ProductoSolo } from "../pages/Landing/ProductoSolo";
 import { LoginAdmin } from "../pages/Landing/LoginAdmin";
 
 import PrivateRoute from "./PrivateRoute";
+import { ConfirmarContrasenia } from "../pages/Landing/ConfirmarContraseña";
+import { RecuperarContraseñaUsuario } from "../pages/Landing/RecuperarContraseñaUsuario";
+import { ConfirmarContraseniaUsuario } from "../pages/Landing/ConfirmarContraseñaUsuario";
 
 export const Rutas = () => {
 
@@ -49,7 +52,19 @@ export const Rutas = () => {
         <Route path="/ProductoSolo/:id" Component={()=> <LandingLayout> <ProductoSolo /> </LandingLayout>  } />
 
 
+        <Route path="/RecuperarCliente" Component={()=> <LandingLayout> <RecuperarContraseña /> </LandingLayout> } />
+
+        <Route path="/ConfirmarConstraseña/:cookieParams" Component={()=> <LandingLayout> <ConfirmarContrasenia /> </LandingLayout> } />
+
+
+        <Route path="/RecuperarUsuario" Component={()=> <LandingLayout> <RecuperarContraseñaUsuario /> </LandingLayout> } />
+
+        <Route path="/ConfirmarConstraseñaUsuario/:cookieParams" Component={()=> <LandingLayout> <ConfirmarContraseniaUsuario /> </LandingLayout> } />
+
+
+
         <Route element={<PrivateRoute requiredPermissions={["ProductoSolo"]}/>}> 
+
         </Route>
 
 
