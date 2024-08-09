@@ -21,7 +21,7 @@
   z-index: -1;
 }
 
-.inputfile+label {
+.inputfile + label {
   max-width: 80%;
   font-size: 1.25rem;
   font-weight: 700;
@@ -33,7 +33,7 @@
   padding: 2px 12px;
 }
 
-.inputfile+label svg {
+.inputfile + label svg {
   width: 1em;
   height: 1em;
   vertical-align: middle;
@@ -48,17 +48,17 @@
   font-family: "Lato";
 }
 
-.inputfile-5+label {
+.inputfile-5 + label {
   color: rgb(119, 195, 165);
 }
 
-.inputfile-5:focus+label,
-.inputfile-5.has-focus+label,
-.inputfile-5+label:hover {
+.inputfile-5:focus + label,
+.inputfile-5.has-focus + label,
+.inputfile-5 + label:hover {
   color: #1cab6898;
 }
 
-.inputfile-5+label figure {
+.inputfile-5 + label figure {
   width: 100px;
   height: 100px;
   border-radius: 50%;
@@ -68,13 +68,13 @@
   margin: 0 auto 10px;
 }
 
-.inputfile-5:focus+label figure,
-.inputfile-5.has-focus+label figure,
-.inputfile-5+label:hover figure {
+.inputfile-5:focus + label figure,
+.inputfile-5.has-focus + label figure,
+.inputfile-5 + label:hover figure {
   background-color: #659f7a;
 }
 
-.inputfile-5+label svg {
+.inputfile-5 + label svg {
   width: 100%;
   height: 100%;
   fill: #fff;
@@ -94,30 +94,28 @@
 }
 /* Boton File Editar Camiseta */
 
-
-
 /* CheckBox Camiseta */
 
 .checkbox {
   align-items: flex-start;
 }
 
-.mycheckbox input:checked~span::after {
+.mycheckbox input:checked ~ span::after {
   background: rgb(12, 167, 12);
   transform: scale(0.85) translate(35px);
 }
 
-.mycheckbox input:checked~span .on {
+.mycheckbox input:checked ~ span .on {
   transform: translate(30px);
   opacity: 1;
 }
 
-.mycheckbox input:checked~span .off {
+.mycheckbox input:checked ~ span .off {
   transform: translate(30px);
   opacity: 0;
 }
 
-.mycheckbox input:checked~span .on-bell {
+.mycheckbox input:checked ~ span .on-bell {
   transform: translate(31px);
 }
 
@@ -218,7 +216,8 @@ h5 {
   border-radius: 5px;
   color: #858796; /* Texto gris */
   text-decoration: none;
-  transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s,
+    box-shadow 0.3s;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Añadir sombra */
   background-color: #f8f9fa; /* Color de fondo claro */
 }
@@ -288,8 +287,8 @@ input.Buscador:focus {
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
   border-radius: 20px;
 }
 
@@ -301,8 +300,8 @@ input.Buscador:focus {
   left: 2px;
   bottom: 2px;
   background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
   border-radius: 50%;
 }
 
@@ -394,7 +393,7 @@ input.Buscador:focus {
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 20px;
 }
 
@@ -406,7 +405,7 @@ input.Buscador:focus {
   left: 4px;
   bottom: 4px;
   background-color: white;
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 50%;
 }
 
@@ -416,4 +415,14 @@ input:checked + .slider-permiso {
 
 input:checked + .slider-permiso:before {
   transform: translateX(16px); /* Posición del indicador cuando está activo */
+}
+
+.small-alert {
+  width: 250px; /* Ajusta el tamaño de la alerta */
+  font-size: 14px; /* Ajusta el tamaño del texto */
+  color: black;
+}
+
+.swal2-popup.swal2-toast {
+  background: #858796 !important;
 }

@@ -396,8 +396,12 @@ export const Proveedores = () => {
       timer: 2000,
       showConfirmButton: false,
       timerProgressBar: true,
+      toast: true, // Activa el modo "toast" para mostrar alertas pequeñas
+      position: "top-end", // Posiciona la alerta en la esquina superior derecha
+      customClass: {
+        popup: "small-alert custom-popup-background", // Aplica ambas clases personalizadas
+      },
       didOpen: () => {
-        // Selecciona la barra de progreso y ajusta su estilo
         const progressBar = MySwal.getTimerProgressBar();
         if (progressBar) {
           progressBar.style.backgroundColor = "black";
@@ -406,6 +410,7 @@ export const Proveedores = () => {
       },
     });
   };
+  
 
   // Función para renderizar los mensajes de error
   const renderErrorMessage = (errorMessage) => {

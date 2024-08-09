@@ -4,6 +4,8 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../assets/js/Pagination";
 import SearchBar from "../../assets/js/SearchBar";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export const Compras = () => {
   const url = "http://localhost:3000/api/compras";
@@ -24,6 +26,123 @@ export const Compras = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+
+    // Agregar una imagen al lado del título
+    const imgData = "../src/assets/img/imagenesHome/logoSoftShirt.png"; // Asegúrate de reemplazar esto con la base64 de tu imagen
+
+    // Configurar el título del PDF
+    const addHeader = () => {
+      doc.addImage(imgData, "PNG", 170, 15, 30, 30); // Ajusta las coordenadas y el tamaño según sea necesario
+      doc.setFontSize(18);
+      doc.setTextColor("#1cc88a"); // Color verde para el título
+      doc.text("Reporte de Compras", 14, 22);
+    };
+
+    // Agregar el encabezado en la primera página
+    addHeader();
+
+    // Inicializar la posición Y para la tabla principal
+    let startY = 30;
+
+    // Iterar sobre cada compra
+    Compras.forEach((compra, index) => {
+      // Calcular la altura necesaria para la tabla de detalles
+      const rowHeight = 10; // Estimación de la altura de cada fila
+      const tableHeight = compra.DetallesCompras.length * rowHeight;
+
+      // Verificar si hay espacio suficiente en la página actual
+      const pageHeight = doc.internal.pageSize.height;
+      const remainingSpace = pageHeight - startY - 20; // Espacio restante en la página
+
+      if (remainingSpace < tableHeight + 30) {
+        // Si no hay suficiente espacio, crear una nueva página
+        doc.addPage();
+        startY = 20; // Resetear la posición Y en la nueva página
+      }
+
+      // Agregar título de la compra
+      doc.setFontSize(14);
+      doc.setTextColor("#1cc88a"); // Color verde para el título de la compra
+      doc.text(`Compra ${index + 1}`, 14, startY);
+
+      // Incrementar la posición Y
+      startY += 10;
+
+      // Agregar la información principal de la compra
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0); // Volver al color negro para el resto del texto
+      doc.text(
+        `Proveedor: ${getProveedorName(compra.IdProveedor)}`,
+        14,
+        startY
+      );
+      doc.text(`Fecha: ${compra.Fecha}`, 14, startY + 5);
+      doc.text(`Total: ${formatPrice(compra.Total)}`, 14, startY + 10);
+      doc.text(`Estado: ${compra.Estado}`, 14, startY + 15);
+
+      // Incrementar la posición Y para los detalles
+      startY += 20;
+
+      // Configurar las columnas y filas de la tabla de detalles
+      const detailColumns = ["Insumo", "Cantidad", "Precio", "SubTotal"];
+
+      // Calcular el precio promedio por insumo
+      const totalCompra = compra.Total;
+      const cantidadDetalles = compra.DetallesCompras.length;
+      const precioPorDetalle = totalCompra / cantidadDetalles;
+
+      // Mapear las filas con el precio promedio
+      const detailRows = compra.DetallesCompras.map((detalle) => [
+        getInsumoName(detalle.IdInsumo),
+        detalle.Cantidad,
+        formatPrice(precioPorDetalle),
+        formatPrice(detalle.Cantidad * precioPorDetalle),
+      ]);
+
+      // Generar la tabla de detalles en el PDF
+      doc.autoTable({
+        head: [detailColumns],
+        body: detailRows,
+        startY: startY,
+        headStyles: {
+          fillColor: "#1cc88a", // Color de fondo del encabezado de la tabla
+          textColor: "#ffffff", // Color del texto del encabezado de la tabla
+        },
+        styles: {
+          fontSize: 10, // Tamaño de fuente en la tabla
+        },
+      });
+
+      // Incrementar la posición Y después de la tabla
+      startY = doc.lastAutoTable.finalY + 10;
+
+      // Dibujar una línea horizontal después de cada compra
+      doc.setLineWidth(0.5);
+      doc.setDrawColor("#1cc88a"); // Color verde para la línea
+      doc.line(14, startY, 200, startY); // Ajusta las coordenadas según sea necesario
+      startY += 10;
+    });
+
+    // Calcular la posición para el texto de copyright
+    const pageHeight = doc.internal.pageSize.height;
+    const footerText = "© Soft-Shirt 2024";
+    const textWidth =
+      (doc.getStringUnitWidth(footerText) * doc.internal.getFontSize()) /
+      doc.internal.scaleFactor;
+    const footerX = (doc.internal.pageSize.width - textWidth) / 2; // Centrar el texto horizontalmente
+    const footerY = pageHeight - 10; // Ajusta la posición vertical según sea necesario
+
+    // Agregar el texto de copyright en la última página
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0); // Color negro para el texto de copyright
+    doc.text(footerText, footerX, footerY);
+
+    // Descargar el PDF
+    doc.save("Reporte_Compras_Soft-Shirt.pdf");
+  };
 
   useEffect(() => {
     getCompras();
@@ -160,7 +279,10 @@ export const Compras = () => {
 
     if (name === "IdProveedor") {
       setIdProveedor(value);
+      // Resetear el error de proveedor al seleccionarlo correctamente
+      setErrors((prevErrors) => ({ ...prevErrors, IdProveedor: "" }));
     } else if (name === "Fecha") {
+      // Aquí sigue tu lógica existente para manejar la fecha
       const selectedDate = new Date(value);
       const currentDate = new Date();
 
@@ -169,16 +291,12 @@ export const Compras = () => {
       minDate.setDate(currentDate.getDate() - 8);
 
       if (selectedDate > currentDate) {
-        // Si la fecha seleccionada es después de la fecha actual,
-        // establecer la fecha actual como valor de Fecha
         const formattedCurrentDate = currentDate.toISOString().split("T")[0];
         setFecha(formattedCurrentDate);
       } else if (selectedDate < minDate) {
-        // Si la fecha seleccionada es anterior a 8 días atrás, establecer la fecha mínima
         const formattedMinDate = minDate.toISOString().split("T")[0];
         setFecha(formattedMinDate);
       } else {
-        // Establecer la fecha seleccionada sin modificarla
         setFecha(value);
       }
     } else if (name === "Total") {
@@ -339,42 +457,31 @@ export const Compras = () => {
 
   const validar = () => {
     let errorMessage = "";
+    const newErrors = { ...errors };
 
     // Validar campos de la compra (Proveedor, Fecha, Detalles)
     if (!IdProveedor) {
       errorMessage = "Selecciona un proveedor";
-      setErrors({ ...errors, IdProveedor: errorMessage });
-      return;
+      newErrors.IdProveedor = errorMessage;
+    } else {
+      // Si el proveedor ya ha sido seleccionado, eliminar el error
+      delete newErrors.IdProveedor;
     }
 
     if (!Fecha) {
       errorMessage = "Selecciona una fecha";
-      setErrors({ ...errors, Fecha: errorMessage });
-      return;
+      newErrors.Fecha = errorMessage;
+    } else {
+      // Si la fecha ya ha sido seleccionada, eliminar el error
+      delete newErrors.Fecha;
     }
 
     // Validar detalles de la compra
-    if (
-      Detalles.length === 0 ||
-      Detalles.some(
-        (detalle) =>
-          !detalle.IdInsumo ||
-          !detalle.cantidad ||
-          !detalle.precio ||
-          detalle.cantidad === "0" ||
-          detalle.precio === "0"
-      )
-    ) {
-      errorMessage = "Agrega detalles válidos de compra";
-      showDetalleAlert(errorMessage); // Mostrar la alerta cuando no hay detalles válidos
-      return;
-    }
-
     const detallesValidados = Detalles.map((detalle, index) => {
-      const errors = {};
+      const detailErrors = {};
 
       if (!detalle.IdInsumo) {
-        errors.IdInsumo = "Selecciona un insumo";
+        detailErrors.IdInsumo = "Selecciona un insumo";
       }
 
       if (
@@ -383,7 +490,7 @@ export const Compras = () => {
         !/^\d+$/.test(detalle.cantidad) ||
         detalle.cantidad === "0"
       ) {
-        errors.cantidad = "Ingresa una cantidad válida";
+        detailErrors.cantidad = "Ingresa una cantidad válida";
         if (detalle.cantidad === "0") {
           show_alerta("La cantidad no puede ser 0", "error");
         }
@@ -395,7 +502,7 @@ export const Compras = () => {
         parseFloat(detalle.precio) > 10000000 ||
         detalle.precio === "0"
       ) {
-        errors.precio =
+        detailErrors.precio =
           "Ingresa un precio válido que no supere los 10 millones y no sea 0";
         if (detalle.precio === "") {
           show_alerta("El precio no puede estar vacío", "error");
@@ -404,21 +511,30 @@ export const Compras = () => {
         }
       }
 
-      if (Object.keys(errors).length > 0) {
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          Detalles: { ...prevErrors.Detalles, [index]: errors },
-        }));
+      if (Object.keys(detailErrors).length > 0) {
+        newErrors.Detalles = { ...newErrors.Detalles, [index]: detailErrors };
+      } else {
+        // Si no hay errores en los detalles, eliminar el error asociado
+        if (newErrors.Detalles) {
+          delete newErrors.Detalles[index];
+        }
       }
 
-      return errors;
+      return detailErrors;
     });
 
-    const hasErrors = detallesValidados.some(
-      (errors) => Object.keys(errors).length > 0
-    );
+    if (
+      Detalles.length === 0 ||
+      detallesValidados.some((errors) => Object.keys(errors).length > 0)
+    ) {
+      // Mostrar alerta general si hay errores en los detalles
+      showDetalleAlert("Agrega detalles válidos de compra");
+    }
+
+    const hasErrors = Object.keys(newErrors).length > 0;
 
     if (hasErrors) {
+      setErrors(newErrors);
       return;
     }
 
@@ -483,6 +599,7 @@ export const Compras = () => {
 
           show_alerta("La compra fue cancelada correctamente", "success");
         } catch (error) {
+          console.log(error);
           show_alerta("Hubo un error al cancelar la compra", "error");
         }
       } else {
@@ -835,16 +952,26 @@ export const Compras = () => {
                       </thead>
                       <tbody>
                         {compraSeleccionada.DetallesCompras.map(
-                          (detalle, index) => (
-                            <tr key={index}>
-                              <td>{getInsumoName(detalle.IdInsumo)}</td>
-                              <td>{detalle.Cantidad}</td>
-                              <td>{formatPrice(detalle.Precio)}</td>
-                              <td>
-                                {formatPrice(detalle.Cantidad * detalle.Precio)}
-                              </td>
-                            </tr>
-                          )
+                          (detalle, index) => {
+                            const insumo = getInsumoName(detalle.IdInsumo);
+                            const totalCompra = compraSeleccionada.Total;
+                            const cantidadDetalles =
+                              compraSeleccionada.DetallesCompras.length;
+                            const precioPorDetalle =
+                              totalCompra / cantidadDetalles;
+                            return (
+                              <tr key={index}>
+                                <td>{insumo}</td>
+                                <td>{detalle.Cantidad}</td>
+                                <td>{formatPrice(precioPorDetalle)}</td>
+                                <td>
+                                  {formatPrice(
+                                    detalle.Cantidad * precioPorDetalle
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          }
                         )}
                       </tbody>
                     </table>
@@ -880,20 +1007,29 @@ export const Compras = () => {
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
           <h1 className="h3 mb-3 text-center text-dark">Gestión de Compras</h1>
+
           <div className="text-right">
             <button
+              onClick={() => openModal(1)}
               type="button"
-              className="btn btn-dark"
+              className="btn btn-dark mr-2"
               data-toggle="modal"
               data-target="#modalCompras"
-              onClick={() => proveedores.length > 0 && openModal(1)}
             >
               <i className="fas fa-pencil-alt"></i> Crear Compra
+            </button>
+
+            <button
+              onClick={generatePDF} // Llama a la función que genera el PDF
+              type="button"
+              className="btn btn-success"
+            >
+              <i className="fas fa-print"></i> Generar Reporte
             </button>
           </div>
         </div>
 
-        {/* <!-- Tabla de Compras --> */}
+        {/* <!-- Tabla Compras --> */}
         <div className="card shadow mb-4">
           <div className="card-header py-1 d-flex">
             <h6 className="m-2 font-weight-bold text-primary">Compras</h6>
@@ -932,29 +1068,30 @@ export const Compras = () => {
                       <td>
                         {compra.Estado === "Cancelado" ? (
                           <button
-                            className="btn btn-secondary mr-2"
+                            className="btn btn-secondary btn-sm mr-2 rounded-icon"
                             disabled
+                            title="No disponible"
                           >
                             <i className="fas fa-times-circle"></i>
                           </button>
                         ) : (
                           <button
                             onClick={() => cancelCompra(compra.IdCompra)}
-                            className="btn btn-danger mr-2"
+                            className="btn btn-danger btn-sm mr-2 rounded-icon"
+                            title="Cancelar"
                           >
                             <i className="fas fa-times-circle"></i>
                           </button>
                         )}
                         <button
                           onClick={() => handleDetalleCompra(compra.IdCompra)}
-                          className={`btn ${
-                            compra.Estado === "Cancelado"
-                              ? "btn-secondary mr-2"
-                              : "btn-info"
-                          } rounded-icon`}
+                          className={`btn btn-info btn-sm rounded-icon ${
+                            compra.Estado === "Cancelado" ? "btn-secondary" : ""
+                          }`}
                           disabled={compra.Estado === "Cancelado"}
                           data-toggle="modal"
                           data-target="#modalDetalleCompra"
+                          title="Detalles"
                         >
                           <i className="fas fa-info-circle"></i>
                         </button>
@@ -971,8 +1108,7 @@ export const Compras = () => {
             />
           </div>
         </div>
-
-        {/* Fin tabla de compras */}
+        {/* Fin tabla compras */}
       </div>
     </>
   );
