@@ -248,7 +248,7 @@ export const Carrito = () => {
       console.log(parametros);
       console.log(obtenerFechaActual());
       
-      return;
+      // return;
       
       const respuesta = await axios({
         method: "POST",

@@ -84,7 +84,7 @@ export const Rutas = () => {
           <Route path="/admin" Component={()=> <AdminLayout> <Dashboard /> </AdminLayout>  } />
         </Route>
 
-        <Route element={<PrivateRoute requiredPermissions={["Configuracion"]}/>}> 
+        <Route element={<PrivateRoute requiredPermissions={["Configuración"]}/>}> 
           <Route path="/admin/Configuracion" Component={()=> <AdminLayout> <Configuracion /> </AdminLayout> } />
         </Route>
 

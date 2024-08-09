@@ -312,7 +312,7 @@ export const Pedidos = () => {
     console.log(Fecha);
     console.log(Total);
 
-    return;
+    // return;
 
     
 

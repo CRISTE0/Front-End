@@ -329,7 +329,7 @@ export const Usuarios = () => {
       });
       const msj = respuesta.data.message;
       show_alerta(msj, "success");
-      document.getElementById("btnCerrar").click();
+      // document.getElementById("btnCerrar").click();
       getUsuarios();
     } catch (error) {
       if (error.response) {

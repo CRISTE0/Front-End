@@ -19,7 +19,7 @@ export const SideBar = ({ isActive }) => {
       path: "/admin/Configuracion",
       icon: "fas fa-fw fa-cog",
       text: "Configuración",
-      permission: "Configuracion",
+      permission: "Configuración",
     },
     {
       path: "/admin/Usuarios",
