@@ -9,6 +9,8 @@ import axios from "axios";
 export const Carrito = () => {
 
   const {auth} = useAuth();
+  const url = "http://localhost:3000/api/pedidos";
+
 
 
   console.log(auth);
@@ -197,18 +199,89 @@ export const Carrito = () => {
 
 
   // Funcion para formatear el precio
-  function formatCurrency(value) {
+  const formatCurrency = (value) => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
     }).format(value);
   }
 
+
+  const obtenerFechaActual = () => {
+    const fecha = new Date();
+    const año = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
+    const dia = String(fecha.getDate()).padStart(2, '0'); // Obtiene el día del mes
+    
+    return `${año}/${mes}/${dia}`;
+  };
+
+  const obtenerSubtotal = (cantidad,precio) =>{
+    return cantidad*precio;
+  }
+  
+
+  const obtenerDetalles = (productos) => {
+    return productos.map(producto => ({
+      IdProducto: producto.IdProducto,
+      cantidad: producto.CantidadSeleccionada,
+      precio: producto.ValorVenta,
+      subtotal: obtenerSubtotal(producto.CantidadSeleccionada,producto.ValorVenta)
+    }));
+  };
+
+  console.log(obtenerFechaActual());
+
+  const enviarSolicitud = async () => {
+    
+    try {
+      
+      let parametros={
+        IdCliente: auth.idCliente,
+        Detalles: obtenerDetalles(cartItems),
+        Fecha: obtenerFechaActual(),
+        Total: totalPedido,
+        IdEstadoPedido: 2,
+      }
+  
+      
+      console.log(parametros);
+      console.log(obtenerFechaActual());
+      
+      return;
+      
+      const respuesta = await axios({
+        method: "POST",
+        url: url,
+        data: parametros,
+      });
+      
+      console.log(respuesta);
+
+      show_alerta(respuesta.data.message, "success");
+
+      // document.getElementById("btnCerrar").click();
+      // getPedidos();
+      // getProductos();
+
+    } catch (error) {
+      console.log(error);
+
+      if (error.response) {
+        show_alerta(error.response.data.message, "error");
+      } else if (error.request) {
+        show_alerta("Error en la solicitud", "error");
+      } else {
+        show_alerta("Error desconocido", "error");
+      }
+    }
+  };
+
   return (
     <>
       <div className="container my-3 p-3 bg-light " style={{"borderRadius":"10px"}}>
         <div className="row">
-          <div className="col-lg-7">
+          <div className="col-lg-6">
 
             {/* productos cliente */}
 
@@ -280,7 +353,7 @@ export const Carrito = () => {
           </div>
 
           {/* informacion cliente */}
-          <div className="col-lg-5">
+          <div className="col-lg-6">
             <div className="card  text-dark rounded-3">
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center mb-4">
@@ -379,7 +452,7 @@ export const Carrito = () => {
                   data-mdb-ripple-init
                   className="btn btn-success btn-block btn-lg"
                 >
-                  <div className="d-flex justify-content-between">
+                  <div className="d-flex justify-content-between" onClick={enviarSolicitud}>
                     <span>Realizar Pedido</span>
                     <span>
                       <i className="fas fa-shopping-basket ms-2"></i>

@@ -163,7 +163,7 @@ export const Login = () => {
 
       
       const decoded = jwtDecode(token);
-      login(decoded,token);
+      await login(decoded,token);
       
       navigate('/');
 

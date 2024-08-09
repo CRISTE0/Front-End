@@ -1392,25 +1392,22 @@ export const Catalogo = () => {
                       <td>{producto.Cantidad}</td>
                       <td>{formatCurrency(producto.ValorVenta)}</td>
                       <td>
-                          <label className="switch">
-                            <input
-                              type="checkbox"
-                              checked={producto.Publicacion === "Activo"}
-                              onChange={() =>
-                                cambiarPublicacionProducto(producto.IdProducto)
-                              }
-                              className={
-                                producto.Publicacion === "Activo"
-                                  ? "switch-green"
-                                  : "switch-red"
-                              }
-                            />
-                            <span className="slider round"></span>
-                          </label>
+                        <label
+                          className={`switch ${
+                            producto.Estado !== "Activo" ? "switch-grey" : ""
+                          }`}
+                        >
+                          <input
+                            disabled={producto.Estado !== "Activo"}
+                            type="checkbox"
+                            checked={producto.Publicacion === "Activo"}
+                            onChange={() => cambiarPublicacionProducto(producto.IdProducto)}
+                          />
+                          <span className="slider round"></span>
+                        </label>
                       </td>
 
                       <td>
-                         
                         <label className="switch">
                           <input
                             type="checkbox"

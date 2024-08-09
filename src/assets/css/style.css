@@ -320,6 +320,12 @@ input.Buscador:focus {
   background-color: #f44336; /* Color rojo cuando está inactivo */
 }
 
+
+/* Nuevo estilo para el estado gris */
+.switch-grey .slider {
+  background-color: grey !important; /* Color gris cuando el estado no es activo */
+}
+
 .switch input[type="checkbox"]:focus + .slider {
   box-shadow: 0 0 1px #20c9a6;
 }
