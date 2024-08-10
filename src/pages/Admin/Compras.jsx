@@ -5,6 +5,8 @@ import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export const Compras = () => {
   const url = "http://localhost:3000/api/compras";
@@ -31,6 +33,118 @@ export const Compras = () => {
     getInsumos();
     getProveedores();
   }, []);
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+
+    // Agregar una imagen al lado del título
+    const imgData = "../src/assets/img/imagenesHome/logoSoftShirt.png"; // Asegúrate de reemplazar esto con la base64 de tu imagen
+
+    // Configurar el título del PDF
+    const addHeader = () => {
+      doc.addImage(imgData, "PNG", 170, 15, 30, 30); // Ajusta las coordenadas y el tamaño según sea necesario
+      doc.setFontSize(18);
+      doc.setTextColor("#1cc88a"); // Color verde para el título
+      doc.text("Reporte de Compras", 14, 22);
+    };
+
+    // Agregar el encabezado en la primera página
+    addHeader();
+
+    // Inicializar la posición Y para la tabla principal
+    let startY = 30;
+
+    // Iterar sobre cada compra
+    Compras.forEach((compra, index) => {
+      // Calcular la altura necesaria para la tabla de detalles
+      const rowHeight = 10; // Estimación de la altura de cada fila
+      const tableHeight = compra.DetallesCompras.length * rowHeight;
+
+      // Verificar si hay espacio suficiente en la página actual
+      const pageHeight = doc.internal.pageSize.height;
+      const remainingSpace = pageHeight - startY - 20; // Espacio restante en la página
+
+      if (remainingSpace < tableHeight + 30) {
+        // Si no hay suficiente espacio, crear una nueva página
+        doc.addPage();
+        startY = 20; // Resetear la posición Y en la nueva página
+      }
+
+      // Agregar título de la compra
+      doc.setFontSize(14);
+      doc.setTextColor("#1cc88a"); // Color verde para el título de la compra
+      doc.text(`Compra ${index + 1}`, 14, startY);
+
+      // Incrementar la posición Y
+      startY += 10;
+
+      // Agregar la información principal de la compra
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0); // Volver al color negro para el resto del texto
+      doc.text(
+        `Proveedor: ${getProveedorName(compra.IdProveedor)}`,
+        14,
+        startY
+      );
+      doc.text(`Fecha: ${compra.Fecha}`, 14, startY + 5);
+      doc.text(`Total: ${formatPrice(compra.Total)}`, 14, startY + 10);
+      doc.text(`Estado: ${compra.Estado}`, 14, startY + 15);
+
+      // Incrementar la posición Y para los detalles
+      startY += 20;
+
+      // Configurar las columnas y filas de la tabla de detalles
+      const detailColumns = ["Insumo", "Cantidad", "Precio", "SubTotal"];
+
+      // Mapear las filas con el precio real
+      const detailRows = compra.DetallesCompras.map((detalle) => [
+        getInsumoName(detalle.IdInsumo),
+        detalle.Cantidad,
+        formatPrice(detalle.Precio), // Usar el precio real del insumo
+        formatPrice(detalle.Cantidad * detalle.Precio), // Calcular el subtotal usando el precio real
+      ]);
+
+      // Generar la tabla de detalles en el PDF
+      doc.autoTable({
+        head: [detailColumns],
+        body: detailRows,
+        startY: startY,
+        headStyles: {
+          fillColor: "#1cc88a", // Color de fondo del encabezado de la tabla
+          textColor: "#ffffff", // Color del texto del encabezado de la tabla
+        },
+        styles: {
+          fontSize: 10, // Tamaño de fuente en la tabla
+        },
+      });
+
+      // Incrementar la posición Y después de la tabla
+      startY = doc.lastAutoTable.finalY + 10;
+
+      // Dibujar una línea horizontal después de cada compra
+      doc.setLineWidth(0.5);
+      doc.setDrawColor("#1cc88a"); // Color verde para la línea
+      doc.line(14, startY, 200, startY); // Ajusta las coordenadas según sea necesario
+      startY += 10;
+    });
+
+    // Calcular la posición para el texto de copyright
+    const pageHeight = doc.internal.pageSize.height;
+    const footerText = "© Soft-Shirt 2024";
+    const textWidth =
+      (doc.getStringUnitWidth(footerText) * doc.internal.getFontSize()) /
+      doc.internal.scaleFactor;
+    const footerX = (doc.internal.pageSize.width - textWidth) / 2; // Centrar el texto horizontalmente
+    const footerY = pageHeight - 10; // Ajusta la posición vertical según sea necesario
+
+    // Agregar el texto de copyright en la última página
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0); // Color negro para el texto de copyright
+    doc.text(footerText, footerX, footerY);
+
+    // Descargar el PDF
+    doc.save("Reporte_Compras_Soft-Shirt.pdf");
+  };
 
   const getCompras = async () => {
     try {
@@ -925,6 +1039,14 @@ export const Compras = () => {
               onClick={() => proveedores.length > 0 && openModal(1)}
             >
               <i className="fas fa-pencil-alt"></i> Crear Compra
+            </button>
+
+            <button
+              onClick={generatePDF} // Llama a la función que genera el PDF
+              type="button"
+              className="btn btn-success"
+            >
+              <i className="fas fa-print"></i> Generar Reporte
             </button>
           </div>
         </div>

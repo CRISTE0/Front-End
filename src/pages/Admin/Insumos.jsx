@@ -142,6 +142,12 @@ export const Insumos = () => {
           type: "success",
         });
       }
+
+      // Usar jQuery para cerrar el modal
+      $("#modalCliente").modal("hide");
+
+      // Opcionalmente, actualizar la lista de insumos
+      getInsumos();
     } catch (error) {
       show_alerta({
         message: "Error al guardar el insumo",
