@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const Catalogo = () => {
   const url = "http://localhost:3000/api/productos";
@@ -130,7 +131,6 @@ export const Catalogo = () => {
 
   // funcion para guardar producto
   const guardarProducto = async () => {
-
     const disenioSeleccionado = Disenios.find(
       (disenio) => disenio.IdDisenio == IdDisenio
     );
@@ -138,52 +138,68 @@ export const Catalogo = () => {
     const insumoSeleccionado = Insumos.find(
       (insumo) => insumo.IdInsumo == IdInsumo
     );
-    
+
     // Validacion en el diseño
     if (!IdDisenio) {
-      show_alerta("Diseño no seleccionado", "error");
+      show_alerta({
+        message: "Diseño no seleccionado",
+        type: "error",
+      });
       return;
-    }else if (!disenioSeleccionado) {
-      show_alerta("Diseño no encontrado", "error");
+    } else if (!disenioSeleccionado) {
+      show_alerta({
+        message: "Diseño no encontrado",
+        type: "error",
+      });
       return;
     }
 
     // Validacion en el insumo
     if (!IdInsumo) {
-      show_alerta("Insumo no seleccionado", "error");
+      show_alerta({
+        message: "Insumo no seleccionado",
+        type: "error",
+      });
       return;
-    }else if (!insumoSeleccionado) {
-      show_alerta("Insumo no encontrado", "error");
+    } else if (!insumoSeleccionado) {
+      show_alerta({
+        message: "Insumo no encontrado",
+        type: "error",
+      });
       return;
     }
 
-    //Validacion en la referencia
+    // Validacion en la referencia
     if (!Referencia) {
-      show_alerta("Escribe la referencia","error");
+      show_alerta({
+        message: "Escribe la referencia",
+        type: "error",
+      });
       return;
-     
-      // Validar que la referencia siga el patrón TST-001
-    }else if (!/^[A-Z]{3}-\d{3}$/.test(Referencia)) {
-      show_alerta("La referencia debe ser en el formato AAA-000","error")
+    } else if (!/^[A-Z]{3}-\d{3}$/.test(Referencia)) {
+      show_alerta({
+        message: "La referencia debe ser en el formato AAA-000",
+        type: "error",
+      });
       return;
     }
 
-
-    //Validacion en la cantidad del producto
+    // Validacion en la cantidad del producto
     if (parseInt(Cantidad) > insumoSeleccionado.Cantidad) {
-      show_alerta(
-        "La cantidad no puede superar a la del insumo seleccionado",
-        "error"
-      );
+      show_alerta({
+        message: "La cantidad no puede superar a la del insumo seleccionado",
+        type: "error",
+      });
       return;
     }
 
-    //Validacion en valor del producto
+    // Validacion en valor del producto
     if (parseFloat(ValorVenta) <= parseFloat(insumoSeleccionado.ValorCompra)) {
-      show_alerta(
-        "El valor de venta debe ser mayor que el valor de compra del insumo",
-        "error"
-      );
+      show_alerta({
+        message:
+          "El valor de venta debe ser mayor que el valor de compra del insumo",
+        type: "error",
+      });
       return;
     }
 
@@ -207,7 +223,6 @@ export const Catalogo = () => {
     }
   };
 
-  
   // Función para validar la referencia
   const validateReferencia = (value) => {
     if (!value) {
@@ -257,7 +272,6 @@ export const Catalogo = () => {
     const disenio = Disenios.find((d) => d.IdDisenio == value);
 
     console.log(disenio);
-
 
     setIdDisenio(value);
     setSelectedDisenio(disenio);
@@ -326,25 +340,6 @@ export const Catalogo = () => {
     }));
   };
 
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        // Selecciona la barra de progreso y ajusta su estilo
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
-  };
-
   // Función para renderizar los mensajes de error
   const renderErrorMessage = (errorMessage) => {
     return errorMessage ? (
@@ -370,25 +365,45 @@ export const Catalogo = () => {
       }
 
       const msj = respuesta.data.message;
-      show_alerta(msj, "success");
+      show_alerta({
+        message: msj,
+        type: "success",
+      });
       document.getElementById("btnCerrarCliente").click();
       getProductosAdmin();
+
       if (metodo === "POST") {
-        show_alerta("producto creado con éxito", "success", { timer: 2000 });
+        show_alerta({
+          message: "Producto creado con éxito",
+          type: "success",
+        });
       } else if (metodo === "PUT") {
-        show_alerta("producto actualizado con éxito", "success", {
-          timer: 2000,
+        show_alerta({
+          message: "Producto actualizado con éxito",
+          type: "success",
         });
       } else if (metodo === "DELETE") {
-        show_alerta("producto eliminado con éxito", "success", { timer: 2000 });
+        show_alerta({
+          message: "Producto eliminado con éxito",
+          type: "success",
+        });
       }
     } catch (error) {
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({
+          message: error.response.data.message,
+          type: "error",
+        });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({
+          message: "Error en la solicitud",
+          type: "error",
+        });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({
+          message: "Error desconocido",
+          type: "error",
+        });
       }
       console.log(error);
     }
@@ -436,23 +451,33 @@ export const Catalogo = () => {
             )
           );
 
-          show_alerta("El producto fue eliminado correctamente", "success");
+          show_alerta({
+            message: "El producto fue eliminado correctamente",
+            type: "success",
+          });
         });
       } else if (result.dismiss === Swal.DismissReason.cancel) {
-        show_alerta("El producto NO fue eliminado", "info");
+        show_alerta({
+          message: "El producto NO fue eliminado",
+          type: "info",
+        });
       } else if (
         result.dismiss === Swal.DismissReason.backdrop ||
         result.dismiss === Swal.DismissReason.esc
       ) {
-        show_alerta("El producto NO fue eliminado", "info");
+        show_alerta({
+          message: "El producto NO fue eliminado",
+          type: "info",
+        });
       }
     });
   };
 
-
   const cambiarPublicacionProducto = async (IdProducto) => {
     try {
-      const productoActual = productosAdmin.find((producto) => producto.IdProducto === IdProducto);
+      const productoActual = productosAdmin.find(
+        (producto) => producto.IdProducto === IdProducto
+      );
 
       const nuevoEstado =
         productoActual.Publicacion === "Activo" ? "Inactivo" : "Activo";
@@ -480,10 +505,7 @@ export const Catalogo = () => {
 
           console.log(parametros);
 
-          const response = await axios.put(
-            `${url}/${IdProducto}`,
-            parametros
-          );
+          const response = await axios.put(`${url}/${IdProducto}`, parametros);
 
           if (response.status === 200) {
             setProductosAdmin((prevProducto) =>
@@ -494,21 +516,26 @@ export const Catalogo = () => {
               )
             );
 
-            show_alerta("La publicación del producto cambiada con éxito", "success", {
-              timer: 8000,
+            show_alerta({
+              message: "La publicación del producto cambiada con éxito",
+              type: "success",
             });
           }
         } else {
-          show_alerta("No se ha cambiado la publicación del producto", "info");
+          show_alerta({
+            message: "No se ha cambiado la publicación del producto",
+            type: "info",
+          });
         }
       });
     } catch (error) {
       console.error("Error updating state:", error);
-      show_alerta("Error cambiando la publicación del producto", "error");
+      show_alerta({
+        message: "Error cambiando la publicación del producto",
+        type: "error",
+      });
     }
   };
-
-
 
   const cambiarEstadoProducto = async (IdProducto) => {
     try {
@@ -551,21 +578,26 @@ export const Catalogo = () => {
               )
             );
 
-            show_alerta("Estado del producto cambiada con éxito", "success", {
-              timer: 8000,
+            show_alerta({
+              message: "Estado del producto cambiado con éxito",
+              type: "success",
             });
           }
         } else {
-          show_alerta("No se ha cambiado el estado del producto", "info");
+          show_alerta({
+            message: "No se ha cambiado el estado del producto",
+            type: "info",
+          });
         }
       });
     } catch (error) {
       console.error("Error updating state:", error);
-      show_alerta("Error cambiando el estado del producto", "error");
+      show_alerta({
+        message: "Error cambiando el estado del producto",
+        type: "error",
+      });
     }
   };
-
-
 
   const convertDisenioIdToName = (disenioId) => {
     const disenio = Disenios.find((disenio) => disenio.IdDisenio === disenioId);
@@ -621,7 +653,10 @@ export const Catalogo = () => {
 
       $("#modalDetalleProducto").modal("show");
     } catch (error) {
-      show_alerta("Error al obtener los detalles del diseño", "error");
+      show_alerta({
+        message: "Error al obtener los detalles del diseño",
+        type: "error",
+      });
     }
   };
 
@@ -663,13 +698,13 @@ export const Catalogo = () => {
     }).format(value);
   }
 
-  const precioSugerido = (precioDisenio,precionInsumo) =>{
-    let subTotal = precioDisenio+precionInsumo;
-    let margen = subTotal*0.30;
-    let total = subTotal+margen;
+  const precioSugerido = (precioDisenio, precionInsumo) => {
+    let subTotal = precioDisenio + precionInsumo;
+    let margen = subTotal * 0.3;
+    let total = subTotal + margen;
 
     return formatCurrency(total);
-  }
+  };
 
   return (
     <>
@@ -702,7 +737,6 @@ export const Catalogo = () => {
             <div className="modal-body">
               <form id="crearClienteForm">
                 <div className="form-row">
-
                   {/* Diseño del Producto */}
                   <div className="form-group col-md-5">
                     <label htmlFor="idDisenio">Diseño del Producto:</label>
@@ -839,7 +873,10 @@ export const Catalogo = () => {
                       id="direccionCliente"
                       placeholder={
                         selectedInsumo
-                          ? `Precio sugerido para el producto es: ${precioSugerido(selectedDisenio.PrecioDisenio,selectedInsumo.ValorCompra )}`
+                          ? `Precio sugerido para el producto es: ${precioSugerido(
+                              selectedDisenio.PrecioDisenio,
+                              selectedInsumo.ValorCompra
+                            )}`
                           : "Ingrese el valor del producto"
                       }
                       required
@@ -1356,7 +1393,7 @@ export const Catalogo = () => {
 
         {/* <!-- Tabla de Productos --> */}
         <div className="card shadow mb-4">
-        <div className="card-header py-1 d-flex">
+          <div className="card-header py-1 d-flex">
             <h6 className="m-2 font-weight-bold text-primary">Productos</h6>
             <SearchBar
               searchTerm={searchTerm}
@@ -1401,7 +1438,9 @@ export const Catalogo = () => {
                             disabled={producto.Estado !== "Activo"}
                             type="checkbox"
                             checked={producto.Publicacion === "Activo"}
-                            onChange={() => cambiarPublicacionProducto(producto.IdProducto)}
+                            onChange={() =>
+                              cambiarPublicacionProducto(producto.IdProducto)
+                            }
                           />
                           <span className="slider round"></span>
                         </label>

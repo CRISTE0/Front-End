@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const Configuracion = () => {
   let url = "http://localhost:3000/api/roles";
@@ -124,21 +125,18 @@ export const Configuracion = () => {
     };
 
     // Verificar si hay algún error
-    Object.values(newErrors).forEach((error) => {
-      if (error) {
-        isValid = false;
-      }
-    });
+    isValid = !Object.values(newErrors).some((error) => error);
 
-    // Actualizar el estado de errores y mostrar alerta si es necesario
+    // Actualizar el estado de errores
     setErrors(newErrors);
 
     if (isValid) {
-      // Lógica para enviar la solicitud si no hay errores
-      var parametros;
-      var metodo;
+      // Preparar los parámetros para la solicitud
+      let parametros;
+      let metodo;
+
       if (NombreRol === "") {
-        show_alerta("Escribe el nombre del rol", "warning");
+        show_alerta({ message: "Escribe el nombre del rol", type: "warning" });
       } else {
         if (operation === 1) {
           parametros = {
@@ -150,18 +148,19 @@ export const Configuracion = () => {
         } else {
           parametros = {
             IdRol: IdRol,
-            NombreRol: NombreRol,
+            NombreRol: cleanedNombreRol, // Usar el nombre limpio aquí
             Permisos: SelectedPermisos, // Añadir permisos seleccionados
           };
           metodo = "PUT";
         }
+
         enviarSolicitud(metodo, parametros);
       }
     } else {
-      show_alerta(
-        "Por favor, completa todos los campos correctamente",
-        "error"
-      );
+      show_alerta({
+        message: "Por favor, completa todos los campos correctamente",
+        type: "error",
+      });
     }
   };
 
@@ -172,15 +171,15 @@ export const Configuracion = () => {
       await axios({ method: metodo, url: urlPut, data: parametros })
         .then((respuesta) => {
           var msj = respuesta.data.message;
-          show_alerta(msj, "success");
+          show_alerta({ message: msj, type: "success" });
           document.getElementById("btnCerrar").click();
           getRoles();
         })
         .catch((error) => {
-          show_alerta(
-            error.response.data.message || "Error en la solicitud",
-            "error"
-          );
+          show_alerta({
+            message: error.response?.data?.message || "Error en la solicitud",
+            type: "error",
+          });
         });
     } else if (metodo === "DELETE") {
       let urlDelete = `${url}/${parametros.IdRol}`;
@@ -188,26 +187,26 @@ export const Configuracion = () => {
       await axios({ method: metodo, url: urlDelete, data: parametros })
         .then((respuesta) => {
           var msj = respuesta.data.message;
-          show_alerta(msj, "success");
+          show_alerta({ message: msj, type: "success" });
           document.getElementById("btnCerrar").click();
           getRoles();
         })
         .catch((error) => {
-          show_alerta("Error en la solicitud", "error");
+          show_alerta({ message: "Error en la solicitud", type: "error" });
         });
     } else {
       await axios({ method: metodo, url: url, data: parametros })
         .then((respuesta) => {
           var msj = respuesta.data.message;
-          show_alerta(msj, "success");
+          show_alerta({ message: msj, type: "success" });
           document.getElementById("btnCerrar").click();
           getRoles();
         })
         .catch((error) => {
-          show_alerta(
-            error.response.data.message || "Error en la solicitud",
-            "error"
-          );
+          show_alerta({
+            message: error.response?.data?.message || "Error en la solicitud",
+            type: "error",
+          });
         });
     }
   };
@@ -230,10 +229,13 @@ export const Configuracion = () => {
             );
           })
           .catch(() => {
-            show_alerta("Hubo un error al eliminar el rol", "error");
+            show_alerta({
+              message: "Hubo un error al eliminar el rol",
+              type: "error",
+            });
           });
       } else {
-        show_alerta("El rol NO fue eliminado", "info");
+        show_alerta({ message: "El rol NO fue eliminado", type: "info" });
       }
     });
   };
@@ -253,9 +255,7 @@ export const Configuracion = () => {
         cancelButtonText: "Cancelar",
       }).then(async (result) => {
         if (result.isConfirmed) {
-          const parametrosRol = {
-            Estado: nuevoEstado,
-          };
+          const parametrosRol = { Estado: nuevoEstado };
 
           const response = await axios.put(
             `${url}/estado/${IdRol}`,
@@ -269,36 +269,24 @@ export const Configuracion = () => {
               )
             );
 
-            show_alerta("Estado del rol cambiado con éxito", "success", {
-              timer: 8000,
+            show_alerta({
+              message: "Estado del rol cambiado con éxito",
+              type: "success",
             });
           }
         } else {
-          show_alerta("No se ha cambiado el estado del rol", "info");
+          show_alerta({
+            message: "No se ha cambiado el estado del rol",
+            type: "info",
+          });
         }
       });
     } catch (error) {
-      show_alerta("Error cambiando el estado del rol", "error");
+      show_alerta({
+        message: "Error cambiando el estado del rol",
+        type: "error",
+      });
     }
-  };
-
-  // Configuración mensaje de alerta
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
   };
 
   const handleSearchTermChange = (newSearchTerm) => {

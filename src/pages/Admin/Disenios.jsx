@@ -3,6 +3,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 import imagenesAdmin from "../../assets/img/imagenesAdmin";
 import {
   editImageDesign,
@@ -311,7 +312,10 @@ export const Disenios = () => {
       setDisenioSeleccionado(disenio);
       $("#modalDetalleDisenio").modal("show");
     } catch (error) {
-      show_alerta("Error al obtener los detalles del diseño", "error");
+      show_alerta({
+        message: "Error al obtener los detalles del diseño",
+        type: "error",
+      });
     }
   };
 
@@ -319,69 +323,94 @@ export const Disenios = () => {
   // const [editReferenceFile,setEditReferenceFile] = useState("");
 
   const guardarDisenio = async () => {
-    // const cleanedColorFuente = ColorFuente.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
-    // const cleanedPosicionImagen = PosicionImagen.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
-
     if (NombreDisenio === "") {
-      show_alerta("Se necesita un nombre para el diseño", "error");
+      show_alerta({
+        message: "Se necesita un nombre para el diseño",
+        type: "error",
+      });
       return;
     } else {
-      console.log(Disenios.NombreDisenio);
       const existe = Disenios.some(
         (disenio) => disenio.NombreDisenio === NombreDisenio
       );
 
       if (existe) {
-        show_alerta("Ya existe un diseño con ese nombre", "error");
+        show_alerta({
+          message: "Ya existe un diseño con ese nombre",
+          type: "error",
+        });
         return;
       }
     }
 
     if (Fuente === "") {
-      show_alerta("Se necesita una fuente para el diseño", "error");
+      show_alerta({
+        message: "Se necesita una fuente para el diseño",
+        type: "error",
+      });
       return;
     }
     if (TamanioFuente === "") {
-      show_alerta("Se necesita un tamaño para la fuente", "error");
+      show_alerta({
+        message: "Se necesita un tamaño para la fuente",
+        type: "error",
+      });
       return;
     }
 
     if (ColorFuente === "") {
-      show_alerta("Se necesita un color para la fuente", "error");
+      show_alerta({
+        message: "Se necesita un color para la fuente",
+        type: "error",
+      });
       return;
     }
 
     if (PosicionFuente === "") {
-      show_alerta("Se necesita una posición para la fuente", "error");
+      show_alerta({
+        message: "Se necesita una posición para la fuente",
+        type: "error",
+      });
       return;
     }
 
     if (TamanioImagen === "") {
-      show_alerta("Se necesita un tamaño para la imagen del diseño", "error");
+      show_alerta({
+        message: "Se necesita un tamaño para la imagen del diseño",
+        type: "error",
+      });
       return;
     }
 
     if (PosicionImagen === "") {
-      show_alerta(
-        "Se necesita una posición para la imagen del diseño",
-        "error"
-      );
+      show_alerta({
+        message: "Se necesita una posición para la imagen del diseño",
+        type: "error",
+      });
       return;
     }
 
     if (PrecioDisenio === "" || isNaN(PrecioDisenio) || PrecioDisenio < 0) {
-      show_alerta("El precio del diseño es invalido", "error");
+      show_alerta({
+        message: "El precio del diseño es invalido",
+        type: "error",
+      });
       return;
     }
 
-    if (ImagenDisenio === "0" /*|| ImagenDisenio !== "No aplica"*/) {
-      console.log(ImagenDisenio);
-      show_alerta("Se necesita una imagen del diseño", "error");
+    if (ImagenDisenio === "0") {
+      show_alerta({
+        message: "Se necesita una imagen del diseño",
+        type: "error",
+      });
       return;
     }
 
     if (ImagenReferencia === "0") {
-      show_alerta("Se necesita una imagen de referencia del diseño", "error");
+      show_alerta({
+        message: "Se necesita una imagen de referencia del diseño",
+        type: "error",
+      });
       return;
     }
 
@@ -393,33 +422,15 @@ export const Disenios = () => {
 
         IdImagenDisenioCreate = idDesign;
         ImagenDisenioCreate = ulrDesign;
-
-        // setTimeout(() => {
-        //   console.log("valorsitos desg");
-        //   console.log(IdImagenDisenio);
-        //   console.log(ImagenDisenio);
-
-        //   console.log(`iddes${idDesign}`);
-        //   console.log(`urldes${ulrDesign}`);
-        // }, 1000);
       } else {
         IdImagenDisenioCreate = "No aplica";
         ImagenDisenioCreate = "No aplica";
-        // setIdImagenDisenio("No aplica");
-        // setImagenDisenio("No aplica");
       }
 
       const [ulrReference, idReference] = await subirImageReference(
         ImagenReferencia
       );
 
-      console.log(`url Reference ${ulrReference}`);
-      console.log(`id Reference ${idReference}`);
-
-      // console.log(`idDis ${idDesign}`);
-      // console.log(`idRef ${idReference}`);
-
-      // Enviar los datos
       await enviarSolicitud("POST", {
         NombreDisenio,
         Fuente,
@@ -435,9 +446,13 @@ export const Disenios = () => {
         ImagenReferencia: ulrReference,
         Estado: "Activo",
       });
+
+      show_alerta({
+        message: "Diseño guardado con éxito",
+        type: "success",
+      });
     } else if (operation === 2) {
       let inputDisenioFile;
-      // let editReferenceFile;
 
       if (TamanioImagen !== "No aplica") {
         inputDisenioFile = document.getElementById("inputFileDisenio").files[0];
@@ -446,16 +461,13 @@ export const Disenios = () => {
       const inputReferenciaFile = document.getElementById("inputFileReferencia")
         .files[0];
 
-      // Actualizar imagen de diseño si existe un archivo cargado
       if (inputDisenioFile) {
         const readerDesignFile = new FileReader();
         readerDesignFile.onloadend = () => {
           setEditDesignFile(readerDesignFile.result);
-          console.log(readerDesignFile.result);
         };
         readerDesignFile.readAsDataURL(inputDisenioFile);
 
-        // Si el id de imagen diseño es "No aplica" se llamara la funcion de subirImageDesignAdmin
         if (IdImagenDisenio === "No aplica") {
           const [idImageDesign, urlDesign] = await subirImageDesignAdmin(
             ImagenDisenio
@@ -463,32 +475,21 @@ export const Disenios = () => {
 
           IdImagenDisenioUpdate = idImageDesign;
           ImagenDisenioUpdate = urlDesign;
-
-          // Si ya tiene un id la imagen de diseño, se llamara a la funcion editImageDesign
         } else {
           await editImageDesign(IdImagenDisenio, ImagenDisenio);
 
           IdImagenDisenioUpdate = IdImagenDisenio;
           ImagenDisenioUpdate = ImagenDisenioTemporalEdit;
         }
-
-        // setImagenDisenio(nuevaImagenDisenio);
-        console.log("entro EditDis");
-
-        //  Si no hay archivo cargado y los atributos de la imagen son "No aplica" se editaran las variables
       } else if (TamanioImagen === "No aplica") {
         IdImagenDisenioUpdate = "No aplica";
         ImagenDisenioUpdate = "No aplica";
       }
 
-      // Actualizar imagen de referencia si existe un archivo cargado
       if (inputReferenciaFile) {
         await editImageReference(IdImagenReferencia, ImagenReferencia);
-
-        console.log("entro EditRef");
       }
 
-      // Actualizar Diseño
       await enviarSolicitud("PUT", {
         IdDisenio,
         NombreDisenio,
@@ -503,6 +504,11 @@ export const Disenios = () => {
         ImagenDisenio: ImagenDisenioUpdate,
         IdImagenReferencia,
         ImagenReferencia: ImagenReferenciaTemporalEdit,
+      });
+
+      show_alerta({
+        message: "Diseño actualizado con éxito",
+        type: "success",
       });
 
       setTimeout(() => {
@@ -1106,25 +1112,6 @@ export const Disenios = () => {
     }
   };
 
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        // Selecciona la barra de progreso y ajusta su estilo
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
-  };
-
   // Función para renderizar los mensajes de error
   const renderErrorMessage = (errorMessage) => {
     return errorMessage ? (
@@ -1160,25 +1147,45 @@ export const Disenios = () => {
       }
 
       const msj = respuesta.data.message;
-      show_alerta(msj, "success");
+      show_alerta({
+        message: msj,
+        type: "success",
+      });
       document.getElementById("btnCerrarCliente").click();
       getDisenios();
+
       if (metodo === "POST") {
-        show_alerta("Diseño creado con éxito", "success", { timer: 2000 });
+        show_alerta({
+          message: "Diseño creado con éxito",
+          type: "success",
+        });
       } else if (metodo === "PUT") {
-        show_alerta("Diseño actualizado con éxito", "success", {
-          timer: 2000,
+        show_alerta({
+          message: "Diseño actualizado con éxito",
+          type: "success",
         });
       } else if (metodo === "DELETE") {
-        show_alerta("Diseño eliminado con éxito", "success", { timer: 2000 });
+        show_alerta({
+          message: "Diseño eliminado con éxito",
+          type: "success",
+        });
       }
     } catch (error) {
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({
+          message: error.response.data.message,
+          type: "error",
+        });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({
+          message: "Error en la solicitud",
+          type: "error",
+        });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({
+          message: "Error desconocido",
+          type: "error",
+        });
       }
       console.log(error);
     }
@@ -1207,9 +1214,17 @@ export const Disenios = () => {
 
           // Establecer la nueva página como la página actual
           setCurrentPage(newPage);
+
+          show_alerta({
+            message: "Diseño eliminado con éxito",
+            type: "success",
+          });
         });
       } else {
-        show_alerta("El diseño NO fue eliminado", "info");
+        show_alerta({
+          message: "El diseño NO fue eliminado",
+          type: "info",
+        });
       }
     });
   };
@@ -1241,16 +1256,23 @@ export const Disenios = () => {
             )
           );
 
-          show_alerta("Estado del diseño cambiado con éxito", "success", {
-            timer: 2000,
+          show_alerta({
+            message: "Estado del diseño cambiado con éxito",
+            type: "success",
           });
         } else {
-          show_alerta("No se ha cambiado el estado del diseño", "info");
+          show_alerta({
+            message: "No se ha cambiado el estado del diseño",
+            type: "info",
+          });
         }
       });
     } catch (error) {
       console.error("Error updating state:", error);
-      show_alerta("Error cambiando el estado del diseño", "error");
+      show_alerta({
+        message: "Error cambiando el estado del diseño",
+        type: "error",
+      });
     }
   };
 

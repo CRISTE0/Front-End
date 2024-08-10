@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const Clientes = () => {
   const url = "http://localhost:3000/api/clientes";
@@ -108,97 +109,100 @@ export const Clientes = () => {
   };
 
   const guardarCliente = async () => {
-    const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+    const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, " ");
     const cleanedUsuario = Usuario.trim().replace(/\s+/g, " ");
-    const cleanedDireccion = Direccion.trim().replace(/\s+/g, " "); // Elimina los espacios múltiples y los extremos
+    const cleanedDireccion = Direccion.trim().replace(/\s+/g, " ");
     const cleanedContrasenia = Contrasenia.trim();
 
     if (!TipoDocumento) {
-      show_alerta(
-        "El tipo documento es necesario",
-        "error"
-      );
+      show_alerta({
+        message: "El tipo documento es necesario",
+        type: "error",
+      });
       return;
     }
 
     if (!NroDocumento) {
-      show_alerta(
-        "El número de documento es necesario",
-        "error"
-      );
+      show_alerta({
+        message: "El número de documento es necesario",
+        type: "error",
+      });
       return;
     }
 
     if (!NombreApellido) {
-      show_alerta(
-        "El nombre y apellido son necesario",
-        "error"
-      );
+      show_alerta({
+        message: "El nombre y apellido son necesarios",
+        type: "error",
+      });
       return;
     }
 
     if (!Usuario) {
-      show_alerta(
-        "El usuario es necesario",
-        "error"
-      );
+      show_alerta({
+        message: "El usuario es necesario",
+        type: "error",
+      });
       return;
-      
-    }else if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+)*$/.test(Usuario) ) {
-      show_alerta(
-        "El nombre de usuario puede contener letras, números, caracteres especiales, y un solo espacio entre palabras",
-        "error"
-      );
+    } else if (
+      !/^[A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+)*$/.test(
+        Usuario
+      )
+    ) {
+      show_alerta({
+        message:
+          "El nombre de usuario puede contener letras, números, caracteres especiales, y un solo espacio entre palabras",
+        type: "error",
+      });
       return;
     }
 
     if (!Telefono) {
-      show_alerta(
-        "El teléfono es necesario",
-        "error"
-      );
+      show_alerta({
+        message: "El teléfono es necesario",
+        type: "error",
+      });
       return;
     }
 
     if (!Direccion) {
-      show_alerta(
-        "La dirección es necesaria",
-        "error"
-      );
+      show_alerta({
+        message: "La dirección es necesaria",
+        type: "error",
+      });
       return;
     }
 
     if (!Correo) {
-      show_alerta(
-        "El correo es necesario",
-        "error"
-      );
+      show_alerta({
+        message: "El correo es necesario",
+        type: "error",
+      });
       return;
     }
 
     if (operation === 1 && !cleanedContrasenia) {
-      // Validar contraseña solo en creación de usuario
       setErrors((prevState) => ({
         ...prevState,
         contrasenia: "La contraseña es requerida",
       }));
     }
 
-    // Validar errores específicos para cambiar contraseña
     const contraseniaError = validateContrasenia(cleanedContrasenia);
 
     if (contraseniaError && operation === 3) {
-      // Mostrar error solo si estás cambiando la contraseña
       setErrors((prevState) => ({
         ...prevState,
         contrasenia: contraseniaError,
       }));
-      show_alerta("Verifique los errores en el formulario", "error");
+      show_alerta({
+        message: "Verifique los errores en el formulario",
+        type: "error",
+      });
       return;
     }
 
     if (operation === 1) {
-      // Crear Cliente
       await enviarSolicitud("POST", {
         TipoDocumento,
         NroDocumento,
@@ -211,7 +215,6 @@ export const Clientes = () => {
         Estado: "Activo",
       });
     } else if (operation === 2) {
-      // Actualizar Cliente
       await enviarSolicitud("PUT", {
         IdCliente,
         TipoDocumento,
@@ -224,7 +227,6 @@ export const Clientes = () => {
         Contrasenia: cleanedContrasenia,
       });
     } else if (operation === 3) {
-      // Cambiar Contraseña
       await enviarSolicitud("PUT", {
         IdCliente,
         Contrasenia: cleanedContrasenia,
@@ -363,16 +365,16 @@ export const Clientes = () => {
   };
 
   const handleChangeUsuario = (e) => {
-  const value = e.target.value.replace(/\s+/g, ""); // Eliminar todos los espacios
-  setUsuario(value);
+    const value = e.target.value.replace(/\s+/g, ""); // Eliminar todos los espacios
+    setUsuario(value);
 
-  // Validar el usuario
-  const errorMessage = validateUsuario(value);
-  setErrors((prevState) => ({
-    ...prevState,
-    usuario: errorMessage,
-  }));
-};
+    // Validar el usuario
+    const errorMessage = validateUsuario(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      usuario: errorMessage,
+    }));
+  };
 
   // Función para manejar cambios en el teléfono
   const handleChangeTelefono = (e) => {
@@ -429,25 +431,6 @@ export const Clientes = () => {
     setShowPassword(!showPassword); // Alternar el estado para mostrar/ocultar contraseña
   };
 
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        // Selecciona la barra de progreso y ajusta su estilo
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
-  };
-
   // Función para renderizar los mensajes de error
   const renderErrorMessage = (errorMessage) => {
     return errorMessage ? (
@@ -472,25 +455,45 @@ export const Clientes = () => {
       }
 
       const msj = respuesta.data.message;
-      show_alerta(msj, "success");
+      show_alerta({
+        message: msj,
+        type: "success",
+      });
       document.getElementById("btnCerrarCliente").click();
       getClientes();
+
       if (metodo === "POST") {
-        show_alerta("Cliente creado con éxito", "success", { timer: 2000 });
+        show_alerta({
+          message: "Cliente creado con éxito",
+          type: "success",
+        });
       } else if (metodo === "PUT") {
-        show_alerta("Cliente actualizado con éxito", "success", {
-          timer: 2000,
+        show_alerta({
+          message: "Cliente actualizado con éxito",
+          type: "success",
         });
       } else if (metodo === "DELETE") {
-        show_alerta("Cliente eliminado con éxito", "success", { timer: 2000 });
+        show_alerta({
+          message: "Cliente eliminado con éxito",
+          type: "success",
+        });
       }
     } catch (error) {
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({
+          message: error.response.data.message,
+          type: "error",
+        });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({
+          message: "Error en la solicitud",
+          type: "error",
+        });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({
+          message: "Error desconocido",
+          type: "error",
+        });
       }
       console.log(error);
     }
@@ -519,9 +522,17 @@ export const Clientes = () => {
 
           // Establecer la nueva página como la página actual
           setCurrentPage(newPage);
+
+          show_alerta({
+            message: "Cliente eliminado con éxito",
+            type: "success",
+          });
         });
       } else {
-        show_alerta("El cliente NO fue eliminado", "info");
+        show_alerta({
+          message: "El cliente NO fue eliminado",
+          type: "info",
+        });
       }
     });
   };
@@ -553,16 +564,23 @@ export const Clientes = () => {
             )
           );
 
-          show_alerta("Estado del cliente cambiado con éxito", "success", {
-            timer: 2000,
+          show_alerta({
+            message: "Estado del cliente cambiado con éxito",
+            type: "success",
           });
         } else {
-          show_alerta("No se ha cambiado el estado del cliente", "info");
+          show_alerta({
+            message: "No se ha cambiado el estado del cliente",
+            type: "info",
+          });
         }
       });
     } catch (error) {
       console.error("Error updating state:", error);
-      show_alerta("Error cambiando el estado del cliente", "error");
+      show_alerta({
+        message: "Error cambiando el estado del cliente",
+        type: "error",
+      });
     }
   };
 

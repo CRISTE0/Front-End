@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
@@ -159,7 +160,10 @@ export const Compras = () => {
       });
       setCompras(comprasOrdenadas);
     } catch (error) {
-      show_alerta("Error al obtener las compras", "error");
+      show_alerta({
+        message: "Error al obtener las compras",
+        type: "error",
+      });
     }
   };
 
@@ -185,7 +189,10 @@ export const Compras = () => {
       );
       setProveedores(proveedoresActivos);
     } catch (error) {
-      show_alerta("Error al obtener los proveedores", "error");
+      show_alerta({
+        message: "Error al obtener los proveedores",
+        type: "error",
+      });
     }
   };
 
@@ -197,7 +204,10 @@ export const Compras = () => {
       );
       setInsumos(insumosActivos);
     } catch (error) {
-      show_alerta("Error al obtener los insumos", "error");
+      show_alerta({
+        message: "Error al obtener los insumos",
+        type: "error",
+      });
     }
   };
 
@@ -219,7 +229,10 @@ export const Compras = () => {
       setCompraSeleccionada(compra);
       $("#modalDetalleCompra").modal("show");
     } catch (error) {
-      show_alerta("Error al obtener los detalles de la compra", "error");
+      show_alerta({
+        message: "Error al obtener los detalles de la compra",
+        type: "error",
+      });
     }
   };
 
@@ -315,7 +328,10 @@ export const Compras = () => {
           detalle.IdInsumo === value && detalleIndex !== index
       );
       if (insumoDuplicado) {
-        show_alerta("Este insumo ya está agregado en los detalles", "error");
+        show_alerta({
+          message: "Este insumo ya está agregado en los detalles",
+          type: "error",
+        });
         return;
       }
     }
@@ -333,14 +349,18 @@ export const Compras = () => {
 
         // Mostrar alerta si la cantidad es 0 y no se está eliminando el detalle
         if (cantidad === 0 && Detalles[index].cantidad !== "") {
-          show_alerta("La cantidad no puede ser 0", "error");
+          show_alerta({
+            message: "La cantidad no puede ser 0",
+            type: "error",
+          });
         }
       } else {
         if (value !== "") {
-          show_alerta(
-            "La cantidad debe ser un número entero positivo sin signos más o menos al principio",
-            "error"
-          );
+          show_alerta({
+            message:
+              "La cantidad debe ser un número entero positivo sin signos más o menos al principio",
+            type: "error",
+          });
         }
         return; // No actualizar si no es un número entero positivo y no está vacío
       }
@@ -358,17 +378,20 @@ export const Compras = () => {
         const currentPrice = getCurrentPrice(idInsumo);
 
         if (newPrice < currentPrice && value !== "") {
-          show_alerta(
-            `El precio no puede ser menor al actual (${formatPrice(
+          show_alerta({
+            message: `El precio no puede ser menor al actual (${formatPrice(
               currentPrice
             )})`,
-            "warning"
-          );
+            type: "warning",
+          });
         }
 
         // Validar que el precio no sea 0, solo si el campo no está vacío
         if (newPrice === 0 && value !== "") {
-          show_alerta("El precio no puede ser 0", "error");
+          show_alerta({
+            message: "El precio no puede ser 0",
+            type: "error",
+          });
           updatedDetalles[index][name] = ""; // Limpiar el campo de precio
         } else {
           // Actualizar el subtotal si se modificó precio
@@ -378,10 +401,11 @@ export const Compras = () => {
         }
       } else {
         if (value !== "") {
-          show_alerta(
-            "El precio debe ser un número válido y no superar los 10 millones, sin signos más o menos al principio",
-            "error"
-          );
+          show_alerta({
+            message:
+              "El precio debe ser un número válido y no superar los 10 millones, sin signos más o menos al principio",
+            type: "error",
+          });
         }
         return; // No actualizar si no es un número válido o si supera el límite
       }
@@ -492,7 +516,10 @@ export const Compras = () => {
       ) {
         detailErrors.cantidad = "Ingresa una cantidad válida";
         if (detalle.cantidad === "0") {
-          show_alerta("La cantidad no puede ser 0", "error");
+          show_alerta({
+            message: "La cantidad no puede ser 0",
+            type: "error",
+          });
         }
       }
 
@@ -505,9 +532,15 @@ export const Compras = () => {
         detailErrors.precio =
           "Ingresa un precio válido que no supere los 10 millones y no sea 0";
         if (detalle.precio === "") {
-          show_alerta("El precio no puede estar vacío", "error");
+          show_alerta({
+            message: "El precio no puede estar vacío",
+            type: "error",
+          });
         } else if (detalle.precio === "0") {
-          show_alerta("El precio no puede ser 0", "error");
+          show_alerta({
+            message: "El precio no puede ser 0",
+            type: "error",
+          });
         }
       }
 
@@ -558,7 +591,10 @@ export const Compras = () => {
         url: urlRequest,
         data: parametros,
       });
-      show_alerta(respuesta.data.message, "success");
+      show_alerta({
+        message: respuesta.data.message,
+        type: "success",
+      });
       document.getElementById("btnCerrar").click();
       getCompras();
 
@@ -568,11 +604,20 @@ export const Compras = () => {
       }
     } catch (error) {
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({
+          message: error.response.data.message,
+          type: "error",
+        });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({
+          message: "Error en la solicitud",
+          type: "error",
+        });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({
+          message: "Error desconocido",
+          type: "error",
+        });
       }
     }
   };
@@ -584,7 +629,7 @@ export const Compras = () => {
       icon: "question",
       text: "No se podrá dar marcha atrás",
       showCancelButton: true,
-      confirmButtonText: "Si, cancelar",
+      confirmButtonText: "Sí, cancelar",
       cancelButtonText: "No",
     }).then(async (result) => {
       if (result.isConfirmed) {
@@ -597,32 +642,23 @@ export const Compras = () => {
           // Actualizar la lista de compras
           getCompras();
 
-          show_alerta("La compra fue cancelada correctamente", "success");
+          show_alerta({
+            message: "La compra fue cancelada correctamente",
+            type: "success",
+          });
         } catch (error) {
           console.log(error);
-          show_alerta("Hubo un error al cancelar la compra", "error");
+          show_alerta({
+            message: "Hubo un error al cancelar la compra",
+            type: "error",
+          });
         }
       } else {
-        show_alerta("La compra NO fue cancelada", "info");
+        show_alerta({
+          message: "La compra NO fue cancelada",
+          type: "info",
+        });
       }
-    });
-  };
-
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
     });
   };
 

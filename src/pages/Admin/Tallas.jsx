@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const Tallas = () => {
   let url = "http://localhost:3000/api/tallas";
@@ -49,12 +50,15 @@ export const Tallas = () => {
   };
 
   const validar = () => {
-    var parametros;
-    var metodo;
     if (Talla === "") {
-      show_alerta("Escribe el nombre de la talla ", "warning");
+      show_alerta({
+        message: "Escribe el nombre de la talla",
+        type: "warning",
+      });
     } else {
       console.log(Talla);
+      let parametros;
+      let metodo;
       if (operation === 1) {
         parametros = {
           Talla: Talla.trim(),
@@ -72,78 +76,46 @@ export const Tallas = () => {
   };
 
   const enviarSolicitud = async (metodo, parametros) => {
-    if (metodo === "PUT") {
-      let urlPut = `${url}/${parametros.IdTalla}`;
+    try {
+      let urlRequest = url;
+      if (metodo === "PUT" || metodo === "DELETE") {
+        urlRequest = `${url}/${parametros.IdTalla}`;
+      }
 
-      console.log(parametros);
-      console.log(url);
-      await axios({ method: metodo, url: urlPut, data: parametros })
-        .then(function (respuesta) {
-          console.log(respuesta);
-          var tipo = respuesta.data[0];
-          var msj = respuesta.data.message;
-          show_alerta(msj, "success");
-          // if (jtipo === "success") {
-          document.getElementById("btnCerrar").click();
-          getTallas();
-          // }
-        })
-        .catch(function (error) {
-          if (!error.response.data.error) {
-            let mensaje = error.response.data.message;
+      const respuesta = await axios({
+        method: metodo,
+        url: urlRequest,
+        data: parametros,
+      });
 
-            show_alerta(mensaje, "error");
-          } else {
-            show_alerta(error.response.data.error, "error");
-          }
+      const mensaje = respuesta.data.message;
+      show_alerta({
+        message: mensaje,
+        type: "success",
+      });
 
-          console.log(error);
+      document.getElementById("btnCerrar").click();
+      getTallas();
+    } catch (error) {
+      if (error.response) {
+        const mensaje =
+          error.response.data.error || error.response.data.message;
+        show_alerta({
+          message: mensaje,
+          type: "error",
         });
-    } else if (metodo === "DELETE") {
-      console.log(parametros);
-      let urlDelete = `${url}/${parametros.IdTalla}`;
-
-      await axios({ method: metodo, url: urlDelete, data: parametros })
-        .then(function (respuesta) {
-          console.log(respuesta);
-          var tipo = respuesta.data[0];
-          var msj = respuesta.data.message;
-          show_alerta(msj, "success");
-          // if (tipo === "success") {
-          document.getElementById("btnCerrar").click();
-          getTallas();
-          // }
-        })
-        .catch(function (error) {
-          show_alerta("Error en la solicitud", "error");
-          console.log(error);
+      } else if (error.request) {
+        show_alerta({
+          message: "Error en la solicitud",
+          type: "error",
         });
-    } else {
-      //POST
-      await axios({ method: metodo, url: url, data: parametros })
-        .then(function (respuesta) {
-          console.log(respuesta);
-          var tipo = respuesta.data[0];
-          var msj = respuesta.data.message;
-          console.log(Talla);
-
-          show_alerta(msj, "success");
-          // if (jtipo === "success") {
-          document.getElementById("btnCerrar").click();
-          getTallas();
-          // }
-        })
-        .catch(function (error) {
-          if (!error.response.data.error) {
-            let mensaje = error.response.data.message;
-
-            show_alerta(mensaje, "error");
-          } else {
-            show_alerta(error.response.data.error, "error");
-          }
-          console.log(error);
-          console.log(error.response.data.error);
+      } else {
+        show_alerta({
+          message: "Error desconocido",
+          type: "error",
         });
+      }
+      console.log(error);
     }
   };
 
@@ -160,23 +132,22 @@ export const Tallas = () => {
       if (result.isConfirmed) {
         enviarSolicitud("DELETE", { IdTalla: IdTalla })
           .then(() => {
-            // Calcular el índice de la talla eliminada en la lista filtrada (si es necesario)
-            const index = filteredTallass.findIndex(
-              (talla) => talla.id === IdTalla
-            );
-
-            // Determinar la página en la que debería estar la talla después de la eliminación
-            const newPage =
-              Math.ceil((filteredTallass.length - 1) / itemsPerPage) || 1;
-
-            // Establecer la nueva página como la página actual
-            setCurrentPage(newPage);
+            show_alerta({
+              message: "Talla eliminada con éxito",
+              type: "success",
+            });
           })
           .catch(() => {
-            show_alerta("Hubo un error al eliminar la talla", "error");
+            show_alerta({
+              message: "Hubo un error al eliminar la talla",
+              type: "error",
+            });
           });
       } else {
-        show_alerta("La talla NO fue eliminada", "info");
+        show_alerta({
+          message: "La talla NO fue eliminada",
+          type: "info",
+        });
       }
     });
   };
@@ -218,38 +189,25 @@ export const Tallas = () => {
               )
             );
 
-            show_alerta("Estado de la talla cambiada con éxito", "success", {
-              timer: 8000,
+            show_alerta({
+              message: "Estado de la talla cambiada con éxito",
+              type: "success",
             });
           }
         } else {
-          show_alerta("No se ha cambiado el estado de la talla", "info");
+          show_alerta({
+            message: "No se ha cambiado el estado de la talla",
+            type: "info",
+          });
         }
       });
     } catch (error) {
       console.error("Error updating state:", error);
-      show_alerta("Error cambiando el estado de la talla", "error");
+      show_alerta({
+        message: "Error cambiando el estado de la talla",
+        type: "error",
+      });
     }
-  };
-
-  // Configuracion mensaje de alerta
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        // Selecciona la barra de progreso y ajusta su estilo
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
   };
 
   const handleSearchTermChange = (newSearchTerm) => {
@@ -364,7 +322,7 @@ export const Tallas = () => {
 
         {/* <!-- Tabla Proveedor --> */}
         <div className="card shadow mb-4">
-        <div className="card-header py-1 d-flex">
+          <div className="card-header py-1 d-flex">
             <h6 className="m-2 font-weight-bold text-primary">Tallas</h6>
             <SearchBar
               searchTerm={searchTerm}

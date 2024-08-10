@@ -4,9 +4,11 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const Proveedores = () => {
   let url = "http://localhost:3000/api/proveedores";
+  const comprasUrl = "http://localhost:3000/api/compras";
   const [Proveedores, setProveedores] = useState([]);
   const [IdProveedor, setIdProveedor] = useState("");
   const [TipoDocumento, setTipoDocumento] = useState("");
@@ -42,6 +44,24 @@ export const Proveedores = () => {
   const getProveedores = async () => {
     const respuesta = await axios.get(url);
     setProveedores(respuesta.data);
+  };
+
+  const getComprasByProveedor = async (IdProveedor) => {
+    try {
+      const response = await axios.get(comprasUrl);
+      // Considera activo si hay compras activas (suponiendo que `estado` es un campo que indica si la compra está activa)
+      const compras = response.data.filter(
+        (compra) => compra.IdProveedor === IdProveedor
+      );
+      const comprasActivas = compras.some(
+        (compra) => compra.Estado === "Activo"
+      );
+      return comprasActivas;
+    } catch (error) {
+      console.error("Error fetching compras:", error);
+      show_alerta({ message: "Error al verificar las compras", type: "error" });
+      return false; // Considera que no tiene compras activas en caso de error
+    }
   };
 
   const openModal = (op, proveedor = null) => {
@@ -388,30 +408,6 @@ export const Proveedores = () => {
     );
   };
 
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      toast: true, // Activa el modo "toast" para mostrar alertas pequeñas
-      position: "top-end", // Posiciona la alerta en la esquina superior derecha
-      customClass: {
-        popup: "small-alert custom-popup-background", // Aplica ambas clases personalizadas
-      },
-      didOpen: () => {
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
-  };
-  
-
   // Función para renderizar los mensajes de error
   const renderErrorMessage = (errorMessage) => {
     return errorMessage ? (
@@ -431,60 +427,71 @@ export const Proveedores = () => {
         url: urlRequest,
         data: parametros,
       });
-      var msj = respuesta.data.message;
-      show_alerta(msj, "success");
+
+      const msj = respuesta.data.message;
+      show_alerta({ message: msj, type: "success" });
       document.getElementById("btnCerrar").click();
       getProveedores();
+
       if (metodo === "POST") {
-        show_alerta("Proveedor creado con éxito", "success", { timer: 2000 });
+        show_alerta({ message: "Proveedor creado con éxito", type: "success" });
       } else if (metodo === "PUT") {
-        show_alerta("Proveedor actualizado con éxito", "success", {
-          timer: 2000,
+        show_alerta({
+          message: "Proveedor actualizado con éxito",
+          type: "success",
         });
       } else if (metodo === "DELETE") {
-        show_alerta("Proveedor eliminado con éxito", "success", {
-          timer: 2000,
+        show_alerta({
+          message: "Proveedor eliminado con éxito",
+          type: "success",
         });
       }
     } catch (error) {
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({ message: error.response.data.message, type: "error" });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({ message: "Error en la solicitud", type: "error" });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({ message: "Error desconocido", type: "error" });
       }
       console.log(error);
     }
   };
 
-  const deleteProveedor = (IdProveedor, NombreApellido) => {
+  const deleteProveedor = async (IdProveedor, NombreApellido) => {
+    const asociado = await getComprasByProveedor(IdProveedor);
+
+    if (asociado) {
+      // Mostrar mensaje si hay compras activas
+      show_alerta({
+        message:
+          "El proveedor está asociado a una compra activa y no puede ser eliminado.",
+        type: "info",
+      });
+      return;
+    }
+
+    // Si no hay compras activas o las compras están canceladas, proceder con la eliminación
     const MySwal = withReactContent(Swal);
     MySwal.fire({
       title: `¿Seguro de eliminar al proveedor ${NombreApellido}?`,
       icon: "question",
       text: "No se podrá dar marcha atrás",
       showCancelButton: true,
-      confirmButtonText: "Si, eliminar",
+      confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
-        setIdProveedor(IdProveedor);
         enviarSolicitud("DELETE", { IdProveedor }).then(() => {
-          // Calcular el índice del proveedor eliminado en la lista filtrada
           const index = filteredProveedores.findIndex(
             (proveedor) => proveedor.IdProveedor === IdProveedor
           );
-
-          // Determinar la página en la que debería estar el proveedor después de la eliminación
           const newPage =
             Math.ceil((filteredProveedores.length - 1) / itemsPerPage) || 1;
-
-          // Establecer la nueva página como la página actual
           setCurrentPage(newPage);
         });
       } else {
-        show_alerta("El proveedor NO fue eliminado", "info");
+        show_alerta({ message: "El proveedor NO fue eliminado", type: "info" });
       }
     });
   };
@@ -516,16 +523,23 @@ export const Proveedores = () => {
             )
           );
 
-          show_alerta("Estado del proveedor cambiado con éxito", "success", {
-            timer: 2000,
+          show_alerta({
+            message: "Estado del proveedor cambiado con éxito",
+            type: "success",
           });
         } else {
-          show_alerta("No se ha cambiado el estado del proveedor", "info");
+          show_alerta({
+            message: "No se ha cambiado el estado del proveedor",
+            type: "info",
+          });
         }
       });
     } catch (error) {
       console.error("Error updating state:", error);
-      show_alerta("Error cambiando el estado del proveedor", "error");
+      show_alerta({
+        message: "Error cambiando el estado del proveedor",
+        type: "error",
+      });
     }
   };
 

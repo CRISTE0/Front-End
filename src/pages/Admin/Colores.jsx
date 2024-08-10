@@ -5,6 +5,7 @@ import withReactContent from "sweetalert2-react-content";
 import { ChromePicker } from "react-color";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const Colores = () => {
   const url = "http://localhost:3000/api/colores";
@@ -29,7 +30,10 @@ export const Colores = () => {
       const respuesta = await axios.get(url);
       setColores(respuesta.data);
     } catch (error) {
-      show_alerta("Error al obtener los colores", "error");
+      show_alerta({
+        message: "Error al obtener los colores",
+        type: "error",
+      });
     }
   };
 
@@ -126,16 +130,28 @@ export const Colores = () => {
         url: urlRequest,
         data: parametros,
       });
-      show_alerta(respuesta.data.message, "success");
+      show_alerta({
+        message: respuesta.data.message,
+        type: "success",
+      });
       document.getElementById("btnCerrar").click();
       getColores();
     } catch (error) {
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({
+          message: error.response.data.message,
+          type: "error",
+        });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({
+          message: "Error en la solicitud",
+          type: "error",
+        });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({
+          message: "Error desconocido",
+          type: "error",
+        });
       }
     }
   };
@@ -147,27 +163,28 @@ export const Colores = () => {
       icon: "question",
       text: "No se podrá dar marcha atrás",
       showCancelButton: true,
-      confirmButtonText: "Si, eliminar",
+      confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
         enviarSolicitud("DELETE", { IdColor: id })
           .then(() => {
-            // Calcular el índice del color eliminado en la lista filtrada (si es necesario)
-            const index = filteredColores.findIndex((color) => color.id === id);
-
-            // Determinar la página en la que debería estar el color después de la eliminación
-            const newPage =
-              Math.ceil((filteredColores.length - 1) / itemsPerPage) || 1;
-
-            // Establecer la nueva página como la página actual
-            setCurrentPage(newPage);
+            show_alerta({
+              message: "Color eliminado correctamente",
+              type: "success",
+            });
           })
           .catch(() => {
-            show_alerta("Hubo un error al eliminar el color", "error");
+            show_alerta({
+              message: "Hubo un error al eliminar el color",
+              type: "error",
+            });
           });
       } else {
-        show_alerta("El color NO fue eliminado", "info");
+        show_alerta({
+          message: "El color NO fue eliminado",
+          type: "info",
+        });
       }
     });
   };
@@ -195,46 +212,42 @@ export const Colores = () => {
             Referencia: colorActual.Referencia,
           };
 
-          const response = await axios.put(`${url}/${IdColor}`, parametros);
-          if (response.status === 200) {
-            setColores((prevColores) =>
-              prevColores.map((color) =>
-                color.IdColor === IdColor
-                  ? { ...color, Estado: nuevoEstado }
-                  : color
-              )
-            );
+          try {
+            const response = await axios.put(`${url}/${IdColor}`, parametros);
+            if (response.status === 200) {
+              setColores((prevColores) =>
+                prevColores.map((color) =>
+                  color.IdColor === IdColor
+                    ? { ...color, Estado: nuevoEstado }
+                    : color
+                )
+              );
 
-            const message = `Estado del color cambiado con éxito`;
-            show_alerta(message, "success");
+              show_alerta({
+                message: "Estado del color cambiado con éxito",
+                type: "success",
+              });
+            }
+          } catch (error) {
+            show_alerta({
+              message: "Error cambiando el estado del color",
+              type: "error",
+            });
           }
         } else {
-          show_alerta("No se ha cambiado el estado del color", "info");
+          show_alerta({
+            message: "No se ha cambiado el estado del color",
+            type: "info",
+          });
         }
       });
     } catch (error) {
       console.error("Error updating state:", error);
-      show_alerta("Error cambiando el estado del color", "error");
+      show_alerta({
+        message: "Error al procesar la solicitud",
+        type: "error",
+      });
     }
-  };
-
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        // Selecciona la barra de progreso y ajusta su estilo
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
   };
 
   const handleSearchTermChange = (newSearchTerm) => {

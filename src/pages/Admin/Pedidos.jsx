@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const Pedidos = () => {
   const url = "http://localhost:3000/api/pedidos";
@@ -66,12 +67,15 @@ export const Pedidos = () => {
   const getClientes = async () => {
     try {
       const respuesta = await axios.get("http://localhost:3000/api/clientes");
-      const ClientesActivos = respuesta.data.filter(
+      const clientesActivos = respuesta.data.filter(
         (cliente) => cliente.Estado === "Activo"
       );
-      setClientes(ClientesActivos);
+      setClientes(clientesActivos);
     } catch (error) {
-      show_alerta("Error al obtener los Clientes", "error");
+      show_alerta({
+        message: "Error al obtener los clientes",
+        type: "error",
+      });
     }
   };
 
@@ -83,7 +87,10 @@ export const Pedidos = () => {
       );
       setProductos(productosActivos);
     } catch (error) {
-      show_alerta("Error al obtener los Productos", "error");
+      show_alerta({
+        message: "Error al obtener los productos",
+        type: "error",
+      });
     }
   };
 
@@ -95,7 +102,10 @@ export const Pedidos = () => {
 
       setEstadosPedidos(respuesta.data);
     } catch (error) {
-      show_alerta("Error al obtener los Productos", "error");
+      show_alerta({
+        message: "Error al obtener los estados de pedidos",
+        type: "error",
+      });
     }
   };
 
@@ -109,15 +119,28 @@ export const Pedidos = () => {
 
   const handleDetalleCompra = async (idPedido) => {
     try {
+      // Realizar la solicitud GET para obtener los detalles del pedido
       const respuesta = await axios.get(
         `http://localhost:3000/api/pedidos/${idPedido}`
       );
+
+      // Obtener los detalles del pedido de la respuesta
       const pedido = respuesta.data;
+
+      // Mostrar los detalles del pedido en la consola para depuración
       console.log("Detalle de Pedido:", pedido);
+
+      // Establecer el pedido seleccionado en el estado
       setPedidoSeleccionado(pedido);
+
+      // Mostrar el modal con los detalles de la compra
       $("#modalDetalleCompra").modal("show");
     } catch (error) {
-      show_alerta("Error al obtener los detalles de la compra", "error");
+      // Manejo de errores en caso de que la solicitud falle
+      show_alerta({
+        message: "Error al obtener los detalles de la compra",
+        type: "error",
+      });
     }
   };
 
@@ -185,7 +208,10 @@ export const Pedidos = () => {
       );
 
       if (productoDuplicado) {
-        show_alerta("Este producto ya está agregado en los detalles", "error");
+        show_alerta({
+          message: "Este producto ya está agregado en los detalles",
+          type: "error",
+        });
         return; // No permitir la selección del producto duplicado
       }
 
@@ -205,7 +231,7 @@ export const Pedidos = () => {
       }
     }
 
-    if (name == "cantidad") {
+    if (name === "cantidad") {
       // Actualizar la cantidad en el detalle
       updatedDetalles[index][name] = value;
       setDetalles(updatedDetalles);
@@ -214,22 +240,28 @@ export const Pedidos = () => {
       const selectedProduct = Productos.find(
         (producto) => producto.IdProducto == selectedProductoId
       );
-      console.log(selectedProduct);
 
       if (selectedProduct) {
         // Validar la cantidad
         if (parseInt(value) > selectedProduct.Cantidad) {
           updatedAlertas[index] =
             "La cantidad ingresada es mayor que la cantidad disponible";
+          show_alerta({
+            message:
+              "La cantidad ingresada es mayor que la cantidad disponible",
+            type: "error",
+          });
         } else {
           updatedAlertas[index] = "";
         }
         setAlertas(updatedAlertas);
       }
 
+      // Calcular el subtotal
       const cantidad = parseFloat(updatedDetalles[index].cantidad || 0);
       const precio = parseFloat(updatedDetalles[index].precio || 0);
       updatedDetalles[index].subtotal = cantidad * precio;
+      setDetalles(updatedDetalles);
     }
   };
 
@@ -314,8 +346,6 @@ export const Pedidos = () => {
 
     // return;
 
-    
-
     enviarSolicitud("POST", {
       IdCliente: IdCliente,
       Fecha: Fecha,
@@ -339,18 +369,30 @@ export const Pedidos = () => {
         data: parametros,
       });
 
-      show_alerta(respuesta.data.message, "success");
+      show_alerta({
+        message: respuesta.data.message,
+        type: "success",
+      });
 
       document.getElementById("btnCerrar").click();
       getPedidos();
       getProductos();
     } catch (error) {
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({
+          message: error.response.data.message,
+          type: "error",
+        });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({
+          message: "Error en la solicitud",
+          type: "error",
+        });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({
+          message: "Error desconocido",
+          type: "error",
+        });
       }
     }
   };
@@ -363,26 +405,35 @@ export const Pedidos = () => {
       icon: "question",
       text: "No se podrá dar marcha atrás",
       showCancelButton: true,
-      confirmButtonText: "Si, cancelar",
+      confirmButtonText: "Sí, cancelar",
       cancelButtonText: "No",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           console.log(idPed);
-          // Cambiar el estado de la compra a "Cancelado"
+          // Cambiar el estado del pedido a "Cancelado"
           await axios.put(`http://localhost:3000/api/pedidos/${idPed}`, {
-            Estado: idEstadosPedidos,
+            Estado: "Cancelado",
           });
 
-          // Actualizar la lista de compras
+          // Actualizar la lista de pedidos
           getPedidos();
 
-          show_alerta("La compra fue cancelada correctamente", "success");
+          show_alerta({
+            message: "La compra fue cancelada correctamente",
+            type: "success",
+          });
         } catch (error) {
-          show_alerta("Hubo un error al cancelar la compra", "error");
+          show_alerta({
+            message: "Hubo un error al cancelar la compra",
+            type: "error",
+          });
         }
       } else {
-        show_alerta("La compra NO fue cancelada", "info");
+        show_alerta({
+          message: "La compra NO fue cancelada",
+          type: "info",
+        });
       }
     });
   };
@@ -394,29 +445,11 @@ export const Pedidos = () => {
     setIdEstadosPedidos(pedido.IdEstadoPedido);
   };
 
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
-  };
-
   const formatearFecha = (fechaISO) => {
-    const [year, month, day] = fechaISO.split('-');
+    const [year, month, day] = fechaISO.split("-");
     return `${day}/${month}/${year}`;
   };
-  
+
   const handleSearchTermChange = (newSearchTerm) => {
     setSearchTerm(newSearchTerm);
     setCurrentPage(1); // Reset current page when changing the search term
@@ -848,7 +881,7 @@ export const Pedidos = () => {
 
         {/* <!-- Tabla de Pedidos --> */}
         <div className="card shadow mb-4">
-        <div className="card-header py-1 d-flex">
+          <div className="card-header py-1 d-flex">
             <h6 className="m-2 font-weight-bold text-primary">Pedidos</h6>
             <SearchBar
               searchTerm={searchTerm}
@@ -922,7 +955,7 @@ export const Pedidos = () => {
                           data-target="#modalDetalleCompra"
                           title="Detalle"
                         >
-                            <i className="fas fa-info-circle"></i>
+                          <i className="fas fa-info-circle"></i>
                         </button>
                       </td>
                     </tr>

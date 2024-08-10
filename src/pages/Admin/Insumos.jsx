@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const Insumos = () => {
   const url = "http://localhost:3000/api/insumos";
@@ -105,28 +106,46 @@ export const Insumos = () => {
     // Comprobar si hay errores
     const hasErrors = Object.values(errors).some((error) => error !== "");
     if (hasErrors) {
-      show_alerta("Corrige los errores antes de guardar", "error");
+      show_alerta({
+        message: "Corrige los errores antes de guardar",
+        type: "error",
+      });
       return; // Detener la ejecución si hay errores
     }
 
-    if (operation === 1) {
-      // Crear Insumo
-      await enviarSolicitud("POST", {
-        IdColor,
-        IdTalla,
-        Referencia: Referencia.trim(),
-        Cantidad,
-        ValorCompra,
-      });
-    } else if (operation === 2) {
-      // Actualizar Insumo
-      await enviarSolicitud("PUT", {
-        IdInsumo,
-        IdColor,
-        IdTalla,
-        Referencia: Referencia.trim(),
-        Cantidad,
-        ValorCompra,
+    try {
+      if (operation === 1) {
+        // Crear Insumo
+        await enviarSolicitud("POST", {
+          IdColor,
+          IdTalla,
+          Referencia: Referencia.trim(),
+          Cantidad,
+          ValorCompra,
+        });
+        show_alerta({
+          message: "Insumo creado con éxito",
+          type: "success",
+        });
+      } else if (operation === 2) {
+        // Actualizar Insumo
+        await enviarSolicitud("PUT", {
+          IdInsumo,
+          IdColor,
+          IdTalla,
+          Referencia: Referencia.trim(),
+          Cantidad,
+          ValorCompra,
+        });
+        show_alerta({
+          message: "Insumo actualizado con éxito",
+          type: "success",
+        });
+      }
+    } catch (error) {
+      show_alerta({
+        message: "Error al guardar el insumo",
+        type: "error",
       });
     }
   };
@@ -211,25 +230,6 @@ export const Insumos = () => {
     }));
   };
 
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        // Selecciona la barra de progreso y ajusta su estilo
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
-  };
-
   // Función para renderizar los mensajes de error
   const renderErrorMessage = (errorMessage) => {
     return errorMessage ? (
@@ -254,25 +254,29 @@ export const Insumos = () => {
       }
 
       const msj = respuesta.data.message;
-      show_alerta(msj, "success");
+      show_alerta({
+        message: msj,
+        type: "success",
+      });
+
       document.getElementById("btnCerrarCliente").click();
       getInsumos();
-      if (metodo === "POST") {
-        show_alerta("Insumo creado con éxito", "success", { timer: 2000 });
-      } else if (metodo === "PUT") {
-        show_alerta("Insumo actualizado con éxito", "success", {
-          timer: 2000,
-        });
-      } else if (metodo === "DELETE") {
-        show_alerta("Insumo eliminado con éxito", "success", { timer: 2000 });
-      }
     } catch (error) {
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({
+          message: error.response.data.message,
+          type: "error",
+        });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({
+          message: "Error en la solicitud",
+          type: "error",
+        });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({
+          message: "Error desconocido",
+          type: "error",
+        });
       }
       console.log(error);
     }
@@ -330,6 +334,7 @@ export const Insumos = () => {
   //     }
   //   });
   // };
+
   const deleteInsumo = async (idInsumo, referencia) => {
     const MySwal = withReactContent(Swal);
 
@@ -341,23 +346,6 @@ export const Insumos = () => {
       showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
-      showClass: {
-        popup: "swal2-show",
-        backdrop: "swal2-backdrop-show",
-        icon: "swal2-icon-show",
-      },
-      hideClass: {
-        popup: "swal2-hide",
-        backdrop: "swal2-backdrop-hide",
-        icon: "swal2-icon-hide",
-      },
-      didOpen: () => {
-        const timerProgressBar = MySwal.getTimerProgressBar();
-        if (timerProgressBar) {
-          timerProgressBar.style.backgroundColor = "black";
-          timerProgressBar.style.height = "6px";
-        }
-      },
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -370,63 +358,35 @@ export const Insumos = () => {
 
           if (response.status === 409) {
             const data = await response.json();
-            Swal.fire({
-              icon: "error",
-              title: "No se puede eliminar",
-              text: data.message,
-              timer: 2000,
-              showConfirmButton: false, // Oculta el botón "OK"
-              timerProgressBar: true,
+            show_alerta({
+              message: data.message,
+              type: "error",
             });
           } else if (response.status === 200) {
-            Swal.fire({
-              icon: "success",
-              title: "Eliminado",
-              text: "Insumo eliminado correctamente",
-              timer: 2000,
-              showConfirmButton: false, // Oculta el botón "OK"
-              timerProgressBar: true,
+            show_alerta({
+              message: "Insumo eliminado correctamente",
+              type: "success",
             });
             // Actualizar la tabla de insumos
             getInsumos();
           } else {
-            Swal.fire({
-              icon: "error",
-              title: "Error",
-              text: "El insumo está asociado a una compra, no se puede eliminar",
-              timer: 2000,
-              showConfirmButton: false, // Oculta el botón "OK"
-              timerProgressBar: true,
+            show_alerta({
+              message:
+                "El insumo está asociado a una compra, no se puede eliminar",
+              type: "error",
             });
           }
         } catch (error) {
           console.error("Error al eliminar el insumo:", error);
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Error al eliminar el insumo",
-            timer: 3000, // 3 segundos
-            showConfirmButton: false, // Oculta el botón "OK"
+          show_alerta({
+            message: "Error al eliminar el insumo",
+            type: "error",
           });
         }
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        Swal.fire({
-          icon: "info",
-          title: "Cancelado",
-          text: "El insumo NO fue eliminado",
-          timer: 3000, // 3 segundos
-          showConfirmButton: false, // Oculta el botón "OK"
-        });
-      } else if (
-        result.dismiss === Swal.DismissReason.backdrop ||
-        result.dismiss === Swal.DismissReason.esc
-      ) {
-        Swal.fire({
-          icon: "info",
-          title: "Cancelado",
-          text: "El insumo NO fue eliminado",
-          timer: 3000, // 3 segundos
-          showConfirmButton: false, // Oculta el botón "OK"
+      } else {
+        show_alerta({
+          message: "El insumo NO fue eliminado",
+          type: "info",
         });
       }
     });
@@ -439,10 +399,11 @@ export const Insumos = () => {
       );
 
       if (insumoActual.Cantidad > 0) {
-        show_alerta(
-          "No se puede desactivar el insumo porque la cantidad es mayor a 0",
-          "warning"
-        );
+        show_alerta({
+          message:
+            "No se puede desactivar el insumo porque la cantidad es mayor a 0",
+          type: "warning",
+        });
         return;
       }
 
@@ -479,17 +440,24 @@ export const Insumos = () => {
               )
             );
 
-            show_alerta("Estado del insumo cambiado con éxito", "success", {
-              timer: 2000,
+            show_alerta({
+              message: "Estado del insumo cambiado con éxito",
+              type: "success",
             });
           }
         } else {
-          show_alerta("No se ha cambiado el estado del insumo", "info");
+          show_alerta({
+            message: "No se ha cambiado el estado del insumo",
+            type: "info",
+          });
         }
       });
     } catch (error) {
       console.error("Error updating state:", error);
-      show_alerta("Error cambiando el estado del insumo", "error");
+      show_alerta({
+        message: "Error cambiando el estado del insumo",
+        type: "error",
+      });
     }
   };
 

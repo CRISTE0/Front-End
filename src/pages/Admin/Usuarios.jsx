@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const Usuarios = () => {
   const url = "http://localhost:3000/api/usuarios";
@@ -39,7 +40,10 @@ export const Usuarios = () => {
       const respuesta = await axios.get(url);
       setUsuarios(respuesta.data);
     } catch (error) {
-      console.error("Error fetching usuarios:", error);
+      show_alerta({
+        message: "Error al obtener los usuarios",
+        type: "error",
+      });
     }
   };
 
@@ -158,7 +162,10 @@ export const Usuarios = () => {
         ...prevState,
         contrasenia: contraseniaError,
       }));
-      show_alerta("Verifique los errores en el formulario", "error");
+      show_alerta({
+        message: "Verifique los errores en el formulario",
+        type: "error",
+      });
       return;
     }
 
@@ -293,24 +300,6 @@ export const Usuarios = () => {
     setShowPassword(!showPassword); // Alternar el estado para mostrar/ocultar contraseña
   };
 
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
-  };
-
   const renderErrorMessage = (error) => {
     return error ? <div className="invalid-feedback">{error}</div> : null;
   };
@@ -327,17 +316,18 @@ export const Usuarios = () => {
         url: urlRequest,
         data: parametros,
       });
+
       const msj = respuesta.data.message;
-      show_alerta(msj, "success");
+      show_alerta({ message: msj, type: "success" });
       // document.getElementById("btnCerrar").click();
       getUsuarios();
     } catch (error) {
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({ message: error.response.data.message, type: "error" });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({ message: "Error en la solicitud", type: "error" });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({ message: "Error desconocido", type: "error" });
       }
       console.error("Error en la solicitud:", error);
     }
@@ -359,7 +349,7 @@ export const Usuarios = () => {
           setCurrentPage(newPage);
         });
       } else {
-        show_alerta("El usuario NO fue eliminado", "info");
+        show_alerta({ message: "El usuario NO fue eliminado", type: "info" });
       }
     });
   };
@@ -382,19 +372,26 @@ export const Usuarios = () => {
       }).then(async (result) => {
         if (result.isConfirmed) {
           await axios.put(`${url}/${idUsuario}`, { Estado: nuevoEstado });
-          show_alerta("Estado del usuario actualizado con éxito", "success", {
+          show_alerta({
+            message: "Estado del usuario actualizado con éxito",
+            type: "success",
             timer: 2000,
           });
           getUsuarios();
+        } else {
+          show_alerta({
+            message: "No se ha cambiado el estado del usuario",
+            type: "info",
+          });
         }
       });
     } catch (error) {
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({ message: error.response.data.message, type: "error" });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({ message: "Error en la solicitud", type: "error" });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({ message: "Error desconocido", type: "error" });
       }
       console.error("Error al cambiar estado:", error);
     }
