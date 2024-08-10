@@ -37,6 +37,8 @@ export const Insumos = () => {
     getTallas(); // Obtener los colores cuando el componente se monta
   }, []);
 
+  
+
   const getInsumos = async () => {
     const respuesta = await axios.get(url);
     setInsumos(respuesta.data);
@@ -96,13 +98,15 @@ export const Insumos = () => {
     }
   };
 
+
   const guardarInsumo = async () => {
     // Verificar errores de validación antes de enviar los datos
     const errors = {
-      Referencia: validateReferencia(Referencia),
+      IdColor: IdColor === "" ? "Seleccione un color" : "",
+      IdTalla: IdTalla === "" ? "Seleccione una talla" : "",
     };
     setErrors(errors);
-
+  
     // Comprobar si hay errores
     const hasErrors = Object.values(errors).some((error) => error !== "");
     if (hasErrors) {
@@ -112,7 +116,20 @@ export const Insumos = () => {
       });
       return; // Detener la ejecución si hay errores
     }
-
+  
+    // Verificar si la referencia ya existe
+    const referenciaExiste = Insumos.some((insumo) =>
+      insumo.Referencia.toLowerCase() === Referencia.toLowerCase()
+    );
+  
+    if (referenciaExiste && operation === 1) { // Solo en la creación
+      show_alerta({
+        message: "La referencia ya existe. Elige una referencia diferente.",
+        type: "error",
+      });
+      return; // Detener la ejecución si la referencia ya existe
+    }
+  
     try {
       if (operation === 1) {
         // Crear Insumo
@@ -142,10 +159,10 @@ export const Insumos = () => {
           type: "success",
         });
       }
-
+  
       // Usar jQuery para cerrar el modal
       $("#modalCliente").modal("hide");
-
+  
       // Opcionalmente, actualizar la lista de insumos
       getInsumos();
     } catch (error) {
@@ -155,6 +172,7 @@ export const Insumos = () => {
       });
     }
   };
+  
 
   // Función para validar la referencia
   const validateReferencia = (value) => {
@@ -162,10 +180,10 @@ export const Insumos = () => {
       return "Escribe la referencia";
     }
     // Validar que la referencia siga el patrón TST-001
-    if (!/^[A-Z]{3}-\d{3}$/.test(value)) {
-      return "La referencia debe ser en el formato AAA-000";
-    }
-    return "";
+    // if (!/^[A-Z]{3}-\d{3}$/.test(value)) {
+    //   return "La referencia debe ser en el formato AAA-000";
+    // }
+    // return "";
   };
 
   // // Función para validar la cantidad
@@ -189,16 +207,37 @@ export const Insumos = () => {
   //   return "";
   // };
 
+  const updateReferencia = (colorId, tallaId) => {
+    const color = Colores.find((color) => color.IdColor === parseInt(colorId));
+    const talla = Tallas.find((talla) => talla.IdTalla === parseInt(tallaId));
+    if (color && talla) {
+      const colorHex = color.Referencia.substring(1, 4).toUpperCase(); // Obtén los primeros 3 caracteres hexadecimales
+      const referenciaGenerada = `${talla.Talla}-${colorHex}`;
+      setReferencia(referenciaGenerada);
+    } else {
+      setReferencia(""); // Vaciar la referencia si no hay color o talla
+    }
+  };
   const handleChangeIdColor = (e) => {
     const value = e.target.value;
     setIdColor(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      IdColor: value === "" ? "Seleccione un color" : "",
+    }));
+    updateReferencia(value, IdTalla);
   };
-
+  
   const handleChangeIdTalla = (e) => {
     const value = e.target.value;
     setIdTalla(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      IdTalla: value === "" ? "Seleccione una talla" : "",
+    }));
+    updateReferencia(IdColor, value);
   };
-
+  
   // Función para manejar cambios en el teléfono
   const handleChangeReferencia = (e) => {
     let value = e.target.value.trim();
@@ -244,11 +283,8 @@ export const Insumos = () => {
   };
 
   const enviarSolicitud = async (metodo, parametros) => {
-    let urlRequest =
-      metodo === "PUT" || metodo === "DELETE"
-        ? `${url}/${parametros.IdInsumo}`
-        : url;
-
+    let urlRequest = metodo === "PUT" || metodo === "DELETE" ? `${url}/${parametros.IdInsumo}` : url;
+  
     try {
       let respuesta;
       if (metodo === "POST") {
@@ -258,19 +294,20 @@ export const Insumos = () => {
       } else if (metodo === "DELETE") {
         respuesta = await axios.delete(urlRequest);
       }
-
+  
       const msj = respuesta.data.message;
       show_alerta({
         message: msj,
         type: "success",
       });
-
+  
       document.getElementById("btnCerrarCliente").click();
       getInsumos();
     } catch (error) {
+      console.log('Error details:', error.response); // Inspeccionar la estructura del error
       if (error.response) {
         show_alerta({
-          message: error.response.data.message,
+          message: error.response.data.message || "Error al procesar la solicitud",
           type: "error",
         });
       } else if (error.request) {
@@ -284,9 +321,11 @@ export const Insumos = () => {
           type: "error",
         });
       }
-      console.log(error);
+      console.error(error);
     }
   };
+  
+  
 
   // const deleteInsumo = (IdInsumo, Referencia) => {
   //   const MySwal = withReactContent(Swal);
@@ -591,22 +630,26 @@ export const Insumos = () => {
 
                 <div className="form-row">
                   <div className="form-group col-md-6">
-                    <label htmlFor="nroDocumentoCliente">
-                      Referencia del insumo:
-                    </label>
+                    <label htmlFor="referencia">Referencia del insumo:</label>
                     <input
                       type="text"
                       className={`form-control ${
                         errors.Referencia ? "is-invalid" : ""
                       }`}
-                      id="nroDocumentoCliente"
+                      id="referencia"
                       placeholder="Ingrese la referencia del insumo"
                       required
                       value={Referencia}
                       onChange={handleChangeReferencia}
+                      disabled
                     />
-                    {renderErrorMessage(errors.Referencia)}
+                    {errors.Referencia && (
+                      <div className="invalid-feedback">
+                        {errors.Referencia}
+                      </div>
+                    )}
                   </div>
+
                   <div className="form-group col-md-6">
                     <label htmlFor="nombreCliente">Cantidad:</label>
                     <input
