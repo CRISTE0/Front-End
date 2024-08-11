@@ -31,6 +31,7 @@ import PrivateRoute from "./PrivateRoute";
 import { ConfirmarContrasenia } from "../pages/Landing/ConfirmarContraseña";
 import { RecuperarContraseñaUsuario } from "../pages/Landing/RecuperarContraseñaUsuario";
 import { ConfirmarContraseniaUsuario } from "../pages/Landing/ConfirmarContraseñaUsuario";
+import PublicRoute from "./PublicRoute";
 
 export const Rutas = () => {
 
@@ -45,7 +46,6 @@ export const Rutas = () => {
         <Route path="/Contactenos" Component={()=> <LandingLayout> <Contactenos /> </LandingLayout> } />
         <Route path="/Diseniador" Component={()=> <LandingLayout> <Diseniador /> </LandingLayout> } />
 
-        <Route path="/Login" Component={()=> <LandingLayout> <Login /> </LandingLayout> } />
 
         <Route path="/Register" Component={()=> <LandingLayout> <Register /> </LandingLayout> } />
         <Route path="/RecuperarContraseña" Component={()=> <LandingLayout> <RecuperarContraseña /> </LandingLayout> } />        
@@ -63,12 +63,18 @@ export const Rutas = () => {
 
 
 
-        <Route element={<PrivateRoute requiredPermissions={["ProductoSolo"]}/>}> 
+        {/* <Route element={<PrivateRoute requiredPermissions={["ProductoSolo"]}/>}> 
 
+        </Route> */}
+
+        <Route element={<PublicRoute />}> 
+          <Route path="/Login" Component={()=> <LandingLayout> <Login /> </LandingLayout> } />
         </Route>
 
 
+        <Route element={<PublicRoute/>}> 
         <Route path="/admin/Login" Component={()=> <LandingLayout> < LoginAdmin/> </LandingLayout> } />
+        </Route>
 
 
         
@@ -78,10 +84,14 @@ export const Rutas = () => {
         <Route element={<PrivateRoute requiredPermissions={["Carrito"]}/>}> 
           <Route path="/Carrito" Component={()=> <LandingLayout> <Carrito /> </LandingLayout>  } />
         </Route>
-        
+
+        {/* cuando la ruta sea solo admin, lo rediriga a algun permiso que tenga el usuario  */}
+        <Route element={<PrivateRoute requiredPermissions={["siu"]}/>}> 
+          <Route path="/admin" Component={()=> <AdminLayout> <Dashboard /> </AdminLayout>  } />
+        </Route>        
 
         <Route element={<PrivateRoute requiredPermissions={["Dashboard"]}/>}> 
-          <Route path="/admin" Component={()=> <AdminLayout> <Dashboard /> </AdminLayout>  } />
+          <Route path="/admin/Dashboard" Component={()=> <AdminLayout> <Dashboard /> </AdminLayout>  } />
         </Route>
 
         <Route element={<PrivateRoute requiredPermissions={["Configuración"]}/>}> 

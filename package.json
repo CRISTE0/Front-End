@@ -30,6 +30,7 @@
     "react-dom": "^18.2.0",
     "react-router": "^6.23.1",
     "react-router-dom": "^6.23.1",
+    "react-router-hash-link": "^2.4.3",
     "react-switch": "^7.0.0",
     "react-toggle-switch": "^3.0.4",
     "startbootstrap-sb-admin-2": "^4.1.4",

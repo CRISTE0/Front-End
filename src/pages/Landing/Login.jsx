@@ -256,11 +256,11 @@ export const Login = () => {
             </div>
             <div className="my-3 text-center">
               <samp>
-                No tienes cuenta? <Link to={"/Register"}>Regístrate aquí</Link>
+                ¿No tienes cuenta? <Link to={"/Register"}>Regístrate aquí</Link>
               </samp>
               <br />
               <samp>
-                ¿Perdiste tu contraseña? <Link to={"/RecuperarCliente"} >Recuperar contraseña</Link>
+                ¿Olvidaste tu contraseña? <Link to={"/RecuperarCliente"} >Recuperar contraseña</Link>
               </samp>
             </div>
           </div>

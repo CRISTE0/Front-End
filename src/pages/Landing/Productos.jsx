@@ -8,6 +8,7 @@ import axios from "axios";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
 
+import { useAuth } from "../../context/AuthProvider";
 
 export const Productos = () => {
   
@@ -15,6 +16,7 @@ export const Productos = () => {
 
   const [Productos, setProductos] = useState([]);
 
+  const { triggerRender } = useAuth();
   
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
 
@@ -67,6 +69,8 @@ export const Productos = () => {
     }
   
     localStorage.setItem('cart', JSON.stringify(cart));
+    triggerRender();
+
 
     console.log(JSON.parse(localStorage.getItem("cart")));
   };

@@ -239,7 +239,7 @@ export const LoginAdmin = () => {
                 {/* Checkbox */}
                 <div className="form-check">
                   
-                <Link to={"/RecuperarUsuario"}>¿Perdiste tu contraseña?</Link>
+                <Link to={"/RecuperarUsuario"}>¿Olvidaste tu contraseña?</Link>
                 </div>
               </div>
 

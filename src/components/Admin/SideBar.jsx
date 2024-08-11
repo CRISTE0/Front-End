@@ -10,7 +10,7 @@ export const SideBar = ({ isActive }) => {
 
   const menuItems = [
     {
-      path: "/admin/",
+      path: "/admin/Dashboard",
       icon: "fas fa-fw fa-tachometer-alt",
       text: "Dashboard",
       permission: "Dashboard",
