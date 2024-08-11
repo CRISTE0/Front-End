@@ -648,7 +648,7 @@ export const Usuarios = () => {
         {/* Tabla Usuarios */}
         <div className="card shadow mb-4">
           <div className="card-header py-1 d-flex">
-            <h6 className="m-2 font-weight-bold text-primary">Usuarios</h6>
+            <h6 className="m-2 font-weight-bold text-primary"></h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}

@@ -1960,7 +1960,7 @@ export const Disenios = () => {
         {/* <!-- Tabla de diseños --> */}
         <div className="card shadow mb-4">
           <div className="card-header py-1 d-flex">
-            <h6 className="m-2 font-weight-bold text-primary">Diseños</h6>
+            <h6 className="m-2 font-weight-bold text-primary"></h6>
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
