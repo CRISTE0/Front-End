@@ -34,116 +34,188 @@ export const Compras = () => {
     getProveedores();
   }, []);
 
-  const generatePDF = () => {
-    const doc = new jsPDF();
+  const handleGenerateReport = () => {
+    const fechaInicio = document.getElementById("fechaInicio").value;
+    const fechaFinal = document.getElementById("fechaFinal").value;
+    document.getElementById("fechaInicio").value = "";
+    document.getElementById("fechaFinal").value = "";
 
-    // Agregar una imagen al lado del título
-    const imgData = "../src/assets/img/imagenesHome/logoSoftShirt.png"; // Asegúrate de reemplazar esto con la base64 de tu imagen
-
-    // Configurar el título del PDF
-    const addHeader = () => {
-      doc.addImage(imgData, "PNG", 170, 15, 30, 30); // Ajusta las coordenadas y el tamaño según sea necesario
-      doc.setFontSize(18);
-      doc.setTextColor("#1cc88a"); // Color verde para el título
-      doc.text("Reporte de Compras", 14, 22);
-    };
-
-    // Agregar el encabezado en la primera página
-    addHeader();
-
-    // Inicializar la posición Y para la tabla principal
-    let startY = 30;
-
-    // Iterar sobre cada compra
-    Compras.forEach((compra, index) => {
-      // Calcular la altura necesaria para la tabla de detalles
-      const rowHeight = 10; // Estimación de la altura de cada fila
-      const tableHeight = compra.DetallesCompras.length * rowHeight;
-
-      // Verificar si hay espacio suficiente en la página actual
-      const pageHeight = doc.internal.pageSize.height;
-      const remainingSpace = pageHeight - startY - 20; // Espacio restante en la página
-
-      if (remainingSpace < tableHeight + 30) {
-        // Si no hay suficiente espacio, crear una nueva página
-        doc.addPage();
-        startY = 20; // Resetear la posición Y en la nueva página
-      }
-
-      // Agregar título de la compra
-      doc.setFontSize(14);
-      doc.setTextColor("#1cc88a"); // Color verde para el título de la compra
-      doc.text(`Compra ${index + 1}`, 14, startY);
-
-      // Incrementar la posición Y
-      startY += 10;
-
-      // Agregar la información principal de la compra
-      doc.setFontSize(12);
-      doc.setTextColor(0, 0, 0); // Volver al color negro para el resto del texto
-      doc.text(
-        `Proveedor: ${getProveedorName(compra.IdProveedor)}`,
-        14,
-        startY
-      );
-      doc.text(`Fecha: ${compra.Fecha}`, 14, startY + 5);
-      doc.text(`Total: ${formatPrice(compra.Total)}`, 14, startY + 10);
-      doc.text(`Estado: ${compra.Estado}`, 14, startY + 15);
-
-      // Incrementar la posición Y para los detalles
-      startY += 20;
-
-      // Configurar las columnas y filas de la tabla de detalles
-      const detailColumns = ["Insumo", "Cantidad", "Precio", "SubTotal"];
-
-      // Mapear las filas con el precio real
-      const detailRows = compra.DetallesCompras.map((detalle) => [
-        getInsumoName(detalle.IdInsumo),
-        detalle.Cantidad,
-        formatPrice(detalle.Precio), // Usar el precio real del insumo
-        formatPrice(detalle.Cantidad * detalle.Precio), // Calcular el subtotal usando el precio real
-      ]);
-
-      // Generar la tabla de detalles en el PDF
-      doc.autoTable({
-        head: [detailColumns],
-        body: detailRows,
-        startY: startY,
-        headStyles: {
-          fillColor: "#1cc88a", // Color de fondo del encabezado de la tabla
-          textColor: "#ffffff", // Color del texto del encabezado de la tabla
-        },
-        styles: {
-          fontSize: 10, // Tamaño de fuente en la tabla
-        },
+    if (!fechaInicio || !fechaFinal) {
+      show_alerta({
+        message: "Por favor, seleccione ambas fechas.",
+        type: "error",
       });
+      return;
+    }
 
-      // Incrementar la posición Y después de la tabla
-      startY = doc.lastAutoTable.finalY + 10;
+    // Convertir fechas a objetos Date
+    const inicio = new Date(fechaInicio);
+    const final = new Date(fechaFinal);
 
-      // Dibujar una línea horizontal después de cada compra
-      doc.setLineWidth(0.5);
-      doc.setDrawColor("#1cc88a"); // Color verde para la línea
-      doc.line(14, startY, 200, startY); // Ajusta las coordenadas según sea necesario
-      startY += 10;
+    // Filtrar las compras en el rango de fechas seleccionado
+    const comprasFiltradas = Compras.filter((compra) => {
+      const fechaCompra = new Date(compra.Fecha);
+      return fechaCompra >= inicio && fechaCompra <= final;
     });
 
-    // Calcular la posición para el texto de copyright
-    const pageHeight = doc.internal.pageSize.height;
-    const footerText = "© Soft-Shirt 2024";
-    const textWidth =
-      (doc.getStringUnitWidth(footerText) * doc.internal.getFontSize()) /
-      doc.internal.scaleFactor;
-    const footerX = (doc.internal.pageSize.width - textWidth) / 2; // Centrar el texto horizontalmente
-    const footerY = pageHeight - 10; // Ajusta la posición vertical según sea necesario
+    if (comprasFiltradas.length === 0) {
+      show_alerta({
+        message:
+          "No se encontraron compras en el rango de fechas seleccionado.",
+        type: "error",
+      });
+      return;
+    }
 
-    // Agregar el texto de copyright en la última página
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0); // Color negro para el texto de copyright
-    doc.text(footerText, footerX, footerY);
+    // Generar el PDF con las compras filtradas
+    generatePDF(comprasFiltradas);
 
-    // Descargar el PDF
-    doc.save("Reporte_Compras_Soft-Shirt.pdf");
+    // Cerrar el modal después de generar el reporte
+    $("#modalGenerarReporte").modal("hide");
+  };
+
+  const generatePDF = async (comprasFiltradas) => {
+    const doc = new jsPDF();
+
+    // Función para convertir una imagen URL a base64
+    const toBase64 = (url) => {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(xhr.response);
+          } else {
+            reject(new Error(`Error al cargar la imagen: ${xhr.status}`));
+          }
+        };
+        xhr.onerror = () =>
+          reject(new Error("Error de red al cargar la imagen"));
+        xhr.responseType = "blob";
+        xhr.open("GET", url);
+        xhr.send();
+      });
+    };
+
+    try {
+      // URL de la imagen (usa ruta absoluta)
+      const imgUrl = "../../../src/assets/img/imagenesHome/logoSoftShirt.png"; // Cambia esto según tu ruta
+
+      // Convertir la imagen a base64
+      const imgData = await toBase64(imgUrl);
+
+      // Configurar el título del PDF
+      const addHeader = () => {
+        doc.addImage(imgData, "PNG", 170, 15, 30, 30); // Ajusta las coordenadas y el tamaño según sea necesario
+        doc.setFontSize(18);
+        doc.setTextColor("#1cc88a"); // Color verde para el título
+        doc.text("Reporte de Compras", 14, 22);
+      };
+
+      // Agregar el encabezado en la primera página
+      addHeader();
+
+      // Inicializar la posición Y para la tabla principal
+      let startY = 30;
+
+      // Iterar sobre cada compra
+      comprasFiltradas.forEach((compra, index) => {
+        // Calcular la altura necesaria para la tabla de detalles
+        const rowHeight = 10; // Estimación de la altura de cada fila
+        const tableHeight = compra.DetallesCompras.length * rowHeight;
+
+        // Verificar si hay espacio suficiente en la página actual
+        const pageHeight = doc.internal.pageSize.height;
+        const remainingSpace = pageHeight - startY - 20; // Espacio restante en la página
+
+        if (remainingSpace < tableHeight + 30) {
+          // Si no hay suficiente espacio, crear una nueva página
+          doc.addPage();
+          startY = 20; // Resetear la posición Y en la nueva página
+          // Agregar el encabezado solo en la primera página
+          if (index === 0) {
+            addHeader(); // Agregar el encabezado en la primera página
+          }
+        }
+
+        // Agregar título de la compra
+        doc.setFontSize(14);
+        doc.setTextColor("#1cc88a"); // Color verde para el título de la compra
+        doc.text(`Compra ${index + 1}`, 14, startY);
+
+        // Incrementar la posición Y
+        startY += 10;
+
+        // Agregar la información principal de la compra
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0); // Volver al color negro para el resto del texto
+        doc.text(
+          `Proveedor: ${getProveedorName(compra.IdProveedor)}`,
+          14,
+          startY
+        );
+        doc.text(`Fecha: ${compra.Fecha}`, 14, startY + 5);
+        doc.text(`Total: ${formatPrice(compra.Total)}`, 14, startY + 10);
+        doc.text(`Estado: ${compra.Estado}`, 14, startY + 15);
+
+        // Incrementar la posición Y para los detalles
+        startY += 20;
+
+        // Configurar las columnas y filas de la tabla de detalles
+        const detailColumns = ["Insumo", "Cantidad", "Precio", "SubTotal"];
+
+        // Mapear las filas con el precio real
+        const detailRows = compra.DetallesCompras.map((detalle) => [
+          getInsumoName(detalle.IdInsumo),
+          detalle.Cantidad,
+          formatPrice(detalle.Precio), // Usar el precio real del insumo
+          formatPrice(detalle.Cantidad * detalle.Precio), // Calcular el subtotal usando el precio real
+        ]);
+
+        // Generar la tabla de detalles en el PDF
+        doc.autoTable({
+          head: [detailColumns],
+          body: detailRows,
+          startY: startY,
+          headStyles: {
+            fillColor: "#1cc88a", // Color de fondo del encabezado de la tabla
+            textColor: "#ffffff", // Color del texto del encabezado de la tabla
+          },
+          styles: {
+            fontSize: 10, // Tamaño de fuente en la tabla
+          },
+        });
+
+        // Incrementar la posición Y después de la tabla
+        startY = doc.lastAutoTable.finalY + 10;
+
+        // Dibujar una línea horizontal después de cada compra
+        doc.setLineWidth(0.5);
+        doc.setDrawColor("#1cc88a"); // Color verde para la línea
+        doc.line(14, startY, 200, startY); // Ajusta las coordenadas según sea necesario
+        startY += 10;
+      });
+
+      // Calcular la posición para el texto de copyright
+      const pageHeight = doc.internal.pageSize.height;
+      const footerText = "© Soft-Shirt 2024";
+      const textWidth =
+        (doc.getStringUnitWidth(footerText) * doc.internal.getFontSize()) /
+        doc.internal.scaleFactor;
+      const footerX = (doc.internal.pageSize.width - textWidth) / 2; // Centrar el texto horizontalmente
+      const footerY = pageHeight - 10; // Ajusta la posición vertical según sea necesario
+
+      // Agregar el texto de copyright en la última página
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0); // Color negro para el texto de copyright
+      doc.text(footerText, footerX, footerY);
+
+      // Descargar el PDF
+      doc.save("Reporte_Compras_Soft-Shirt.pdf");
+    } catch (error) {
+      console.error("Error al generar el PDF:", error);
+    }
   };
 
   const getCompras = async () => {
@@ -1026,6 +1098,75 @@ export const Compras = () => {
 
       {/* Fin modal ver detalle compra */}
 
+      {/* Modal para la fecha y generar el reporte */}
+      <div>
+        <div
+          className="modal fade"
+          id="modalGenerarReporte"
+          tabIndex="-1"
+          role="dialog"
+          aria-labelledby="ModalGenerarReporteLabel"
+          aria-hidden="true"
+          data-backdrop="static"
+          data-keyboard="false"
+        >
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="ModalGenerarReporteLabel">
+                  Generar Reporte de Compras
+                </h5>
+                <button
+                  type="button"
+                  className="close"
+                  data-dismiss="modal"
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <form>
+                  <div className="form-group">
+                    <label htmlFor="fechaInicio">Fecha de Inicio</label>
+                    <input
+                      type="date"
+                      id="fechaInicio"
+                      className="form-control"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="fechaFinal">Fecha Final</label>
+                    <input
+                      type="date"
+                      id="fechaFinal"
+                      className="form-control"
+                    />
+                  </div>
+                </form>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  data-dismiss="modal"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleGenerateReport}
+                >
+                  Generar Reporte
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Fin modal para la fecha y generar el reporte */}
+
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
@@ -1033,20 +1174,20 @@ export const Compras = () => {
           <div className="text-right">
             <button
               type="button"
-              className="btn btn-dark"
+              className="btn btn-dark mr-2 custom-font"
               data-toggle="modal"
               data-target="#modalCompras"
               onClick={() => proveedores.length > 0 && openModal(1)}
             >
               <i className="fas fa-pencil-alt"></i> Crear Compra
             </button>
-
             <button
-              onClick={generatePDF} // Llama a la función que genera el PDF
               type="button"
-              className="btn btn-success"
+              className="btn btn-primary custom-font"
+              data-toggle="modal"
+              data-target="#modalGenerarReporte"
             >
-              <i className="fas fa-print"></i> Generar Reporte
+              <i className="fa fa-print"></i> Generar Reporte
             </button>
           </div>
         </div>
