@@ -9,7 +9,7 @@
 // import "../assets/js/jquery-1.11.0.min.js"
 
 import React from "react";
-
+import { HashLink as Link } from 'react-router-hash-link';
 export const LandingFooter = () => {
   return (
     <>
@@ -21,24 +21,24 @@ export const LandingFooter = () => {
               <h2 className="h2 text-success border-bottom pb-3 border-light logo">
                 SoftShirt
               </h2>
-              <ul className="list-unstyled text-light footer-link-list">
+              <ul className="list-unstyled text-light footer-link-list ">
                 <li>
-                  <i className="fas fa-map-marker-alt fa-fw"></i>
-                  123 Consectetur at ligula 10660
+                  <i className="fas fa-map-marker-alt fa-fw mx-1"></i>
+                  Calle 99B #35A – 48
                 </li>
                 <li>
-                  <i className="fa fa-phone fa-fw"></i>
-                  <a className="text-decoration-none" href="tel:010-020-0340">
-                    010-020-0340
+                  <i className="fa fa-phone fa-fw mx-1"></i>
+                  <a className="text-decoration-none" href="tel:3122942574">
+                    312 2942574
                   </a>
                 </li>
                 <li>
-                  <i className="fa fa-envelope fa-fw"></i>
+                  <i className="fa fa-envelope fa-fw mx-1"></i>
                   <a
                     className="text-decoration-none"
-                    href="mailto:info@company.com"
+                    href="mailto:softshirt0@gmail.com"
                   >
-                    info@company.com
+                    softshirt0@gmail.com
                   </a>
                 </li>
               </ul>
@@ -46,141 +46,61 @@ export const LandingFooter = () => {
 
             <div className="col-md-4 pt-5">
               <h2 className="h2 text-light border-bottom pb-3 border-light">
-                Products
+                Productos
               </h2>
               <ul className="list-unstyled text-light footer-link-list">
                 <li>
-                  <a className="text-decoration-none" href="#">
-                    Luxury
-                  </a>
+                  <Link  to={"/Productos"} className="text-decoration-none" >
+                    Camisetas estampadas
+                  </Link>
                 </li>
+
                 <li>
-                  <a className="text-decoration-none" href="#">
-                    Sport Wear
-                  </a>
+                  <Link  to={"/Diseniador"} className="text-decoration-none" >
+                    Crea tu camiseta
+                  </Link>
                 </li>
-                <li>
-                  <a className="text-decoration-none" href="#">
-                    Men's Shoes
-                  </a>
-                </li>
-                <li>
-                  <a className="text-decoration-none" href="#">
-                    Women's Shoes
-                  </a>
-                </li>
-                <li>
-                  <a className="text-decoration-none" href="#">
-                    Popular Dress
-                  </a>
-                </li>
-                <li>
-                  <a className="text-decoration-none" href="#">
-                    Gym Accessories
-                  </a>
-                </li>
-                <li>
-                  <a className="text-decoration-none" href="#">
-                    Sport Shoes
-                  </a>
-                </li>
+               
               </ul>
             </div>
 
             <div className="col-md-4 pt-5">
               <h2 className="h2 text-light border-bottom pb-3 border-light">
-                Further Info
+                Información
               </h2>
               <ul className="list-unstyled text-light footer-link-list">
                 <li>
-                  <a className="text-decoration-none" href="#">
-                    Home
-                  </a>
+                  <Link to={"/"} className="text-decoration-none" >
+                    Inicio
+                  </Link>
                 </li>
                 <li>
-                  <a className="text-decoration-none" href="#">
-                    About Us
-                  </a>
+                  <Link to={"/#sobreNosotros"} className="text-decoration-none" >
+                    Sobre nosotros
+                  </Link>
                 </li>
                 <li>
-                  <a className="text-decoration-none" href="#">
-                    Shop Locations
-                  </a>
+                  <Link to={"/#servicios"} className="text-decoration-none" >
+                    Servicios
+                  </Link>
                 </li>
                 <li>
-                  <a className="text-decoration-none" href="#">
+                  <Link to={"/Contactenos"} className="text-decoration-none" >
+                    Contacto
+                  </Link>
+                </li>
+                <li>
+                  <Link to={"/#FAQs"} className="text-decoration-none" >
                     FAQs
-                  </a>
-                </li>
-                <li>
-                  <a className="text-decoration-none" href="#">
-                    Contact
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
           </div>
 
-          <div className="row text-light mb-4">
-            <div className="col-12 mb-3">
-              <div className="w-100 my-3 border-top border-light"></div>
-            </div>
-            <div className="col-auto me-auto">
-              <ul className="list-inline text-left footer-icons">
-                <li className="list-inline-item border border-light rounded-circle text-center">
-                  <a
-                    className="text-light text-decoration-none"
-                    target="_blank"
-                    href="http://facebook.com/"
-                  >
-                    <i className="fab fa-facebook-f fa-lg fa-fw"></i>
-                  </a>
-                </li>
-                <li className="list-inline-item border border-light rounded-circle text-center">
-                  <a
-                    className="text-light text-decoration-none"
-                    target="_blank"
-                    href="https://www.instagram.com/"
-                  >
-                    <i className="fab fa-instagram fa-lg fa-fw"></i>
-                  </a>
-                </li>
-                <li className="list-inline-item border border-light rounded-circle text-center">
-                  <a
-                    className="text-light text-decoration-none"
-                    target="_blank"
-                    href="https://twitter.com/"
-                  >
-                    <i className="fab fa-twitter fa-lg fa-fw"></i>
-                  </a>
-                </li>
-                <li className="list-inline-item border border-light rounded-circle text-center">
-                  <a
-                    className="text-light text-decoration-none"
-                    target="_blank"
-                    href="https://www.linkedin.com/"
-                  >
-                    <i className="fab fa-linkedin fa-lg fa-fw"></i>
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div className="col-auto">
-              <label className="sr-only" htmlFor="subscribeEmail">
-                Email address
-              </label>
-              <div className="input-group mb-2">
-                {/* <input type="text" className ="form-control bg-dark border-light" id="subscribeEmail"
-                            placeholder="Email address"> */}
-                <div className="input-group-text btn-success text-light">
-                  Subscribe
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
-        <div className="w-100 bg-dark py-3">
+        <div className="w-100 bg-black py-3">
           <div className="container">
             <div className="row pt-2">
               <div className="col-12">

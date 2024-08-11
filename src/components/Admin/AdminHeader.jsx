@@ -2,25 +2,28 @@ import React, { useState } from "react";
 import { AdminFooter } from "./AdminFooter";
 import { Link } from "react-router-dom";
 import { SideBar } from "./SideBar";
+import { useAuth } from "../../context/AuthProvider";
 
 export const AdminHeader = ({ children }) => {
+  const [isActive, setIsActive] = useState(false);
 
-  const [isActive,setIsActive] = useState(false)
+  const changeClass = () => {
+    setIsActive(!isActive);
+  };
 
-  const changeClass= () =>{
-    setIsActive(!isActive)
-  }
-  
+  const { logout } = useAuth();
+
+  const { auth } = useAuth();
+
   return (
     <>
       <div id="page-top">
         {/* <!-- Page Wrapper --> */}
         <div id="wrapper">
-          
           {/* <!-- Sidebar --> */}
 
-            <SideBar isActive={isActive}/>
-          
+          <SideBar isActive={isActive} />
+
           {/* <!-- End of Sidebar --> */}
 
           {/* <!-- Content Wrapper --> */}
@@ -29,14 +32,13 @@ export const AdminHeader = ({ children }) => {
             <div id="content">
               {/* <!-- Topbar --> */}
               <nav className="navbar navbar-expand navbar-light bg-white topbar mb-1 static-top shadow">
-
                 {/* <!-- Sidebar Toggle (Topbar) --> */}
                 <button
                   id="sidebarToggleTop"
                   className="btn btn-link d-md-none rounded-circle mr-3"
                   onClick={changeClass}
                 >
-                  <i className="fas fa-bars" style={{color:"black"}}></i>
+                  <i className="fas fa-bars" style={{ color: "black" }}></i>
                 </button>
 
                 {/* <!-- Topbar Search --> */}
@@ -59,7 +61,7 @@ export const AdminHeader = ({ children }) => {
                       aria-expanded="false"
                     >
                       <span className="mr-2 d-none d-lg-inline text-gray-600 small">
-                        Admin
+                        {auth.user}
                       </span>
                       <i className="fas fa-user-circle fa-lg"></i>
                       {/* <img
@@ -73,39 +75,48 @@ export const AdminHeader = ({ children }) => {
                       className="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                       aria-labelledby="userDropdown"
                     >
-                      {/* <a className="dropdown-item" href="#">
+                      {auth.idUsuario && (
+
+                      <Link to={"/admin"} className="dropdown-item">
                         <i className="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                        Profile
-                      </a> */}
-                      <a className="dropdown-item" href="#">
-                        <i className="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                        Ajustes
-                      </a>
+                        Centro Personal
+                      </Link>
+                      )}
+
+                      {/* Renderizar solo si es un cliente  */}
+                      {auth.idCliente && (
+                        <>
+                          <Link to={"/"} className="dropdown-item">
+                            <i className="fas fa-home fa-sm fa-fw mr-2 text-gray-400"></i>
+                            Inicio
+                          </Link>
+
+                          <Link to={""} className="dropdown-item">
+                            <i className="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                            Ajustes
+                          </Link>
+                        </>
+                      )}
 
                       {/* <a className="dropdown-item" href="#">
                         <i className="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
                         Activity Log
                       </a>
                        */}
+
                       <div className="dropdown-divider"></div>
-                      <a
-                        className="dropdown-item"
-                        href="#"
-                        data-toggle="modal"
-                        data-target="#logoutModal"
-                      >
+                      <Link className="dropdown-item" onClick={logout}>
                         <i className="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                        Cerrar Sesión 
-                      </a>
+                        Cerrar Sesión
+                      </Link>
                     </div>
                   </li>
                 </ul>
               </nav>
               {/* <!-- End of Topbar --> */}
-            {children}
-            {/* {<AdminFooter />} */}
+              {children}
+              {/* {<AdminFooter />} */}
             </div>
-
 
             {/* <!-- Footer --> */}
             {/* <!-- End of Footer --> */}
@@ -155,7 +166,7 @@ export const AdminHeader = ({ children }) => {
                 >
                   Cancel
                 </button>
-                <a className="btn btn-primary" href="login.html">
+                <a className="btn btn-primary" onClick={logout}>
                   Logout
                 </a>
               </div>

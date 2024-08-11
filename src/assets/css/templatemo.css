@@ -80,6 +80,10 @@ Table of contents
   margin: 8px -15px;
 }
 
+.dropdown-item {
+  color: #3a3b45 !important;
+}
+
 /* #navMainLanding{
   flex-wrap: inherit;
 } */

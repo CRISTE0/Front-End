@@ -30,7 +30,7 @@ export const Inicio = () => {
             <div className="container">
               <div className="row p-5">
                 <div className="mx-auto col-md-8 col-lg-6 order-lg-last">
-                  <img className="img-fluid" src={imagenesLanding[1]} alt="Imagen slider" />
+                  <img className="img-fluid p-4" src={imagenesLanding[1]} alt="Imagen slider" />
                 </div>
                 <div className="col-lg-6 mb-0 d-flex align-items-center">
                   <div className="text-align-left align-self-center">
@@ -56,7 +56,7 @@ export const Inicio = () => {
             <div className="container">
               <div className="row p-5">
                 <div className="mx-auto col-md-8 col-lg-6 order-lg-last">
-                  <img className="img-fluid" src={imagenesLanding[2]} alt="Imagen slider" />
+                  <img className="img-fluid p-4" src={imagenesLanding[2]} alt="Imagen slider" />
                 </div>
                 <div className="col-lg-6 mb-0 d-flex align-items-center">
                   <div className="text-align-left">
@@ -79,9 +79,9 @@ export const Inicio = () => {
             <div className="container">
               <div className="row p-5">
                 <div className="mx-auto col-md-8 col-lg-6 order-lg-last">
-                  <img className="img-fluid" src={imagenesLanding[3]} alt="Imagen slider" />
+                  <img className="img-fluid p-4" src={imagenesLanding[3]} alt="Imagen slider" />
                 </div>
-                <div className="col-lg-6 mb-0 d-flex align-items-center">
+                <div className="col-lg-6 mb-0 d-flex align-items-center ">
                   <div className="text-align-left">
                     {/* <!-- <h1 className="h1">Repr in voluptate</h1> --> */}
                     <h3 className="h2">Mas que un diseño</h3>
@@ -118,7 +118,7 @@ export const Inicio = () => {
       {/* fin Banner Hero */}
 
       {/* inicio nosotros  */}
-      <section className="bg-success py-5">
+      <section className="bg-success py-5" id="sobreNosotros">
         <div className="container">
           <div className="row align-items-center py-5">
             <div className="col-md-8 text-white">
@@ -141,7 +141,7 @@ export const Inicio = () => {
       {/* fin nosotros */}
 
       {/* inicio servicios  */}
-      <section className="container py-5">
+      <section className="container py-5" id="servicios">
         <div className="row text-center pt-5 pb-3">
           <div className="col-lg-6 m-auto">
             <h1 className="h1">Hechale un vistazo a nuestros servicios</h1>
@@ -235,7 +235,7 @@ export const Inicio = () => {
 
       {/* inicio FAQs  */}
 
-      <div className="accordion p-3" id="accordionExample">
+      <div className="accordion p-3" id="FAQs">
         <h1 className="h1">Preguntas Frecuentes</h1>
         <div className="accordion-item">
           <h2 className="accordion-header" id="headingOne">

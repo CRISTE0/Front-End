@@ -11,6 +11,8 @@ export const AuthProvider = ({ children }) => {
       : { user: null, permissions: [], token:null };
   });
 
+  const [renderTrigger, setRenderTrigger] = useState(false);
+
   useEffect(() => {
     if (auth.user) {
       localStorage.setItem("auth", JSON.stringify(auth));
@@ -29,14 +31,18 @@ export const AuthProvider = ({ children }) => {
       setAuth({ user: userData.nombreUsuario, permissions: permisosCliente, token,idCliente:userData.idCliente });
       
     }
+    triggerRender(); // Llamar a triggerRender después de login
   };
 
   const logout = () => {
     setAuth({ user: null, permissions: [], token: null });
+    triggerRender(); // Llamar a triggerRender después de logout
   };
 
+  const triggerRender = () => setRenderTrigger(prev => !prev);
+
   return (
-    <AuthContext.Provider value={{ auth, login, logout }}>
+    <AuthContext.Provider value={{ auth, login, logout, renderTrigger, triggerRender }}>
       {children}
     </AuthContext.Provider>
   );

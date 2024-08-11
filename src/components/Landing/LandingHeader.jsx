@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import imagenesLanding from "../../assets/img/imagenesHome";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import { fetchCartItemsNav } from "../../assets/js/getProductosCarrito";
 
 // import "../assets/css/bootstrap.min.css"
 // import "../assets/css/templatemo.css"
@@ -11,6 +13,11 @@ import { jwtDecode } from "jwt-decode";
 
 export const LandingHeader = () => {
   const { auth } = useAuth();
+  const {logout} = useAuth();
+
+  const [cantidadTotal, setCantidadTotal] = useState(0);
+  const { renderTrigger } = useAuth();
+
   let isClient;
   let isUser;
 
@@ -19,6 +26,22 @@ export const LandingHeader = () => {
 
     isUser = auth.idUsuario != null ? true : false;
   }
+
+  
+  
+  useEffect(() => {
+    const obtenerDatosCarrito = async () => {
+      try {
+        const sumaCantidades = await fetchCartItemsNav();
+        setCantidadTotal(sumaCantidades);
+      } catch (error) {
+        console.error("Error fetching cart items:", error);
+      }
+    };
+
+    obtenerDatosCarrito();
+  }, [renderTrigger]); // renderTrigger como dependencia
+
 
   return (
     <>
@@ -33,16 +56,16 @@ export const LandingHeader = () => {
               <i className="fa fa-envelope mx-2"></i>
               <a
                 className="navbar-sm-brand text-light text-decoration-none"
-                href="mailto:info@company.com"
+                href="mailto:softshirt0@gmail.com"
               >
-                info@company.com
+                softshirt0@gmail.com
               </a>
               <i className="fa fa-phone mx-2"></i>
               <a
                 className="navbar-sm-brand text-light text-decoration-none"
-                href="tel:010-020-0340"
+                href="tel:3122942574"
               >
-                010-020-0340
+                312 2942574
               </a>
             </div>
             <div>
@@ -157,7 +180,7 @@ export const LandingHeader = () => {
                       className="position-absolute top-0 left-100 translate-middle badge rounded-pill bg-light text-dark"
                       id="carritoNav"
                     >
-                      1
+                      {cantidadTotal}
                     </span>
                   </Link>
 
@@ -167,9 +190,9 @@ export const LandingHeader = () => {
 
                   {/* <!-- Nav Item - User Information --> */}
                   <li className="nav-item dropdown no-arrow">
-                    <a
+                    <Link
                       className=" dropdown-toggle"
-                      href="#"
+                      
                       id="userDropdown"
                       role="button"
                       data-toggle="dropdown"
@@ -178,23 +201,23 @@ export const LandingHeader = () => {
                     >
                       <i className="fas fa-user-circle fa-lg"></i>
                       
-                    </a>
+                    </Link>
                     
                     {/* <!-- Dropdown - User Information --> */}
                     <div
-                      className="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                      className="dropdown-menu dropdown-menu-right shadow animated--grow-in text-black"
                       aria-labelledby="userDropdown"
                     >
                       
-                      <a className="dropdown-item" href="#">
+                      <Link to={"/admin"} className="dropdown-item " >
                         <i className="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                         Centro Personal
-                      </a>
+                      </Link>
 
-                      <a className="dropdown-item" href="#">
+                      <Link to={"/"} className="dropdown-item" >
                         <i className="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
                         Ajustes
-                      </a>
+                      </Link>
 
                       {/* <a className="dropdown-item text-decoration-none" href="#">
                         <i className="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
@@ -203,15 +226,13 @@ export const LandingHeader = () => {
                       
 
                       <div className="dropdown-divider"></div>
-                      <a
+                      <Link
                         className="dropdown-item"
-                        href="#"
-                        data-toggle="modal"
-                        data-target="#logoutModal"
+                        onClick={logout}
                       >
                         <i className="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                         Cerrar Sesión 
-                      </a>
+                      </Link>
                     </div>
                   </li>
                 </ul>
