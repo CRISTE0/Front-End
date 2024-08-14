@@ -1,16 +1,12 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
-
 import axios from "axios";
-
 
 export const RecuperarContraseña = () => {
   const [Correo, setCorreo] = useState("");
-
-  const urlRecuperar = "http://localhost:3000/api/restablecerContraseniaCliente";
-
+  const urlRecuperar =
+    "http://localhost:3000/api/restablecerContraseniaCliente";
 
   const [errors, setErrors] = useState({
     correo: "",
@@ -34,24 +30,18 @@ export const RecuperarContraseña = () => {
     });
   };
 
-  // Función para manejar cambios en el correo electrónico
   const handleChangeCorreo = (e) => {
     const value = e.target.value;
-    setCorreo(value); // Actualiza el estado del correo electrónico
+    setCorreo(value);
 
-    // Valida el correo electrónico y obtiene el mensaje de error
     const errorMessage = validateCorreo(value);
-
-    // Actualiza el estado de los errores con el mensaje de error correspondiente
     setErrors((prevState) => ({
       ...prevState,
-      correo: errorMessage, // Actualiza el error de correo con el mensaje de error obtenido
+      correo: errorMessage,
     }));
   };
 
-
-   // Función para validar el correo electrónico
-   const validateCorreo = (value) => {
+  const validateCorreo = (value) => {
     if (!value) {
       return "Ingresa tu correo electrónico";
     }
@@ -68,8 +58,7 @@ export const RecuperarContraseña = () => {
     return "";
   };
 
-   // Función para renderizar los mensajes de error
-   const renderErrorMessage = (errorMessage) => {
+  const renderErrorMessage = (errorMessage) => {
     return errorMessage ? (
       <div className="invalid-feedback">{errorMessage}</div>
     ) : null;
@@ -77,35 +66,34 @@ export const RecuperarContraseña = () => {
 
   const validarCorreo = () => {
     if (!Correo) {
-      show_alerta ("Ingresa tu correo electrónico","error");
+      show_alerta("Ingresa tu correo electrónico", "error");
       return;
     }
     if (/\s/.test(Correo)) {
-      show_alerta ("El correo electrónico no puede contener espacios","error");
+      show_alerta("El correo electrónico no puede contener espacios", "error");
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(Correo)) {
-      show_alerta ("Ingresa un correo electrónico válido","error");
+      show_alerta("Ingresa un correo electrónico válido", "error");
       return;
     }
     const length = Correo.length;
     if (length < 10 || length > 50) {
-      show_alerta ("El correo debe tener entre 10 y 50 caracteres","error");
+      show_alerta("El correo debe tener entre 10 y 50 caracteres", "error");
       return;
     }
     restablecerContrasenia();
-  }
+  };
 
-
-  const restablecerContrasenia = async()=> {
+  const restablecerContrasenia = async () => {
     try {
-      let respuesta;
-      respuesta = await axios.post(urlRecuperar, {Correo} ,{withCredentials:true} );
-      
+      const respuesta = await axios.post(
+        urlRecuperar,
+        { Correo },
+        { withCredentials: true }
+      );
       const msj = respuesta.data.message;
-      console.log(respuesta);
       show_alerta(msj, "success");
-
     } catch (error) {
       if (error.response) {
         show_alerta(error.response.data.message, "error");
@@ -117,48 +105,46 @@ export const RecuperarContraseña = () => {
       }
       console.log(error);
     }
-  }
+  };
 
   return (
     <>
-      {/* formulario */}
-      <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
-        <div className="row w-100">
-          <div className="col-12 text-center">
-            <h2 className="fw-bold my-4">Recuperar Contraseña</h2>
+      <div
+        className="container d-flex justify-content-center align-items-center"
+        style={{ minHeight: "80vh" }}
+      >
+        <div className="card p-4 shadow-lg w-100" style={{ maxWidth: "400px" }}>
+          <div className="text-center">
+            <h2 className="fw-bold mb-5">Recuperar Contraseña</h2>
           </div>
-          <div className="w-100">
-            <div className="mb-3 text-center">
-              <label htmlFor="correo" className="form-label">
-                Correo
-              </label>
-              <div className="col-12 col-md-3 mx-auto">
-                <input
-                  type="text"
-                  className={`form-control ${
-                    errors.correo ? "is-invalid" : ""
-                  }`}
-                  id="Correo"
-                  placeholder="Correo"
-                  onChange={handleChangeCorreo}
-                />
-                 {renderErrorMessage(errors.correo)}
-              </div>
-            </div>
+          <div className="mb-3 text-center">
+            <label htmlFor="correo" className="form-label">
+              Correo
+            </label>
+            <input
+              type="text"
+              className={`form-control ${errors.correo ? "is-invalid" : ""}`}
+              id="Correo"
+              placeholder="Correo"
+              onChange={handleChangeCorreo}
+            />
+            {renderErrorMessage(errors.correo)}
+          </div>
 
-            <div className="d-grid text-center">
-              <div className="col-12 col-md-3 mx-auto">
-                <button  className="btn btn-success my-5" onClick={validarCorreo}>
-                 Enviar Email
-                </button>
-              </div>
-            </div>
-            <div className="my-3 text-center">
+          <div className="d-grid text-center">
+            <button
+              className="btn btn-success mx-auto my-4"
+              onClick={validarCorreo}
+            >
+              Enviar Email
+            </button>
+            <div className="my-2 text-center">
+          <a href="/Login">Inicio de sesión</a>
+          
             </div>
           </div>
         </div>
       </div>
-      {/* FIN formulario */}
     </>
   );
 };

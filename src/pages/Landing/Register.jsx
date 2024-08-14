@@ -27,140 +27,139 @@ export const Register = () => {
     valcontrasenia: "",
   });
 
-const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
-const [showValPassword, setShowValPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
+  const [showValPassword, setShowValPassword] = useState(false);
 
-const show_alerta = (message, type) => {
-  const MySwal = withReactContent(Swal);
-  MySwal.fire({
-    title: message,
-    icon: type,
-    timer: 2000,
-    showConfirmButton: false,
-    timerProgressBar: true,
-    didOpen: () => {
-      // Selecciona la barra de progreso y ajusta su estilo
-      const progressBar = MySwal.getTimerProgressBar();
-      if (progressBar) {
-        progressBar.style.backgroundColor = "black";
-        progressBar.style.height = "6px";
-      }
-    },
-  });
-};
+  const show_alerta = (message, type) => {
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: message,
+      icon: type,
+      timer: 2000,
+      showConfirmButton: false,
+      timerProgressBar: true,
+      didOpen: () => {
+        // Selecciona la barra de progreso y ajusta su estilo
+        const progressBar = MySwal.getTimerProgressBar();
+        if (progressBar) {
+          progressBar.style.backgroundColor = "black";
+          progressBar.style.height = "6px";
+        }
+      },
+    });
+  };
 
-// Función para validar el número de documento
-const validateNroDocumento = (value) => {
-  if (!value) {
-    return "Escribe el número de documento";
-  }
-  if (!/^\d+$/.test(value)) {
-    return "El número de documento solo puede contener dígitos";
-  }
-  if (value.startsWith("0")) {
-    return "El número de documento no puede empezar con cero";
-  }
-  if (value.length < 6 || value.length > 10) {
-    return "El número de documento debe tener entre 6 y 10 dígitos";
-  }
-  return "";
-};
+  // Función para validar el número de documento
+  const validateNroDocumento = (value) => {
+    if (!value) {
+      return "Escribe el número de documento";
+    }
+    if (!/^\d+$/.test(value)) {
+      return "El número de documento solo puede contener dígitos";
+    }
+    if (value.startsWith("0")) {
+      return "El número de documento no puede empezar con cero";
+    }
+    if (value.length < 6 || value.length > 10) {
+      return "El número de documento debe tener entre 6 y 10 dígitos";
+    }
+    return "";
+  };
 
-const validateNombreApellido = (value) => {
-  if (!value) {
-    return "Escribe el nombre y apellido";
-  }
-  if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value)) {
-    return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
-  }
-  return "";
-};
+  const validateNombreApellido = (value) => {
+    if (!value) {
+      return "Escribe el nombre y apellido";
+    }
+    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value)) {
+      return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
+    }
+    return "";
+  };
 
-const validateUsuario = (value) => {
-  if (!value) {
-    return "Escribe el usuario";
-  }
-  if (!/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ!@#$%^&*(),.?":{}|<>]+$/.test(value)) {
-    return "El nombre de usuario solo puede contener letras, números y caracteres especiales, sin espacios";
-  }
-  if (value.length < 10 || value.length > 60) {
-    return "El usuario debe tener entre 10 y 60 caracteres";
-  }
-  return "";
-};
+  const validateUsuario = (value) => {
+    if (!value) {
+      return "Escribe el usuario";
+    }
+    if (!/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ!@#$%^&*(),.?":{}|<>]+$/.test(value)) {
+      return "El nombre de usuario solo puede contener letras, números y caracteres especiales, sin espacios";
+    }
+    if (value.length < 10 || value.length > 60) {
+      return "El usuario debe tener entre 10 y 60 caracteres";
+    }
+    return "";
+  };
 
-// Función para validar el teléfono
-const validateTelefono = (value) => {
-  if (!value) {
-    return "Escribe el teléfono";
-  }
-  if (!/^\d+$/.test(value)) {
-    return "El teléfono solo puede contener dígitos";
-  }
-  if (value.startsWith("0")) {
-    return "El teléfono no puede empezar con cero";
-  }
-  if (value.length !== 10) {
-    return "El teléfono debe tener exactamente 10 dígitos";
-  }
-  return "";
-};
+  // Función para validar el teléfono
+  const validateTelefono = (value) => {
+    if (!value) {
+      return "Escribe el teléfono";
+    }
+    if (!/^\d+$/.test(value)) {
+      return "El teléfono solo puede contener dígitos";
+    }
+    if (value.startsWith("0")) {
+      return "El teléfono no puede empezar con cero";
+    }
+    if (value.length !== 10) {
+      return "El teléfono debe tener exactamente 10 dígitos";
+    }
+    return "";
+  };
 
-// Función para validar la dirección
-const validateDireccion = (value) => {
-  if (!value) {
-    return "Escribe la dirección";
-  }
-  if (/^\s/.test(value)) {
-    return "La dirección no puede comenzar con un espacio";
-  }
-  if (!/^[a-zA-Z0-9#-\s]*$/.test(value)) {
-    return "La dirección solo puede contener letras, números, # y -";
-  }
-  if (value.length < 10 || value.length > 50) {
-    return "La dirección debe tener entre 10 y 50 caracteres";
-  }
-  return "";
-};
+  // Función para validar la dirección
+  const validateDireccion = (value) => {
+    if (!value) {
+      return "Escribe la dirección";
+    }
+    if (/^\s/.test(value)) {
+      return "La dirección no puede comenzar con un espacio";
+    }
+    if (!/^[a-zA-Z0-9#-\s]*$/.test(value)) {
+      return "La dirección solo puede contener letras, números, # y -";
+    }
+    if (value.length < 10 || value.length > 50) {
+      return "La dirección debe tener entre 10 y 50 caracteres";
+    }
+    return "";
+  };
 
+  // Función para validar el correo electrónico
+  const validateCorreo = (value) => {
+    if (!value) {
+      return "Ingresa tu correo electrónico";
+    }
+    if (/\s/.test(value)) {
+      return "El correo electrónico no puede contener espacios";
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      return "Ingresa un correo electrónico válido";
+    }
+    const length = value.length;
+    if (length < 10 || length > 50) {
+      return "El correo debe tener entre 10 y 50 caracteres";
+    }
+    return "";
+  };
 
-// Función para validar el correo electrónico
-const validateCorreo = (value) => {
-  if (!value) {
-    return "Ingresa tu correo electrónico";
-  }
-  if (/\s/.test(value)) {
-    return "El correo electrónico no puede contener espacios";
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-    return "Ingresa un correo electrónico válido";
-  }
-  const length = value.length;
-  if (length < 10 || length > 50) {
-    return "El correo debe tener entre 10 y 50 caracteres";
-  }
-  return "";
-};
+  // Función para validar la contraseña
+  const validateContrasenia = (value) => {
+    if (!value) {
+      return "La contraseña es requerida";
+    } else if (value.length < 8 || value.length > 15) {
+      return "La contraseña debe tener entre 8 y 15 caracteres";
+    }
+    return "";
+  };
 
-// Función para validar la contraseña
-const validateContrasenia = (value) => {
-  if (!value) {
-    return "La contraseña es requerida";
-  } else if (value.length < 8 || value.length > 15) {
-    return "La contraseña debe tener entre 8 y 15 caracteres";
-  }
-  return "";
-};
-
-// Función para validar la contraseña
-const validateValContrasenia = (value, contrasenia) => {
-  if (!value) {
-    return "La validación de la contraseña es requerida";
-  } else if (value !== contrasenia) {
-    return "Las contraseñas no coinciden";
-  }
-  return "";
-};
+  // Función para validar la contraseña
+  const validateValContrasenia = (value, contrasenia) => {
+    if (!value) {
+      return "La validación de la contraseña es requerida";
+    } else if (value !== contrasenia) {
+      return "Las contraseñas no coinciden";
+    }
+    return "";
+  };
 
   const handleChangeTipoDocumento = (e) => {
     const value = e.target.value;
@@ -196,7 +195,7 @@ const validateValContrasenia = (value, contrasenia) => {
   const handleChangeUsuario = (e) => {
     const value = e.target.value.replace(/\s+/g, ""); // Eliminar todos los espacios
     setUsuario(value);
-  
+
     // Validar el usuario
     const errorMessage = validateUsuario(value);
     setErrors((prevState) => ({
@@ -254,8 +253,6 @@ const validateValContrasenia = (value, contrasenia) => {
     }));
   };
 
-  
-
   const handleChangeValcontrasenia = (e) => {
     setValcontrasenia(e.target.value); // Actualiza el estado de la contraseña
     const errorMessage = validateValContrasenia(e.target.value, Contrasenia);
@@ -282,63 +279,63 @@ const validateValContrasenia = (value, contrasenia) => {
 
   const guardarCliente = async (e) => {
     e.preventDefault(); // Evita que el formulario se recargue
-  
+
     const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, " ");
     const cleanedUsuario = Usuario.trim().replace(/\s+/g, " ");
     const cleanedDireccion = Direccion.trim().replace(/\s+/g, " ");
     const cleanedContrasenia = Contrasenia.trim();
-  
+
     // Validaciones
     if (!TipoDocumento) {
       show_alerta("El tipo documento es necesario", "error");
       return;
     }
-  
+
     if (!NroDocumento) {
       show_alerta("El número de documento es necesario", "error");
       return;
     }
-  
+
     if (!NombreApellido) {
       show_alerta("El nombre y apellido son necesarios", "error");
       return;
     }
 
     if (!Usuario) {
-      show_alerta(
-        "El usuario es necesario",
-        "error"
-      );
+      show_alerta("El usuario es necesario", "error");
       return;
-      
-    }else if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+)*$/.test(Usuario) ) {
+    } else if (
+      !/^[A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+)*$/.test(
+        Usuario
+      )
+    ) {
       show_alerta(
         "El nombre de usuario puede contener letras, números, caracteres especiales, y un solo espacio entre palabras",
         "error"
       );
       return;
     }
-  
+
     if (!Telefono) {
       show_alerta("El teléfono es necesario", "error");
       return;
     }
-  
+
     if (!Direccion) {
       show_alerta("La dirección es necesaria", "error");
       return;
     }
-  
+
     if (!Correo) {
       show_alerta("El correo es necesario", "error");
       return;
     }
-  
+
     if (!cleanedContrasenia) {
       show_alerta("La contraseña es requerida", "error");
       return;
     }
-  
+
     try {
       if (IdCliente) {
         // Actualizar Cliente
@@ -369,7 +366,7 @@ const validateValContrasenia = (value, contrasenia) => {
         });
         show_alerta("Cliente registrado exitosamente", "success");
       }
-      
+
       // Limpiar los campos del formulario directamente aquí
       setTipoDocumento("");
       setNroDocumento("");
@@ -402,12 +399,9 @@ const validateValContrasenia = (value, contrasenia) => {
       console.log(error);
     }
   };
-  
-  
-  
 
   const enviarSolicitud = async (metodo, parametros) => {
-    console.log(parametros)
+    console.log(parametros);
     let urlRequest =
       metodo === "PUT" || metodo === "DELETE"
         ? `${url}/${parametros.IdCliente}`
@@ -450,125 +444,208 @@ const validateValContrasenia = (value, contrasenia) => {
 
   return (
     <>
-      {/* formulario */}
+      {/* Contenedor principal del formulario */}
       <div
         className="container d-flex justify-content-center align-items-center"
-        style={{ minHeight: "80vh" }}
+        style={{ minHeight: "100vh", maxWidth: "3000px" }} // Aumenta el maxWidth
       >
-        <div className="row w-100">
-          <div className="col-12 text-center">
-            <h2 className="fw-bold my-4">Register</h2>
-          </div>
-          <div className="w-100">
-            <div className="row">
-              <div className="col-md-6">
-                {/* Tipo doc */}
-                <div className="mb-3">
-                  <label htmlFor="tipoDocumento" className="form-label">
-                    Tipo Documento
-                  </label>
-                  <select
-                    className="form-control"
-                    name="tipoDocumento"
-                    id="tipoDocumento"
-                    value={TipoDocumento}
-                    onChange={(e) => handleChangeTipoDocumento(e)}
-                    required
-                  >
-                    <option value="">Seleccione un tipo de documento</option>
-                    <option value="CC">Cédula</option>
-                    <option value="CE">Cédula de Extranjería</option>
-                  </select>
+        <div className="row w-100 justify-content-center">
+          <div className="col-lg-6 col-md-8 col-sm-10">
+            {/* Caja del formulario */}
+            <div className="p-4 border rounded shadow-sm bg-white">
+              <div className="text-center mb-4">
+                <h2 className="fw-bold">Regístrate</h2>
+              </div>
+              <form onSubmit={guardarCliente}>
+                <div className="row">
+                  <div className="col-md-6">
+                    {/* Tipo doc */}
+                    <div className="mb-3">
+                      <label htmlFor="tipoDocumento" className="form-label">
+                        Tipo Documento
+                      </label>
+                      <select
+                        className="form-control"
+                        name="tipoDocumento"
+                        id="tipoDocumento"
+                        value={TipoDocumento}
+                        onChange={handleChangeTipoDocumento}
+                        required
+                      >
+                        <option value="">
+                          Seleccione un tipo de documento
+                        </option>
+                        <option value="CC">Cédula</option>
+                        <option value="CE">Cédula de Extranjería</option>
+                      </select>
+                      {TipoDocumento === "" && (
+                        <p className="text-danger">
+                          Por favor, seleccione un tipo de documento.
+                        </p>
+                      )}
+                    </div>
+                    {/* Fin tipo doc */}
 
-                  {TipoDocumento == "" && (
-                    <p className="text-danger">
-                      Por favor, seleccione un tipo de documento.
-                    </p>
-                  )}
-                </div>
-                {/* Fin tipo doc */}
+                    {/* Documento */}
+                    <div className="mb-3">
+                      <label htmlFor="nroDocumento" className="form-label">
+                        Número de Documento
+                      </label>
+                      <input
+                        type="text"
+                        className={`form-control ${
+                          errors.nroDocumento ? "is-invalid" : ""
+                        }`}
+                        name="nroDocumento"
+                        id="nroDocumento"
+                        placeholder="Ingrese el número de documento"
+                        required
+                        value={NroDocumento}
+                        onChange={handleChangeNroDocumento}
+                      />
+                      {renderErrorMessage(errors.nroDocumento)}
+                    </div>
+                    {/* Fin Documento */}
 
-                {/* Documento */}
-                <div className="mb-3">
-                  <label htmlFor="nroDocumento" className="form-label">
-                    Número de Documento
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.nroDocumento ? "is-invalid" : ""
-                    }`}
-                    name="nroDocumento"
-                    id="nroDocumento"
-                    placeholder="Ingrese el número de documento"
-                    required
-                    value={NroDocumento}
-                    onChange={handleChangeNroDocumento}
-                  />
-                  {renderErrorMessage(errors.nroDocumento)}
-                </div>
-                {/*Fin Documento */}
+                    {/* Nombre y Apellido */}
+                    <div className="mb-3">
+                      <label htmlFor="nombreApellido" className="form-label">
+                        Nombre y Apellido
+                      </label>
+                      <input
+                        type="text"
+                        className={`form-control ${
+                          errors.nombreApellido ? "is-invalid" : ""
+                        }`}
+                        name="nombreApellido"
+                        id="nombreApellido"
+                        placeholder="Nombre y Apellido"
+                        required
+                        value={NombreApellido}
+                        onChange={handleChangeNombreApellido}
+                      />
+                      {renderErrorMessage(errors.nombreApellido)}
+                    </div>
+                    {/* Fin Nombre y Apellido */}
 
-                {/* Nombre y Apellido */}
-                <div className="mb-3">
-                  <label htmlFor="nombreApellido" className="form-label">
-                    Nombre y Apellido
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.nombreApellido ? "is-invalid" : ""
-                    }`}
-                    name="nombreApellido"
-                    id="nombreApellido"
-                    placeholder="Nombre y Apellido"
-                    required
-                    value={NombreApellido}
-                    onChange={handleChangeNombreApellido}
-                  />
-                  {renderErrorMessage(errors.nombreApellido)}
-                </div>
-                {/* fin Nombre y Apellido */}
+                    {/* Usuario */}
+                    <div className="mb-3">
+                      <label htmlFor="nombreUsuario" className="form-label">
+                        Nombre de Usuario
+                      </label>
+                      <input
+                        type="text"
+                        className={`form-control ${
+                          errors.usuario ? "is-invalid" : ""
+                        }`}
+                        name="nombreUsuario"
+                        id="nombreUsuario"
+                        placeholder="Usuario"
+                        required
+                        value={Usuario}
+                        onChange={handleChangeUsuario}
+                      />
+                      {renderErrorMessage(errors.usuario)}
+                    </div>
+                    {/* Fin Usuario */}
+                  </div>
 
-                {/* Usuario */}
-                <div className="mb-3">
-                  <label htmlFor="nombreUsuario" className="form-label">
-                    Nombre de Usuario
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.usuario ? "is-invalid" : ""
-                    }`}
-                    name="nombreUsuario"
-                    id="nombreUsuario"
-                    placeholder="Usuario"
-                    required
-                    value={Usuario}
-                    onChange={handleChangeUsuario}
-                  />
-                  {renderErrorMessage(errors.usuario)}
-                </div>
-                {/* fin Usuario */}
+                  <div className="col-md-6">
+                    {/* Dirección */}
+                    <div className="mb-3">
+                      <label htmlFor="direccion" className="form-label">
+                        Dirección
+                      </label>
+                      <input
+                        type="text"
+                        className={`form-control ${
+                          errors.direccion ? "is-invalid" : ""
+                        }`}
+                        name="direccion"
+                        id="direccion"
+                        placeholder="Ingrese la dirección"
+                        required
+                        value={Direccion}
+                        onChange={handleChangeDireccion}
+                      />
+                      {renderErrorMessage(errors.direccion)}
+                    </div>
+                    {/* Fin dirección */}
 
-                {/* validar contra */}
-                <div className="mb-3">
-                  <label htmlFor="valcontrasenia" className="form-label">
-                    Validar Contraseña
-                  </label>
-                  <div className="d-flex align-items-center">
-                  <input
-                    type={showValPassword ? "text" : "password"}
-                    className={`form-control ${
-                      errors.valcontrasenia ? "is-invalid" : ""
-                    }`}
-                    name="valcontrasenia"
-                    id="valcontraseña"
-                    placeholder="Validar Contraseña"
-                    value={Valcontrasenia}
-                    onChange={handleChangeValcontrasenia}
-                  />
-                  <button
+                    {/* Correo */}
+                    <div className="mb-3">
+                      <label htmlFor="correo" className="form-label">
+                        Correo Electrónico
+                      </label>
+                      <input
+                        type="text"
+                        className={`form-control ${
+                          errors.correo ? "is-invalid" : ""
+                        }`}
+                        name="correo"
+                        id="correo"
+                        placeholder="Ingrese su correo electrónico"
+                        required
+                        value={Correo}
+                        onChange={handleChangeCorreo}
+                      />
+                      {renderErrorMessage(errors.correo)}
+                    </div>
+                    {/* Fin Correo */}
+
+                    {/* Contraseña */}
+                    <div className="mb-3">
+                      <label htmlFor="contrasenia" className="form-label">
+                        Contraseña
+                      </label>
+                      <div className="d-flex align-items-center">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          className={`form-control ${
+                            errors.contrasenia ? "is-invalid" : ""
+                          }`}
+                          name="contrasenia"
+                          id="contrasenia"
+                          placeholder="Ingrese su contraseña"
+                          required
+                          value={Contrasenia}
+                          onChange={handleChangeContrasenia}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary ml-2"
+                          onClick={toggleShowPassword}
+                        >
+                          {showPassword ? (
+                            <i className="fas fa-eye-slash"></i>
+                          ) : (
+                            <i className="fas fa-eye"></i>
+                          )}
+                        </button>
+                      </div>
+                      {renderErrorMessage(errors.contrasenia)}
+                    </div>
+                    {/* Fin Contraseña */}
+
+                    {/* Validar Contraseña */}
+                    <div className="mb-3">
+                      <label htmlFor="valcontrasenia" className="form-label">
+                        Validar Contraseña
+                      </label>
+                      <div className="d-flex align-items-center">
+                        <input
+                          type={showValPassword ? "text" : "password"}
+                          className={`form-control ${
+                            errors.valcontrasenia ? "is-invalid" : ""
+                          }`}
+                          name="valcontrasenia"
+                          id="valcontrasenia"
+                          placeholder="Validar Contraseña"
+                          required
+                          value={Valcontrasenia}
+                          onChange={handleChangeValcontrasenia}
+                        />
+                        <button
                           type="button"
                           className="btn btn-outline-secondary ml-2"
                           onClick={toggleShowValPassword}
@@ -579,126 +656,31 @@ const validateValContrasenia = (value, contrasenia) => {
                             <i className="fas fa-eye"></i>
                           )}
                         </button>
-                </div>
-                {renderErrorMessage(errors.valcontrasenia)}
-              </div>
-            </div>
-              {/* fin val contra */}
-
-              {/* Direccion */}
-              <div className="col-md-6">
-                <div className="mb-3">
-                  <label htmlFor="direccion" className="form-label">
-                    Dirección
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.direccion ? "is-invalid" : ""
-                    }`}
-                    name="direccion"
-                    id="direccion"
-                    placeholder="Ingrese la dirección"
-                    required
-                    value={Direccion}
-                    onChange={handleChangeDireccion}
-                  />
-                  {renderErrorMessage(errors.direccion)}
-                </div>
-                {/* fin dirección */}
-
-                {/* correo */}
-                <div className="mb-3">
-                  <label htmlFor="correo">Correo Electrónico </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.correo ? "is-invalid" : ""
-                    }`}
-                    name="correo"
-                    id="correo"
-                    placeholder="Ingrese el correo electrónico"
-                    required
-                    value={Correo}
-                    onChange={handleChangeCorreo}
-                  />
-                  {renderErrorMessage(errors.correo)}
-                </div>
-                {/*Fin correo */}
-
-                {/* contraseña */}
-                  <div className="mb-3">
-                    <label htmlFor="contraseniaNuevo" className="form-label">
-                      Contraseña
-                    </label>
-                    <div className="d-flex align-items-center">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      className={`form-control ${
-                        errors.contrasenia ? "is-invalid" : ""
-                      }`}
-                      name="contrasenia"
-                      id="contraseniaNuevo"
-                      placeholder="Contraseña"
-                      value={Contrasenia}
-                      onChange={handleChangeContrasenia}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary ml-2"
-                      onClick={toggleShowPassword}
-                    >
-                      {showPassword ? (
-                        <i className="fas fa-eye-slash"></i>
-                      ) : (
-                        <i className="fas fa-eye"></i>
-                      )}
-                    </button>
+                      </div>
+                      {renderErrorMessage(errors.valcontrasenia)}
+                    </div>
+                    {/* Fin Validar Contraseña */}
                   </div>
-                  {renderErrorMessage(errors.contrasenia)}
                 </div>
-                
-                {/*fin contraseña */}
-
-                {/*Telefono */}
-                <div className="mb-3">
-                  <label htmlFor="telefono" className="form-label">
-                    Teléfono
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.telefono ? "is-invalid" : ""
-                    }`}
-                    name="telefono"
-                    id="telefono"
-                    placeholder="Ingrese el Teléfono"
-                    required
-                    value={Telefono}
-                    onChange={handleChangeTelefono}
-                  />
-                  {renderErrorMessage(errors.telefono)}
-                </div>
-                {/*fin telefono */}
-              </div>
-            </div>
-
-            <div className="d-grid text-center">
-              <div className="col-12 col-md-3 mx-auto">
-                <button className="btn btn-success" onClick={guardarCliente}>
+                <div className="d-flex justify-content-center">
+                  <button
+                    type="submit"
+                    className="btn btn-success"
+                    style={{ width: "150px", height: "40px" }} // Ajusta el ancho y la altura
+                  >
                     Registrar
-                </button>
-              </div>
-            </div>
-            <div className="my-3 text-center">
-              <samp>
-                ¿Tienes cuenta? <a href="/Login">Ingresa aquí</a>
-              </samp>
+                  </button>
+                </div>
+                <div className="my-3 text-center">
+                  <samp>
+                    ¿Tienes cuenta? <a href="/Login">Ingresa aquí</a>
+                  </samp>
+                </div>
+              </form>
             </div>
           </div>
         </div>
       </div>
-      {/* FIN formulario */}
     </>
   );
 };
