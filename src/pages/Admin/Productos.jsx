@@ -1378,27 +1378,27 @@ export const Catalogo = () => {
           <h1 className="h3 mb-3 text-center text-dark">
             Gestión de Productos
           </h1>
-          <div className="text-right">
+        </div>
+
+        {/* <!-- Tabla de Productos --> */}
+        <div className="card shadow mb-4">
+          <div className="card-header py-1 d-flex justify-content-between align-items-center">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
             <button
               type="button"
               className="btn btn-dark"
               data-toggle="modal"
               data-target="#modalCliente"
               onClick={() => openModal(1, "", "", "", "", "", "")}
+              style={{
+                width: "175px",
+              }}
             >
               <i className="fas fa-pencil-alt"></i> Crear Producto
             </button>
-          </div>
-        </div>
-
-        {/* <!-- Tabla de Productos --> */}
-        <div className="card shadow mb-4">
-          <div className="card-header py-1 d-flex">
-            <h6 className="m-2 font-weight-bold text-primary"></h6>
-            <SearchBar
-              searchTerm={searchTerm}
-              onSearchTermChange={handleSearchTermChange}
-            />
           </div>
           <div className="card-body">
             <div className="table-responsive">

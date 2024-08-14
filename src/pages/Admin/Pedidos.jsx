@@ -866,7 +866,15 @@ export const Pedidos = () => {
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
           <h1 className="h3 mb-3 text-center text-dark">Gestión de Pedidos</h1>
-          <div className="text-right">
+        </div>
+
+        {/* <!-- Tabla de Pedidos --> */}
+        <div className="card shadow mb-4">
+          <div className="card-header py-1 d-flex justify-content-between align-items-center">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
             <button
               type="button"
               className="btn btn-dark"
@@ -876,17 +884,6 @@ export const Pedidos = () => {
             >
               <i className="fas fa-pencil-alt"></i> Añadir Pedido
             </button>
-          </div>
-        </div>
-
-        {/* <!-- Tabla de Pedidos --> */}
-        <div className="card shadow mb-4">
-          <div className="card-header py-1 d-flex">
-            <h6 className="m-2 font-weight-bold text-primary"></h6>
-            <SearchBar
-              searchTerm={searchTerm}
-              onSearchTermChange={handleSearchTermChange}
-            />
           </div>
           <div className="card-body">
             <div className="table-responsive">

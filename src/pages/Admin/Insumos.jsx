@@ -37,8 +37,6 @@ export const Insumos = () => {
     getTallas(); // Obtener los colores cuando el componente se monta
   }, []);
 
-  
-
   const getInsumos = async () => {
     const respuesta = await axios.get(url);
     setInsumos(respuesta.data);
@@ -98,7 +96,6 @@ export const Insumos = () => {
     }
   };
 
-
   const guardarInsumo = async () => {
     // Verificar errores de validación antes de enviar los datos
     const errors = {
@@ -106,7 +103,7 @@ export const Insumos = () => {
       IdTalla: IdTalla === "" ? "Seleccione una talla" : "",
     };
     setErrors(errors);
-  
+
     // Comprobar si hay errores
     const hasErrors = Object.values(errors).some((error) => error !== "");
     if (hasErrors) {
@@ -116,20 +113,21 @@ export const Insumos = () => {
       });
       return; // Detener la ejecución si hay errores
     }
-  
+
     // Verificar si la referencia ya existe
-    const referenciaExiste = Insumos.some((insumo) =>
-      insumo.Referencia.toLowerCase() === Referencia.toLowerCase()
+    const referenciaExiste = Insumos.some(
+      (insumo) => insumo.Referencia.toLowerCase() === Referencia.toLowerCase()
     );
-  
-    if (referenciaExiste && operation === 1) { // Solo en la creación
+
+    if (referenciaExiste && operation === 1) {
+      // Solo en la creación
       show_alerta({
         message: "La referencia ya existe. Elige una referencia diferente.",
         type: "error",
       });
       return; // Detener la ejecución si la referencia ya existe
     }
-  
+
     try {
       if (operation === 1) {
         // Crear Insumo
@@ -159,10 +157,10 @@ export const Insumos = () => {
           type: "success",
         });
       }
-  
+
       // Usar jQuery para cerrar el modal
       $("#modalCliente").modal("hide");
-  
+
       // Opcionalmente, actualizar la lista de insumos
       getInsumos();
     } catch (error) {
@@ -172,7 +170,6 @@ export const Insumos = () => {
       });
     }
   };
-  
 
   // Función para validar la referencia
   const validateReferencia = (value) => {
@@ -227,7 +224,7 @@ export const Insumos = () => {
     }));
     updateReferencia(value, IdTalla);
   };
-  
+
   const handleChangeIdTalla = (e) => {
     const value = e.target.value;
     setIdTalla(value);
@@ -237,7 +234,7 @@ export const Insumos = () => {
     }));
     updateReferencia(IdColor, value);
   };
-  
+
   // Función para manejar cambios en el teléfono
   const handleChangeReferencia = (e) => {
     let value = e.target.value.trim();
@@ -283,8 +280,11 @@ export const Insumos = () => {
   };
 
   const enviarSolicitud = async (metodo, parametros) => {
-    let urlRequest = metodo === "PUT" || metodo === "DELETE" ? `${url}/${parametros.IdInsumo}` : url;
-  
+    let urlRequest =
+      metodo === "PUT" || metodo === "DELETE"
+        ? `${url}/${parametros.IdInsumo}`
+        : url;
+
     try {
       let respuesta;
       if (metodo === "POST") {
@@ -294,20 +294,21 @@ export const Insumos = () => {
       } else if (metodo === "DELETE") {
         respuesta = await axios.delete(urlRequest);
       }
-  
+
       const msj = respuesta.data.message;
       show_alerta({
         message: msj,
         type: "success",
       });
-  
+
       document.getElementById("btnCerrarCliente").click();
       getInsumos();
     } catch (error) {
-      console.log('Error details:', error.response); // Inspeccionar la estructura del error
+      console.log("Error details:", error.response); // Inspeccionar la estructura del error
       if (error.response) {
         show_alerta({
-          message: error.response.data.message || "Error al procesar la solicitud",
+          message:
+            error.response.data.message || "Error al procesar la solicitud",
           type: "error",
         });
       } else if (error.request) {
@@ -324,8 +325,6 @@ export const Insumos = () => {
       console.error(error);
     }
   };
-  
-  
 
   // const deleteInsumo = (IdInsumo, Referencia) => {
   //   const MySwal = withReactContent(Swal);
@@ -717,27 +716,27 @@ export const Insumos = () => {
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
           <h1 className="h3 mb-3 text-center text-dark">Gestión de Insumos</h1>
-          <div className="text-right">
+        </div>
+
+        {/* <!-- Tabla de Clientes --> */}
+        <div className="card shadow mb-4">
+          <div className="card-header py-1 d-flex justify-content-between align-items-center">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
             <button
               type="button"
               className="btn btn-dark"
               data-toggle="modal"
               data-target="#modalCliente"
+              style={{
+                width: "155px",
+              }}
               onClick={() => openModal(1, "", "", "", "", "", "")}
             >
               <i className="fas fa-pencil-alt"></i> Crear Insumo
             </button>
-          </div>
-        </div>
-
-        {/* <!-- Tabla de Clientes --> */}
-        <div className="card shadow mb-4">
-          <div className="card-header py-1 d-flex">
-            <h6 className="m-2 font-weight-bold text-primary"></h6>
-            <SearchBar
-              searchTerm={searchTerm}
-              onSearchTermChange={handleSearchTermChange}
-            />
           </div>
           <div className="card-body">
             <div className="table-responsive">

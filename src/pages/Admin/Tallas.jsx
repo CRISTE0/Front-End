@@ -306,28 +306,27 @@ export const Tallas = () => {
       <div className="container-fluid">
         <div className="d-flex align-items-center justify-content-between">
           <h1 className="h3 mb-3 text-center text-dark">Gestión de Tallas</h1>
+        </div>
 
-          <div className="text-right">
+        {/* <!-- Tabla Proveedor --> */}
+        <div className="card shadow mb-4">
+          <div className="card-header py-1 d-flex justify-content-between align-items-center">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
             <button
               onClick={() => openModal(1)}
               type="button"
               className="btn btn-dark"
               data-toggle="modal"
               data-target="#modalTallas"
+              style={{
+                width: "135px"
+              }}
             >
               <i className="fas fa-pencil-alt"></i> Crear Talla
             </button>
-          </div>
-        </div>
-
-        {/* <!-- Tabla Proveedor --> */}
-        <div className="card shadow mb-4">
-          <div className="card-header py-1 d-flex">
-            <h6 className="m-2 font-weight-bold text-primary"></h6>
-            <SearchBar
-              searchTerm={searchTerm}
-              onSearchTermChange={handleSearchTermChange}
-            />
           </div>
           <div className="card-body">
             <div className="table-responsive">

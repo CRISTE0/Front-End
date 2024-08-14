@@ -1944,27 +1944,27 @@ export const Disenios = () => {
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
           <h1 className="h3 mb-3 text-center text-dark">Gestión de Diseños</h1>
-          <div className="text-right">
+        </div>
+
+        {/* <!-- Tabla de diseños --> */}
+        <div className="card shadow mb-4">
+          <div className="card-header py-1 d-flex justify-content-between align-items-center">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
             <button
               type="button"
               className="btn btn-dark"
               data-toggle="modal"
               data-target="#modalDisenio"
               onClick={() => openModal(1, "", "", "", "", "", "")}
+              style={{
+                width: "150px",
+              }}
             >
               <i className="fas fa-pencil-alt"></i> Crear Diseño
             </button>
-          </div>
-        </div>
-
-        {/* <!-- Tabla de diseños --> */}
-        <div className="card shadow mb-4">
-          <div className="card-header py-1 d-flex">
-            <h6 className="m-2 font-weight-bold text-primary"></h6>
-            <SearchBar
-              searchTerm={searchTerm}
-              onSearchTermChange={handleSearchTermChange}
-            />
           </div>
           <div className="card-body">
             <div className="table-responsive">

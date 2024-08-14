@@ -632,27 +632,29 @@ export const Usuarios = () => {
         {/* Page Heading */}
         <div className="d-flex align-items-center justify-content-between">
           <h1 className="h3 mb-3 text-center text-dark">Gestión de Usuarios</h1>
-          <div className="text-right">
-            <button
-              onClick={() => openModal(1)}
-              type="button"
-              className="btn btn-dark"
-              data-toggle="modal"
-              data-target="#modalUsuarios"
-            >
-              <i className="fas fa-pencil-alt"></i> Crear Usuario
-            </button>
-          </div>
         </div>
 
         {/* Tabla Usuarios */}
         <div className="card shadow mb-4">
-          <div className="card-header py-1 d-flex">
-            <h6 className="m-2 font-weight-bold text-primary"></h6>
+          <div className="card-header py-1 d-flex justify-content-between align-items-center">
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+            <div className="text-right">
+              <button
+                onClick={() => openModal(1)}
+                type="button"
+                className="btn btn-dark"
+                data-toggle="modal"
+                data-target="#modalUsuarios"
+                style={{
+                  width: "150px"
+                }}
+              >
+                <i className="fas fa-pencil-alt"></i> Crear Usuario
+              </button>
+            </div>
           </div>
           <div className="card-body">
             <div className="table-responsive">

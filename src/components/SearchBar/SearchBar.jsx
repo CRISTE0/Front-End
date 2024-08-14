@@ -6,7 +6,7 @@ const SearchBar = ({ searchTerm, onSearchTermChange }) => {
     <div className="input-group mb-1">
       <input
         type="text"
-        className="Buscador"
+        className="Buscador" // Usa la clase CSS correcta aquí
         placeholder="Buscar..."
         value={searchTerm}
         onChange={(e) => onSearchTermChange(e.target.value)}

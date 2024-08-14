@@ -1171,13 +1171,24 @@ export const Compras = () => {
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
           <h1 className="h3 mb-3 text-center text-dark">Gestión de Compras</h1>
-          <div className="text-right">
+        </div>
+
+        {/* <!-- Tabla de Compras --> */}
+        <div className="card shadow mb-4">
+          <div className="card-header py-1 d-flex justify-content-between align-items-center">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
             <button
               type="button"
               className="btn btn-dark mr-2 custom-font"
               data-toggle="modal"
               data-target="#modalCompras"
               onClick={() => proveedores.length > 0 && openModal(1)}
+              style={{
+                width: "190px",
+              }}
             >
               <i className="fas fa-pencil-alt"></i> Crear Compra
             </button>
@@ -1186,20 +1197,12 @@ export const Compras = () => {
               className="btn btn-primary custom-font"
               data-toggle="modal"
               data-target="#modalGenerarReporte"
+              style={{
+                width: "205px",
+              }}
             >
               <i className="fa fa-print"></i> Generar Reporte
             </button>
-          </div>
-        </div>
-
-        {/* <!-- Tabla de Compras --> */}
-        <div className="card shadow mb-4">
-          <div className="card-header py-1 d-flex">
-            <h6 className="m-2 font-weight-bold text-primary"></h6>
-            <SearchBar
-              searchTerm={searchTerm}
-              onSearchTermChange={handleSearchTermChange}
-            />
           </div>
           <div className="card-body">
             <div className="table-responsive">

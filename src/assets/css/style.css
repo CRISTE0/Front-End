@@ -254,7 +254,7 @@ h5 {
 input.Buscador {
   padding: 5px; /* Reducir el padding */
   margin-top: 5px;
-  margin-left: auto;
+  margin-right: auto; /* Empuja el campo de búsqueda hacia la izquierda */
   border: 1px solid #ccc;
   border-radius: 15px; /* Reducir el radio de los bordes */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */

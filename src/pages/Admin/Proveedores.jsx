@@ -776,27 +776,28 @@ export const Proveedores = () => {
           <h1 className="h3 mb-3 text-center text-dark">
             Gestión de Proveedores
           </h1>
-          <div className="text-right">
-            <button
-              type="button"
-              className="btn btn-dark"
-              data-toggle="modal"
-              data-target="#modalProveedor"
-              onClick={() => openModal(1, "", "", "", "", "", "", "", "")}
-            >
-              <i className="fas fa-pencil-alt"></i> Crear Proveedor
-            </button>
-          </div>
         </div>
 
         {/* <!-- Tabla Proveedores --> */}
         <div className="card shadow mb-4">
-          <div className="card-header py-1 d-flex">
-            <h6 className="m-2 font-weight-bold text-primary"></h6>
+          <div className="card-header py-1 d-flex justify-content-between align-items-center">
             <SearchBar
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+              <button
+                type="button"
+                className="btn btn-dark"
+                data-toggle="modal"
+                data-target="#modalProveedor"
+                style={{
+                  width: 
+                  '180px'
+                }}
+                onClick={() => openModal(1, "", "", "", "", "", "", "", "")}
+              >
+                <i className="fas fa-pencil-alt"></i> Crear Proveedor
+              </button>
           </div>
           <div className="card-body">
             <div className="table-responsive">
