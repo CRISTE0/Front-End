@@ -49,18 +49,15 @@ export const Proveedores = () => {
   const getComprasByProveedor = async (IdProveedor) => {
     try {
       const response = await axios.get(comprasUrl);
-      // Considera activo si hay compras activas (suponiendo que `estado` es un campo que indica si la compra está activa)
+      // Verifica si el proveedor está asociado a alguna compra
       const compras = response.data.filter(
         (compra) => compra.IdProveedor === IdProveedor
       );
-      const comprasActivas = compras.some(
-        (compra) => compra.Estado === "Activo"
-      );
-      return comprasActivas;
+      return compras.length > 0; // Devuelve true si hay al menos una compra asociada
     } catch (error) {
       console.error("Error fetching compras:", error);
       show_alerta({ message: "Error al verificar las compras", type: "error" });
-      return false; // Considera que no tiene compras activas en caso de error
+      return false; // Considera que no tiene compras asociadas en caso de error
     }
   };
 
@@ -459,19 +456,20 @@ export const Proveedores = () => {
   };
 
   const deleteProveedor = async (IdProveedor, NombreApellido) => {
+    // Verificar si el proveedor está asociado a alguna compra
     const asociado = await getComprasByProveedor(IdProveedor);
 
     if (asociado) {
-      // Mostrar mensaje si hay compras activas
+      // Mostrar mensaje si está asociado y no permitir la eliminación
       show_alerta({
         message:
-          "El proveedor está asociado a una compra activa y no puede ser eliminado.",
+          "El proveedor está asociado a una compra y no puede ser eliminado.",
         type: "info",
       });
-      return;
+      return; // Salir de la función para evitar la eliminación
     }
 
-    // Si no hay compras activas o las compras están canceladas, proceder con la eliminación
+    // Confirmar la eliminación del proveedor
     const MySwal = withReactContent(Swal);
     MySwal.fire({
       title: `¿Seguro de eliminar al proveedor ${NombreApellido}?`,
@@ -482,13 +480,20 @@ export const Proveedores = () => {
       cancelButtonText: "Cancelar",
     }).then((result) => {
       if (result.isConfirmed) {
+        // Proceder con la eliminación del proveedor
         enviarSolicitud("DELETE", { IdProveedor }).then(() => {
-          const index = filteredProveedores.findIndex(
-            (proveedor) => proveedor.IdProveedor === IdProveedor
-          );
+          // Actualizar la lista de proveedores después de eliminar
+          getProveedores();
+
+          // Calcular la nueva página después de la eliminación
           const newPage =
             Math.ceil((filteredProveedores.length - 1) / itemsPerPage) || 1;
           setCurrentPage(newPage);
+
+          show_alerta({ 
+            message: "Proveedor eliminado con éxito",
+            type: "success",
+          });
         });
       } else {
         show_alerta({ message: "El proveedor NO fue eliminado", type: "info" });
@@ -785,19 +790,18 @@ export const Proveedores = () => {
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
-              <button
-                type="button"
-                className="btn btn-dark"
-                data-toggle="modal"
-                data-target="#modalProveedor"
-                style={{
-                  width: 
-                  '180px'
-                }}
-                onClick={() => openModal(1, "", "", "", "", "", "", "", "")}
-              >
-                <i className="fas fa-pencil-alt"></i> Crear Proveedor
-              </button>
+            <button
+              type="button"
+              className="btn btn-dark"
+              data-toggle="modal"
+              data-target="#modalProveedor"
+              style={{
+                width: "180px",
+              }}
+              onClick={() => openModal(1, "", "", "", "", "", "", "", "")}
+            >
+              <i className="fas fa-pencil-alt"></i> Crear Proveedor
+            </button>
           </div>
           <div className="card-body">
             <div className="table-responsive">
