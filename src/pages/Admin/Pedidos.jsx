@@ -881,6 +881,9 @@ export const Pedidos = () => {
               data-toggle="modal"
               data-target="#modalCompras"
               onClick={() => Clientes.length > 0 && openModal(1)}
+              style={{
+                width: "165px"
+              }}
             >
               <i className="fas fa-pencil-alt"></i> Añadir Pedido
             </button>

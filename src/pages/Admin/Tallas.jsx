@@ -291,7 +291,7 @@ export const Tallas = () => {
                     Cancelar
                   </button>
 
-                  <button onClick={() => validar()} className="btn btn-success">
+                  <button onClick={() => validar()} className="btn btn-primary">
                     <i className="fa-solid fa-floppy-disk"></i> Guardar
                   </button>
                 </div>
