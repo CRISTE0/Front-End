@@ -415,7 +415,7 @@ export const Configuracion = () => {
               </button>
               <button
                 type="button"
-                className="btn btn-success"
+                className="btn btn-primary"
                 onClick={() => validar()}
               >
                 <i className="fa-solid fa-floppy-disk"></i> Guardar
@@ -521,10 +521,10 @@ export const Configuracion = () => {
               data-toggle="modal"
               data-target="#modalRoles"
               style={{
-                width : "120px"
+                width: "120px",
               }}
             >
-              <i className="fas fa-pencil-alt"></i> Crear rol
+              <i className="fas fa-pencil-alt"></i> Crear Rol
             </button>
           </div>
           <div className="card-body">
