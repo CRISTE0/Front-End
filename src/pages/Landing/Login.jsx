@@ -203,15 +203,10 @@ export const Login = () => {
               Iniciar sesión
             </button>
           </div>
-
           <div className="mt-4 text-center">
-            <samp>
               ¿No tienes cuenta? <Link to={"/Register"}>Regístrate aquí</Link>
-            </samp>
             <br />
-            <samp>
               ¿Olvidaste tu contraseña? <Link to={"/RecuperarCliente"}>Recuperar contraseña</Link>
-            </samp>
           </div>
         </div>
       </div>

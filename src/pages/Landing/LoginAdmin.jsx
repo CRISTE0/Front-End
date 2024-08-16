@@ -235,14 +235,6 @@ export const LoginAdmin = () => {
                 {renderErrorMessage(errors.contrasenia)}
               </div>
 
-              <div className="d-flex justify-content-around align-items-center mb-4">
-                {/* Checkbox */}
-                <div className="form-check">
-                  
-                <Link to={"/RecuperarUsuario"}>¿Olvidaste tu contraseña?</Link>
-                </div>
-              </div>
-
               {/* Submit button */}
               <button 
                 data-mdb-button-init 
@@ -251,6 +243,11 @@ export const LoginAdmin = () => {
                 onClick={loguearUsuario}>
                 Iniciar sesión
               </button>
+              <div className="mt-4 text-center">
+                  
+              ¿Olvidaste tu contraseña? <Link to={"/RecuperarUsuario"}>Recuperar contraseña</Link>
+              
+              </div>
             </div>
           </div>
         </div>

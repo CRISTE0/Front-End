@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 export const RecuperarContraseña = () => {
   const [Correo, setCorreo] = useState("");
@@ -139,8 +140,7 @@ export const RecuperarContraseña = () => {
               Enviar Email
             </button>
             <div className="my-2 text-center">
-          <a href="/Login">Inicio de sesión</a>
-          
+            ¿Tienes cuenta? <Link to="/Login">Inicio de sesión</Link>
             </div>
           </div>
         </div>
