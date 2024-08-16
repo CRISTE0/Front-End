@@ -99,3 +99,34 @@ export async function editImageReference(idFileR,newFileR)  {
   // return url;
 
 }
+
+
+export async function subirImageComprobante(fileComprobante)  {
+
+  const idImagenComprobante = v4();
+ 
+  const storageRef= ref(storage,`Comprobantes/${idImagenComprobante}`)
+  await uploadBytes(storageRef,fileComprobante)
+  const imagenComprobante = await getDownloadURL(storageRef)
+  console.log(imagenComprobante); 
+
+  return [idImagenComprobante,imagenComprobante];
+}
+
+
+
+export async function editImageComprobante(idFileComprobante,newFileComprobante)  {
+  
+  console.log(idFileComprobante);
+  console.log(newFileComprobante);
+
+
+  const storageRef= ref(storage,`Comprobantes/${idFileComprobante}`)
+  // const blob = await fetch(newFileR).then((res) => res.blob());
+
+  await uploadBytes(storageRef,newFileComprobante)
+  const url = await getDownloadURL(storageRef)
+  console.log(url);
+  return true;
+
+}

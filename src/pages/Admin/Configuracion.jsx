@@ -569,13 +569,11 @@ export const Configuracion = () => {
                         </td>
                         <td>
                           <div
-                            className="btn-group"
-                            role="group"
-                            aria-label="Acciones"
+                            className="d-flex"
                           >
                             {/* Botón de actualizar */}
                             <button
-                              className="btn btn-warning btn-sm mr-2 rounded-icon"
+                              className="btn btn-warning btn-sm mr-2 "
                               data-toggle="modal"
                               data-target="#modalRoles"
                               onClick={() =>
@@ -594,7 +592,7 @@ export const Configuracion = () => {
                             {/* Botón de eliminar */}
                             {!rolAsociado && (
                               <button
-                                className="btn btn-danger btn-sm mr-2 rounded-icon"
+                                className="btn btn-danger btn-sm mr-2 "
                                 onClick={() =>
                                   deleteRol(rol.IdRol, rol.NombreRol)
                                 }
@@ -606,7 +604,7 @@ export const Configuracion = () => {
                             )}
                             {/* Botón de detalle */}
                             <button
-                              className="btn btn-info btn-sm rounded-icon"
+                              className="btn btn-info btn-sm mr-2 "
                               data-toggle="modal"
                               data-target="#modalDetalleRol"
                               onClick={() => openDetailModal(rol)}

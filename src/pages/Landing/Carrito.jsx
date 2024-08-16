@@ -246,6 +246,8 @@ export const Carrito = () => {
         Detalles: obtenerDetalles(cartItems),
         Fecha: obtenerFechaActual(),
         Total: totalPedido,
+        IdImagenComprobante:0,
+        ImagenComprobante:"0",
         IdEstadoPedido: 2,
       };
 

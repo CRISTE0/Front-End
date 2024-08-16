@@ -1233,14 +1233,13 @@ export const Compras = () => {
                       <td>{formatPrice(compra.Total)}</td>
                       <td>
                         <div
-                          className="btn-group"
-                          role="group"
-                          aria-label="Acciones"
+                          className="d-flex"
+                          
                         >
                           {/* Botón de cancelar */}
                           {compra.Estado === "Cancelado" ? (
                             <button
-                              className="btn btn-secondary btn-sm mr-2 rounded-icon"
+                              className="btn btn-secondary btn-sm mr-2 "
                               disabled
                               title="No se puede cancelar"
                             >
@@ -1249,7 +1248,7 @@ export const Compras = () => {
                           ) : (
                             <button
                               onClick={() => cancelCompra(compra.IdCompra)}
-                              className="btn btn-danger btn-sm mr-2 rounded-icon"
+                              className="btn btn-danger btn-sm mr-2 "
                               title="Cancelar Compra"
                             >
                               <i className="fas fa-times-circle"></i>
@@ -1262,7 +1261,7 @@ export const Compras = () => {
                               compra.Estado === "Cancelado"
                                 ? "btn-secondary"
                                 : "btn-info"
-                            } btn-sm rounded-icon`}
+                            } btn-sm `}
                             disabled={compra.Estado === "Cancelado"}
                             data-toggle="modal"
                             data-target="#modalDetalleCompra"

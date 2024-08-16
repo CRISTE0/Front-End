@@ -696,9 +696,7 @@ export const Usuarios = () => {
                       </td>
                       <td>
                         <div
-                          className="btn-group"
-                          role="group"
-                          aria-label="Acciones"
+                         className="d-flex"
                         >
                           <button
                             className="btn btn-warning btn-sm mr-2"
@@ -718,7 +716,6 @@ export const Usuarios = () => {
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                        </div>
                         <button
                           className="btn btn-info btn-sm mr-2"
                           title="Detalle"
@@ -731,6 +728,7 @@ export const Usuarios = () => {
                         >
                           <i className="fas fa-solid fa-info-circle"></i>
                         </button>
+                        </div>
                         {/* <button
                           type="button"
                           className="btn btn-primary btn-sm mr-2"
