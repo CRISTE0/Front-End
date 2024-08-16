@@ -5,6 +5,10 @@ import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
+import { editImageComprobante, subirImageComprobante } from "../../firebase/config";
+
+import { useAuth } from "../../context/AuthProvider";
+
 
 export const Pedidos = () => {
   const url = "http://localhost:3000/api/pedidos";
@@ -17,6 +21,14 @@ export const Pedidos = () => {
   const [Fecha, setFecha] = useState("");
   const [Total, setTotal] = useState("");
   const [idEstadosPedidos, setIdEstadosPedidos] = useState("");
+
+  const [imagenComprobante, setImagenComprobante] = useState("");
+  const [imagenComprobantePrevisualizar, setImagenComprobantePrevisualizar] =
+  useState("");
+
+  const {auth} = useAuth();
+  
+  const [showComprobanteButton, setShowComprobanteButton] = useState(null);
 
   const [estadosPedidos, setEstadosPedidos] = useState([]);
   const [Detalles, setDetalles] = useState([]);
@@ -117,7 +129,9 @@ export const Pedidos = () => {
         }, 0)
       : 0;
 
-  const handleDetalleCompra = async (idPedido) => {
+
+  // Abre el modal del detalle del pedido
+  const handleDetallePedido = async (idPedido) => {
     try {
       // Realizar la solicitud GET para obtener los detalles del pedido
       const respuesta = await axios.get(
@@ -132,6 +146,8 @@ export const Pedidos = () => {
 
       // Establecer el pedido seleccionado en el estado
       setPedidoSeleccionado(pedido);
+      // setImagenComprobante(pedido.ImagenComprobante);
+      setImagenComprobantePrevisualizar(pedido.ImagenComprobante);
 
       // Mostrar el modal con los detalles de la compra
       $("#modalDetalleCompra").modal("show");
@@ -144,25 +160,32 @@ export const Pedidos = () => {
     }
   };
 
-  const formatPrice = (price) => {
-    // Convertir el precio a número si es una cadena
-    const formattedPrice =
-      typeof price === "string" ? parseFloat(price) : price;
+  function formatCurrency(value) {
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+    }).format(value);
+  }
 
-    // Verificar si el precio es un número válido
-    if (!isNaN(formattedPrice)) {
-      // Formatear el número con separadores de miles y coma decimal
-      const formattedNumber = formattedPrice.toLocaleString("es-ES", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
+  // const formatCurrency = (price) => {
+  //   // Convertir el precio a número si es una cadena
+  //   const formattedPrice =
+  //     typeof price === "string" ? parseFloat(price) : price;
 
-      // Retornar el número con el símbolo de peso
-      return `$${formattedNumber}`;
-    }
+  //   // Verificar si el precio es un número válido
+  //   if (!isNaN(formattedPrice)) {
+  //     // Formatear el número con separadores de miles y coma decimal
+  //     const formattedNumber = formattedPrice.toLocaleString("es-ES", {
+  //       minimumFractionDigits: 2,
+  //       maximumFractionDigits: 2,
+  //     });
 
-    return `$0.00`; // Valor predeterminado si no es un número válido
-  };
+  //     // Retornar el número con el símbolo de peso
+  //     return `$${formattedNumber}`;
+  //   }
+
+  //   return `$0.00`; // Valor predeterminado si no es un número válido
+  // };
 
   const openModal = () => {
     setIdPedido(""); // Resetear el IdCompra al abrir el modal para indicar una nueva compra
@@ -315,6 +338,88 @@ export const Pedidos = () => {
     ) : null;
   };
 
+  // cargar la imagen que se usara en el comprobante
+  const handleChangeImagenComprobante = (e) => {
+    let errorMessage = "";
+
+    const file = e.target.files[0];
+    console.log(file);
+
+    let spanComprobante = document.getElementById("spanInputFileComprobante");
+
+    const fileTypes = ["image/png", "image/jpeg"];
+
+    if (file && fileTypes.includes(file.type)) {
+      // Cargar la imagen para previsualizarla
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // setImagenDisenio(reader.result);
+        setImagenComprobantePrevisualizar(reader.result);
+        console.log(reader.result);
+      };
+      reader.readAsDataURL(file);
+
+      setImagenComprobante(file);
+      setShowComprobanteButton(true);
+
+      let fileName = "";
+      fileName = e.target.value.split("\\").pop();
+
+      spanComprobante.innerHTML = fileName;
+    } else {
+      errorMessage = "Selecciona un archivo válido .png o .jpg";
+
+      setErrors({ fileComprobante: errorMessage });
+
+      console.log(e.target.files[0]);
+      console.log("else");
+
+      // return;
+    }
+  };
+
+  const enviarComprobante = async (idPed,pedidoIdImagenComprobante) => {
+    try {
+
+      console.log(pedidoSeleccionado);
+      console.log(pedidoIdImagenComprobante);
+
+      // return;
+      
+
+      if (pedidoIdImagenComprobante != "0") {
+        console.log("editarComprobante");
+        
+        const url = await editImageComprobante(pedidoIdImagenComprobante,imagenComprobante);
+  
+        await axios.put(`http://localhost:3000/api/pedidos/comprobante/${idPed}`, {
+          idImagenComprobante: pedidoIdImagenComprobante,
+          imagenComprobante: url
+        });
+
+      }else{
+        console.log("crearComprobante");
+
+        const [idImagenComprobante,url] = await subirImageComprobante(imagenComprobante);
+  
+        await axios.put(`http://localhost:3000/api/pedidos/comprobante/${idPed}`, {
+          idImagenComprobante: idImagenComprobante,
+          imagenComprobante: url
+        });
+        
+      }
+
+
+      show_alerta({
+        message: "El comprobante fue cargado correctamente",
+        type: "success",
+      });
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const validar = () => {
     let errorMessage = "";
 
@@ -351,7 +456,9 @@ export const Pedidos = () => {
       Fecha: Fecha,
       Total: totalCompra,
       Detalles: Detalles,
-      IdEstadoPedido: 2,
+      idImagenComprobante: "0",
+      imagenComprobante:"0",
+      IdEstadoPedido: 2
     });
   };
 
@@ -398,10 +505,11 @@ export const Pedidos = () => {
   };
 
   const cambiarEstadoPedido = async () => {
-    let idPed = idEstadosPedidos;
+    let idEstPed = idEstadosPedidos;
+    let idPed = IdPedidoActualizar ;
     const MySwal = withReactContent(Swal);
     MySwal.fire({
-      title: "¿Seguro de cancelar el pedido?",
+      title: "¿Seguro de cambiar el estado al pedido?",
       icon: "question",
       text: "No se podrá dar marcha atrás",
       showCancelButton: true,
@@ -411,16 +519,18 @@ export const Pedidos = () => {
       if (result.isConfirmed) {
         try {
           console.log(idPed);
+          console.log(idEstPed);
           // Cambiar el estado del pedido a "Cancelado"
           await axios.put(`http://localhost:3000/api/pedidos/${idPed}`, {
-            Estado: "Cancelado",
+            Estado: idEstPed,
           });
 
           // Actualizar la lista de pedidos
           getPedidos();
+          $(".close").click();
 
           show_alerta({
-            message: "La compra fue cancelada correctamente",
+            message: "La compra fue modificada correctamente",
             type: "success",
           });
         } catch (error) {
@@ -437,6 +547,116 @@ export const Pedidos = () => {
       }
     });
   };
+
+  const aceptarComprobante = async (idPedido) => {
+    // let idEstPed = idEstadosPedidos;
+    // let idPed = IdPedidoActualizar ;
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: "¿Seguro de aceptar el comprobante del pedido?",
+      icon: "question",
+      text: "No se podrá dar marcha atrás",
+      showCancelButton: true,
+      confirmButtonText: "Sí, aceptar",
+      cancelButtonText: "No",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          console.log(idPedido);
+          // console.log(idEstadoPedido);
+
+          const respuesta = await axios.put(`http://localhost:3000/api/pedidos/${idPedido}`, {
+            Estado: 2,
+          });
+
+          let message = respuesta.response.message;
+           
+
+          // Actualizar la lista de pedidos
+          getPedidos();
+          $(".close").click();
+
+          // show_alerta({
+          //   message: "La compra fue modificada correctamente",
+          //   type: "success",
+          // });
+
+          show_alerta({
+            message: message,
+            type: "success",
+          });
+          
+
+        } catch (error) {
+          show_alerta({
+            message: "Hubo un error al cancelar la compra",
+            type: "error",
+          });
+        }
+      } else {
+        show_alerta({
+          message: "La compra NO fue cancelada",
+          type: "info",
+        });
+      }
+    });
+  };
+
+  const rechazarComprobante = async (idPedido) => {
+    // let idEstPed = idEstadosPedidos;
+    // let idPed = IdPedidoActualizar ;
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: "¿Seguro de rechazar el comprobante del pedido?",
+      icon: "question",
+      text: "No se podrá dar marcha atrás",
+      showCancelButton: true,
+      confirmButtonText: "Sí, rechazar",
+      cancelButtonText: "No",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          console.log(idPedido);
+          // console.log(idEstadoPedido);
+
+          const respuesta = await axios.put(`http://localhost:3000/api/pedidos/intentos/${idPedido}`, {
+            Estado: 2,
+          });
+
+          let message = respuesta.response.message;
+           
+
+          // Actualizar la lista de pedidos
+          getPedidos();
+          $(".close").click();
+
+          // show_alerta({
+          //   message: "La compra fue modificada correctamente",
+          //   type: "success",
+          // });
+
+          show_alerta({
+            message: message,
+            type: "success",
+          });
+          
+
+        } catch (error) {
+          show_alerta({
+            message: "Hubo un error al cancelar la compra",
+            type: "error",
+          });
+        }
+      } else {
+        show_alerta({
+          message: "La compra NO fue cancelada",
+          type: "info",
+        });
+      }
+    });
+  };
+
+
 
   const openModalEstado = (pedido) => {
     setTitle("Actualizar Estado");
@@ -468,6 +688,12 @@ export const Pedidos = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const [isZoomed, setIsZoomed] = useState(false);
+
+  const handleToggleZoom = () => {
+    setIsZoomed(!isZoomed);
+  };
 
   return (
     <>
@@ -696,7 +922,7 @@ export const Pedidos = () => {
                             className="form-control"
                             name="subtotal"
                             placeholder="Subtotal"
-                            value={formatPrice(detalle.subtotal)}
+                            value={formatCurrency(detalle.subtotal)}
                             disabled
                           />
                         </td>
@@ -763,13 +989,13 @@ export const Pedidos = () => {
           </div>
         </div>
       </div>
-      {/* fin modal de crear compra con el detalle */}
+      {/* fin modal de crear pedido con el detalle */}
 
-      {/* Inicio modal ver detalle compra */}
+      {/* Inicio modal ver detalle pedido */}
       <div
         className="modal fade"
         id="modalDetalleCompra"
-        tabIndex="-1"
+        // tabIndex="-1"
         role="dialog"
         aria-labelledby="ModalDetalleCompraLabel"
         aria-hidden="true"
@@ -791,63 +1017,261 @@ export const Pedidos = () => {
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
+
             <div className="modal-body">
-              {pedidoSeleccionado && (
-                <>
-                  <div className="row mb-3">
-                    <div className="col-md-6">
-                      <label>Proveedor:</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={getClienteName(pedidoSeleccionado.IdCliente)}
-                        disabled
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label>Fecha:</label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={pedidoSeleccionado.Fecha}
-                        disabled
-                      />
-                    </div>
-                  </div>
-                  <div className="table-responsive">
-                    <table className="table table-bordered">
-                      <thead>
-                        <tr>
-                          <th>Producto</th>
-                          <th>Cantidad</th>
-                          <th>Precio</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {pedidoSeleccionado.DetallesPedidosProductos.map(
-                          (detalle, index) => (
-                            <tr key={index}>
-                              <td>{getProductoName(detalle.IdProducto)}</td>
-                              <td>{detalle.Cantidad}</td>
-                              <td>{detalle.Precio}</td>
-                            </tr>
-                          )
+              <div className="modal-body">
+                <form>
+                  <div className="form-row">
+                    <div className="accordion col-md-12" id="accordionExample">
+                      {/* Acordeon detalles del pedido */}
+                      <div className="card">
+                        <div className="card-header" id="headingOne">
+                          <h2 className="mb-0">
+                            <button
+                              className="btn btn-link btn-block text-left"
+                              type="button"
+                              data-toggle="collapse"
+                              data-target="#collapseOne"
+                              aria-expanded="true"
+                              aria-controls="collapseOne"
+                            >
+                              Detalles del Pedido
+                            </button>
+                          </h2>
+                        </div>
+
+                        {pedidoSeleccionado && (
+                          <div
+                            id="collapseOne"
+                            className="collapse show"
+                            aria-labelledby="headingOne"
+                            data-parent="#accordionExample"
+                          >
+                            <div className="card-body">
+                              <div className="row mb-3">
+                                <div className="col-md-6">
+                                  <label>Cliente:</label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={
+                                      pedidoSeleccionado.Cliente.NombreApellido
+                                    }
+                                    disabled
+                                  />
+                                </div>
+                                <div className="col-md-6">
+                                  <label>Fecha:</label>
+                                  <input
+                                    type="date"
+                                    className="form-control"
+                                    value={pedidoSeleccionado.Fecha}
+                                    disabled
+                                  />
+                                </div>
+                              </div>
+                              <div className="table-responsive">
+                                <table className="table table-bordered">
+                                  <thead>
+                                    <tr>
+                                      <th>Producto</th>
+                                      <th>Cantidad</th>
+                                      <th>Precio</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {pedidoSeleccionado.DetallesPedidosProductos.map(
+                                      (detalle, index) => (
+                                        <tr key={index}>
+                                          <td>
+                                            {getProductoName(
+                                              detalle.IdProducto
+                                            )}
+                                          </td>
+                                          <td>{detalle.Cantidad}</td>
+                                          <td>
+                                            {formatCurrency(detalle.Precio)}
+                                          </td>
+                                        </tr>
+                                      )
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                              <div className="form-group">
+                                <label>Total:</label>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  value={formatCurrency(
+                                    pedidoSeleccionado.Total
+                                  )}
+                                  disabled
+                                />
+                              </div>
+                            </div>
+                          </div>
                         )}
-                      </tbody>
-                    </table>
+                      </div>
+
+                      {/* Acordeon comprobante del pedido */}
+                      <div className="card">
+                        <div className="card-header" id="headingTwo">
+                          <h2 className="mb-0">
+                            <button
+                              className="btn btn-link btn-block text-left collapsed"
+                              type="button"
+                              data-toggle="collapse"
+                              data-target="#collapseTwo"
+                              aria-expanded="false"
+                              aria-controls="collapseTwo"
+                            >
+                              Comprobante de pago
+                            </button>
+                          </h2>
+                        </div>
+
+                        {/* {insumoSeleccionado && ( */}
+                        <div
+                          id="collapseTwo"
+                          className="collapse"
+                          aria-labelledby="headingTwo"
+                          data-parent="#accordionExample"
+                        >
+                          <div className="card-body">
+                            <div className="container">
+                              {/* Imagen comprobante */}
+                              <div
+                                className="container py-2 d-flex justify-content-center align-items-center"
+                                
+                                style={{
+                                  overflow: "visible",
+                                  position: "relative",
+                                }}
+                              >
+
+                                {imagenComprobantePrevisualizar  && (
+                                  <img onClick={handleToggleZoom}
+                                    src={imagenComprobantePrevisualizar}
+                                    alt="Vista previa imagen del comprobante"
+                                    style={{
+                                      cursor: "pointer",
+                                      // width: "80%",
+                                      // height: "auto",
+                                      // maxWidth: "200px",
+                                      // display: "",
+                                      // border: "1px solid black",
+                                      // width: "30%", /* Ajusta al 100% del ancho del contenedor */
+                                      maxWidth:
+                                        "720px" /* Limita el ancho máximo */,
+                                      height:
+                                        "300px" /* Mantiene la proporción */,
+
+                                      objectFit: "cover",
+                                      position: "relative",
+                                      // top: '-50px', /* Ajusta el desbordamiento hacia arriba */
+                                      left: "0",
+
+                                      zIndex: 1 /* Asegura que la imagen esté sobre otros elementos */,
+                                      transform: isZoomed
+                                        ? "scale(2.1)"
+                                        : "scale(1)" /* Aplica o quita el zoom */,
+                                      transition:
+                                        "transform 0.3s ease-in-out" /* Suaviza el cambio */,
+                                    }}
+                                    className="zoom-image"
+                                  />
+                                )}
+                              </div>
+
+                              {/* Input file comprobante */}
+                              
+                              {auth.idCliente && pedidoSeleccionado.ImagenComprobante == "0" &&(
+                                
+                              <div className="inputComprobante d-flex justify-content-center align-items-center pt-4">
+                                <input
+                                  accept=".png, .jpg, .jpeg"
+                                  type="file"
+                                  name="file-3"
+                                  id="inputFileReferencia"
+                                  className={`inputfileComprobante inputfileComprobante-2 ${
+                                    errors.fileComprobante ? "is-invalid" : ""
+                                  } `}
+                                  onChange={handleChangeImagenComprobante}
+                                />
+                                <label
+                                  className="d-flex justify-content-center align-items-center"
+                                  htmlFor="inputFileReferencia"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="iborrainputfileComprobante"
+                                    width="20"
+                                    height="17"
+                                    viewBox="0 0 20 17"
+                                  >
+                                    <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
+                                  </svg>
+                                  <span
+                                    className="iborrainputfileComprobante"
+                                    id="spanInputFileComprobante"
+                                  >
+                                    Seleccionar archivo
+                                  </span>
+                                </label>
+                                {/* {renderErrorMessage(errors.fileComprobante)} */}
+                              </div>
+                              )}
+
+                              {/* Boton enviar comprobante */}
+                              {showComprobanteButton && (
+                                <div className="d-flex justify-content-center align-items-center pt-4">
+                                  <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={() => enviarComprobante(pedidoSeleccionado.IdPedido,pedidoSeleccionado.IdImagenComprobante)}
+                                  >
+                                    Subir Comprobante :)
+                                  </button>
+                                </div>
+                              )}
+
+                              {/* Botones de acción con comprobante */}
+                              {auth.idUsuario && (
+                                <div className="d-flex pt-4"
+                                  style={{
+                                    justifyContent:"space-evenly"
+                                  }}
+                                >
+                                  <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={() => aceptarComprobante(pedidoSeleccionado.IdPedido)}
+                                  >
+                                    Aceptar Comprobante :)
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    className="btn btn-danger"
+                                    onClick={() => rechazarComprobante(pedidoSeleccionado.IdPedido,pedidoSeleccionado.IdImagenComprobante)}
+                                  >
+                                    Rechazar Comprobante :(
+                                  </button>
+                                </div>
+                              )}
+
+                            </div>
+                          </div>
+                        </div>
+                        {/* )} */}
+                      </div>
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label>Total:</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={pedidoSeleccionado.Total}
-                      disabled
-                    />
-                  </div>
-                </>
-              )}
+                </form>
+              </div>
             </div>
+
             <div className="modal-footer">
               <button
                 type="button"
@@ -860,7 +1284,7 @@ export const Pedidos = () => {
           </div>
         </div>
       </div>
-      {/* Fin modal ver detalle compra */}
+      {/* Fin modal ver detalle pedido */}
 
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
@@ -890,7 +1314,7 @@ export const Pedidos = () => {
           </div>
           <div className="card-body">
             <div className="table-responsive">
-              <table className="table table-striped table-bordered">
+              <table className="table table-bordered">
                 <thead>
                   <tr>
                     <th>Cliente</th>
@@ -901,62 +1325,67 @@ export const Pedidos = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentPedidos.map((compra) => (
+                  {currentPedidos.map((pedido) => (
                     <tr
-                      key={compra.IdPedido}
+                      key={pedido.IdPedido}
                       className={
-                        compra.IdEstadoPedido === 4 ||
-                        compra.IdEstadoPedido === 2
+                        pedido.IdEstadoPedido === 3 ||
+                        pedido.IdEstadoPedido === 3
                           ? "table-secondary"
                           : ""
                       }
                     >
-                      <td>{getClienteName(compra.IdCliente)}</td>
+                      <td>{getClienteName(pedido.IdCliente)}</td>
 
-                      <td>{formatearFecha(compra.Fecha)}</td>
+                      <td>{formatearFecha(pedido.Fecha)}</td>
 
-                      <td>{compra.Total}</td>
+                      <td>{formatCurrency(pedido.Total)}</td>
 
                       <td>
-                        {convertEstadoPedidoIdToName(compra.IdEstadoPedido)}
+                        {convertEstadoPedidoIdToName(pedido.IdEstadoPedido)}
                       </td>
 
                       <td>
-                        {compra.IdEstadoPedido === 4 ||
-                        compra.IdEstadoPedido === 3 ? (
-                          <button className="btn btn-secondary mr-2" disabled>
-                            <i className="fas fa-times-circle"></i>
-                          </button>
-                        ) : (
-                          <button
-                            data-toggle="modal"
-                            data-target="#modalEstadoPedido"
-                            onClick={() => openModalEstado(compra)}
-                            className="btn btn-danger mr-2"
-                            title="Editar"
-                          >
-                            <i className="fas fa-times-circle"></i>
-                          </button>
-                        )}
+                        <div className="d-flex">
+                          {pedido.IdEstadoPedido === 1 ||
+                          pedido.IdEstadoPedido === 3 ? (
+                            <button
+                              className="btn btn-secondary btn-sm mr-2 rounded-icon"
+                              disabled
+                            >
+                              <i className="fas fa-times-circle"></i>
+                            </button>
+                          ) : (
+                            <button
+                              data-toggle="modal"
+                              data-target="#modalEstadoPedido"
+                              onClick={() => openModalEstado(pedido)}
+                              className="btn btn-danger btn-sm mr-2 rounded-icon"
+                              title="Editar"
+                            >
+                              <i className="fas fa-times-circle"></i>
+                            </button>
+                          )}
 
-                        <button
-                          onClick={() => handleDetalleCompra(compra.IdPedido)}
-                          className={`btn ${
-                            compra.IdEstadoPedido === 4 ||
-                            compra.IdEstadoPedido === 3
-                              ? "btn-secondary mr-2"
-                              : "btn-info"
-                          }`}
-                          disabled={
-                            compra.IdEstadoPedido === 4 ||
-                            compra.IdEstadoPedido === 3
-                          }
-                          data-toggle="modal"
-                          data-target="#modalDetalleCompra"
-                          title="Detalle"
-                        >
-                          <i className="fas fa-info-circle"></i>
-                        </button>
+                          <button
+                            onClick={() => handleDetallePedido(pedido.IdPedido)}
+                            className={`btn btn-sm ${
+                              pedido.IdEstadoPedido === 3 ||
+                              pedido.IdEstadoPedido === 3
+                                ? "btn-secondary mr-2 rounded-icon"
+                                : "btn-info"
+                            }`}
+                            disabled={
+                              pedido.IdEstadoPedido === 3 ||
+                              pedido.IdEstadoPedido === 3
+                            }
+                            data-toggle="modal"
+                            data-target="#modalDetalleCompra"
+                            title="Detalle"
+                          >
+                            <i className="fas fa-info-circle"></i>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

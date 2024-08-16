@@ -848,12 +848,11 @@ export const Proveedores = () => {
                       </td>
                       <td>
                         <div
-                          className="btn-group"
-                          role="group"
-                          aria-label="Acciones"
+                          className="d-flex"
+                          
                         >
                           <button
-                            className="btn btn-warning btn-sm mr-2"
+                            className="btn btn-warning btn-sm mr-1"
                             title="Editar"
                             data-toggle="modal"
                             data-target="#modalProveedor"
@@ -863,7 +862,7 @@ export const Proveedores = () => {
                             <i className="fas fa-sync-alt"></i>
                           </button>
                           <button
-                            className="btn btn-danger btn-sm mr-2"
+                            className="btn btn-danger btn-sm mr"
                             title="Eliminar"
                             onClick={() =>
                               deleteProveedor(

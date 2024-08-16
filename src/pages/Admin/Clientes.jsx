@@ -958,9 +958,8 @@ export const Clientes = () => {
                       </td>
                       <td>
                         <div
-                          className="btn-group"
-                          role="group"
-                          aria-label="Acciones"
+                          className="d-flex"
+                         
                         >
                           <button
                             className="btn btn-warning btn-sm mr-2"

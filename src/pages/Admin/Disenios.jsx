@@ -2029,7 +2029,7 @@ export const Disenios = () => {
                       </td>
                       <td>
                         <div
-                          className="btn-group"
+                          className="d-flex"
                           role="group"
                           aria-label="Acciones"
                         >

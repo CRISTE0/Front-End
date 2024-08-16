@@ -1,0 +1,78 @@
+/* Estilos para la imagen del comprobante */
+
+/* .zoom-image:hover {
+  transform: scale(2.8); 
+} */
+
+/* @media (max-width: 768px) {
+  .zoom-image {
+    height: auto; 
+  }
+}
+
+@media (min-width: 769px) {
+  .zoom-image {
+    height: 300px; 
+  }
+
+  .zoom-image:hover {
+    transform: scale(1.8); 
+  }
+} */
+
+
+
+
+
+
+/* Estilos para el input tipo file */
+.inputfileComprobante {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+.inputfileComprobante + label {
+  width: 80%;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-block;
+  overflow: hidden;
+  padding: 2px ;
+}
+
+.inputfileComprobante + label svg {
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+  fill: currentColor;
+  margin-top: -0.25em;
+  margin-right: 0.25em;
+}
+
+.iborrainputfileComprobante {
+  font-size: 16px;
+  font-weight: normal;
+  font-family: "Lato";
+}
+
+
+/* estilo del input */
+
+.inputfileComprobante-2 + label {
+  color: #050907;
+
+  border: 1.5px solid currentColor;
+}
+
+.inputfileComprobante-2:focus + label,
+.inputfileComprobante-2.has-focus + label,
+.inputfileComprobante-2 + label:hover {
+    color: #35805a;
+}
