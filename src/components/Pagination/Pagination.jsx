@@ -8,36 +8,67 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     }
   };
 
+  const getVisiblePages = () => {
+    const maxVisiblePages = 3; // Número máximo de páginas visibles
+    let pages = [];
+
+    if (totalPages <= maxVisiblePages) {
+      // Si hay 3 o menos páginas, muestra todas
+      pages = [...Array(totalPages).keys()].map((i) => i + 1);
+    } else {
+      if (currentPage === 1) {
+        // Si estamos en la primera página, muestra las primeras 3
+        pages = [1, 2, 3];
+      } else if (currentPage === totalPages) {
+        // Si estamos en la última página, muestra las últimas 3
+        pages = [totalPages - 2, totalPages - 1, totalPages];
+      } else {
+        // Si estamos en cualquier otra página, muestra una ventana de 3 páginas
+        pages = [currentPage - 1, currentPage, currentPage + 1];
+      }
+    }
+
+    return pages;
+  };
+
+  const visiblePages = getVisiblePages();
+
   return (
     <nav>
       <ul className="pagination">
+        {/* Botón para ir a la página anterior */}
         <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
           <button
             className="page-link"
             onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
           >
             Anterior
           </button>
         </li>
-        {[...Array(totalPages).keys()].map((_, index) => (
+        {visiblePages.map((page, index) => (
           <li
             key={index}
-            className={`page-item ${currentPage === index + 1 ? "active" : ""}`}
+            className={`page-item ${currentPage === page ? "active" : ""}`}
           >
             <button
               className="page-link"
-              onClick={() => handlePageChange(index + 1)}
+              onClick={() => handlePageChange(page)}
             >
-              {index + 1}
+              {page}
             </button>
           </li>
         ))}
+        {/* Botón para ir a la página siguiente */}
         <li
-          className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+          className={`page-item ${
+            currentPage === totalPages ? "disabled" : ""
+          }`}
         >
           <button
             className="page-link"
             onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
           >
             Siguiente
           </button>

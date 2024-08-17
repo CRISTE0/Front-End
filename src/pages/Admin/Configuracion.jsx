@@ -24,6 +24,16 @@ export const Configuracion = () => {
     nombreRol: "",
   });
 
+  const permisosFiltrados =
+    Roles.length === 0
+      ? Permisos
+      : Permisos.filter(
+          (permiso) =>
+            permiso.Permiso !== "Pedidos" &&
+            permiso.Permiso !== "Diseños" &&
+            permiso.Permiso !== "Productos"
+        );
+
   const [showErrors, setShowErrors] = useState(false);
 
   // Función para validar el nombre del rol
@@ -369,11 +379,7 @@ export const Configuracion = () => {
                 <div className="form-group">
                   <label>Permisos:</label>
                   <div className="row">
-                    {Permisos.filter(
-                      (permiso) =>
-                        permiso.Permiso !== "Pedidos" &&
-                        permiso.Permiso !== "Diseños"
-                    ).map((permiso) => (
+                    {permisosFiltrados.map((permiso) => (
                       <div
                         key={permiso.IdPermiso}
                         className="col-lg-3 col-md-4 col-sm-6 mb-3"
