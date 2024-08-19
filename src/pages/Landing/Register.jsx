@@ -548,6 +548,26 @@ export const Register = () => {
                       {renderErrorMessage(errors.usuario)}
                     </div>
                     {/* Fin Usuario */}
+                    {/* Dirección */}
+                    <div className="mb-3">
+                      <label htmlFor="telefono" className="form-label">
+                        Teléfono
+                      </label>
+                      <input
+                        type="text"
+                        className={`form-control ${
+                          errors.telefono ? "is-invalid" : ""
+                        }`}
+                        name="telefono"
+                        id="telefono"
+                        placeholder="Ingrese el teléfono"
+                        required
+                        value={Telefono}
+                        onChange={handleChangeTelefono}
+                      />
+                      {renderErrorMessage(errors.telefono)}
+                    </div>
+                    {/* Fin dirección */}
                   </div>
 
                   <div className="col-md-6">
