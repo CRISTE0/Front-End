@@ -20,6 +20,9 @@ export const Compras = () => {
   const [Insumos, setInsumos] = useState([]);
   const [showDetalleField, setShowDetalleField] = useState(false);
   const [compraSeleccionada, setCompraSeleccionada] = useState(null);
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFinal, setFechaFinal] = useState("");
+  const [fechaFinalDisabled, setFechaFinalDisabled] = useState(true);
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [errors, setErrors] = useState({});
@@ -34,11 +37,24 @@ export const Compras = () => {
     getProveedores();
   }, []);
 
+  const handleFechaInicioChange = (e) => {
+    const selectedFechaInicio = e.target.value;
+    setFechaInicio(selectedFechaInicio);
+    // Habilitar fecha final si se ha seleccionado una fecha de inicio
+    setIsFechaFinalDisabled(!selectedFechaInicio);
+    // Limpiar la fecha final si la fecha de inicio se borra
+    if (!selectedFechaInicio) {
+      setFechaFinal("");
+    }
+  };
+
+  const handleFechaFinalChange = (e) => {
+    setFechaFinal(e.target.value);
+  };
+
   const handleGenerateReport = () => {
     const fechaInicio = document.getElementById("fechaInicio").value;
     const fechaFinal = document.getElementById("fechaFinal").value;
-    document.getElementById("fechaInicio").value = "";
-    document.getElementById("fechaFinal").value = "";
 
     if (!fechaInicio || !fechaFinal) {
       show_alerta({
@@ -70,6 +86,11 @@ export const Compras = () => {
     // Generar el PDF con las compras filtradas
     generatePDF(comprasFiltradas);
 
+    // Restablecer el estado del campo de fecha final
+    setFechaFinal(""); // Limpia el valor del campo fechaFinal
+    setFechaInicio(""); // Limpia el valor del campo fechaInicio
+    setFechaFinalDisabled(true); // Establece el estado disabled de fechaFinal a true
+
     // Cerrar el modal después de generar el reporte
     $("#modalGenerarReporte").modal("hide");
   };
@@ -99,7 +120,7 @@ export const Compras = () => {
     };
 
     try {
-      // URL de la imagen (usa ruta absoluta)
+      // URL de la imagen (usa ruta absoluta o ruta relativa si es necesario)
       const imgUrl = "../../../src/assets/img/imagenesHome/logoSoftShirt.png"; // Cambia esto según tu ruta
 
       // Convertir la imagen a base64
@@ -1133,6 +1154,11 @@ export const Compras = () => {
                       type="date"
                       id="fechaInicio"
                       className="form-control"
+                      value={fechaInicio}
+                      onChange={(e) => {
+                        setFechaInicio(e.target.value);
+                        setFechaFinalDisabled(!e.target.value); // Habilita/deshabilita fechaFinal
+                      }}
                     />
                   </div>
                   <div className="form-group">
@@ -1141,6 +1167,9 @@ export const Compras = () => {
                       type="date"
                       id="fechaFinal"
                       className="form-control"
+                      value={fechaFinal}
+                      onChange={(e) => setFechaFinal(e.target.value)}
+                      disabled={fechaFinalDisabled}
                     />
                   </div>
                 </form>
@@ -1232,10 +1261,7 @@ export const Compras = () => {
                       <td>{compra.Fecha}</td>
                       <td>{formatPrice(compra.Total)}</td>
                       <td>
-                        <div
-                          className="d-flex"
-                          
-                        >
+                        <div className="d-flex">
                           {/* Botón de cancelar */}
                           {compra.Estado === "Cancelado" ? (
                             <button
