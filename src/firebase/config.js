@@ -127,6 +127,6 @@ export async function editImageComprobante(idFileComprobante,newFileComprobante)
   await uploadBytes(storageRef,newFileComprobante)
   const url = await getDownloadURL(storageRef)
   console.log(url);
-  return true;
+  return url;
 
 }
