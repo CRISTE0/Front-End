@@ -1,5 +1,5 @@
 import React from "react";
-import "../../assets/css/style.css"; // Ajusta la ruta si es necesario
+// import "../../assets/css/style.css"; // Ajusta la ruta si es necesario
 
 const SearchBar = ({ searchTerm, onSearchTermChange }) => {
   return (

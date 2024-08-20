@@ -13,24 +13,33 @@ import { useAuth } from "../../context/AuthProvider";
 export const Pedidos = () => {
   const url = "http://localhost:3000/api/pedidos";
   const [pedidos, setPedidos] = useState([]);
+  const [pedidosCliente, setPedidosCliente] = useState([]);
   const [IdPedido, setIdPedido] = useState("");
-  const [IdPedidoActualizar, setIdPedidoActualizar] = useState("");
+
 
   const [Clientes, setClientes] = useState([]);
   const [IdCliente, setIdCliente] = useState("");
   const [Fecha, setFecha] = useState("");
   const [Total, setTotal] = useState("");
-  const [idEstadosPedidos, setIdEstadosPedidos] = useState("");
+
+  const [IdPedidoActualizar, setIdPedidoActualizar] = useState("");
+  const [idEstadoPedidoActualizar, setIdEstdosPedidoActualizar] = useState("");
+
+
+  let idPedidoActualizarEstado;
+  let idEstadoPedidoActualizarEstado;
 
   const [imagenComprobante, setImagenComprobante] = useState("");
   const [imagenComprobantePrevisualizar, setImagenComprobantePrevisualizar] =
   useState("");
 
   const {auth} = useAuth();
-  
+
   const [showComprobanteButton, setShowComprobanteButton] = useState(null);
 
   const [estadosPedidos, setEstadosPedidos] = useState([]);
+  const [nuevosEstadosPedidos, setNuevosEstadosPedidos] = useState([]);
+
   const [Detalles, setDetalles] = useState([]);
   const [Productos, setProductos] = useState([]);
   const [showDetalleField, setShowDetalleField] = useState(false);
@@ -43,18 +52,42 @@ export const Pedidos = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
+  let pedidosTotales;
+
   useEffect(() => {
     getPedidos();
     getEstadosPedidos();
     getProductos();
     getClientes();
+    // getPedidosCliente();
   }, []);
 
   const getPedidos = async () => {
     try {
       const respuesta = await axios.get(url);
       setPedidos(respuesta.data);
+
+      pedidosTotales=respuesta.data;
+      getPedidosCliente();
+
     } catch (error) {
+      show_alerta("Error al obtener los pedidos", "error");
+    }
+  };
+
+  const getPedidosCliente = async  () => {
+    try {
+
+
+      const pedidosFiltrados = pedidosTotales.filter(pedido => pedido.Cliente.IdCliente == auth.idCliente);
+
+      console.log(pedidosTotales);
+      console.log(pedidosFiltrados);
+
+      setPedidosCliente(pedidosFiltrados);
+    } catch (error) {
+      console.log(error);
+
       show_alerta("Error al obtener los pedidos", "error");
     }
   };
@@ -139,7 +172,7 @@ export const Pedidos = () => {
       );
 
       // Obtener los detalles del pedido de la respuesta
-      const pedido = respuesta.data;
+      const pedido = await respuesta.data;
 
       // Mostrar los detalles del pedido en la consola para depuración
       console.log("Detalle de Pedido:", pedido);
@@ -149,6 +182,18 @@ export const Pedidos = () => {
       // setImagenComprobante(pedido.ImagenComprobante);
       setImagenComprobantePrevisualizar(pedido.ImagenComprobante);
 
+      setShowComprobanteButton(null);
+      
+      if (auth.idCliente) {
+        
+        setTimeout(()=>{  
+          document.getElementById("spanInputFileComprobante").innerHTML =
+          "Seleccionar archivo";
+        },10);
+      }
+      
+
+
       // Mostrar el modal con los detalles de la compra
       $("#modalDetalleCompra").modal("show");
     } catch (error) {
@@ -157,6 +202,9 @@ export const Pedidos = () => {
         message: "Error al obtener los detalles de la compra",
         type: "error",
       });
+
+      console.log(error);
+      
     }
   };
 
@@ -167,25 +215,6 @@ export const Pedidos = () => {
     }).format(value);
   }
 
-  // const formatCurrency = (price) => {
-  //   // Convertir el precio a número si es una cadena
-  //   const formattedPrice =
-  //     typeof price === "string" ? parseFloat(price) : price;
-
-  //   // Verificar si el precio es un número válido
-  //   if (!isNaN(formattedPrice)) {
-  //     // Formatear el número con separadores de miles y coma decimal
-  //     const formattedNumber = formattedPrice.toLocaleString("es-ES", {
-  //       minimumFractionDigits: 2,
-  //       maximumFractionDigits: 2,
-  //     });
-
-  //     // Retornar el número con el símbolo de peso
-  //     return `$${formattedNumber}`;
-  //   }
-
-  //   return `$0.00`; // Valor predeterminado si no es un número válido
-  // };
 
   const openModal = () => {
     setIdPedido(""); // Resetear el IdCompra al abrir el modal para indicar una nueva compra
@@ -290,7 +319,7 @@ export const Pedidos = () => {
 
   const handleChangeIdEstadoPedido = (e) => {
     const value = e.target.value;
-    setIdEstadosPedidos(value);
+    setIdEstdosPedidoActualizar(value);
   };
 
   const getFilteredProductos = (index) => {
@@ -385,13 +414,13 @@ export const Pedidos = () => {
       console.log(pedidoIdImagenComprobante);
 
       // return;
-      
+
 
       if (pedidoIdImagenComprobante != "0") {
         console.log("editarComprobante");
-        
+
         const url = await editImageComprobante(pedidoIdImagenComprobante,imagenComprobante);
-  
+
         await axios.put(`http://localhost:3000/api/pedidos/comprobante/${idPed}`, {
           idImagenComprobante: pedidoIdImagenComprobante,
           imagenComprobante: url
@@ -401,14 +430,15 @@ export const Pedidos = () => {
         console.log("crearComprobante");
 
         const [idImagenComprobante,url] = await subirImageComprobante(imagenComprobante);
-  
+
         await axios.put(`http://localhost:3000/api/pedidos/comprobante/${idPed}`, {
           idImagenComprobante: idImagenComprobante,
           imagenComprobante: url
         });
-        
+
       }
 
+      $(".close").click();
 
       show_alerta({
         message: "El comprobante fue cargado correctamente",
@@ -458,7 +488,8 @@ export const Pedidos = () => {
       Detalles: Detalles,
       idImagenComprobante: "0",
       imagenComprobante:"0",
-      IdEstadoPedido: 2
+      intentos:3,
+      IdEstadoPedido: 1
     });
   };
 
@@ -481,7 +512,8 @@ export const Pedidos = () => {
         type: "success",
       });
 
-      document.getElementById("btnCerrar").click();
+      $(".close").click();
+
       getPedidos();
       getProductos();
     } catch (error) {
@@ -505,21 +537,51 @@ export const Pedidos = () => {
   };
 
   const cambiarEstadoPedido = async () => {
-    let idEstPed = idEstadosPedidos;
-    let idPed = IdPedidoActualizar ;
+    let idEstPed;
+    let idPed;
+    let titleOperation;
+    let nombreEstado;
+    let confirmButtonTextEstado;
+
+    // Cambiar el estado desde el modal
+    if (auth.idUsuario) {
+      idPed = IdPedidoActualizar ;
+      idEstPed = idEstadoPedidoActualizar;
+      nombreEstado = estadosPedidos.find(estado => estado.IdEstadoPedido == idEstPed)?.NombreEstado || "Estado no encontrado";
+      titleOperation = `¿Seguro de cambiar el estado del pedido a ${nombreEstado}?`
+      confirmButtonTextEstado = "Sí, cambiar"
+
+    }else{
+      idPed = idPedidoActualizarEstado ;
+      idEstPed = 4;
+      titleOperation = "¿Seguro de cancelar el pedido?"
+      confirmButtonTextEstado = "Sí, cancelar"
+
+    }
+
+
+    // console.log(nombreEstado);
+    // console.log(idEstPed);
+    // console.log(idPed);
+
+    // return;
+
+
     const MySwal = withReactContent(Swal);
     MySwal.fire({
-      title: "¿Seguro de cambiar el estado al pedido?",
+      title: titleOperation,
       icon: "question",
       text: "No se podrá dar marcha atrás",
       showCancelButton: true,
-      confirmButtonText: "Sí, cancelar",
+      confirmButtonText: confirmButtonTextEstado,
       cancelButtonText: "No",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           console.log(idPed);
           console.log(idEstPed);
+
+          // return;
           // Cambiar el estado del pedido a "Cancelado"
           await axios.put(`http://localhost:3000/api/pedidos/${idPed}`, {
             Estado: idEstPed,
@@ -548,8 +610,38 @@ export const Pedidos = () => {
     });
   };
 
+  const anularPedido = async (idPedido) => {
+
+    try {
+      console.log(idPedido);
+
+      // return;
+      // Cambiar el estado del pedido a "Cancelado"
+      await axios.put(`http://localhost:3000/api/pedidos/${idPedido}`, {
+        Estado: 4,
+      });
+
+      // Actualizar la lista de pedidos
+      // getPedidos();
+      // $(".close").click();
+
+      // show_alerta({
+      //   message: "El pedido fue cancelado correctamente",
+      //   type: "success",
+      // });
+    } catch (error) {
+      show_alerta({
+        message: "Hubo un error al cancelar el pedido",
+        type: "error",
+      });
+      console.log(error);
+      
+    }
+  };
+
+
   const aceptarComprobante = async (idPedido) => {
-    // let idEstPed = idEstadosPedidos;
+    // let idEstPed = idEstadoPedidoActualizar;
     // let idPed = IdPedidoActualizar ;
     const MySwal = withReactContent(Swal);
     MySwal.fire({
@@ -570,7 +662,7 @@ export const Pedidos = () => {
           });
 
           let message = respuesta.response.message;
-           
+
 
           // Actualizar la lista de pedidos
           getPedidos();
@@ -585,7 +677,7 @@ export const Pedidos = () => {
             message: message,
             type: "success",
           });
-          
+
 
         } catch (error) {
           show_alerta({
@@ -602,50 +694,88 @@ export const Pedidos = () => {
     });
   };
 
-  const rechazarComprobante = async (idPedido) => {
-    // let idEstPed = idEstadosPedidos;
+  const rechazarComprobante = async (idPedido,intentosActuales,nombreClientePedido,correoClientePedido) => {
+    // let idEstPed = idEstadoPedidoActualizar;
     // let idPed = IdPedidoActualizar ;
+
+    let titleText;
+    let confirmButtonTextAnular;
+
+    if (intentosActuales == 1) {
+      
+      titleText = "¿Seguro de rechazar el comprobante y anular el pedido?"; 
+      confirmButtonTextAnular = "Sí, rechazar y anular";
+    }else{
+      titleText = "¿Seguro de rechazar el comprobante del pedido?";
+      confirmButtonTextAnular = "Sí, rechazar";
+    }
+
+
     const MySwal = withReactContent(Swal);
     MySwal.fire({
-      title: "¿Seguro de rechazar el comprobante del pedido?",
+      title: titleText,
       icon: "question",
       text: "No se podrá dar marcha atrás",
       showCancelButton: true,
-      confirmButtonText: "Sí, rechazar",
+      confirmButtonText: confirmButtonTextAnular,
       cancelButtonText: "No",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           console.log(idPedido);
-          // console.log(idEstadoPedido);
+          console.log(intentosActuales);
+          console.log(nombreClientePedido);
+          console.log(correoClientePedido);
 
-          const respuesta = await axios.put(`http://localhost:3000/api/pedidos/intentos/${idPedido}`, {
-            Estado: 2,
+
+          const respuesta = await axios.put(`http://localhost:3000/api/pedidos/comprobante/intentos/${idPedido}`, {
+            intentos: intentosActuales,
+            nombreCliente: nombreClientePedido,
+            correoCliente: correoClientePedido
           });
 
-          let message = respuesta.response.message;
-           
+          let message = respuesta.data.message;
 
-          // Actualizar la lista de pedidos
-          getPedidos();
-          $(".close").click();
+          console.log(respuesta);
 
-          // show_alerta({
-          //   message: "La compra fue modificada correctamente",
-          //   type: "success",
-          // });
+          if (intentosActuales == 1) {
+            await anularPedido(idPedido);
 
-          show_alerta({
-            message: message,
-            type: "success",
-          });
-          
+              
+            // Actualizar la lista de pedidos
+            getPedidos();
+            
+            $(".close").click();
+
+            show_alerta({
+              message: "Comprobante rechazado y pedido anulado",
+              type: "success",
+            });
+          }else{
+            // Actualizar la lista de pedidos
+            getPedidos();
+            
+            $(".close").click();
+  
+            show_alerta({
+              message: message,
+              type: "success",
+            });
+
+        
+          }
+
+
+
 
         } catch (error) {
           show_alerta({
             message: "Hubo un error al cancelar la compra",
             type: "error",
           });
+
+          console.log(error);
+
         }
       } else {
         show_alerta({
@@ -662,7 +792,21 @@ export const Pedidos = () => {
     setTitle("Actualizar Estado");
     setIdPedidoActualizar(pedido.IdPedido);
     // setIdPedido(pedido.IdPedido);
-    setIdEstadosPedidos(pedido.IdEstadoPedido);
+    setIdEstdosPedidoActualizar(pedido.IdEstadoPedido);
+
+    if (pedido.IdEstadoPedido == 2) {
+      const idsBuscados = [2, 3];
+
+      const nuevosEstadosPedido = estadosPedidos.filter(estado =>idsBuscados.includes(estado.IdEstadoPedido));
+
+      setNuevosEstadosPedidos(nuevosEstadosPedido);
+
+    }else if (nuevosEstadosPedidos.length < 3){
+
+      setNuevosEstadosPedidos(estadosPedidos);
+
+    }
+
   };
 
   const formatearFecha = (fechaISO) => {
@@ -675,24 +819,56 @@ export const Pedidos = () => {
     setCurrentPage(1); // Reset current page when changing the search term
   };
 
-  // Filter purchases based on the search term
-  const filteredCompras = pedidos.filter((compra) =>
-    Object.values(compra).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  let totalPages;
+  let currentPedidos
 
-  // Apply pagination to the filtered purchases
-  const totalPages = Math.ceil(filteredCompras.length / itemsPerPage);
-  const currentPedidos = filteredCompras.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Sirve pa que no se dañe la cantidad de paginas una de admin y otra de cliente
+  if (auth.idUsuario) {
+    // Filter purchases based on the search term
+    const filteredCompras = pedidos.filter((compra) =>
+      Object.values(compra).some((value) =>
+        value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
+    // Apply pagination to the filtered purchases
+    totalPages = Math.ceil(filteredCompras.length / itemsPerPage);
+    currentPedidos = filteredCompras.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+
+  }else{
+
+    // Filter purchases based on the search term
+    const filteredPedidosCliente = pedidosCliente.filter((compra) =>
+      Object.values(compra).some((value) =>
+        value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
+    // Apply pagination to the filtered purchases
+    totalPages = Math.ceil(filteredPedidosCliente.length / itemsPerPage);
+    currentPedidos = filteredPedidosCliente.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }
 
   const [isZoomed, setIsZoomed] = useState(false);
 
   const handleToggleZoom = () => {
     setIsZoomed(!isZoomed);
+  };
+
+  const handleDownload = async (pedido) => {
+    const response = await fetch(pedido.ImagenComprobante,{ mode: 'no-cors' });
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'imagen-descargada.jpg';
+    link.click();
   };
 
   return (
@@ -704,7 +880,7 @@ export const Pedidos = () => {
         tabIndex="-1"
         role="dialog"
         aria-labelledby="ModalEditarEstadoLabel"
-        aria-hidden="true"
+        // aria-hidden="true"
         data-backdrop="static"
         data-keyboard="false"
       >
@@ -734,13 +910,13 @@ export const Pedidos = () => {
                   <select
                     className="form-control"
                     name="IdCliente"
-                    value={idEstadosPedidos}
+                    value={idEstadoPedidoActualizar}
                     onChange={handleChangeIdEstadoPedido}
                   >
                     <option disabled value="">
                       Selecciona un estado
                     </option>
-                    {estadosPedidos.map((estado) => (
+                    {nuevosEstadosPedidos.map((estado) => (
                       <option
                         key={estado.IdEstadoPedido}
                         value={estado.IdEstadoPedido}
@@ -906,11 +1082,11 @@ export const Pedidos = () => {
 
                         <td>
                           <input
-                            type="number"
+                            type="text"
                             className="form-control"
                             name="precio"
                             placeholder="Precio"
-                            value={detalle.precio}
+                            value={formatCurrency(detalle.precio)}
                             onChange={(e) => handleDetailChange(index, e)}
                             disabled
                           />
@@ -959,11 +1135,11 @@ export const Pedidos = () => {
               <div className="form-group">
                 <label>Total:</label>
                 <input
-                  type="number"
+                  type="text"
                   className="form-control"
                   id="Total"
                   name="Total"
-                  value={totalCompra}
+                  value={formatCurrency(totalCompra)}
                   disabled
                 />
               </div>
@@ -1020,7 +1196,7 @@ export const Pedidos = () => {
 
             <div className="modal-body">
               <div className="modal-body">
-                <form>
+                <div>
                   <div className="form-row">
                     <div className="accordion col-md-12" id="accordionExample">
                       {/* Acordeon detalles del pedido */}
@@ -1143,14 +1319,14 @@ export const Pedidos = () => {
                               {/* Imagen comprobante */}
                               <div
                                 className="container py-2 d-flex justify-content-center align-items-center"
-                                
+
                                 style={{
                                   overflow: "visible",
                                   position: "relative",
                                 }}
                               >
-
-                                {imagenComprobantePrevisualizar  && (
+                                {/* si existe renderizar la imagen del comprobante, si no mostrar texto  */}
+                                {imagenComprobantePrevisualizar != "0" ? (
                                   <img onClick={handleToggleZoom}
                                     src={imagenComprobantePrevisualizar}
                                     alt="Vista previa imagen del comprobante"
@@ -1181,13 +1357,19 @@ export const Pedidos = () => {
                                     }}
                                     className="zoom-image"
                                   />
+                                ): (
+
+
+                                <p className="font-weight-bold text-dark">Aún no hay un comprobante</p>
                                 )}
+
+
                               </div>
 
                               {/* Input file comprobante */}
-                              
-                              {auth.idCliente && pedidoSeleccionado.ImagenComprobante == "0" &&(
-                                
+                              {/* Renderizar solo si es un cliente y no hay comprobante */}
+                              {auth.idCliente && pedidoSeleccionado?.ImagenComprobante == "0" &&(
+
                               <div className="inputComprobante d-flex justify-content-center align-items-center pt-4">
                                 <input
                                   accept=".png, .jpg, .jpeg"
@@ -1236,8 +1418,29 @@ export const Pedidos = () => {
                                 </div>
                               )}
 
-                              {/* Botones de acción con comprobante */}
-                              {auth.idUsuario && (
+                                  {auth.idUsuario && pedidoSeleccionado?.ImagenComprobante != "0"  && (
+                                    <div className="d-flex justify-content-center pt-4">
+
+                                      {/* <a href={pedidoSeleccionado?.ImagenComprobante} download={"Comprobante.png"} target="_blank" style={{ textDecoration: 'none' }}>
+
+                                      <button className="btn btn-info"> Ver comprobante</button>
+
+                                      </a> */}
+                                    
+
+                                    <button className="btn btn-info" onClick={()=> handleDownload(pedidoSeleccionado)}> Ver comprobante</button>
+
+
+                                    </div>
+
+                                    
+                                  )}
+
+
+
+
+                              {/*Renderizar botones de acción con comprobante, solo admin puede acceder a ellos */}
+                              {auth.idUsuario && pedidoSeleccionado?.ImagenComprobante != "0" && pedidoSeleccionado?.IdEstadoPedido == 1 && (
                                 <div className="d-flex pt-4"
                                   style={{
                                     justifyContent:"space-evenly"
@@ -1254,7 +1457,20 @@ export const Pedidos = () => {
                                   <button
                                     type="button"
                                     className="btn btn-danger"
-                                    onClick={() => rechazarComprobante(pedidoSeleccionado.IdPedido,pedidoSeleccionado.IdImagenComprobante)}
+                                    // hacer una especie de funcion en el onclck para determinar si hay o no intentos
+                                    onClick={() =>{
+
+                                      if (pedidoSeleccionado.Intentos > 1) {
+
+                                        rechazarComprobante(pedidoSeleccionado.IdPedido,pedidoSeleccionado.Intentos,pedidoSeleccionado.Cliente.NombreApellido,pedidoSeleccionado.Cliente.Correo);
+                                      }else{
+
+
+                                        rechazarComprobante(pedidoSeleccionado.IdPedido,pedidoSeleccionado.Intentos,pedidoSeleccionado.Cliente.NombreApellido,pedidoSeleccionado.Cliente.Correo);
+
+                                      }
+
+                                    }}
                                   >
                                     Rechazar Comprobante :(
                                   </button>
@@ -1268,7 +1484,7 @@ export const Pedidos = () => {
                       </div>
                     </div>
                   </div>
-                </form>
+                </div>
               </div>
             </div>
 
@@ -1314,7 +1530,10 @@ export const Pedidos = () => {
           </div>
           <div className="card-body">
             <div className="table-responsive">
-              <table className="table table-bordered">
+
+              {/* Si un usuario esta logueado renderizara la tabla de admin, si no renderizara la tabla del cliente  */}
+              {auth.idUsuario ?(
+                <table className="table table-bordered">
                 <thead>
                   <tr>
                     <th>Cliente</th>
@@ -1329,7 +1548,7 @@ export const Pedidos = () => {
                     <tr
                       key={pedido.IdPedido}
                       className={
-                        pedido.IdEstadoPedido === 3 ||
+                        pedido.IdEstadoPedido === 4 ||
                         pedido.IdEstadoPedido === 3
                           ? "table-secondary"
                           : ""
@@ -1347,7 +1566,7 @@ export const Pedidos = () => {
 
                       <td>
                         <div className="d-flex">
-                          {pedido.IdEstadoPedido === 1 ||
+                          {pedido.IdEstadoPedido === 4 ||
                           pedido.IdEstadoPedido === 3 ? (
                             <button
                               className="btn btn-secondary btn-sm mr-2 rounded-icon"
@@ -1370,14 +1589,14 @@ export const Pedidos = () => {
                           <button
                             onClick={() => handleDetallePedido(pedido.IdPedido)}
                             className={`btn btn-sm ${
-                              pedido.IdEstadoPedido === 3 ||
-                              pedido.IdEstadoPedido === 3
+                              pedido.IdEstadoPedido === 9 ||
+                              pedido.IdEstadoPedido === 9
                                 ? "btn-secondary mr-2 rounded-icon"
                                 : "btn-info"
                             }`}
                             disabled={
-                              pedido.IdEstadoPedido === 3 ||
-                              pedido.IdEstadoPedido === 3
+                              pedido.IdEstadoPedido === 9 ||
+                              pedido.IdEstadoPedido === 9
                             }
                             data-toggle="modal"
                             data-target="#modalDetalleCompra"
@@ -1391,6 +1610,96 @@ export const Pedidos = () => {
                   ))}
                 </tbody>
               </table>
+
+              ):
+
+              (
+              <table className="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Fecha</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentPedidos.map((pedido) => (
+                    <tr
+                      key={pedido.IdPedido}
+                      className={
+                        pedido.IdEstadoPedido === 4 ||
+                        pedido.IdEstadoPedido === 3
+                          ? "table-secondary"
+                          : ""
+                      }
+                    >
+                      <td>{getClienteName(pedido.IdCliente)}</td>
+
+                      <td>{formatearFecha(pedido.Fecha)}</td>
+
+                      <td>{formatCurrency(pedido.Total)}</td>
+
+                      <td>
+                        {convertEstadoPedidoIdToName(pedido.IdEstadoPedido)}
+                      </td>
+
+                      <td>
+                        <div className="d-flex">
+                          {pedido.IdEstadoPedido === 4 ||
+                          pedido.IdEstadoPedido === 2 ? (
+                            <button
+                              className="btn btn-secondary btn-sm mr-2 rounded-icon"
+                              disabled
+                            >
+                              <i className="fas fa-times-circle"></i>
+                            </button>
+                          ) : (
+                            <button
+
+                              onClick={() => {
+                                idPedidoActualizarEstado = pedido.IdPedido;
+                                // setIdEstdosPedidoActualizar(pedido.IdEstadoPedido);
+
+                                cambiarEstadoPedido();
+                              }}
+                              className="btn btn-danger btn-sm mr-2 rounded-icon"
+                              title="Cancelar pedido"
+                            >
+                              <i className="fas fa-times-circle"></i>
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => handleDetallePedido(pedido.IdPedido)}
+                            className={`btn btn-sm ${
+                              pedido.IdEstadoPedido === 9 ||
+                              pedido.IdEstadoPedido === 9
+                                ? "btn-secondary mr-2 rounded-icon"
+                                : "btn-info"
+                            }`}
+                            disabled={
+                              pedido.IdEstadoPedido === 9 ||
+                              pedido.IdEstadoPedido === 9
+                            }
+                            data-toggle="modal"
+                            data-target="#modalDetalleCompra"
+                            title="Detalle"
+                          >
+                            <i className="fas fa-info-circle"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              )}
+
+
+
             </div>
             <Pagination
               currentPage={currentPage}
