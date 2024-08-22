@@ -95,22 +95,6 @@ export const Usuarios = () => {
     modal.show();
   };
 
-  const openModalCambiarContrasenia = (usuario) => {
-    setIdUsuario(usuario.IdUsuario);
-    setContrasenia(usuario.Contrasenia || ""); // Asegúrate de manejar el caso donde no hay contraseña inicial
-    setTitle("Cambiar Contraseña");
-    setOperation(3); // Indica que la operación es cambiar contraseña
-    setErrors({
-      contrasenia: "",
-    });
-
-    // Mostrar el modal de cambiar contraseña
-    const modal = new bootstrap.Modal(
-      document.getElementById("modalCambiarContrasenia")
-    );
-    modal.show();
-  };
-
   const guardarUsuario = async () => {
     setErrors({
       usuario: "",
@@ -552,80 +536,7 @@ export const Usuarios = () => {
           </div>
         </div>
       </div>
-
       {/* Fin modal crear/editar usuario */}
-
-      {/* Modal para cambiar contra */}
-      {/* <div
-        className="modal fade"
-        id="modalCambiarContrasenia"
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="modalUsuariosLabel"
-        aria-hidden="true"
-        data-backdrop="static"
-        data-keyboard="false"
-      >
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="modalCambiarContrasenia">
-                {title}
-              </h5>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="input-group mb-3">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="contrasenia"
-                  className={`form-control ${
-                    errors.contrasenia ? "is-invalid" : ""
-                  }`}
-                  placeholder="Contraseña"
-                  value={Contrasenia}
-                  onChange={handleChangeContrasenia}
-                />
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary ml-2"
-                  onClick={toggleShowPassword}
-                >
-                  {showPassword ? (
-                    <i className="fas fa-eye-slash"></i>
-                  ) : (
-                    <i className="fas fa-eye"></i>
-                  )}
-                </button>
-                {renderErrorMessage(errors.contrasenia)}
-              </div>
-            </div>
-            <div className="modal-footer">
-              <div className="text-right">
-                <button
-                  type="button"
-                  id="btnCerrar"
-                  className="btn btn-secondary mr-2"
-                  data-dismiss="modal"
-                >
-                  Cancelar
-                </button>
-                <button className="btn btn-primary" onClick={guardarUsuario}>
-                  Guardar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> */}
-      {/* Fin modal cambiar la contra*/}
 
       {/* Inicio de usuarios */}
       <div className="container-fluid">
@@ -649,7 +560,7 @@ export const Usuarios = () => {
                 data-toggle="modal"
                 data-target="#modalUsuarios"
                 style={{
-                  width: "150px"
+                  width: "150px",
                 }}
               >
                 <i className="fas fa-pencil-alt"></i> Crear Usuario
@@ -695,9 +606,7 @@ export const Usuarios = () => {
                         </label>
                       </td>
                       <td>
-                        <div
-                         className="d-flex"
-                        >
+                        <div className="d-flex">
                           <button
                             className="btn btn-warning btn-sm mr-2"
                             title="Editar"
@@ -716,18 +625,18 @@ export const Usuarios = () => {
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
-                        <button
-                          className="btn btn-info btn-sm mr-2"
-                          title="Detalle"
-                          onClick={() =>
-                            handleDetalleUsuario(usuario.IdUsuario)
-                          }
-                          disabled={usuario.Estado === "Inactivo"}
-                          data-toggle="modal"
-                          data-target="#modalDetalleUsuario"
-                        >
-                          <i className="fas fa-solid fa-info-circle"></i>
-                        </button>
+                          <button
+                            className="btn btn-info btn-sm mr-2"
+                            title="Detalle"
+                            onClick={() =>
+                              handleDetalleUsuario(usuario.IdUsuario)
+                            }
+                            disabled={usuario.Estado === "Inactivo"}
+                            data-toggle="modal"
+                            data-target="#modalDetalleUsuario"
+                          >
+                            <i className="fas fa-solid fa-info-circle"></i>
+                          </button>
                         </div>
                         {/* <button
                           type="button"

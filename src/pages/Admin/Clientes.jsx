@@ -8,6 +8,7 @@ import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const Clientes = () => {
   const url = "http://localhost:3000/api/clientes";
+  const pedidoUrl = "http://localhost:3000/api/pedidos";
   const [Clientes, setClientes] = useState([]);
   const [IdCliente, setIdCliente] = useState("");
   const [TipoDocumento, setTipoDocumento] = useState("");
@@ -43,6 +44,21 @@ export const Clientes = () => {
     const respuesta = await axios.get(url);
     setClientes(respuesta.data);
     console.log(respuesta.data);
+  };
+
+  const getComprasByClente = async (IdCliente) => {
+    try {
+      const response = await axios.get(pedidoUrl);
+      // Verifica si el cliente está asociado a algun producto
+      const pedidos = response.data.filter(
+        (pedido) => pedido.IdCliente === IdCliente
+      );
+      return pedidos.length > 0; // Devuelve true si hay al menos un producto asociada
+    } catch (error) {
+      console.error("Error fetching pedidos:", error);
+      show_alerta({ message: "Error al verificar el producto", type: "error" });
+      return false; // Considera que no tiene productos asociadas en caso de error
+    }
   };
 
   const openModal = (op, cliente = null) => {
@@ -499,7 +515,21 @@ export const Clientes = () => {
     }
   };
 
-  const deleteCliente = (IdCliente, NombreCliente) => {
+  const deleteCliente = async (IdCliente, NombreCliente) => {
+
+    // Verificar si el cliente está asociado a algun producto
+    const asociado = await getComprasByClente(IdCliente);
+
+    if (asociado) {
+      // Mostrar mensaje si está asociado y no permitir la eliminación
+      show_alerta({
+        message:
+          "El cliente está asociado a un producto y no puede ser eliminado.",
+        type: "info",
+      });
+      return; // Salir de la función para evitar la eliminación
+    }
+
     const MySwal = withReactContent(Swal);
     MySwal.fire({
       title: `¿Seguro de eliminar al cliente ${NombreCliente}?`,
@@ -902,7 +932,7 @@ export const Clientes = () => {
               data-target="#modalCliente"
               onClick={() => openModal(1, "", "", "", "", "", "")}
               style={{
-                width: "150px"
+                width: "150px",
               }}
             >
               <i className="fas fa-pencil-alt"></i> Crear Cliente
@@ -957,10 +987,7 @@ export const Clientes = () => {
                         </label>
                       </td>
                       <td>
-                        <div
-                          className="d-flex"
-                         
-                        >
+                        <div className="d-flex">
                           <button
                             className="btn btn-warning btn-sm mr-2"
                             title="Editar"
