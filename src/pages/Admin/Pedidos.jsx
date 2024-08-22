@@ -65,7 +65,10 @@ export const Pedidos = () => {
   const getPedidos = async () => {
     try {
       const respuesta = await axios.get(url);
-      setPedidos(respuesta.data);
+
+      const pedidosFiltradosAdmin = respuesta.data.filter(pedido => pedido.IdEstadoPedido != 3)
+
+      setPedidos(pedidosFiltradosAdmin);
 
       pedidosTotales=respuesta.data;
       getPedidosCliente();
@@ -184,7 +187,7 @@ export const Pedidos = () => {
 
       setShowComprobanteButton(null);
       
-      if (auth.idCliente) {
+      if (auth.idCliente && !pedido.ImagenComprobante ) {
         
         setTimeout(()=>{  
           document.getElementById("spanInputFileComprobante").innerHTML =
@@ -862,12 +865,12 @@ export const Pedidos = () => {
   };
 
   const handleDownload = async (pedido) => {
-    const response = await fetch(pedido.ImagenComprobante,{ mode: 'no-cors' });
+    const response = await fetch(pedido.ImagenComprobante);
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'imagen-descargada.jpg';
+    link.download = `Comprobante ${pedido.Cliente.NombreApellido}.jpg`;
     link.click();
   };
 
@@ -1421,19 +1424,10 @@ export const Pedidos = () => {
                                   {auth.idUsuario && pedidoSeleccionado?.ImagenComprobante != "0"  && (
                                     <div className="d-flex justify-content-center pt-4">
 
-                                      {/* <a href={pedidoSeleccionado?.ImagenComprobante} download={"Comprobante.png"} target="_blank" style={{ textDecoration: 'none' }}>
 
-                                      <button className="btn btn-info"> Ver comprobante</button>
+                                    <button className="btn btn-info" onClick={()=> handleDownload(pedidoSeleccionado)}> Descargar comprobante</button>
 
-                                      </a> */}
-                                    
-
-                                    <button className="btn btn-info" onClick={()=> handleDownload(pedidoSeleccionado)}> Ver comprobante</button>
-
-
-                                    </div>
-
-                                    
+                                    </div>                                    
                                   )}
 
 
@@ -1515,7 +1509,7 @@ export const Pedidos = () => {
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
-            <button
+            {/* <button
               type="button"
               className="btn btn-dark"
               data-toggle="modal"
@@ -1526,7 +1520,7 @@ export const Pedidos = () => {
               }}
             >
               <i className="fas fa-pencil-alt"></i> Añadir Pedido
-            </button>
+            </button> */}
           </div>
           <div className="card-body">
             <div className="table-responsive">
@@ -1613,6 +1607,7 @@ export const Pedidos = () => {
 
               ):
 
+              // tabla de cliente
               (
               <table className="table table-bordered">
                 <thead>
@@ -1647,8 +1642,7 @@ export const Pedidos = () => {
 
                       <td>
                         <div className="d-flex">
-                          {pedido.IdEstadoPedido === 4 ||
-                          pedido.IdEstadoPedido === 2 ? (
+                          {pedido.IdEstadoPedido === 4 ||pedido.IdEstadoPedido === 2 || pedido.IdEstadoPedido == 3 ? (
                             <button
                               className="btn btn-secondary btn-sm mr-2 rounded-icon"
                               disabled

@@ -30,29 +30,26 @@ function generateIdImageReference  () {
 }
 
 
-export async function subirImageDesign(fileD)  {
-  if (!fileD) {
-    return ("No aplica");
-  }
-  const storageRef= ref(storage,`Disenios/${v4()}`)
-  await uploadBytes(storageRef,fileD)
-  const url = await getDownloadURL(storageRef)
-  console.log(url);
-  return url;
-}
+// export async function subirImageDesign(fileD)  {
+//   if (!fileD) {
+//     return ("No aplica");
+//   }
+//   const storageRef= ref(storage,`Disenios/${v4()}`)
+//   await uploadBytes(storageRef,fileD)
+//   const url = await getDownloadURL(storageRef)
+//   console.log(url);
+//   return url;
+// }
 
 
 // sirve para el admin(aunque se debe cambiar la otra func)
-export async function subirImageDesignAdmin(fileD)  {
-  if (!fileD) {
-    return ("No aplica");
-  }
+export async function subirImageDesign(fileDesign)  {
 
-  const idImagenDisenio = generateIdImageDesign();
+  const idImagenDisenio = v4();
 
   const storageRef= ref(storage,`Disenios/${idImagenDisenio}`)
-  const blob = await fetch(fileD).then((res) => res.blob());
-  await uploadBytes(storageRef,blob)
+  // const blob = await fetch(fileD).then((res) => res.blob());
+  await uploadBytes(storageRef,fileDesign)
   const url = await getDownloadURL(storageRef)
 
   console.log(`id del diseño: ${idImagenDisenio}`);
@@ -61,43 +58,45 @@ export async function subirImageDesignAdmin(fileD)  {
   return [idImagenDisenio,url] ;
 }
 
-export async function subirImageReference(fileR)  {
-  const idImagenReferencia = await generateIdImageReference();
+export async function subirImageReference(fileReference)  {
+  const idImagenReferencia = v4();
 
   const storageRef= ref(storage,`Referencias/${idImagenReferencia}`)
-  const blob = await fetch(fileR).then((res) => res.blob());
-  await uploadBytes(storageRef,blob)
+
+  // const blob = await fetch(fileReference).then((res) => res.blob());
+  await uploadBytes(storageRef,fileReference)
   const url = await getDownloadURL(storageRef)
   console.log(url);
   return [url,idImagenReferencia];
 
 }
 
+// Funciones para editar las imagenes de diseño y referencia 
 export async function editImageDesign(idFileD,newFileD)  {
 
   const storageRef= ref(storage,`Disenios/${idFileD}`)
   const blob = await fetch(newFileD).then((res) => res.blob());
-  console.log(blob);
-  await uploadBytes(storageRef,blob)
+  // console.log(blob);
+
+  await uploadBytes(storageRef,newFileD)
   const url = await getDownloadURL(storageRef)
   console.log(url);
   // return url;
 }
 
 
-export async function editImageReference(idFileR,newFileR)  {
+export async function editImageReference(idFileR,newFileReference)  {
   
   console.log(idFileR);
-  console.log(newFileR);
+  console.log(newFileReference);
 
 
   const storageRef= ref(storage,`Referencias/${idFileR}`)
-  const blob = await fetch(newFileR).then((res) => res.blob());
-  await uploadBytes(storageRef,blob)
+  // const blob = await fetch(newFileR).then((res) => res.blob());
+  await uploadBytes(storageRef,newFileReference)
   const url = await getDownloadURL(storageRef)
   console.log(url);
   // return url;
-
 }
 
 
