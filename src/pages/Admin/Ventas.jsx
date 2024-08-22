@@ -1,263 +1,1864 @@
-import React from 'react'
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import Pagination from "../../components/Pagination/Pagination";
+import SearchBar from "../../components/SearchBar/SearchBar";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
+import {
+  editImageComprobante,
+  subirImageComprobante,
+} from "../../firebase/config";
+
+import { useAuth } from "../../context/AuthProvider";
 
 export const Ventas = () => {
+  const url = "http://localhost:3000/api/pedidos";
+  const [ventas, setPedidos] = useState([]);
+  const [pedidosCliente, setPedidosCliente] = useState([]);
+  const [IdPedido, setIdPedido] = useState("");
+
+  const [Clientes, setClientes] = useState([]);
+  const [IdCliente, setIdCliente] = useState("");
+  const [TipoPago, setTipoPago] = useState("");
+  const [Fecha, setFecha] = useState("");
+  const [Total, setTotal] = useState("");
+
+  const [IdPedidoActualizar, setIdPedidoActualizar] = useState("");
+  const [idEstadoPedidoActualizar, setIdEstdosPedidoActualizar] = useState("");
+
+  let idPedidoActualizarEstado;
+  let idEstadoPedidoActualizarEstado;
+
+  const [imagenComprobante, setImagenComprobante] = useState("");
+  const [imagenComprobantePrevisualizar, setImagenComprobantePrevisualizar] = useState("");
+
+  const { auth } = useAuth();
+
+  const [showComprobanteButton, setShowComprobanteButton] = useState(null);
+
+  const [estadosPedidos, setEstadosPedidos] = useState([]);
+  const [nuevosEstadosPedidos, setNuevosEstadosPedidos] = useState([]);
+
+  const [Detalles, setDetalles] = useState([]);
+  const [Productos, setProductos] = useState([]);
+  const [showDetalleField, setShowDetalleField] = useState(false);
+  const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
+  const [operation, setOperation] = useState(1);
+  const [title, setTitle] = useState("");
+  const [errors, setErrors] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
+
+  useEffect(() => {
+    getPedidos();
+    getEstadosPedidos();
+    getProductos();
+    getClientes();
+    // getPedidosCliente();
+  }, []);
+
+  const getPedidos = async () => {
+    try {
+      const respuesta = await axios.get(url);
+      // setPedidos(respuesta.data);
+
+      const ventas = respuesta.data.filter(
+        (venta) => venta.IdEstadoPedido == 3
+      );
+
+      setPedidos(ventas);
+    } catch (error) {
+      show_alerta("Error al obtener los pedidos", "error");
+    }
+  };
+
+  const getClienteName = (idCliente) => {
+    const cliente = Clientes.find((prov) => prov.IdCliente === idCliente);
+    return cliente ? cliente.NombreApellido : "Cliente no encontrado";
+  };
+
+  const getProductoName = (idProducto) => {
+    const producto = Productos.find((item) => item.IdProducto === idProducto);
+    return producto ? producto.Referencia : "Producto no encontrado";
+  };
+
+  const convertEstadoPedidoIdToName = (estadoPedidoId) => {
+    const estadoPedido = estadosPedidos.find(
+      (pedido) => pedido.IdEstadoPedido === estadoPedidoId
+    );
+    return estadoPedido ? estadoPedido.NombreEstado : "";
+  };
+
+  const getClientes = async () => {
+    try {
+      const respuesta = await axios.get("http://localhost:3000/api/clientes");
+      const clientesActivos = respuesta.data.filter(
+        (cliente) => cliente.Estado === "Activo"
+      );
+      setClientes(clientesActivos);
+    } catch (error) {
+      show_alerta({
+        message: "Error al obtener los clientes",
+        type: "error",
+      });
+    }
+  };
+
+  const getProductos = async () => {
+    try {
+      const respuesta = await axios.get("http://localhost:3000/api/productos");
+      const productosActivos = respuesta.data.filter(
+        (producto) => producto.Estado === "Activo"
+      );
+      setProductos(productosActivos);
+    } catch (error) {
+      show_alerta({
+        message: "Error al obtener los productos",
+        type: "error",
+      });
+    }
+  };
+
+  const getEstadosPedidos = async () => {
+    try {
+      const respuesta = await axios.get(
+        "http://localhost:3000/api/estadosPedidos"
+      );
+
+      setEstadosPedidos(respuesta.data);
+    } catch (error) {
+      show_alerta({
+        message: "Error al obtener los estados de pedidos",
+        type: "error",
+      });
+    }
+  };
+
+  // Calcular el precio total de la compra en función de los detalles
+  const totalCompra =
+    Detalles && Detalles.length > 0
+      ? Detalles.reduce((total, detalle) => {
+          return total + (detalle.cantidad * detalle.precio || 0);
+        }, 0)
+      : 0;
+
+  // Abre el modal del detalle del pedido
+  const handleDetallePedido = async (idPedido) => {
+    try {
+      // Realizar la solicitud GET para obtener los detalles del pedido
+      const respuesta = await axios.get(
+        `http://localhost:3000/api/pedidos/${idPedido}`
+      );
+
+      // Obtener los detalles del pedido de la respuesta
+      const pedido = await respuesta.data;
+
+      // Mostrar los detalles del pedido en la consola para depuración
+      console.log("Detalle de Pedido:", pedido);
+
+      // Establecer el pedido seleccionado en el estado
+      setPedidoSeleccionado(pedido);
+      // setImagenComprobante(pedido.ImagenComprobante);
+      setImagenComprobantePrevisualizar(pedido.ImagenComprobante);
+
+      setShowComprobanteButton(null);
+
+      if (auth.idCliente) {
+        setTimeout(() => {
+          document.getElementById("spanInputFileComprobante").innerHTML =
+            "Seleccionar archivo";
+        }, 10);
+      }
+
+      // Mostrar el modal con los detalles de la compra
+      $("#modalDetalleCompra").modal("show");
+    } catch (error) {
+      // Manejo de errores en caso de que la solicitud falle
+      show_alerta({
+        message: "Error al obtener los detalles de la compra",
+        type: "error",
+      });
+
+      console.log(error);
+    }
+  };
+
+  function formatCurrency(value) {
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+    }).format(value);
+  }
+
+  const openModal = () => {
+    setIdPedido(""); // Resetear el IdCompra al abrir el modal para indicar una nueva compra
+    setIdCliente("");
+    setTipoPago("");
+    setFecha("");
+    setTotal("");
+    setImagenComprobante(null)
+    setImagenComprobantePrevisualizar("0")
+    setDetalles([]);
+    setOperation(1); // Indicar que es una operación de creación
+    setErrors({});
+    setTitle("Registrar Venta");
+    setShowDetalleField(false); // Ocultar el campo de detalles al abrir el modal
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    console.log(name);
+    
+    if (name === "IdCliente") {
+      setIdCliente(value);
+    }else if (name === "TipoPago") {
+      setTipoPago(value);
+    } else if (name === "Fecha") {
+      setFecha(value);
+    } else if (name === "Total") {
+      setTotal(value);
+    }
+  };
+
+  const [alertas, setAlertas] = useState([]);
+
+  const hayAlertas = () => {
+    return alertas.some((alerta) => alerta !== "");
+  };
+
+  const handleDetailChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedDetalles = [...Detalles];
+    const updatedAlertas = [...alertas];
+
+    console.log(name);
+
+    if (name === "IdProducto") {
+      // Verificar si el producto ya está en los detalles
+      const productoDuplicado = updatedDetalles.some(
+        (detalle, detalleIndex) =>
+          detalle.IdProducto === value && detalleIndex !== index
+      );
+
+      if (productoDuplicado) {
+        show_alerta({
+          message: "Este producto ya está agregado en los detalles",
+          type: "error",
+        });
+        return; // No permitir la selección del producto duplicado
+      }
+
+      // Actualizar el IdProducto en el detalle
+      updatedDetalles[index][name] = value;
+      setDetalles(updatedDetalles);
+
+      // Encontrar el producto seleccionado
+      const selectedProduct = Productos.find(
+        (producto) => producto.IdProducto == value
+      );
+
+      if (selectedProduct) {
+        // Actualizar el precio en el detalle
+        updatedDetalles[index].precio = selectedProduct.ValorVenta;
+        setDetalles(updatedDetalles);
+      }
+    }
+
+    if (name === "cantidad") {
+      // Actualizar la cantidad en el detalle
+      updatedDetalles[index][name] = value;
+      setDetalles(updatedDetalles);
+
+      const selectedProductoId = updatedDetalles[index].IdProducto;
+      const selectedProduct = Productos.find(
+        (producto) => producto.IdProducto == selectedProductoId
+      );
+
+      if (selectedProduct) {
+        // Validar la cantidad
+        if (parseInt(value) > selectedProduct.Cantidad) {
+          updatedAlertas[index] =
+            "La cantidad ingresada es mayor que la cantidad disponible";
+          show_alerta({
+            message:
+              "La cantidad ingresada es mayor que la cantidad disponible",
+            type: "error",
+          });
+        } else {
+          updatedAlertas[index] = "";
+        }
+        setAlertas(updatedAlertas);
+      }
+
+      // Calcular el subtotal
+      const cantidad = parseFloat(updatedDetalles[index].cantidad || 0);
+      const precio = parseFloat(updatedDetalles[index].precio || 0);
+      updatedDetalles[index].subtotal = cantidad * precio;
+      setDetalles(updatedDetalles);
+    }
+  };
+
+  const handleChangeIdEstadoPedido = (e) => {
+    const value = e.target.value;
+    setIdEstdosPedidoActualizar(value);
+  };
+
+  const getFilteredProductos = (index) => {
+    // Obtener los IDs de los insumos seleccionados en las otras filas de detalles
+    const productosSeleccionados = Detalles.reduce((acc, detalle, i) => {
+      if (i !== index && detalle.IdProducto) {
+        acc.push(detalle.IdProducto);
+      }
+      return acc;
+    }, []);
+
+    // Filtrar los insumos disponibles excluyendo los ya seleccionados
+    return Productos.filter(
+      (producto) => !productosSeleccionados.includes(producto.IdProducto)
+    );
+  };
+
+  const addDetail = () => {
+    // Crear un nuevo detalle con valores predeterminados
+    const newDetail = {
+      IdProducto: "",
+      cantidad: "",
+      precio: "",
+      subtotal: 0,
+    };
+
+    // Crear una nueva matriz de detalles con el nuevo detalle agregado
+    const updatedDetalles = [...Detalles, newDetail];
+
+    // Establecer los detalles actualizados
+    setDetalles(updatedDetalles);
+
+    // Mostrar el campo de detalles cuando se agrega un detalle
+    setShowDetalleField(true);
+  };
+
+  const removeDetail = (index) => {
+    const updatedDetalles = Detalles.filter((_, i) => i !== index);
+    setDetalles(updatedDetalles);
+  };
+
+  const renderErrorMessage = (errorMessage) => {
+    return errorMessage ? (
+      <div className="invalid-feedback">{errorMessage}</div>
+    ) : null;
+  };
+
+  // cargar la imagen que se usara en el comprobante
+  const handleChangeImagenComprobante = (e) => {
+    let errorMessage = "";
+
+    const file = e.target.files[0];
+    console.log(file);
+
+    let spanComprobante = document.getElementById("spanInputFileComprobante");
+
+    const fileTypes = ["image/png", "image/jpeg"];
+
+    if (file && fileTypes.includes(file.type)) {
+      // Cargar la imagen para previsualizarla
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        // setImagenDisenio(reader.result);
+        setImagenComprobantePrevisualizar(reader.result);
+        console.log(reader.result);
+      };
+      reader.readAsDataURL(file);
+
+      setImagenComprobante(file);
+      setShowComprobanteButton(true);
+
+      let fileName = "";
+      fileName = e.target.value.split("\\").pop();
+
+      spanComprobante.innerHTML = fileName;
+    } else {
+      errorMessage = "Selecciona un archivo válido .png o .jpg";
+
+      setErrors({ fileComprobante: errorMessage });
+
+      console.log(e.target.files[0]);
+      console.log("else");
+
+      // return;
+    }
+  };
+
+  const enviarComprobante = async (idPed, pedidoIdImagenComprobante) => {
+    try {
+      console.log(pedidoSeleccionado);
+      console.log(pedidoIdImagenComprobante);
+
+      // return;
+
+      if (pedidoIdImagenComprobante != "0") {
+        console.log("editarComprobante");
+
+        const url = await editImageComprobante(
+          pedidoIdImagenComprobante,
+          imagenComprobante
+        );
+
+        await axios.put(
+          `http://localhost:3000/api/pedidos/comprobante/${idPed}`,
+          {
+            idImagenComprobante: pedidoIdImagenComprobante,
+            imagenComprobante: url,
+          }
+        );
+      } else {
+        console.log("crearComprobante");
+
+        const [idImagenComprobante, url] = await subirImageComprobante(
+          imagenComprobante
+        );
+
+        await axios.put(
+          `http://localhost:3000/api/pedidos/comprobante/${idPed}`,
+          {
+            idImagenComprobante: idImagenComprobante,
+            imagenComprobante: url,
+          }
+        );
+      }
+
+      $(".close").click();
+
+      show_alerta({
+        message: "El comprobante fue cargado correctamente",
+        type: "success",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const validar = async () => {
+    let errorMessage = "";
+
+    let idImagenComprobante= "0";
+    let url= "0";
+
+    if (!IdCliente) {
+      errorMessage = "Selecciona un cliente";
+      setErrors({ IdCliente: errorMessage });
+      return;
+    }
+
+    if (!TipoPago) {
+      errorMessage = "Selecciona un método de pago";
+      setErrors({ TipoPago: errorMessage });
+      return;
+    }
+
+    if (Detalles.length === 0) {
+      errorMessage = "Agrega al menos un detalle de compra";
+      setErrors({ Detalles: errorMessage });
+      return;
+    }
+
+    if (Detalles.some((detalle) => !detalle.cantidad || !detalle.precio)) {
+      errorMessage =
+        "Ingresa una cantidad y un precio válido para cada detalle";
+      setErrors({ Detalles: errorMessage });
+      return;
+    }
+
+    if (hayAlertas()) {
+      return;
+    }
+    console.log(Detalles);
+    console.log(Fecha);
+    console.log(Total);
+    console.log(TipoPago);
+    
+    
+    if (TipoPago == "Transferencia") {
+
+        if (!imagenComprobante) {
+          show_alerta({
+            message: "Es necesario un comprobante de pago",
+            type: "error",
+          });        }
+
+        [idImagenComprobante, url] = await subirImageComprobante(
+        imagenComprobante
+      );
+    }
+    // return;
+    
+    // return;
+
+    enviarSolicitud("POST", {
+      IdCliente: IdCliente,
+      TipoPago: TipoPago,
+      Fecha: Fecha,
+      Total: totalCompra,
+      Detalles: Detalles,
+      idImagenComprobante: idImagenComprobante,
+      imagenComprobante: url,
+      intentos: 3,
+      IdEstadoPedido: 3,
+    });
+  };
+
+  const enviarSolicitud = async (metodo, parametros) => {
+    console.log(parametros);
+    try {
+      let urlRequest = url;
+      
+
+      const respuesta = await axios({
+        method: metodo,
+        url: url,
+        data: parametros,
+      });
+
+      show_alerta({
+        message: respuesta.data.message,
+        type: "success",
+      });
+
+      $(".close").click();
+
+      getPedidos();
+      getProductos();
+    } catch (error) {
+      if (error.response) {
+        show_alerta({
+          message: error.response.data.message,
+          type: "error",
+        });
+      } else if (error.request) {
+        show_alerta({
+          message: "Error en la solicitud",
+          type: "error",
+        });
+      } else {
+        show_alerta({
+          message: "Error desconocido",
+          type: "error",
+        });
+      }
+    }
+  };
+
+  const cambiarEstadoPedido = async () => {
+    let idEstPed;
+    let idPed;
+    let titleOperation;
+    let nombreEstado;
+    let confirmButtonTextEstado;
+
+    // Cambiar el estado desde el modal
+    if (auth.idUsuario) {
+      idPed = IdPedidoActualizar;
+      idEstPed = idEstadoPedidoActualizar;
+      nombreEstado =
+        estadosPedidos.find((estado) => estado.IdEstadoPedido == idEstPed)
+          ?.NombreEstado || "Estado no encontrado";
+      titleOperation = `¿Seguro de cambiar el estado del pedido a ${nombreEstado}?`;
+      confirmButtonTextEstado = "Sí, cambiar";
+    } else {
+      idPed = idPedidoActualizarEstado;
+      idEstPed = 4;
+      titleOperation = "¿Seguro de cancelar el pedido?";
+      confirmButtonTextEstado = "Sí, cancelar";
+    }
+
+    // console.log(nombreEstado);
+    // console.log(idEstPed);
+    // console.log(idPed);
+
+    // return;
+
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: titleOperation,
+      icon: "question",
+      text: "No se podrá dar marcha atrás",
+      showCancelButton: true,
+      confirmButtonText: confirmButtonTextEstado,
+      cancelButtonText: "No",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          console.log(idPed);
+          console.log(idEstPed);
+
+          // return;
+          // Cambiar el estado del pedido a "Cancelado"
+          await axios.put(`http://localhost:3000/api/pedidos/${idPed}`, {
+            Estado: idEstPed,
+          });
+
+          // Actualizar la lista de pedidos
+          getPedidos();
+          $(".close").click();
+
+          show_alerta({
+            message: "La compra fue modificada correctamente",
+            type: "success",
+          });
+        } catch (error) {
+          show_alerta({
+            message: "Hubo un error al cancelar la compra",
+            type: "error",
+          });
+        }
+      } else {
+        show_alerta({
+          message: "La compra NO fue cancelada",
+          type: "info",
+        });
+      }
+    });
+  };
+
+  const anularPedido = async (idPedido) => {
+    try {
+      console.log(idPedido);
+
+      // return;
+      // Cambiar el estado del pedido a "Cancelado"
+      await axios.put(`http://localhost:3000/api/pedidos/${idPedido}`, {
+        Estado: 4,
+      });
+
+      // Actualizar la lista de pedidos
+      // getPedidos();
+      // $(".close").click();
+
+      // show_alerta({
+      //   message: "El pedido fue cancelado correctamente",
+      //   type: "success",
+      // });
+    } catch (error) {
+      show_alerta({
+        message: "Hubo un error al cancelar el pedido",
+        type: "error",
+      });
+      console.log(error);
+    }
+  };
+
+  const aceptarComprobante = async (idPedido) => {
+    // let idEstPed = idEstadoPedidoActualizar;
+    // let idPed = IdPedidoActualizar ;
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: "¿Seguro de aceptar el comprobante del pedido?",
+      icon: "question",
+      text: "No se podrá dar marcha atrás",
+      showCancelButton: true,
+      confirmButtonText: "Sí, aceptar",
+      cancelButtonText: "No",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          console.log(idPedido);
+          // console.log(idEstadoPedido);
+
+          const respuesta = await axios.put(
+            `http://localhost:3000/api/pedidos/${idPedido}`,
+            {
+              Estado: 2,
+            }
+          );
+
+          let message = respuesta.response.message;
+
+          // Actualizar la lista de pedidos
+          getPedidos();
+          $(".close").click();
+
+          // show_alerta({
+          //   message: "La compra fue modificada correctamente",
+          //   type: "success",
+          // });
+
+          show_alerta({
+            message: message,
+            type: "success",
+          });
+        } catch (error) {
+          show_alerta({
+            message: "Hubo un error al cancelar la compra",
+            type: "error",
+          });
+        }
+      } else {
+        show_alerta({
+          message: "La compra NO fue cancelada",
+          type: "info",
+        });
+      }
+    });
+  };
+
+  const rechazarComprobante = async (
+    idPedido,
+    intentosActuales,
+    nombreClientePedido,
+    correoClientePedido
+  ) => {
+    // let idEstPed = idEstadoPedidoActualizar;
+    // let idPed = IdPedidoActualizar ;
+
+    let titleText;
+    let confirmButtonTextAnular;
+
+    if (intentosActuales == 1) {
+      titleText = "¿Seguro de rechazar el comprobante y anular el pedido?";
+      confirmButtonTextAnular = "Sí, rechazar y anular";
+    } else {
+      titleText = "¿Seguro de rechazar el comprobante del pedido?";
+      confirmButtonTextAnular = "Sí, rechazar";
+    }
+
+    const MySwal = withReactContent(Swal);
+    MySwal.fire({
+      title: titleText,
+      icon: "question",
+      text: "No se podrá dar marcha atrás",
+      showCancelButton: true,
+      confirmButtonText: confirmButtonTextAnular,
+      cancelButtonText: "No",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          console.log(idPedido);
+          console.log(intentosActuales);
+          console.log(nombreClientePedido);
+          console.log(correoClientePedido);
+
+          const respuesta = await axios.put(
+            `http://localhost:3000/api/pedidos/comprobante/intentos/${idPedido}`,
+            {
+              intentos: intentosActuales,
+              nombreCliente: nombreClientePedido,
+              correoCliente: correoClientePedido,
+            }
+          );
+
+          let message = respuesta.data.message;
+
+          console.log(respuesta);
+
+          if (intentosActuales == 1) {
+            await anularPedido(idPedido);
+
+            // Actualizar la lista de pedidos
+            getPedidos();
+
+            $(".close").click();
+
+            show_alerta({
+              message: "Comprobante rechazado y pedido anulado",
+              type: "success",
+            });
+          } else {
+            // Actualizar la lista de pedidos
+            getPedidos();
+
+            $(".close").click();
+
+            show_alerta({
+              message: message,
+              type: "success",
+            });
+          }
+        } catch (error) {
+          show_alerta({
+            message: "Hubo un error al cancelar la compra",
+            type: "error",
+          });
+
+          console.log(error);
+        }
+      } else {
+        show_alerta({
+          message: "La compra NO fue cancelada",
+          type: "info",
+        });
+      }
+    });
+  };
+
+  const openModalEstado = (pedido) => {
+    setTitle("Actualizar Estado");
+    setIdPedidoActualizar(pedido.IdPedido);
+    // setIdPedido(pedido.IdPedido);
+    setIdEstdosPedidoActualizar(pedido.IdEstadoPedido);
+
+    if (pedido.IdEstadoPedido == 2) {
+      const idsBuscados = [2, 3];
+
+      const nuevosEstadosPedido = estadosPedidos.filter((estado) =>
+        idsBuscados.includes(estado.IdEstadoPedido)
+      );
+
+      setNuevosEstadosPedidos(nuevosEstadosPedido);
+    } else if (nuevosEstadosPedidos.length < 3) {
+      setNuevosEstadosPedidos(estadosPedidos);
+    }
+  };
+
+  const formatearFecha = (fechaISO) => {
+    const [year, month, day] = fechaISO.split("-");
+    return `${day}/${month}/${year}`;
+  };
+
+  const handleSearchTermChange = (newSearchTerm) => {
+    setSearchTerm(newSearchTerm);
+    setCurrentPage(1); // Reset current page when changing the search term
+  };
+
+  let totalPages;
+  let currentPedidos;
+
+  // Sirve pa que no se dañe la cantidad de paginas una de admin y otra de cliente
+  if (auth.idUsuario) {
+    // Filter purchases based on the search term
+    const filteredCompras = ventas.filter((compra) =>
+      Object.values(compra).some((value) =>
+        value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
+    // Apply pagination to the filtered purchases
+    totalPages = Math.ceil(filteredCompras.length / itemsPerPage);
+    currentPedidos = filteredCompras.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  } else {
+    // Filter purchases based on the search term
+    const filteredPedidosCliente = pedidosCliente.filter((compra) =>
+      Object.values(compra).some((value) =>
+        value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
+    // Apply pagination to the filtered purchases
+    totalPages = Math.ceil(filteredPedidosCliente.length / itemsPerPage);
+    currentPedidos = filteredPedidosCliente.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }
+
+  const [isZoomed, setIsZoomed] = useState(false);
+
+  const handleToggleZoom = () => {
+    setIsZoomed(!isZoomed);
+  };
+
+  const handleDownload = async (pedido) => {
+    const response = await fetch(pedido.ImagenComprobante);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Comprobante ${pedido.Cliente.NombreApellido}.jpg`;
+    link.click();
+  };
+
   return (
     <>
+      {/* Inicio modal de editar estado */}
+      <div
+        className="modal fade"
+        id="modalEstadoPedido"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="ModalEditarEstadoLabel"
+        // aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
+      >
+        <div className="modal-dialog modal-md" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="ModalEditarEstadoLabel">
+                {title}
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
 
-{/* <!-- Modal para crear una Venta --> */}
-        <div className="modal fade" id="ModalCrearVenta" tabIndex="-1" role="dialog" aria-labelledby="ModalAñadirVenta"
-          aria-hidden="true">
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="ModalAñadirVenta">Crear Venta</h5>
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                {/* <!-- Contenido del formulario para crear venta --> */}
-                <form id="crearVentaForm">
-                  <div className="form-group">
-                    <label htmlFor="nombreCliente">Nombre del Cliente:</label>
-                    <input type="text" className="form-control" id="nombreCliente"
-                      placeholder="Ingrese el nombre del cliente" />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="fechaVenta">Fecha de la Venta:</label>
-                    <input type="date" className="form-control" id="fechaVenta" />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="montoVenta">Monto de la Venta:</label>
-                    <input type="number" className="form-control" id="montoVenta" placeholder="Ingrese el monto de la venta"
-                      max="50000" />
-                  </div>
-                  {/* <!-- Agrega más campos según tus necesidades --> */}
-                  <div className="modal-footer">
-                    <button type="button" className="btn btn-secondary" data-dismiss="modal">
-                      Cancelar
-                    </button>
-                    <button type="submit" className="btn btn-primary">
-                      Guardar Venta
-                    </button>
-                  </div>
-                </form>
+            <div className="modal-body">
+              {/* <input type="text" id="IdCompra" value={IdPedidoActualizar}></input> */}
+
+              <div className="form-row">
+                {/* Seleccionar estado */}
+                <div className="form-group col-md-12">
+                  <label>Estados:</label>
+                  <select
+                    className="form-control"
+                    name="IdCliente"
+                    value={idEstadoPedidoActualizar}
+                    onChange={handleChangeIdEstadoPedido}
+                  >
+                    <option disabled value="">
+                      Selecciona un estado
+                    </option>
+                    {nuevosEstadosPedidos.map((estado) => (
+                      <option
+                        key={estado.IdEstadoPedido}
+                        value={estado.IdEstadoPedido}
+                      >
+                        {estado.NombreEstado}
+                      </option>
+                    ))}
+                  </select>
+                  {/* {renderErrorMessage(errors.IdCliente)} */}
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* <!-- Inicio de Ventas --> */}
-        <div className="container-fluid">
-          {/* <!-- Page Heading --> */}
-          <div className="d-flex align-items-center justify-content-between">
-            <h1 className="h3 mb-4 text-center text-dark">Ventas</h1>
-
-            <div className="text-center p-3">
-              <button type="button" className="btn btn-dark" data-toggle="modal" data-target="#ModalCrearVenta">
-                <i className="fas fa-pencil-alt"></i> Crear Venta
+            <div className="modal-footer">
+              <button
+                type="button"
+                id="btnCerrar"
+                className="btn btn-secondary"
+                data-dismiss="modal"
+              >
+                Cerrar
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => cambiarEstadoPedido()}
+              >
+                Actualizar
               </button>
             </div>
           </div>
+        </div>
+      </div>
+      {/* fin modal de editar estado */}
 
-          {/* <!-- Modal de visualización --> */}
-          <div className="modal fade" id="ModalVisualizarVenta" tabIndex="-1" role="dialog"
-            aria-labelledby="visualizarModalLabel" aria-hidden="true">
-            <div className="modal-dialog" role="document">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title" id="visualizarModalLabel">
-                    Detalles de la Venta
-                  </h5>
-                  <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-
-                {/* <!-- Campos del modal para Visualizar --> */}
-                <div className="modal-body">
-                  <div className="form-group">
-                    <label htmlFor="nombreCliente" style={{color: "black"}}>Nombre del Cliente:</label>
-                    <input type="text" className="form-control" id="nombreCliente" placeholder="Nombre del cliente aquí" />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="fechaVenta" style={{color: "black"}}>Fecha de la Venta:</label>
-                    <input type="date" className="form-control" id="fechaVenta" placeholder="Fecha de la venta aquí" />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="montoVenta" style={{color: "black"}}>Cantidad de los productos::</label>
-                    <input type="text" className="form-control" id="montoVenta" placeholder="Monto de la venta aquí" />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="montoVenta" style={{color: "black"}}>Monto de la Venta:</label>
-                    <input type="text" className="form-control" id="montoVenta" placeholder="Monto de la venta aquí" />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="montoVenta" style={{color: "black"}}>Subtotal:</label>
-                    <input type="text" className="form-control" id="montoVenta" placeholder="Monto de la venta aquí" />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="montoVenta" style={{color: "black"}}>Descuento:</label>
-                    <input type="text" className="form-control" id="montoVenta" placeholder="Monto de la venta aquí" />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="montoVenta" style={{color: "black"}}>IVA:</label>
-                    <input type="text" className="form-control" id="montoVenta" placeholder="Monto de la venta aquí" />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="detallesVenta" style={{color: "black"}}>Detalles de la Venta:</label>
-                    <textarea className="form-control" id="detallesVenta" style={{color: "black"}}
-                      placeholder="Ingresa detalles de la venta aquí..."></textarea>
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" data-dismiss="modal">
-                    Cerrar
-                  </button>
-                </div>
-              </div>
+      {/* Inicio modal de crear venta con su detalle */}
+      <div
+        className="modal fade"
+        id="modalCompras"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="ModalAñadirCompraLabel"
+        aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
+      >
+        <div className="modal-dialog modal-lg" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="ModalAñadirCompraLabel">
+                {title}
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
             </div>
-          </div>
 
-          {/* <!-- Tabla Ventas --> */}
-          <div className="card shadow mb-4">
-            <div className="card-header py-3">
-              <h6 className="m-0 font-weight-bold text-primary"></h6>
-            </div>
-            <div className="card-body">
-              <div className="table-responsive">
-                <table className="table table-bordered" id="dataTable" width="100%" cellSpacing="0">
-                  <thead>
-                    <tr>
-                      <th>Nombre</th>
-                      <th>Fecha</th>
-                      <th>Total</th>
-                      <th>Acciones</th>
-                      <th>Estado</th>
-                    </tr>
-                  </thead>
-                  <tfoot>
-                    <tr>
-                      <th>Nombre</th>
-                      <th>Fecha</th>
-                      <th>Total</th>
-                      <th>Acciones</th>
-                      <th>Estado</th>
-                    </tr>
-                  </tfoot>
-                  <tbody>
-                    <tr>
-                      <td>Alejandro</td>
-                      <td>2011/04/25</td>
-                      <td>30,000</td>
-                      <td>
-                        {/* <!-- Botón de Visualizar con manejo de modal mediante JavaScript --> */}
-                        <button type="button" className="btn btn-info" data-toggle="modal"
-                          data-target="#ModalVisualizarVenta">
-                          <i className="fas fa-eye" title="Ver Detalles"></i>
-                        </button>
+            <div className="modal-body">
+              <div className="modal-body">
+                <div>
+                  <div className="form-row">
+                    <div className="accordion col-md-12" id="accordionExample">
 
-                        <button style={{display: "none"}} type="button" className="btn btn-success">
-                          <i className="fas fa-print" title="Imprimir"></i>
-                        </button>
-                      </td>
-                      <td>
-                        <div className="btn-group" role="group" aria-label="Acciones">
-                          {/* <button id="toggleButton" className="btn btn-success mr-1" onclick="toggleEstado()">
-                            Activo
-                          </button> */}
-                          <div className="dropdown">
-                            <button className="btn btn-light dropdown-toggle" type="button" id="estadoDropdown"
-                              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                              <span className="caret"></span>
+                      {/* Acordeon crear venta */}
+                      <div className="card">
+                        <div className="card-header" id="headingOne">
+                          <h2 className="mb-0">
+                            <button
+                              className="btn btn-link btn-block text-left"
+                              type="button"
+                              data-toggle="collapse"
+                              data-target="#collapseOne"
+                              aria-expanded="true"
+                              aria-controls="collapseOne"
+                            >
+                              Detalles del Pedido
                             </button>
-                            <div className="dropdown-menu" aria-labelledby="estadoDropdown">
-                              {/* <a className="dropdown-item" href="#" onclick="cambiarEstado('Activo')">Activo</a>
-                              <a className="dropdown-item" href="#" onclick="cambiarEstado('Pendiente')">Pendiente</a>
-                              <a className="dropdown-item" href="#" onclick="cambiarEstado('Inhabilitado')">Inhabilitado</a> */}
+                          </h2>
+                        </div>
+                        {/* <input type="hidden" id="IdCompra"></input> */}
+
+                        <div
+                          id="collapseOne"
+                          className="collapse show"
+                          aria-labelledby="headingOne"
+                          data-parent="#accordionExample"
+                        >
+                          <div className="card-body">
+                            <div className="form-row">
+                              {/* Seleccionar cliente */}
+                              <div className="form-group col-md-6">
+                                <label>Cliente:</label>
+                                <select
+                                  className={`form-control ${
+                                    errors.IdCliente ? "is-invalid" : ""
+                                  }`}
+                                  name="IdCliente"
+                                  value={IdCliente}
+                                  onChange={handleChange}
+                                >
+                                  <option value="" disabled>
+                                    Selecciona un cliente
+                                  </option>
+                                  {Clientes.map((cliente) => (
+                                    <option
+                                      key={cliente.IdCliente}
+                                      value={cliente.IdCliente}
+                                    >
+                                      {cliente.NombreApellido}
+                                    </option>
+                                  ))}
+                                </select>
+                                {renderErrorMessage(errors.IdCliente)}
+                              </div>
+
+                              {/* Seleccionar tipo de pago */}
+                              <div className="form-group col-md-6">
+                                <label>Método de pago:</label>
+                                <select
+                                  className={`form-control ${
+                                    errors.TipoPago ? "is-invalid" : ""
+                                  }`}
+                                  name="TipoPago"
+                                  value={TipoPago}
+                                  onChange={handleChange}
+                                >
+                                  <option value="" disabled>Selecciona un método de pago</option>
+                                  <option value={"Transferencia"}>Transferencia</option>
+                                  <option value={"Efectivo"}>Efectivo </option>
+                                </select>
+                                {renderErrorMessage(errors.TipoPago)}
+                              </div>
+                            </div>
+
+                            {/* Fecha */}
+                            <div className="form-group">
+                              <label>Fecha:</label>
+                              <input
+                                type="date"
+                                className={`form-control ${
+                                  errors.Fecha ? "is-invalid" : ""
+                                }`}
+                                id="Fecha"
+                                name="Fecha"
+                                value={Fecha}
+                                onChange={handleChange}
+                              />
+                              {renderErrorMessage(errors.Fecha)}
+                            </div>
+
+                            <div className="table-responsive">
+                              <table className="table table-bordered">
+                                <thead>
+                                  <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio</th>
+                                    <th>SubTotal</th>
+                                    <th>Acción</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {Detalles.map((detalle, index) => (
+                                    <tr key={index}>
+                                      <td>
+                                        <select
+                                          className={`form-control ${
+                                            errors.Detalles &&
+                                            errors.Detalles[index] &&
+                                            errors.Detalles[index].IdProducto
+                                              ? "is-invalid"
+                                              : ""
+                                          }`}
+                                          name="IdProducto"
+                                          value={detalle.IdProducto}
+                                          onChange={(e) =>
+                                            handleDetailChange(index, e)
+                                          }
+                                        >
+                                          <option value="">
+                                            Selecciona un producto
+                                          </option>
+                                          {getFilteredProductos(index).map(
+                                            (producto) => (
+                                              <option
+                                                key={producto.IdProducto}
+                                                value={producto.IdProducto}
+                                              >
+                                                {producto.Referencia}
+                                              </option>
+                                            )
+                                          )}
+                                        </select>
+
+                                        {errors.Detalles &&
+                                          errors.Detalles[index] &&
+                                          errors.Detalles[index].IdProducto && (
+                                            <div className="invalid-feedback">
+                                              {
+                                                errors.Detalles[index]
+                                                  .IdProducto
+                                              }
+                                            </div>
+                                          )}
+                                      </td>
+
+                                      <td>
+                                        <input
+                                          type="number"
+                                          className="form-control"
+                                          name="cantidad"
+                                          placeholder="Cantidad"
+                                          value={detalle.cantidad}
+                                          onChange={(e) =>
+                                            handleDetailChange(index, e)
+                                          }
+                                        />
+                                        {alertas[index] && (
+                                          <span
+                                            style={{ color: "red" }}
+                                            className="alerta"
+                                          >
+                                            {alertas[index]}
+                                          </span>
+                                        )}
+                                      </td>
+
+                                      <td>
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          name="precio"
+                                          placeholder="Precio"
+                                          value={formatCurrency(detalle.precio)}
+                                          onChange={(e) =>
+                                            handleDetailChange(index, e)
+                                          }
+                                          disabled
+                                        />
+                                      </td>
+
+                                      <td>
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          name="subtotal"
+                                          placeholder="Subtotal"
+                                          value={formatCurrency(
+                                            detalle.subtotal
+                                          )}
+                                          disabled
+                                        />
+                                      </td>
+
+                                      <td>
+                                        <button
+                                          type="button"
+                                          className="btn btn-danger"
+                                          onClick={() => removeDetail(index)}
+                                        >
+                                          X
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {errors.Detalles && (
+                              <div className="invalid-feedback">
+                                {errors.Detalles}
+                              </div>
+                            )}
+
+                            <div className="text-right mb-3">
+                              <button
+                                type="button"
+                                className="btn btn-primary"
+                                onClick={addDetail}
+                              >
+                                Añadir Detalle
+                              </button>
+                            </div>
+
+                            <div className="form-group">
+                              <label>Total:</label>
+                              <input
+                                type="text"
+                                className="form-control"
+                                id="Total"
+                                name="Total"
+                                value={formatCurrency(totalCompra)}
+                                disabled
+                              />
                             </div>
                           </div>
                         </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Isabella</td>
-                      <td>2021/08/25</td>
-                      <td>30,000</td>
-                      <td>63</td>
-                      <td>Activo|Pendiente|Inhabilitado</td>
-                    </tr>
-                    <tr>
-                      <td>Mateo</td>
-                      <td>2021/11/21</td>
-                      <td>30,000</td>
-                      <td>66</td>
-                      <td>Activo|Pendiente|Inhabilitado</td>
-                    </tr>
-                    <tr>
-                      <td>Sophia</td>
-                      <td>2022/08/21</td>
-                      <td>50,000</td>
-                      <td>22</td>
-                      <td>Activo|Pendiente|Inhabilitado</td>
-                    </tr>
-                    <tr>
-                      <td>Diego</td>
-                      <td>2021/08/25</td>
-                      <td>30,000</td>
-                      <td>33</td>
-                      <td>Activo|Pendiente|Inhabilitado</td>
-                    </tr>
-                    <tr>
-                      <td>Olivia</td>
-                      <td>2021/01/21</td>
-                      <td>30,000</td>
-                      <td>61</td>
-                      <td>Activo|Pendiente|Inhabilitado</td>
-                    </tr>
-                    <tr>
-                      <td>Sebastián</td>
-                      <td>2021/12/27</td>
-                      <td>40,000</td>
-                      <td>59</td>
-                      <td>Activo|Pendiente|Inhabilitado</td>
-                    </tr>
-                    <tr>
-                      <td>Alejandro</td>
-                      <td>2021/12/24</td>
-                      <td>40,000</td>
-                      <td>55</td>
-                      <td>Activo|Pendiente|Inhabilitado</td>
-                    </tr>
-                    <tr>
-                      <td>Isabella</td>
-                      <td>2021/12/31</td>
-                      <td>40,000</td>
-                      <td>39</td>
-                      <td>Activo|Pendiente|Inhabilitado</td>
-                    </tr>
-                    <tr>
-                      <td>Kevin</td>
-                      <td>2021/12/30</td>
-                      <td>50,000</td>
-                      <td>23</td>
-                      <td>Activo|Pendiente|Inhabilitado</td>
-                    </tr>
-                    <tr>
-                      <td>Cristian</td>
-                      <td>2021/12/24</td>
-                      <td>50,000</td>
-                      <td>30</td>
-                      <td>Activo|Pendiente|Inhabilitado</td>
-                    </tr>
-                  </tbody>
-                </table>
+                      </div>
+
+                      {/* Acordeon comprobante de la venta */}
+                      {TipoPago == "Transferencia" &&(
+                        <div className="card">
+                          <div className="card-header" id="headingTwo">
+                            <h2 className="mb-0">
+                              <button
+                                className="btn btn-link btn-block text-left collapsed"
+                                type="button"
+                                data-toggle="collapse"
+                                data-target="#collapseTwo"
+                                aria-expanded="false"
+                                aria-controls="collapseTwo"
+                              >
+                                Comprobante de pago
+                              </button>
+                            </h2>
+                          </div>
+
+                          {/* {insumoSeleccionado && ( */}
+                          <div
+                            id="collapseTwo"
+                            className="collapse"
+                            aria-labelledby="headingTwo"
+                            data-parent="#accordionExample"
+                          >
+                            <div className="card-body">
+                              <div className="container">
+                                {/* Imagen comprobante */}
+                                <div
+                                  className="container py-2 d-flex justify-content-center align-items-center"
+                                  style={{
+                                    overflow: "visible",
+                                    position: "relative",
+                                  }}
+                                >
+                                  {/* si existe renderizar la imagen del comprobante, si no mostrar texto  */}
+                                  {imagenComprobantePrevisualizar != "0" ? (
+                                    <img
+                                      onClick={handleToggleZoom}
+                                      src={imagenComprobantePrevisualizar}
+                                      alt="Vista previa imagen del comprobante"
+                                      style={{
+                                        cursor: "pointer",
+                                        // width: "80%",
+                                        // height: "auto",
+                                        // maxWidth: "200px",
+                                        // display: "",
+                                        // border: "1px solid black",
+                                        // width: "30%", /* Ajusta al 100% del ancho del contenedor */
+                                        maxWidth:
+                                          "720px" /* Limita el ancho máximo */,
+                                        height:
+                                          "300px" /* Mantiene la proporción */,
+
+                                        objectFit: "cover",
+                                        position: "relative",
+                                        // top: '-50px', /* Ajusta el desbordamiento hacia arriba */
+                                        left: "0",
+
+                                        zIndex: 1 /* Asegura que la imagen esté sobre otros elementos */,
+                                        transform: isZoomed
+                                          ? "scale(2.1)"
+                                          : "scale(1)" /* Aplica o quita el zoom */,
+                                        transition:
+                                          "transform 0.3s ease-in-out" /* Suaviza el cambio */,
+                                      }}
+                                      className="zoom-image"
+                                    />
+                                  ) : (
+                                    <p className="font-weight-bold text-dark">
+                                      Aún no hay un comprobante
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* Input file comprobante */}
+                                {/* Renderizar solo si no hay comprobante */}
+                                {imagenComprobantePrevisualizar == "0" && (
+                                    <div className="inputComprobante d-flex justify-content-center align-items-center pt-4">
+                                      <input
+                                        accept=".png, .jpg, .jpeg"
+                                        type="file"
+                                        name="file-3"
+                                        id="inputFileReferencia"
+                                        className={`inputfileComprobante inputfileComprobante-2 ${
+                                          errors.fileComprobante
+                                            ? "is-invalid"
+                                            : ""
+                                        } `}
+                                        onChange={handleChangeImagenComprobante}
+                                      />
+                                      <label
+                                        className="d-flex justify-content-center align-items-center"
+                                        htmlFor="inputFileReferencia"
+                                      >
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          className="iborrainputfileComprobante"
+                                          width="20"
+                                          height="17"
+                                          viewBox="0 0 20 17"
+                                        >
+                                          <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
+                                        </svg>
+                                        <span
+                                          className="iborrainputfileComprobante"
+                                          id="spanInputFileComprobante"
+                                        >
+                                          Seleccionar archivo
+                                        </span>
+                                      </label>
+                                      {/* {renderErrorMessage(errors.fileComprobante)} */}
+                                    </div>
+                                  )}
+
+                                {/* Boton enviar comprobante */}
+                                {/* {showComprobanteButton && (
+                                  <div className="d-flex justify-content-center align-items-center pt-4">
+                                    <button
+                                      type="button"
+                                      className="btn btn-primary"
+                                      onClick={() =>
+                                        enviarComprobante(
+                                          pedidoSeleccionado.IdPedido,
+                                          pedidoSeleccionado.IdImagenComprobante
+                                        )
+                                      }
+                                    >
+                                      Subir Comprobante
+                                    </button>
+                                  </div>
+                                )} */}
+
+
+                              </div>
+                            </div>
+                          </div>
+                          
+                        </div>
+                      )}
+
+                    </div>
+                  </div>
+                </div>
               </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                type="button"
+                id="btnCerrar"
+                className="btn btn-secondary "
+                data-dismiss="modal"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => validar()}
+              >
+                Guardar
+              </button>
             </div>
           </div>
         </div>
-      
-    </>
-  )
-}
+      </div>
+      {/* fin modal de crear venta con el detalle */}
 
+      {/* Inicio modal ver detalle venta */}
+      <div
+        className="modal fade"
+        id="modalDetalleCompra"
+        // tabIndex="-1"
+        role="dialog"
+        aria-labelledby="ModalDetalleCompraLabel"
+        aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
+      >
+        <div className="modal-dialog modal-lg" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="ModalDetalleCompraLabel">
+                Detalle de la venta
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="modal-body">
+                <div>
+                  <div className="form-row">
+                    <div className="accordion col-md-12" id="accordionExample">
+                      {/* Acordeon detalles de la venta */}
+                      <div className="card">
+                        <div className="card-header" id="headingOne">
+                          <h2 className="mb-0">
+                            <button
+                              className="btn btn-link btn-block text-left"
+                              type="button"
+                              data-toggle="collapse"
+                              data-target="#collapseOne"
+                              aria-expanded="true"
+                              aria-controls="collapseOne"
+                            >
+                              Detalles de la venta
+                            </button>
+                          </h2>
+                        </div>
+
+                        {pedidoSeleccionado && (
+                          <div
+                            id="collapseOne"
+                            className="collapse show"
+                            aria-labelledby="headingOne"
+                            data-parent="#accordionExample"
+                          >
+                            <div className="card-body">
+                              <div className="row mb-3">
+
+                                <div className="col-md-6">
+                                  <label>Cliente:</label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={
+                                      pedidoSeleccionado.Cliente.NombreApellido
+                                    }
+                                    disabled
+                                  />
+                                </div>
+
+                                <div className="col-md-6">
+                                  <label>Método de pago:</label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={pedidoSeleccionado.TipoPago}
+                                    disabled
+                                  />
+                                </div>
+
+                                <div className="col-md-12 ">
+                                  <label>Fecha:</label>
+                                  <input
+                                    type="date"
+                                    className="form-control"
+                                    value={pedidoSeleccionado.Fecha}
+                                    disabled
+                                  />
+                                </div>
+
+                              </div>
+                              <div className="table-responsive">
+                                <table className="table table-bordered">
+                                  <thead>
+                                    <tr>
+                                      <th>Producto</th>
+                                      <th>Cantidad</th>
+                                      <th>Precio</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {pedidoSeleccionado.DetallesPedidosProductos.map(
+                                      (detalle, index) => (
+                                        <tr key={index}>
+                                          <td>
+                                            {getProductoName(
+                                              detalle.IdProducto
+                                            )}
+                                          </td>
+                                          <td>{detalle.Cantidad}</td>
+                                          <td>
+                                            {formatCurrency(detalle.Precio)}
+                                          </td>
+                                        </tr>
+                                      )
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                              <div className="form-group">
+                                <label>Total:</label>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  value={formatCurrency(
+                                    pedidoSeleccionado.Total
+                                  )}
+                                  disabled
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Acordeon comprobante de la venta */}
+                      {pedidoSeleccionado?.TipoPago == "Transferencia" &&(
+
+                      <div className="card">
+                        <div className="card-header" id="headingTwo">
+                          <h2 className="mb-0">
+                            <button
+                              className="btn btn-link btn-block text-left collapsed"
+                              type="button"
+                              data-toggle="collapse"
+                              data-target="#collapseTwo"
+                              aria-expanded="false"
+                              aria-controls="collapseTwo"
+                            >
+                              Comprobante de pago
+                            </button>
+                          </h2>
+                        </div>
+
+                        {/* {insumoSeleccionado && ( */}
+                        <div
+                          id="collapseTwo"
+                          className="collapse"
+                          aria-labelledby="headingTwo"
+                          data-parent="#accordionExample"
+                        >
+                          <div className="card-body">
+                            <div className="container">
+                              {/* Imagen comprobante */}
+                              <div
+                                className="container py-2 d-flex justify-content-center align-items-center"
+                                style={{
+                                  overflow: "visible",
+                                  position: "relative",
+                                }}
+                              >
+                                {/* si existe renderizar la imagen del comprobante, si no mostrar texto  */}
+                                {imagenComprobantePrevisualizar != "0" ? (
+                                  <img
+                                    onClick={handleToggleZoom}
+                                    src={imagenComprobantePrevisualizar}
+                                    alt="Vista previa imagen del comprobante"
+                                    style={{
+                                      cursor: "pointer",
+                                      // width: "80%",
+                                      // height: "auto",
+                                      // maxWidth: "200px",
+                                      // display: "",
+                                      // border: "1px solid black",
+                                      // width: "30%", /* Ajusta al 100% del ancho del contenedor */
+                                      maxWidth:
+                                        "720px" /* Limita el ancho máximo */,
+                                      height:
+                                        "300px" /* Mantiene la proporción */,
+
+                                      objectFit: "cover",
+                                      position: "relative",
+                                      // top: '-50px', /* Ajusta el desbordamiento hacia arriba */
+                                      left: "0",
+
+                                      zIndex: 1 /* Asegura que la imagen esté sobre otros elementos */,
+                                      transform: isZoomed
+                                        ? "scale(2.1)"
+                                        : "scale(1)" /* Aplica o quita el zoom */,
+                                      transition:
+                                        "transform 0.3s ease-in-out" /* Suaviza el cambio */,
+                                    }}
+                                    className="zoom-image"
+                                  />
+                                ) : (
+                                  <p className="font-weight-bold text-dark">
+                                    Aún no hay un comprobante
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Input file comprobante */}
+                              {/* Renderizar solo si es un cliente y no hay comprobante */}
+                              {auth.idCliente &&
+                                pedidoSeleccionado?.ImagenComprobante ==
+                                  "0" && (
+                                  <div className="inputComprobante d-flex justify-content-center align-items-center pt-4">
+                                    <input
+                                      accept=".png, .jpg, .jpeg"
+                                      type="file"
+                                      name="file-3"
+                                      id="inputFileReferencia"
+                                      className={`inputfileComprobante inputfileComprobante-2 ${
+                                        errors.fileComprobante
+                                          ? "is-invalid"
+                                          : ""
+                                      } `}
+                                      onChange={handleChangeImagenComprobante}
+                                    />
+                                    <label
+                                      className="d-flex justify-content-center align-items-center"
+                                      htmlFor="inputFileReferencia"
+                                    >
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="iborrainputfileComprobante"
+                                        width="20"
+                                        height="17"
+                                        viewBox="0 0 20 17"
+                                      >
+                                        <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
+                                      </svg>
+                                      <span
+                                        className="iborrainputfileComprobante"
+                                        id="spanInputFileComprobante"
+                                      >
+                                        Seleccionar archivo
+                                      </span>
+                                    </label>
+                                    {/* {renderErrorMessage(errors.fileComprobante)} */}
+                                  </div>
+                                )}
+
+                              {/* Boton enviar comprobante */}
+                              {showComprobanteButton && (
+                                <div className="d-flex justify-content-center align-items-center pt-4">
+                                  <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={() =>
+                                      enviarComprobante(
+                                        pedidoSeleccionado.IdPedido,
+                                        pedidoSeleccionado.IdImagenComprobante
+                                      )
+                                    }
+                                  >
+                                    Subir Comprobante :)
+                                  </button>
+                                </div>
+                              )}
+
+                              {auth.idUsuario &&
+                                pedidoSeleccionado?.ImagenComprobante !=
+                                  "0" && (
+                                  <div className="d-flex justify-content-center pt-4">
+                                    <button
+                                      className="btn btn-info"
+                                      onClick={() =>
+                                        handleDownload(pedidoSeleccionado)
+                                      }
+                                    >
+                                      {" "}
+                                      Descargar comprobante
+                                    </button>
+                                  </div>
+                                )}
+
+                              {/*Renderizar botones de acción con comprobante, solo admin puede acceder a ellos */}
+                              {auth.idUsuario &&
+                                pedidoSeleccionado?.ImagenComprobante != "0" &&
+                                pedidoSeleccionado?.IdEstadoPedido == 1 && (
+                                  <div
+                                    className="d-flex pt-4"
+                                    style={{
+                                      justifyContent: "space-evenly",
+                                    }}
+                                  >
+                                    <button
+                                      type="button"
+                                      className="btn btn-primary"
+                                      onClick={() =>
+                                        aceptarComprobante(
+                                          pedidoSeleccionado.IdPedido
+                                        )
+                                      }
+                                    >
+                                      Aceptar Comprobante :)
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      className="btn btn-danger"
+                                      // hacer una especie de funcion en el onclck para determinar si hay o no intentos
+                                      onClick={() => {
+                                        if (pedidoSeleccionado.Intentos > 1) {
+                                          rechazarComprobante(
+                                            pedidoSeleccionado.IdPedido,
+                                            pedidoSeleccionado.Intentos,
+                                            pedidoSeleccionado.Cliente
+                                              .NombreApellido,
+                                            pedidoSeleccionado.Cliente.Correo
+                                          );
+                                        } else {
+                                          rechazarComprobante(
+                                            pedidoSeleccionado.IdPedido,
+                                            pedidoSeleccionado.Intentos,
+                                            pedidoSeleccionado.Cliente
+                                              .NombreApellido,
+                                            pedidoSeleccionado.Cliente.Correo
+                                          );
+                                        }
+                                      }}
+                                    >
+                                      Rechazar Comprobante :(
+                                    </button>
+                                  </div>
+                                )}
+                            </div>
+                          </div>
+                        </div>
+                        {/* )} */}
+                      </div>
+                      )}
+
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-dismiss="modal"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Fin modal ver detalle venta */}
+
+      <div className="container-fluid">
+        {/* <!-- Page Heading --> */}
+        <div className="d-flex align-items-center justify-content-between">
+          <h1 className="h3 mb-3 text-center text-dark">Gestión de Ventas</h1>
+        </div>
+
+        {/* <!-- Tabla de Pedidos --> */}
+        <div className="card shadow mb-4">
+          <div className="card-header py-1 d-flex justify-content-between align-items-center">
+            <SearchBar
+              searchTerm={searchTerm}
+              onSearchTermChange={handleSearchTermChange}
+            />
+            <button
+              type="button"
+              className="btn btn-dark"
+              data-toggle="modal"
+              data-target="#modalCompras"
+              onClick={() => Clientes.length > 0 && openModal(1)}
+              style={{
+                width: "165px",
+              }}
+            >
+              <i className="fas fa-pencil-alt"></i> Añadir Venta
+            </button>
+          </div>
+          <div className="card-body">
+            <div className="table-responsive">
+              {/* Si un usuario esta logueado renderizara la tabla de admin, si no renderizara la tabla del cliente  */}
+              <table className="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Método pago</th>
+                    <th>Fecha</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentPedidos.map((pedido) => (
+                    <tr key={pedido.IdPedido}>
+                      <td>{getClienteName(pedido.IdCliente)}</td>
+
+                      <td>{pedido.TipoPago}</td>
+
+                      <td>{formatearFecha(pedido.Fecha)}</td>
+
+                      <td>{formatCurrency(pedido.Total)}</td>
+
+                      <td>
+                        {convertEstadoPedidoIdToName(pedido.IdEstadoPedido)}
+                      </td>
+
+                      <td>
+                        <div className="d-flex">
+                          {/* {pedido.IdEstadoPedido === 4 ||
+                          pedido.IdEstadoPedido === 3 ? (
+                            <button
+                              className="btn btn-secondary btn-sm mr-2 rounded-icon"
+                              disabled
+                            >
+                              <i className="fas fa-times-circle"></i>
+                            </button>
+                          ) : (
+                            <button
+                              data-toggle="modal"
+                              data-target="#modalEstadoPedido"
+                              onClick={() => openModalEstado(pedido)}
+                              className="btn btn-danger btn-sm mr-2 rounded-icon"
+                              title="Editar"
+                            >
+                              <i className="fas fa-times-circle"></i>
+                            </button>
+                          )} */}
+
+                          <button
+                            onClick={() => handleDetallePedido(pedido.IdPedido)}
+                            className={`btn btn-sm btn-info mr-2 rounded-icon`}
+                            data-toggle="modal"
+                            data-target="#modalDetalleCompra"
+                            title="Detalle"
+                          >
+                            <i className="fas fa-info-circle"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        </div>
+        {/* Fin tabla de compras */}
+      </div>
+    </>
+  );
+};

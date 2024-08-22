@@ -9,14 +9,18 @@ import {
   editImageDesign,
   editImageReference,
   subirImageDesign,
-  subirImageDesignAdmin,
+  // subirImageDesignAdmin,
   subirImageReference,
 } from "../../firebase/config";
 import withReactContent from "sweetalert2-react-content";
-
+ 
+import { useAuth } from "../../context/AuthProvider";
 export const Disenios = () => {
   const url = "http://localhost:3000/api/disenios";
+  const {auth} = useAuth();
   const [Disenios, setDisenios] = useState([]);
+  const [DiseniosCliente, setDiseniosCliente] = useState([]);
+
   const [IdDisenio, setIdDisenio] = useState("");
   const [NombreDisenio, setNombreDisenio] = useState("");
   const [Fuente, setFuente] = useState("");
@@ -32,25 +36,31 @@ export const Disenios = () => {
   const [IdImagenReferencia, setIdImagenReferencia] = useState("");
   const [disenioSeleccionado, setDisenioSeleccionado] = useState(null);
 
+
+  const [ImagenDisenioPrevisualizar, setImagenDisenioPrevisualizar] = useState("");
+  const [ImagenReferenciaPrevisualizar, setImagenReferenciaPrevisualizar] = useState("");
+
+  const [ImagenDisenioUpdate, setImagenDisenioUpdate] = useState("");
+  const [ImagenReferenciaUpdate, setImagenReferenciaUpdate] = useState("");
+
   let IdImagenDisenioCreate;
   let ImagenDisenioCreate;
 
   let IdImagenDisenioUpdate;
-  let ImagenDisenioUpdate;
 
   // variables temporales de para el modal de actualizar diseño
 
-  const [FuenteTemporalEdit, setFuenteTemporalEdit] = useState("");
-  const [TamanioFuenteTemporalEdit, setTamanioFuenteTemporalEdit] =
-    useState("");
-  const [ColorFuenteTemporalEdit, setColorFuenteTemporalEdit] = useState("");
-  const [PosicionFuenteTemporalEdit, setPosicionFuenteTemporalEdit] =
-    useState("");
+  // const [FuenteTemporalEdit, setFuenteTemporalEdit] = useState("");
+  // const [TamanioFuenteTemporalEdit, setTamanioFuenteTemporalEdit] =
+  //   useState("");
+  // const [ColorFuenteTemporalEdit, setColorFuenteTemporalEdit] = useState("");
+  // const [PosicionFuenteTemporalEdit, setPosicionFuenteTemporalEdit] =
+  //   useState("");
 
-  const [TamanioImagenTemporalEdit, setTamanioImagenTemporalEdit] =
-    useState("");
-  const [PosicionImagenTemporalEdit, setPosicionImagenTemporalEdit] =
-    useState("");
+  // const [TamanioImagenTemporalEdit, setTamanioImagenTemporalEdit] =
+  //   useState("");
+  // const [PosicionImagenTemporalEdit, setPosicionImagenTemporalEdit] =
+  //   useState("");
   const [ImagenDisenioTemporalEdit, setImagenDisenioTemporalEdit] =
     useState("");
   const [ImagenReferenciaTemporalEdit, setImagenReferenciaTemporalEdit] =
@@ -107,54 +117,29 @@ export const Disenios = () => {
       setOperation(1);
       setIdDisenio("");
       setNombreDisenio("");
-      setFuente("");
-      setTamanioFuente("");
-      setColorFuente("#000000");
-      setShowColorValue(false);
-      setShowExistsColor(false);
-      setPosicionFuente("");
+      // setFuente("");
+      // setTamanioFuente("");
+      // setColorFuente("#000000");
+      // setShowColorValue(false);
+      // setShowExistsColor(false);
+      // setPosicionFuente("");
 
       setTamanioImagen("");
       setPosicionImagen("");
       setPrecioDisenio("");
-      setImagenDisenio("0");
-      setImagenReferencia("0");
-      setShowInputsFile(true);
+      setImagenDisenio(null);
+      setImagenReferencia(null);
+      setImagenDisenioPrevisualizar(null);
+      setImagenReferenciaPrevisualizar(null);
 
-      setShowDisenioInput(false);
+      // setShowInputsFile(true);
 
-      setShowColorInput(false);
-      setShowColor(true);
+      // setShowDisenioInput(false);
+
+      // setShowColorInput(false);
+      // setShowColor(true);
       setShowDisenio(true);
 
-      // document.getElementById("nombreFuente").selectedIndex=0;
-      // document.getElementById("tamanioFuente").selectedIndex=0;
-      // document.getElementById("posicionFuente").selectedIndex=0;
-
-      const selectFuente = document.getElementById("nombreFuente");
-      const selectTamanioFuente = document.getElementById("tamanioFuente");
-      const selectPosicionFuente = document.getElementById("posicionFuente");
-
-      const selectTamanioImagen = document.getElementById("tamanioImagen");
-      const selectPosicionImagen = document.getElementById("posicionImagen");
-
-      if (selectFuente.options.length === 6) {
-        const nuevaOpcion1 = new Option("No aplica", "No aplica");
-        const nuevaOpcion2 = new Option("No aplica", "No aplica");
-        const nuevaOpcion3 = new Option("No aplica", "No aplica");
-
-        selectFuente.add(nuevaOpcion1);
-        selectTamanioFuente.add(nuevaOpcion2);
-        selectPosicionFuente.add(nuevaOpcion3);
-      }
-
-      if (selectTamanioImagen.options.length == 4) {
-        const nuevaOpcionSelectTamImg = new Option("No aplica", "No aplica");
-        const nuevaOpcionSelectPosImg = new Option("No aplica", "No aplica");
-
-        selectTamanioImagen.add(nuevaOpcionSelectTamImg);
-        selectPosicionImagen.add(nuevaOpcionSelectPosImg);
-      }
 
       setTimeout(() => {
         document.getElementById("spanInputFileDisenio").innerHTML =
@@ -172,132 +157,48 @@ export const Disenios = () => {
 
       setIdDisenio(disenio.IdDisenio);
       setNombreDisenio(disenio.NombreDisenio);
-      setFuente(disenio.Fuente);
-      setTamanioFuente(disenio.TamanioFuente);
-      setColorFuente(disenio.ColorFuente);
-      setPosicionFuente(disenio.PosicionFuente);
+
       setTamanioImagen(disenio.TamanioImagen);
       setPosicionImagen(disenio.PosicionImagen);
       setPrecioDisenio(disenio.PrecioDisenio);
+      
       setImagenDisenio(disenio.ImagenDisenio);
       setImagenReferencia(disenio.ImagenReferencia);
+
+      setImagenDisenioPrevisualizar(disenio.ImagenDisenio);
+      setImagenReferenciaPrevisualizar(disenio.ImagenReferencia);
 
       setIdImagenDisenio(disenio.IdImagenDisenio);
       setIdImagenReferencia(disenio.IdImagenReferencia);
 
-      setFuenteTemporalEdit(disenio.Fuente);
-      setTamanioFuenteTemporalEdit(disenio.TamanioFuente);
-      setColorFuenteTemporalEdit(disenio.ColorFuente);
-      setPosicionFuenteTemporalEdit(disenio.PosicionFuente);
+      setImagenDisenioUpdate(disenio.ImagenDisenio);
+      setImagenReferenciaUpdate(disenio.ImagenReferencia);
 
-      setTamanioImagenTemporalEdit(disenio.TamanioImagen);
-      setPosicionImagenTemporalEdit(disenio.PosicionImagen);
-      setImagenDisenioTemporalEdit(disenio.ImagenDisenio);
-      setImagenReferenciaTemporalEdit(disenio.ImagenReferencia);
+      
+      // setImagenDisenioPrevisualizar(null);
+      // setImagenReferenciaPrevisualizar(null);
 
       // console.log(IdImagenDisenio);
 
-      setShowInputsFile(false);
-
-      const selectPosicionImagen = document.getElementById("posicionImagen");
-      const selectTamanioImagen = document.getElementById("tamanioImagen");
-
-      const selectFuente = document.getElementById("nombreFuente");
-      const selectTamanioFuente = document.getElementById("tamanioFuente");
-      const selectPosicionFuente = document.getElementById("posicionFuente");
-
-      if (disenio.Fuente === "No aplica") {
-        // Si las opciones de la fuente tiene un tamaño de 6 se agregara opcs a los atributos de fuente
-        if (selectFuente.options.length === 6) {
-          const nuevaOpcion1 = new Option("No aplica", "No aplica");
-          const nuevaOpcion2 = new Option("No aplica", "No aplica");
-          const nuevaOpcion3 = new Option("No aplica", "No aplica");
-
-          selectFuente.add(nuevaOpcion1);
-          selectTamanioFuente.add(nuevaOpcion2);
-          selectPosicionFuente.add(nuevaOpcion3);
-        }
-
-        selectPosicionImagen.remove(6);
-        selectTamanioImagen.remove(4);
-      } else {
-        if (selectTamanioImagen.options.length <= 4) {
-          const nuevaOpcionSelectTamImg = new Option("No aplica", "No aplica");
-          const nuevaOpcionSelectPosImg = new Option("No aplica", "No aplica");
-
-          selectTamanioImagen.add(nuevaOpcionSelectTamImg);
-          selectPosicionImagen.add(nuevaOpcionSelectPosImg);
-        }
-      }
-
-      if (disenio.ColorFuente !== "No aplica") {
-        setShowColorInput(false);
-        setShowColor(false);
-        setShowExistsColor(true);
-      } else {
-        setShowExistsColor(false);
-        setShowColor(false);
-        setShowColorInput(true);
-      }
-
-      // if (disenio.TamanioFuente === "No aplica") {
-
-      // }
-
-      if (disenio.ImagenDisenio === "No aplica") {
-        setShowDisenioInput(true);
-
-        // Elimina las opciones de ("No aplica") de los selects de los atributos de fuente
-        if (selectFuente.options.length >= 7) {
-          selectFuente.remove(6);
-          selectTamanioFuente.remove(4);
-          selectPosicionFuente.remove(6);
-        }
-
-        if (selectTamanioImagen.options.length <= 4) {
-          selectFuente.remove(6);
-          selectTamanioFuente.remove(4);
-          selectPosicionFuente.remove(6);
-
-          const nuevaOpcionSelectTamImg = new Option("No aplica", "No aplica");
-          const nuevaOpcionSelectPosImg = new Option("No aplica", "No aplica");
-
-          selectTamanioImagen.add(nuevaOpcionSelectTamImg);
-          selectPosicionImagen.add(nuevaOpcionSelectPosImg);
-        }
-      } else {
-        setShowDisenioInput(false);
-        setShowDisenio(true);
-        setTimeout(() => {
-          document.getElementById("spanInputFileDisenio").innerHTML =
-            "Seleccionar archivo";
-        }, 10);
-      }
-
-      // setShowColor(false);
 
       document.getElementById("spanInputFileReferencia").innerHTML =
         "Seleccionar archivo";
 
+        document.getElementById("spanInputFileDisenio").innerHTML =
+        "Seleccionar archivo";
+
+
       setErrors({
         NombreDisenio: "",
-        Fuente: "",
-        TamanioFuente: "",
-        ColorFuente: "",
-        PosicionFuente: "",
         PosicionImagen: "",
       });
 
-      const errors = {
-        NombreDisenio: validateTamanioFuente(disenio.NombreDisenio),
-        Fuente: validateTamanioFuente(disenio.Fuente),
+      // const errors = {
+      //   NombreDisenio: validateTamanioFuente(disenio.NombreDisenio),
+      //   // Fuente: validateTamanioFuente(disenio.Fuente),
 
-        TamanioFuente: validateTamanioFuente(disenio.TamanioFuente),
-        ColorFuente: validateColorFuente(disenio.ColorFuente),
-        PosicionFuente: validatePosicionFuente(disenio.PosicionFuente),
-        PosicionImagen: validatePosicionImagen(disenio.PosicionImagen),
-      };
-      setErrors(errors);
+      // };
+      // setErrors(errors);
     }
   };
 
@@ -319,129 +220,86 @@ export const Disenios = () => {
     }
   };
 
-  const [editDesignFile, setEditDesignFile] = useState("");
-  // const [editReferenceFile,setEditReferenceFile] = useState("");
 
   const guardarDisenio = async () => {
-    if (NombreDisenio === "") {
-      show_alerta({
-        message: "Se necesita un nombre para el diseño",
-        type: "error",
-      });
-      return;
-    } else {
-      const existe = Disenios.some(
+    
+
+    if (operation === 1) {
+
+      // Validar si existe un diseño con ese nombre
+      const existeNombreDisenio = Disenios.some(
         (disenio) => disenio.NombreDisenio === NombreDisenio
       );
 
-      if (existe) {
+      if (existeNombreDisenio) {
         show_alerta({
           message: "Ya existe un diseño con ese nombre",
           type: "error",
         });
         return;
       }
-    }
 
-    if (Fuente === "") {
-      show_alerta({
-        message: "Se necesita una fuente para el diseño",
-        type: "error",
-      });
-      return;
-    }
-    if (TamanioFuente === "") {
-      show_alerta({
-        message: "Se necesita un tamaño para la fuente",
-        type: "error",
-      });
-      return;
-    }
-
-    if (ColorFuente === "") {
-      show_alerta({
-        message: "Se necesita un color para la fuente",
-        type: "error",
-      });
-      return;
-    }
-
-    if (PosicionFuente === "") {
-      show_alerta({
-        message: "Se necesita una posición para la fuente",
-        type: "error",
-      });
-      return;
-    }
-
-    if (TamanioImagen === "") {
-      show_alerta({
-        message: "Se necesita un tamaño para la imagen del diseño",
-        type: "error",
-      });
-      return;
-    }
-
-    if (PosicionImagen === "") {
-      show_alerta({
-        message: "Se necesita una posición para la imagen del diseño",
-        type: "error",
-      });
-      return;
-    }
-
-    if (PrecioDisenio === "" || isNaN(PrecioDisenio) || PrecioDisenio < 0) {
-      show_alerta({
-        message: "El precio del diseño es invalido",
-        type: "error",
-      });
-      return;
-    }
-
-    if (ImagenDisenio === "0") {
-      show_alerta({
-        message: "Se necesita una imagen del diseño",
-        type: "error",
-      });
-      return;
-    }
-
-    if (ImagenReferencia === "0") {
-      show_alerta({
-        message: "Se necesita una imagen de referencia del diseño",
-        type: "error",
-      });
-      return;
-    }
-
-    if (operation === 1) {
-      if (ImagenDisenio !== "No aplica") {
-        const [idDesign, ulrDesign] = await subirImageDesignAdmin(
-          ImagenDisenio
-        );
-
-        IdImagenDisenioCreate = idDesign;
-        ImagenDisenioCreate = ulrDesign;
-      } else {
-        IdImagenDisenioCreate = "No aplica";
-        ImagenDisenioCreate = "No aplica";
+      if (NombreDisenio === "") {
+        show_alerta({
+          message: "Se necesita un nombre para el diseño",
+          type: "error",
+        });
+        return;
+      } 
+        
+      if (TamanioImagen === "") {
+        show_alerta({
+          message: "Se necesita un tamaño para la imagen del diseño",
+          type: "error",
+        });
+        return;
+      }
+  
+      if (PosicionImagen === "") {
+        show_alerta({
+          message: "Se necesita una posición para la imagen del diseño",
+          type: "error",
+        });
+        return;
+      }
+  
+      if (PrecioDisenio === "" || isNaN(PrecioDisenio) || PrecioDisenio < 0) {
+        show_alerta({
+          message: "El precio del diseño es invalido",
+          type: "error",
+        });
+        return;
+      }
+  
+      if (!ImagenDisenio ) {
+        show_alerta({
+          message: "Se necesita una imagen del diseño",
+          type: "error",
+        });
+        return;
+      }
+  
+      if (!ImagenReferencia) {
+        show_alerta({
+          message: "Se necesita una imagen de referencia del diseño",
+          type: "error",
+        });
+        return;
       }
 
-      const [ulrReference, idReference] = await subirImageReference(
-        ImagenReferencia
-      );
+
+      const [idDesign, ulrDesign] = await subirImageDesign(ImagenDisenio);     
+
+      const [ulrReference, idReference] = await subirImageReference(ImagenReferencia);
 
       await enviarSolicitud("POST", {
+        IdUsuario: auth.idUsuario || auth.idCliente, 
         NombreDisenio,
-        Fuente,
-        TamanioFuente,
-        ColorFuente,
-        PosicionFuente,
         TamanioImagen,
         PosicionImagen,
         PrecioDisenio,
-        IdImagenDisenio: IdImagenDisenioCreate,
-        ImagenDisenio: ImagenDisenioCreate,
+        IdImagenDisenio: idDesign,
+        ImagenDisenio: ulrDesign,
         IdImagenReferencia: idReference,
         ImagenReferencia: ulrReference,
         Estado: "Activo",
@@ -452,58 +310,66 @@ export const Disenios = () => {
         type: "success",
       });
     } else if (operation === 2) {
-      let inputDisenioFile;
 
-      if (TamanioImagen !== "No aplica") {
-        inputDisenioFile = document.getElementById("inputFileDisenio").files[0];
+      if (NombreDisenio === "") {
+        show_alerta({
+          message: "Se necesita un nombre para el diseño",
+          type: "error",
+        });
+        return;
+      } 
+      
+      if (PrecioDisenio === "" || isNaN(PrecioDisenio) || PrecioDisenio < 0) {
+        show_alerta({
+          message: "El precio del diseño es invalido",
+          type: "error",
+        });
+        return;
       }
 
-      const inputReferenciaFile = document.getElementById("inputFileReferencia")
-        .files[0];
+      if (!ImagenDisenio ) {
+        show_alerta({
+          message: "Se necesita una imagen del diseño",
+          type: "error",
+        });
+        return;
+      }
+  
+      if (!ImagenReferencia) {
+        show_alerta({
+          message: "Se necesita una imagen de referencia del diseño",
+          type: "error",
+        });
+        return;
+      }
+      
+      let inputDisenioFile = document.getElementById("inputFileDisenio").files[0];
 
-      if (inputDisenioFile) {
-        const readerDesignFile = new FileReader();
-        readerDesignFile.onloadend = () => {
-          setEditDesignFile(readerDesignFile.result);
-        };
-        readerDesignFile.readAsDataURL(inputDisenioFile);
+      let inputReferenciaFile = document.getElementById("inputFileReferencia").files[0];
 
-        if (IdImagenDisenio === "No aplica") {
-          const [idImageDesign, urlDesign] = await subirImageDesignAdmin(
-            ImagenDisenio
-          );
+      // Si hay archivos en los inputs de diseño y referencia
+      if (inputDisenioFile) { 
+        await editImageDesign(IdImagenDisenio, inputDisenioFile);
 
-          IdImagenDisenioUpdate = idImageDesign;
-          ImagenDisenioUpdate = urlDesign;
-        } else {
-          await editImageDesign(IdImagenDisenio, ImagenDisenio);
-
-          IdImagenDisenioUpdate = IdImagenDisenio;
-          ImagenDisenioUpdate = ImagenDisenioTemporalEdit;
-        }
-      } else if (TamanioImagen === "No aplica") {
-        IdImagenDisenioUpdate = "No aplica";
-        ImagenDisenioUpdate = "No aplica";
+        // IdImagenDisenioUpdate = IdImagenDisenio;
+        // ImagenDisenioUpdate = ImagenDisenioTemporalEdit;
       }
 
       if (inputReferenciaFile) {
-        await editImageReference(IdImagenReferencia, ImagenReferencia);
+        await editImageReference(IdImagenReferencia, inputReferenciaFile);
+        // ImagenDisenioUpdate = ImagenReferencia;
       }
 
       await enviarSolicitud("PUT", {
         IdDisenio,
         NombreDisenio,
-        Fuente,
-        TamanioFuente,
-        ColorFuente,
-        PosicionFuente,
         TamanioImagen,
         PosicionImagen,
         PrecioDisenio,
-        IdImagenDisenio: IdImagenDisenioUpdate,
-        ImagenDisenio: ImagenDisenioUpdate,
+        IdImagenDisenio,
+        ImagenDisenio:ImagenDisenioUpdate,
         IdImagenReferencia,
-        ImagenReferencia: ImagenReferenciaTemporalEdit,
+        ImagenReferencia:ImagenReferenciaUpdate,
       });
 
       show_alerta({
@@ -512,11 +378,16 @@ export const Disenios = () => {
       });
 
       setTimeout(() => {
-        setImagenReferencia(null);
+        setImagenDisenio(null);
+        setImagenDisenioPrevisualizar(null);
+        setImagenReferencia(null);  
+        setImagenReferenciaPrevisualizar(null);
       }, 1000);
     }
   };
 
+
+  // Función para validar el nombre de diseño
   const validateNombreDisenio = (value) => {
     if (!value) {
       return "Escribe el nombre del diseño";
@@ -527,60 +398,7 @@ export const Disenios = () => {
     return "";
   };
 
-  const validateFuente = (value) => {
-    if (!value) {
-      return "Escribe el nombre de la fuente";
-    }
-    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value)) {
-      return "El nombre de la fuente solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
-    }
-    return "";
-  };
-
-  // Función para validar el número de documento
-  const validateTamanioFuente = (value) => {
-    if (!value) {
-      return "Escribe el tamaño de la fuente";
-    }
-    if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ0-9]+( [A-Za-zñÑáéíóúÁÉÍÓÚ0-9]+)*$/.test(value)) {
-      return "El tamaño de la fuente solo puede contener letras, tildes, la letra 'ñ' y numeros con un solo espacio entre palabras";
-    }
-    return "";
-  };
-
-  // Funcion para validar el color de la fuente
-  const validateColorFuente = (value) => {
-    if (value == "#000000") {
-      return "Escribe el color de la fuente.";
-    }
-    if (!/^#([0-9A-F]{3}){1,2}$/i.test(value)) {
-      return "El color de la fuente solo puede tener formato hexadecimal.";
-    }
-    return "";
-  };
-
-  // Función para validar el teléfono
-  const validatePosicionFuente = (value) => {
-    if (!value) {
-      return "Selecciona una posición para la fuente";
-    }
-    return "";
-  };
-
-  // Función para validar la dirección
-  const validatePosicionImagen = (value) => {
-    if (!value) {
-      return "Escribe la dirección";
-    }
-    if (!/^[a-zA-Z0-9#-\s]*$/.test(value)) {
-      return "La dirección solo puede contener letras, números, # y -";
-    }
-    // if (!/^[a-zA-Z0-9#-\s]*$/.test(value)) {
-    //   return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
-    // }
-    return "";
-  };
-
+  // Función para validar el precio de diseño
   const validatePrecioDisenio = (value) => {
     if (!value) {
       return "Digite el precio del diseño";
@@ -589,20 +407,6 @@ export const Disenios = () => {
       return "El precio del diseño solo puede contener números y decimales";
     }
     return "";
-  };
-
-  // Función para validar el ImagenDisenio
-  const validateImagenDisenio = () => {
-    if (!ImagenDisenio) {
-      return "Ingresa una imagen para tu diseño";
-    }
-    return "";
-  };
-
-  // Función para validar la ImagenReferencia
-  const validateImagenReferencia = () => {
-    console.log("imgRef");
-    return "Ingresa la imagen de referencia para tu diseño";
   };
 
   // Función para manejar cambios en el nombre de diseño
@@ -621,362 +425,12 @@ export const Disenios = () => {
     }));
   };
 
-  // Función para manejar cambios en la fuente
-  const handleChangeFuente = (e) => {
-    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
-
-    setFuente(value);
-
-    const errorMessage = validateFuente(value);
-    setErrors((prevState) => ({
-      ...prevState,
-      Fuente: errorMessage,
-    }));
-
-    const selectPosicionImagen = document.getElementById("posicionImagen");
-    const selectTamanioImagen = document.getElementById("tamanioImagen");
-
-    if (e.target.value === "No aplica") {
-      console.log("ChangeFuente if (no aplica)");
-
-      document.getElementById("tamanioFuente").selectedIndex = 4;
-      document.getElementById("posicionFuente").selectedIndex = 4;
-      setTamanioFuente("No aplica");
-      setPosicionFuente("No aplica");
-
-      selectTamanioImagen.remove(4);
-      selectPosicionImagen.remove(6);
-
-      if (operation == 2) {
-        console.log(`valor de showcolor ${showColor}`);
-        console.log(`valor de showcolorinput ${showColorInput}`);
-
-        if (showExistsColor) {
-          console.log("Entro showExistsColor");
-          setShowExistsColor(false);
-          setShowColorInput(true);
-          setColorFuente("No aplica");
-        } else if (FuenteTemporalEdit === "No aplica") {
-          setShowColor(false);
-          setShowColorInput(true);
-          setColorFuente("No aplica");
-        }
-      } else if (operation == 1) {
-        console.log(`valor de showcolor ${showColor} (operation1)`);
-
-        setColorFuente("No aplica");
-        setShowColor(false);
-        setShowColorInput(true);
-      }
-    } else {
-      if (selectPosicionImagen.options.length <= 6) {
-        console.log("ChangeFuente else if (selectPosicionImagen.options < 6)");
-        const nuevaOpcionSelectPosImg = new Option("No aplica", "No aplica");
-        const nuevaOpcionSelectTamImg = new Option("No aplica", "No aplica");
-        selectTamanioImagen.add(nuevaOpcionSelectTamImg);
-        selectPosicionImagen.add(nuevaOpcionSelectPosImg);
-        // document.getElementById("tamanioFuente").selectedIndex=0;
-        // document.getElementById("posicionFuente").selectedIndex=0;
-
-        if (operation == 1) {
-          setTamanioFuente("");
-          setPosicionFuente("");
-          setColorFuente("#000000");
-          setShowColorInput(false);
-          setShowColor(true);
-        } else if (operation == 2 && FuenteTemporalEdit !== "No aplica") {
-          console.log("elseFuenteOperation2");
-          console.log(FuenteTemporalEdit);
-
-          setTamanioFuente(TamanioFuenteTemporalEdit);
-          setPosicionFuente(PosicionFuenteTemporalEdit);
-          setColorFuente(ColorFuenteTemporalEdit);
-          setShowColorInput(false);
-          setShowExistsColor(true);
-        } else if (operation == 2 && FuenteTemporalEdit === "No aplica") {
-          console.log("elseFuenteOperation2&&");
-          console.log(FuenteTemporalEdit);
-
-          setTamanioFuente("");
-          setPosicionFuente("");
-          setColorFuente("#000000");
-          setShowColorInput(false);
-          setShowColor(true);
-        }
-      }
-    }
-  };
-
-  // Función para manejar cambios en el tamaño de la fuente
-  const handleChangeTamanioFuente = (e) => {
-    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
-    setTamanioFuente(value);
-
-    // Validar el nombre y apellido
-    const errorMessage = validateTamanioFuente(value);
-    setErrors((prevState) => ({
-      ...prevState,
-      TamanioFuente: errorMessage,
-    }));
-
-    const selectPosicionImagen = document.getElementById("posicionImagen");
-
-    const selectTamanioImagen = document.getElementById("tamanioImagen");
-
-    if (e.target.value === "No aplica") {
-      console.log("ChangeTamanioFuente if (no aplica)");
-      setFuente("No aplica");
-      setPosicionFuente("No aplica");
-      setColorFuente("No aplica");
-      // setShowColor(false);
-      // setShowColorInput(true);
-
-      selectTamanioImagen.remove(4);
-      selectPosicionImagen.remove(6);
-
-      if (operation == 2) {
-        console.log(`valor de showcolor ${showColor}`);
-        console.log(`valor de showcolorinput ${showColorInput}`);
-
-        if (showExistsColor) {
-          console.log("Entro showExistsColor");
-          setShowExistsColor(false);
-          setShowColorInput(true);
-          setColorFuente("No aplica");
-        } else if (FuenteTemporalEdit === "No aplica") {
-          setShowColor(false);
-          setShowColorInput(true);
-          setColorFuente("No aplica");
-        }
-      } else if (operation == 1) {
-        console.log(`valor de showcolor ${showColor} (operation1)`);
-
-        setColorFuente("No aplica");
-        setShowColor(false);
-        setShowColorInput(true);
-      }
-    } else {
-      if (selectPosicionImagen.options.length <= 6) {
-        console.log("ChangeTamanioFuente else if (options < 6)");
-        const nuevaOpcionSelectPosImg = new Option("No aplica", "No aplica");
-        const nuevaOpcionSelectTamImg = new Option("No aplica", "No aplica");
-
-        selectTamanioImagen.add(nuevaOpcionSelectTamImg);
-        selectPosicionImagen.add(nuevaOpcionSelectPosImg);
-
-        if (operation == 1) {
-          setFuente("");
-          // setFuente("");
-          setPosicionFuente("");
-          setColorFuente("#000000");
-          setShowColorInput(false);
-          setShowColor(true);
-        } else if (operation == 2 && FuenteTemporalEdit !== "No aplica") {
-          setFuente(FuenteTemporalEdit);
-          setPosicionFuente(PosicionFuenteTemporalEdit);
-          setColorFuente(ColorFuenteTemporalEdit);
-          setShowColorInput(false);
-          setShowExistsColor(true);
-        } else if (operation == 2 && FuenteTemporalEdit === "No aplica") {
-          console.log("elseFuenteOperation2&&");
-          console.log(FuenteTemporalEdit);
-
-          setFuente("");
-          setPosicionFuente("");
-          setColorFuente("#000000");
-          setShowColorInput(false);
-          setShowColor(true);
-        }
-      }
-    }
-  };
-
-  const [colorValue, setColorValue] = useState("");
-
-  const [showcolorValue, setShowColorValue] = useState("");
-
-  // Función para manejar cambios en el color de la fuente
-  const handleChangeColorFuente = (e) => {
-    const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
-    setColorFuente(value);
-
-    setShowColorValue(true);
-
-    setTimeout(() => {
-      let spanValueColor = document.getElementById("spanColor");
-
-      spanValueColor.innerHTML = value;
-    }, 40);
-
-    // Validar el nombre y apellido
-    const errorMessage = validateColorFuente(value);
-    setErrors((prevState) => ({
-      ...prevState,
-      ColorFuente: errorMessage,
-    }));
-  };
-
-  // Función para manejar cambios en la posicion de la fuente
-  const handleChangePosicionFuente = (e) => {
-    let value = e.target.value;
-
-    // Limitar la longitud del valor ingresado a 10 caracteres
-    // if (value.length > 10) {
-    //   value = value.slice(0, 10);
-    // }
-
-    setPosicionFuente(value);
-
-    const selectTamanioImagen = document.getElementById("tamanioImagen");
-
-    const selectPosicionImagen = document.getElementById("posicionImagen");
-
-    if (e.target.value === "No aplica") {
-      console.log("ChangePosicionFuente if (no aplica)");
-      // document.getElementById("nombreFuente").selectedIndex=4;
-      // document.getElementById("tamanioFuente").selectedIndex=4;
-      setFuente("No aplica");
-      setTamanioFuente("No aplica");
-      setColorFuente("No aplica");
-      // setShowColor(false);
-      // setShowColorInput(true);
-
-      selectTamanioImagen.remove(4);
-      selectPosicionImagen.remove(6);
-
-      if (operation == 2) {
-        console.log(`valor de showcolor ${showColor}`);
-        console.log(`valor de showcolorinput ${showColorInput}`);
-
-        if (showExistsColor) {
-          console.log("Entro showExistsColor");
-          setShowExistsColor(false);
-          setShowColorInput(true);
-          setColorFuente("No aplica");
-        } else if (FuenteTemporalEdit === "No aplica") {
-          setShowColor(false);
-          setShowColorInput(true);
-          setColorFuente("No aplica");
-        }
-      } else if (operation == 1) {
-        console.log(`valor de showcolor ${showColor} (operation1)`);
-
-        setColorFuente("No aplica");
-        setShowColor(false);
-        setShowColorInput(true);
-      }
-    } else {
-      if (selectPosicionImagen.options.length <= 6) {
-        console.log("ChangePosicionFuente else if (options < 6)");
-        const nuevaOpcionSelectPosImg = new Option("No aplica", "No aplica");
-        const nuevaOpcionSelectTamImg = new Option("No aplica", "No aplica");
-        selectTamanioImagen.add(nuevaOpcionSelectTamImg);
-        selectPosicionImagen.add(nuevaOpcionSelectPosImg);
-
-        // document.getElementById("nombreFuente").selectedIndex=0;
-        // document.getElementById("tamanioFuente").selectedIndex=0;
-        // setFuente("");
-        // setTamanioFuente("");
-        // setColorFuente("#000000");
-        // setShowColorInput(false);
-        // setShowColor(true);
-
-        if (operation == 1) {
-          setFuente("");
-          setTamanioFuente("");
-          setColorFuente("#000000");
-          setShowColorInput(false);
-          setShowColor(true);
-        } else if (operation == 2 && FuenteTemporalEdit !== "No aplica") {
-          setFuente(FuenteTemporalEdit);
-          setTamanioFuente(TamanioFuenteTemporalEdit);
-          setColorFuente(ColorFuenteTemporalEdit);
-          setShowColorInput(false);
-          setShowExistsColor(true);
-        } else if (operation == 2 && FuenteTemporalEdit === "No aplica") {
-          console.log("elseFuenteOperation2&&");
-          console.log(FuenteTemporalEdit);
-
-          setFuente("");
-          setTamanioFuente("");
-          setColorFuente("#000000");
-          setShowColorInput(false);
-          setShowColor(true);
-        }
-      }
-    }
-  };
 
   // Función para manejar cambios en el tamaño de la imagen
   const handleChangeTamanioImagen = (e) => {
     const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setTamanioImagen(value);
 
-    const selectNombreFuente = document.getElementById("nombreFuente");
-    const selectTamanioFuente = document.getElementById("tamanioFuente");
-    const selectPosicionFuente = document.getElementById("posicionFuente");
-
-    if (e.target.value === "No aplica") {
-      console.log("ChangeTamanioImagen if (no aplica)");
-      console.log("Change");
-      console.log(selectNombreFuente.options.length);
-
-      setShowDisenio(false);
-      setShowDisenioInput(true);
-      setImagenDisenio("No aplica");
-
-      setPosicionImagen("No aplica");
-
-      selectNombreFuente.remove(6);
-      selectTamanioFuente.remove(4);
-      selectPosicionFuente.remove(6);
-
-      // sino es ("No aplica") pasa al else
-    } else {
-      console.log("ChangeTamanioFuente else");
-
-      if (selectNombreFuente.options.length <= 6) {
-        console.log(
-          "ChangeTamanioFuente else if selectNombreFuente.options < 6"
-        );
-        const nuevaOpcion1 = new Option("No aplica", "No aplica");
-        const nuevaOpcion2 = new Option("No aplica", "No aplica");
-        const nuevaOpcion3 = new Option("No aplica", "No aplica");
-        selectNombreFuente.add(nuevaOpcion1);
-        selectTamanioFuente.add(nuevaOpcion2);
-        selectPosicionFuente.add(nuevaOpcion3);
-
-        if (operation == 1) {
-          console.log("ChangeTamanioFuente else - operation create");
-
-          setShowDisenioInput(false);
-          setShowDisenio(true);
-          setPosicionImagen("");
-          setImagenDisenio("0");
-        } else if (operation == 2) {
-          console.log("ChangeTamanioFuente else - operation update");
-          setShowDisenioInput(false);
-          setShowDisenio(true);
-
-          console.log(TamanioFuenteTemporalEdit);
-
-          if (TamanioImagenTemporalEdit === "No aplica") {
-            setPosicionImagen("");
-            setImagenDisenio("0");
-          } else {
-            setPosicionImagen(PosicionImagenTemporalEdit);
-            setImagenDisenio(ImagenDisenioTemporalEdit);
-          }
-        }
-
-        // if (operation == 2) {
-        //   setImagenDisenio("1");
-
-        // }else if (operation == 1){
-        //   setImagenDisenio("0");
-        // }
-      }
-    }
   };
 
   // Función para manejar cambios en la posicion de la imagen
@@ -984,65 +438,6 @@ export const Disenios = () => {
     const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setPosicionImagen(value);
 
-    const selectNombreFuente = document.getElementById("nombreFuente");
-    const selectTamanioFuente = document.getElementById("tamanioFuente");
-    const selectPosicionFuente = document.getElementById("posicionFuente");
-
-    if (e.target.value === "No aplica") {
-      console.log("ChangePosicionImagen no aplica");
-      console.log(selectNombreFuente.options.length);
-
-      setShowDisenio(false);
-      setShowDisenioInput(true);
-      setImagenDisenio("No aplica");
-
-      setTamanioImagen("No aplica");
-
-      selectNombreFuente.remove(6);
-      selectTamanioFuente.remove(4);
-      selectPosicionFuente.remove(6);
-
-      // sino es ("No aplica") pasa al else
-    } else {
-      console.log("ChangePosicionImagen else");
-
-      // setTamanioImagen("");
-
-      if (selectNombreFuente.options.length <= 6) {
-        console.log("opt");
-        const nuevaOpcion1 = new Option("No aplica", "No aplica");
-        const nuevaOpcion2 = new Option("No aplica", "No aplica");
-        const nuevaOpcion3 = new Option("No aplica", "No aplica");
-        selectNombreFuente.add(nuevaOpcion1);
-        selectTamanioFuente.add(nuevaOpcion2);
-        selectPosicionFuente.add(nuevaOpcion3);
-
-        if (operation == 1) {
-          setShowDisenioInput(false);
-          setShowDisenio(true);
-          setTamanioImagen("");
-          setImagenDisenio("0");
-        } else if (operation == 2) {
-          setShowDisenioInput(false);
-          setShowDisenio(true);
-
-          if (TamanioImagenTemporalEdit === "No aplica") {
-            setTamanioImagen("");
-            setImagenDisenio("0");
-          } else {
-            setTamanioImagen(TamanioImagenTemporalEdit);
-            setImagenDisenio(ImagenDisenioTemporalEdit);
-          }
-        }
-
-        // if (operation == 2) {
-        //   setImagenDisenio("1");
-
-        // }else if (operation == 1){
-        //   setImagenDisenio("0");
-        // }
-      }
-    }
   };
 
   // Función para manejar cambios en el precio de diseño
@@ -1066,10 +461,13 @@ export const Disenios = () => {
     const file = e.target.files[0];
     console.log(file);
     let spanDisenio = document.getElementById("spanInputFileDisenio");
+
     if (file) {
+      setImagenDisenio(file);
+      
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagenDisenio(reader.result);
+        setImagenDisenioPrevisualizar(reader.result);
         console.log(reader.result);
       };
       reader.readAsDataURL(file);
@@ -1080,7 +478,8 @@ export const Disenios = () => {
       spanDisenio.innerHTML = fileName;
     } else {
       document.getElementById("inputFileDisenio").value = null;
-      setImagenDisenio("0");
+      setImagenDisenio(null);
+      setImagenDisenioPrevisualizar(null);
       spanDisenio.innerHTML = "Seleccionar archivo";
 
       console.log(e.target.files[0]);
@@ -1092,10 +491,13 @@ export const Disenios = () => {
     const file = e.target.files[0];
     console.log(file);
     let spanReferencia = document.getElementById("spanInputFileReferencia");
+
     if (file) {
+      setImagenReferencia(file);
+
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagenReferencia(reader.result);
+        setImagenReferenciaPrevisualizar(reader.result);
       };
       reader.readAsDataURL(file);
 
@@ -1107,7 +509,8 @@ export const Disenios = () => {
       console.log("elseChanIR");
 
       document.getElementById("inputFileReferencia").value = null;
-      setImagenReferencia("0");
+      setImagenReferencia(null);
+      setImagenReferenciaPrevisualizar(null)
       spanReferencia.innerHTML = "Seleccionar archivo";
     }
   };
@@ -1125,16 +528,11 @@ export const Disenios = () => {
         ? `${url}/${parametros.IdDisenio}`
         : url;
 
-    console.log(NombreDisenio);
-    console.log(Fuente);
-    console.log(TamanioFuente);
-    console.log(ColorFuente);
-    console.log(PosicionFuente);
-    console.log(TamanioImagen);
-    console.log(PosicionImagen);
-    console.log(PrecioDisenio);
-    console.log(ImagenDisenio);
-    console.log(ImagenReferencia);
+
+    console.log(parametros);
+
+    // return
+    
 
     try {
       let respuesta;
@@ -1156,7 +554,7 @@ export const Disenios = () => {
 
       if (metodo === "POST") {
         show_alerta({
-          message: "Diseño creado con éxito",
+          message: "Diseño creado correctamente",
           type: "success",
         });
       } else if (metodo === "PUT") {
@@ -1276,6 +674,15 @@ export const Disenios = () => {
     }
   };
 
+
+  function formatCurrency(value) {
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+    }).format(value);
+  }
+
+
   const handleSearchTermChange = (newSearchTerm) => {
     setSearchTerm(newSearchTerm);
     setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
@@ -1297,7 +704,7 @@ export const Disenios = () => {
 
   return (
     <>
-      {/* modal diseño */}
+      {/* modal crear diseño */}
       <div
         className="modal fade"
         id="modalDisenio"
@@ -1326,6 +733,7 @@ export const Disenios = () => {
             <div className="modal-body">
               <form id="crearClienteForm">
                 <div className="form-row">
+
                   {/* Nombre de diseño */}
                   <div className="form-group col-md-6">
                     <label htmlFor="nombreDiseño">Nombre del Diseño:</label>
@@ -1341,150 +749,6 @@ export const Disenios = () => {
                       onChange={handleChangeNombreDisenio}
                     />
                     {renderErrorMessage(errors.NombreDisenio)}
-                  </div>
-
-                  {/* Nombre de fuente*/}
-                  <div className="form-group col-md-6">
-                    <label htmlFor="nombreFuente">Fuente:</label>
-                    <select
-                      className="form-control"
-                      id="nombreFuente"
-                      value={Fuente}
-                      onChange={(e) => handleChangeFuente(e)}
-                      required
-                    >
-                      <option value="" disabled>
-                        Elige una fuente para el diseño
-                      </option>
-                      <option value="Palatino">Palatino</option>
-                      <option value="Trebuchet MS">Trebuchet MS</option>
-                      <option value="Comic Sans MS">Comic Sans</option>
-                      <option value="Courier New">Courier New</option>
-                      <option value="Consolas">Consolas</option>
-                      <option value="No aplica">No aplica</option>
-                    </select>
-
-                    {Fuente === "" && (
-                      <p className="text-danger">
-                        Por favor, seleccione una fuente para el diseño.
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Tamaño de fuente*/}
-                  <div className="form-group col-md-6">
-                    <label htmlFor="tamanioFuente">Tamaño de Fuente:</label>
-                    <select
-                      className="form-control"
-                      id="tamanioFuente"
-                      value={TamanioFuente}
-                      onChange={(e) => handleChangeTamanioFuente(e)}
-                      required
-                    >
-                      <option value="" disabled>
-                        Elige el tamaño de la fuente
-                      </option>
-                      <option value="Grande">Grande</option>
-                      <option value="Mediana">Mediana</option>
-                      <option value="Pequeña">Pequeña</option>
-                      <option value="No aplica">No aplica</option>
-                    </select>
-
-                    {TamanioFuente === "" && (
-                      <p className="text-danger">
-                        Por favor, seleccione un tamaño para la fuente.
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Color de fuente*/}
-                  <div className="form-group col-md-6">
-                    <label htmlFor="colorFuente">Color de Fuente:</label>
-
-                    {showColor && (
-                      <div className="d-flex align-items-center">
-                        <input
-                          type="color"
-                          className={`form-control col-md-4 ${
-                            errors.ColorFuente ? "is-invalid" : ""
-                          }`}
-                          id="colorFuente"
-                          placeholder="Ingrese el color de la fuente"
-                          required
-                          value={ColorFuente}
-                          onChange={handleChangeColorFuente}
-                        />
-
-                        {showcolorValue && (
-                          <span className="ml-3" id="spanColor">
-                            {colorValue}
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    {showExistsColor && (
-                      <div className="d-flex align-items-center">
-                        <input
-                          type="color"
-                          className={`form-control col-md-4 ${
-                            errors.ColorFuente ? "is-invalid" : ""
-                          }`}
-                          id="colorFuente"
-                          required
-                          value={ColorFuente}
-                          onChange={handleChangeColorFuente}
-                        />
-
-                        <span className="ml-3" id="spanColor">
-                          {ColorFuente}
-                        </span>
-                      </div>
-                    )}
-
-                    {showColorInput /*|| ColorFuente === "No aplica"*/ && (
-                      <input
-                        type="text"
-                        className="form-control"
-                        disabled
-                        required
-                        value={"No aplica"}
-                      />
-                    )}
-
-                    {ColorFuente === "#000000" && (
-                      <p className="text-danger">
-                        Por favor, seleccione un color para la fuente.
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Posicion de fuente*/}
-                  <div className="form-group col-md-6">
-                    <label htmlFor="posicionFuente">Posicion de Fuente:</label>
-                    <select
-                      className="form-control"
-                      id="posicionFuente"
-                      value={PosicionFuente}
-                      onChange={(e) => handleChangePosicionFuente(e)}
-                      required
-                    >
-                      <option value="" disabled>
-                        Seleccione una posición para la fuente
-                      </option>
-                      <option value="Arriba Izquierda">Arriba Izquierda</option>
-                      <option value="Arriba Derecha">Arriba Derecha</option>
-                      <option value="Abajo Izquierda">Abajo Izquierda</option>
-                      <option value="Abajo Derecha">Abajo Derecha</option>
-                      <option value="Centro">Centro</option>
-                      <option value="No aplica">No aplica</option>
-                    </select>
-
-                    {PosicionFuente === "" && (
-                      <p className="text-danger">
-                        Por favor, seleccione una posición para la fuente.
-                      </p>
-                    )}
                   </div>
 
                   {/* Tamaño de imagen*/}
@@ -1503,7 +767,6 @@ export const Disenios = () => {
                       <option value="Grande">Grande</option>
                       <option value="Mediana">Mediana</option>
                       <option value="Pequeña">Pequeña</option>
-                      <option value="No aplica">No aplica</option>
                     </select>
 
                     {TamanioImagen === "" && (
@@ -1532,7 +795,6 @@ export const Disenios = () => {
                       <option value="Abajo Izquierda">Abajo Izquierda</option>
                       <option value="Abajo Derecha">Abajo Derecha</option>
                       <option value="Centro">Centro</option>
-                      <option value="No aplica">No aplica</option>
                     </select>
 
                     {PosicionImagen === "" && (
@@ -1564,9 +826,10 @@ export const Disenios = () => {
                     <label>Imagen Diseño :</label>
                     <br />
 
-                    {renderInputDisenio && (
+                    {/* {renderInputDisenio && ( */}
                       <>
                         <input
+                        accept=".png, .jpg, .jpeg"
                           type="file"
                           name="file-2"
                           id="inputFileDisenio"
@@ -1592,19 +855,19 @@ export const Disenios = () => {
                           </span>
                         </label>
                       </>
-                    )}
+                    {/* )} */}
 
-                    {ImagenDisenio === "0" && (
+                    {!ImagenDisenio  && (
                       <p className="text-danger">
                         Por favor, ingresa una imagen para tu diseño, se permite
                         (.png .jpg) .
                       </p>
                     )}
 
-                    {ImagenDisenio !== "0" && ImagenDisenio !== "No aplica" && (
+                    {ImagenDisenio && (
                       <div className="container py-5 mx-3">
                         <img
-                          src={ImagenDisenio}
+                          src={ImagenDisenioPrevisualizar}
                           alt="Vista previa imagen del diseño"
                           style={{
                             maxWidth: "200px",
@@ -1615,14 +878,6 @@ export const Disenios = () => {
                       </div>
                     )}
 
-                    {showDisenioInput && (
-                      <input
-                        type="text"
-                        className="form-control"
-                        disabled
-                        value={"No aplica"}
-                      />
-                    )}
                   </div>
 
                   {/* Imagen referencia*/}
@@ -1634,6 +889,7 @@ export const Disenios = () => {
                     <br />
 
                     <input
+                    accept=".png, .jpg, .jpeg"
                       type="file"
                       name="file-3"
                       id="inputFileReferencia"
@@ -1660,7 +916,7 @@ export const Disenios = () => {
 
                     {/* {renderErrorMessage(errors.ImagenReferencia)} */}
 
-                    {ImagenReferencia === "0" && (
+                    {!ImagenReferencia  && (
                       <p className="text-danger">
                         Por favor, ingresa una imagen de referencia de tu
                         diseño, se permite (.png .jpg) .
@@ -1668,9 +924,9 @@ export const Disenios = () => {
                     )}
 
                     <div className="container py-5 mx-3">
-                      {ImagenReferencia !== "0" && (
+                      {ImagenReferencia  && (
                         <img
-                          src={ImagenReferencia}
+                          src={ImagenReferenciaPrevisualizar}
                           alt="Vista previa imagen del diseño"
                           style={{
                             maxWidth: "200px",
@@ -1707,7 +963,7 @@ export const Disenios = () => {
           </div>
         </div>
       </div>
-      {/* modal diseño */}
+      {/* modal crear diseño */}
 
       {/* Inicio modal ver detalle diseño */}
       <div
@@ -1755,77 +1011,6 @@ export const Disenios = () => {
                           />
                         </div>
 
-                        {/* Nombre de fuente detalle*/}
-                        <div className="form-group col-md-6">
-                          <label htmlFor="nombreFuente">Fuente:</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            // id="nombreDiseño"
-                            value={disenioSeleccionado.Fuente}
-                            disabled
-                          />
-                        </div>
-
-                        {/* Tamaño de fuente detalle*/}
-                        <div className="form-group col-md-6">
-                          <label htmlFor="tamanioFuente">
-                            Tamaño de Fuente:
-                          </label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            // id="nombreDiseño"
-                            value={disenioSeleccionado.TamanioFuente}
-                            disabled
-                          />
-                        </div>
-
-                        {/* Color de fuente detalle*/}
-                        <div className="form-group col-md-6">
-                          <label htmlFor="colorFuente">Color de Fuente:</label>
-
-                          {disenioSeleccionado.ColorFuente !== "No aplica" && (
-                            <div className="d-flex align-items-center">
-                              <input
-                                type="color"
-                                className="form-control col-md-4"
-                                id="colorFuente"
-                                value={disenioSeleccionado.ColorFuente}
-                                disabled
-                              />
-
-                              <span className="ml-3" id="spanColor">
-                                {disenioSeleccionado.ColorFuente}
-                              </span>
-                            </div>
-                          )}
-
-                          {disenioSeleccionado.ColorFuente === "No aplica" && (
-                            <input
-                              type="text"
-                              className="form-control"
-                              disabled
-                              required
-                              value={disenioSeleccionado.ColorFuente}
-                            />
-                          )}
-                        </div>
-
-                        {/* Posicion de fuente detalle*/}
-                        <div className="form-group col-md-6">
-                          <label htmlFor="posicionFuente">
-                            Posicion de Fuente:
-                          </label>
-
-                          <input
-                            type="text"
-                            className="form-control"
-                            // id=""
-                            value={disenioSeleccionado.PosicionFuente}
-                            disabled
-                          />
-                        </div>
 
                         {/* Tamaño de imagen detalle*/}
                         <div className="form-group col-md-6">
@@ -1977,9 +1162,10 @@ export const Disenios = () => {
                 <thead>
                   <tr>
                     <th>Nombre del Diseño</th>
-                    <th>Fuente</th>
-                    <th>Tamaño de Fuente</th>
-                    <th>Color de fuente</th>
+                    <th>Tamaño de Imagen</th>
+                    <th>Posición de Imagen</th>
+                    <th>Precio del Diseño </th>
+                    {/* <th>Color de fuente</th> */}
                     {/* <th>Dirección</th>
                     <th>ImagenDisenio Electrónico</th> */}
                     <th>Estado</th>
@@ -1990,22 +1176,9 @@ export const Disenios = () => {
                   {currentDiseños.map((disenio) => (
                     <tr key={disenio.IdDisenio}>
                       <td>{disenio.NombreDisenio}</td>
-                      <td>{disenio.Fuente}</td>
-                      <td>{disenio.TamanioFuente}</td>
-                      <td>
-                        {disenio.ColorFuente === "No aplica" ? (
-                          "No aplica"
-                        ) : (
-                          <div
-                            style={{
-                              backgroundColor: disenio.ColorFuente,
-                              width: "25px",
-                              height: "25px",
-                              margin: "0px 0px 0px 50px",
-                            }}
-                          ></div>
-                        )}
-                      </td>
+                      <td>{disenio.TamanioImagen}</td>
+                      <td>{disenio.PosicionImagen}</td>
+                      <td>{formatCurrency( disenio.PrecioDisenio)}</td>
                       {/* <td>{disenio.ColorFuente}</td> */}
                       {/* <td>{cliente.PosicionImagen}</td>
                       <td>{cliente.ImagenDisenio}</td> */}

@@ -244,11 +244,13 @@ export const Carrito = () => {
       let parametros = {
         IdCliente: auth.idCliente,
         Detalles: obtenerDetalles(cartItems),
+        TipoPago:"Transferencia",
         Fecha: obtenerFechaActual(),
         Total: totalPedido,
-        IdImagenComprobante:0,
-        ImagenComprobante:"0",
-        IdEstadoPedido: 2,
+        idImagenComprobante:"0",
+        imagenComprobante:"0",
+        intentos:3,
+        IdEstadoPedido: 1,
       };
 
       console.log(parametros);
