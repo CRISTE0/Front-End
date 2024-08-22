@@ -9,6 +9,7 @@ import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const Colores = () => {
   const url = "http://localhost:3000/api/colores";
+  const insumosUrl = "http://localhost:3000/api/insumos";
   const [Colores, setColores] = useState([]);
   const [IdColor, setIdColor] = useState("");
   const [Color, setColor] = useState("");
@@ -34,6 +35,21 @@ export const Colores = () => {
         message: "Error al obtener los colores",
         type: "error",
       });
+    }
+  };
+
+  const getInsumosByColor = async (IdColor) => {
+    try {
+      const response = await axios.get(insumosUrl);
+      // Verifica si el color está asociado a algún insumo
+      const insumos = response.data.filter(
+        (insumo) => insumo.IdColor === IdColor
+      );
+      return insumos.length > 0; // Devuelve true si hay al menos un insumo asociado
+    } catch (error) {
+      console.error("Error fetching insumos:", error);
+      show_alerta({ message: "Error al verificar los insumos", type: "error" });
+      return false; // Considera que no tiene insumos asociados en caso de error
     }
   };
 
@@ -158,32 +174,44 @@ export const Colores = () => {
 
   const deleteColor = (id, color) => {
     const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: `¿Seguro de eliminar el color ${color}?`,
-      icon: "question",
-      text: "No se podrá dar marcha atrás",
-      showCancelButton: true,
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        enviarSolicitud("DELETE", { IdColor: id })
-          .then(() => {
-            show_alerta({
-              message: "Color eliminado correctamente",
-              type: "success",
-            });
-          })
-          .catch(() => {
-            show_alerta({
-              message: "Hubo un error al eliminar el color",
-              type: "error",
-            });
-          });
-      } else {
+
+    // Primero, verifica si el color está asociado a un insumo
+    getInsumosByColor(id).then((isAssociated) => {
+      if (isAssociated) {
         show_alerta({
-          message: "El color NO fue eliminado",
-          type: "info",
+          message: `El color ${color} está asociado a un insumo y no se puede eliminar.`,
+          type: "warning",
+        });
+      } else {
+        // Si no está asociado, procede con la eliminación
+        MySwal.fire({
+          title: `¿Seguro de eliminar el color ${color}?`,
+          icon: "question",
+          text: "No se podrá dar marcha atrás",
+          showCancelButton: true,
+          confirmButtonText: "Sí, eliminar",
+          cancelButtonText: "Cancelar",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            enviarSolicitud("DELETE", { IdColor: id })
+              .then(() => {
+                show_alerta({
+                  message: "Color eliminado correctamente",
+                  type: "success",
+                });
+              })
+              .catch(() => {
+                show_alerta({
+                  message: "Hubo un error al eliminar el color",
+                  type: "error",
+                });
+              });
+          } else {
+            show_alerta({
+              message: "El color NO fue eliminado",
+              type: "info",
+            });
+          }
         });
       }
     });
@@ -356,8 +384,7 @@ export const Colores = () => {
               data-toggle="modal"
               data-target="#modalColores"
               style={{
-                width: 
-                "140px"
+                width: "140px",
               }}
             >
               <i className="fas fa-pencil-alt"></i> Crear Color

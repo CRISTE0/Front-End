@@ -7,8 +7,8 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const Tallas = () => {
-  let url = "http://localhost:3000/api/tallas";
-
+  const url = "http://localhost:3000/api/tallas";
+  const insumosUrl = "http://localhost:3000/api/insumos";
   const [Tallas, setTallas] = useState([]);
   const [IdTalla, setIdTalla] = useState("");
   const [Talla, setTalla] = useState([]);
@@ -31,6 +31,21 @@ export const Tallas = () => {
     const respuesta = await axios.get(url);
     setTallas(respuesta.data);
     console.log(respuesta.data);
+  };
+
+  const getInsumosByTalla = async (IdTalla) => {
+    try {
+      const response = await axios.get(insumosUrl);
+      // Verifica si la talla está asociado a algún insumo
+      const insumos = response.data.filter(
+        (insumo) => insumo.IdTalla === IdTalla
+      );
+      return insumos.length > 0; // Devuelve true si hay al menos un insumo asociado
+    } catch (error) {
+      console.error("Error fetching insumos:", error);
+      show_alerta({ message: "Error al verificar los insumos", type: "error" });
+      return false; // Considera que no tiene insumos asociados en caso de error
+    }
   };
 
   const openModal = (op, IdTalla, Talla) => {
@@ -119,34 +134,46 @@ export const Tallas = () => {
     }
   };
 
-  const deletetalla = (IdTalla, Talla) => {
+  const deletetalla = (id, talla) => {
     const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: `¿Seguro de eliminar la talla ${Talla}?`,
-      icon: "question",
-      text: "No se podrá dar marcha atrás",
-      showCancelButton: true,
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        enviarSolicitud("DELETE", { IdTalla: IdTalla })
-          .then(() => {
-            show_alerta({
-              message: "Talla eliminada con éxito",
-              type: "success",
-            });
-          })
-          .catch(() => {
-            show_alerta({
-              message: "Hubo un error al eliminar la talla",
-              type: "error",
-            });
-          });
-      } else {
+
+    // Primero, verifica si la talla está asociada a un insumo
+    getInsumosByTalla(id).then((isAssociated) => {
+      if (isAssociated) {
         show_alerta({
-          message: "La talla NO fue eliminada",
-          type: "info",
+          message: `La talla ${talla} está asociada a un insumo y no se puede eliminar.`,
+          type: "warning",
+        });
+      } else {
+        // Si no está asociada, procede con la eliminación
+        MySwal.fire({
+          title: `¿Seguro de eliminar la talla ${talla}?`,
+          icon: "question",
+          text: "No se podrá dar marcha atrás",
+          showCancelButton: true,
+          confirmButtonText: "Sí, eliminar",
+          cancelButtonText: "Cancelar",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            enviarSolicitud("DELETE", { IdTalla: id })
+              .then(() => {
+                show_alerta({
+                  message: "Talla eliminada correctamente",
+                  type: "success",
+                });
+              })
+              .catch(() => {
+                show_alerta({
+                  message: "Hubo un error al eliminar la talla",
+                  type: "error",
+                });
+              });
+          } else {
+            show_alerta({
+              message: "La talla NO fue eliminada",
+              type: "info",
+            });
+          }
         });
       }
     });
@@ -322,7 +349,7 @@ export const Tallas = () => {
               data-toggle="modal"
               data-target="#modalTallas"
               style={{
-                width: "135px"
+                width: "135px",
               }}
             >
               <i className="fas fa-pencil-alt"></i> Crear Talla
@@ -364,9 +391,7 @@ export const Tallas = () => {
                         </label>
                       </td>
                       <td>
-                        <div
-                          className="d-flex"
-                        >
+                        <div className="d-flex">
                           <button
                             className="btn btn-warning btn-sm mr-2"
                             title="Editar"
