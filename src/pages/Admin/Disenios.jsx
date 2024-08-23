@@ -17,6 +17,7 @@ import withReactContent from "sweetalert2-react-content";
 import { useAuth } from "../../context/AuthProvider";
 export const Disenios = () => {
   const url = "http://localhost:3000/api/disenios";
+  const productosUrl = "http://localhost:3000/api/productos";
   const {auth} = useAuth();
   const [Disenios, setDisenios] = useState([]);
   const [DiseniosCliente, setDiseniosCliente] = useState([]);
@@ -85,6 +86,21 @@ export const Disenios = () => {
     const respuesta = await axios.get(url);
     setDisenios(respuesta.data);
     console.log(respuesta.data);
+  };
+
+  const getComprasByDisenios = async (IdDisenio) => {
+    try {
+      const response = await axios.get(productosUrl);
+      // Verifica si el diseño está asociado a algun producto
+      const productos = response.data.filter(
+        (producto) => producto.IdDisenio === IdDisenio
+      );
+      return productos.length > 0; // Devuelve true si hay al menos una compra asociada
+    } catch (error) {
+      console.error("Error fetching productos:", error);
+      show_alerta({ message: "Error al verificar el producto", type: "error" });
+      return false; // Considera que no tiene productos asociadas en caso de error
+    }
   };
 
   const [showInputsFile, setShowInputsFile] = useState(null);
@@ -589,7 +605,20 @@ export const Disenios = () => {
     }
   };
 
-  const deleteDisenio = (IdDisenio, NombreDisenio) => {
+  const deleteDisenio = async (IdDisenio, NombreDisenio) => {
+    // Verificar si el diseño está asociado a algun producto
+    const asociado = await getComprasByDisenios(IdDisenio);
+
+    if (asociado) {
+      // Mostrar mensaje si está asociado y no permitir la eliminación
+      show_alerta({
+        message:
+          "El diseño está asociado a un producto y no puede ser eliminado.",
+        type: "info",
+      });
+      return; // Salir de la función para evitar la eliminación
+    }
+
     const MySwal = withReactContent(Swal);
     MySwal.fire({
       title: `¿Seguro de eliminar el diseño ${NombreDisenio}?`,
