@@ -11,11 +11,23 @@ export const Tallas = () => {
   const insumosUrl = "http://localhost:3000/api/insumos";
   const [Tallas, setTallas] = useState([]);
   const [IdTalla, setIdTalla] = useState("");
-  const [Talla, setTalla] = useState([]);
+  const [Talla, setTalla] = useState("");
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [errors, setErrors] = useState({});
+  const tallasValidas = [
+    "XXXS",
+    "XXS",
+    "XS",
+    "S",
+    "M",
+    "L",
+    "XL",
+    "XXL",
+    "XXXL",
+    "XXXXL",
+  ];
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
@@ -24,24 +36,46 @@ export const Tallas = () => {
     getTallas();
   }, []);
 
+  const verificarTallaExistente = async (talla) => {
+    try {
+      const response = await axios.get(`${url}?Talla=${talla}`);
+      return response.data.length > 0;
+    } catch (error) {
+      console.error("Error al verificar si la talla existe:", error);
+      show_alerta({
+        message: "Error al verificar si la talla existe",
+        type: "error",
+      });
+      return false;
+    }
+  };
+
+  const validateTallas = (value) => {
+    if (!value) {
+      return "Escribe el nombre de la talla";
+    }
+    if (!tallasValidas.includes(value.toUpperCase())) {
+      return `Las tallas deben ser: \n ${tallasValidas.join(", ")}`;
+    }
+    return "";
+  };
+
   const getTallas = async () => {
     const respuesta = await axios.get(url);
     setTallas(respuesta.data);
-    console.log(respuesta.data);
   };
 
   const getInsumosByTalla = async (IdTalla) => {
     try {
       const response = await axios.get(insumosUrl);
-      // Verifica si la talla está asociado a algún insumo
       const insumos = response.data.filter(
         (insumo) => insumo.IdTalla === IdTalla
       );
-      return insumos.length > 0; // Devuelve true si hay al menos un insumo asociado
+      return insumos.length > 0;
     } catch (error) {
       console.error("Error fetching insumos:", error);
       show_alerta({ message: "Error al verificar los insumos", type: "error" });
-      return false; // Considera que no tiene insumos asociados en caso de error
+      return false;
     }
   };
 
@@ -56,17 +90,6 @@ export const Tallas = () => {
       setIdTalla(IdTalla);
       setTalla(Talla);
     }
-    // window.setTimeout(function () {
-    //   document.getElementById("nombre").focus();
-    // }, 500);
-  };
-
-  const validateTallas = (value) => {
-    if (!value) {
-      return "Escribe el nombre de la talla";
-    }
-    // Puedes agregar más validaciones si es necesario
-    return "";
   };
 
   const handleChangeTalla = (e) => {
@@ -84,8 +107,25 @@ export const Tallas = () => {
     let hasErrors = false;
     const errors = {};
 
+    // Lista de tallas válidas
+    const tallasValidas = [
+      "XXXS",
+      "XXS",
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL",
+      "XXXL",
+      "XXXXL",
+    ];
+
     if (!Talla) {
       errors.talla = "Escribe el nombre de la talla";
+      hasErrors = true;
+    } else if (!tallasValidas.includes(Talla.trim().toUpperCase())) {
+      errors.talla = `Las tallas deben ser: \n ${tallasValidas.join(", ")}`;
       hasErrors = true;
     }
 
@@ -99,29 +139,63 @@ export const Tallas = () => {
       return;
     }
 
-    let parametros;
-    let metodo;
-    if (operation === 1) {
-      parametros = { Talla: Talla.trim() };
-      metodo = "POST";
-    } else {
-      parametros = { IdTalla: IdTalla, Talla: Talla.trim() };
-      metodo = "PUT";
+    // Verificar si la talla ya existe (solo para la operación de actualización)
+    if (operation === 2 && (await verificarTallaExistente(Talla.trim()))) {
+      show_alerta({
+        message: `La talla ${Talla} ya existe`,
+        type: "warning",
+      });
+      return;
     }
 
     try {
-      await enviarSolicitud(metodo, parametros);
-      show_alerta({
-        message: `Talla ${
-          operation === 1 ? "creada" : "actualizada"
-        } con éxito`,
-        type: "success",
+      const parametros =
+        operation === 1
+          ? { Talla: Talla.trim() }
+          : { IdTalla: IdTalla, Talla: Talla.trim() };
+
+      const metodo = operation === 1 ? "POST" : "PUT";
+
+      const respuesta = await axios({
+        method: metodo,
+        url: url,
+        data: parametros,
       });
+
+      const mensaje = respuesta.data.message;
+
+      if (mensaje.includes("ya existe")) {
+        show_alerta({
+          message: mensaje,
+          type: "warning",
+        });
+      } else {
+        show_alerta({
+          message: mensaje,
+          type: "success",
+        });
+        document.getElementById("btnCerrar").click();
+        getTallas();
+      }
     } catch (error) {
-      show_alerta({
-        message: "Error al guardar la talla",
-        type: "error",
-      });
+      if (error.response) {
+        const mensaje = error.response.data.message || "Error en la solicitud";
+        show_alerta({
+          message: mensaje,
+          type: "error",
+        });
+      } else if (error.request) {
+        show_alerta({
+          message: "Error en la solicitud",
+          type: "error",
+        });
+      } else {
+        show_alerta({
+          message: "Error desconocido",
+          type: "error",
+        });
+      }
+      console.log(error);
     }
   };
 
@@ -140,11 +214,10 @@ export const Tallas = () => {
 
       const mensaje = respuesta.data.message;
 
-      // Verifica si el mensaje indica que la talla ya existe
       if (mensaje.includes("ya existe")) {
         show_alerta({
           message: mensaje,
-          type: "warning", // Tipo de alerta para advertencia
+          type: "warning",
         });
       } else {
         show_alerta({
