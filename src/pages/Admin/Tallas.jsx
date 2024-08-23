@@ -15,6 +15,7 @@ export const Tallas = () => {
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [errors, setErrors] = useState({});
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
@@ -22,10 +23,6 @@ export const Tallas = () => {
   useEffect(() => {
     getTallas();
   }, []);
-
-  const handleChangeTalla = (e) => {
-    setTalla(e.target.value.toUpperCase());
-  };
 
   const getTallas = async () => {
     const respuesta = await axios.get(url);
@@ -64,29 +61,67 @@ export const Tallas = () => {
     // }, 500);
   };
 
-  const validar = () => {
-    if (Talla === "") {
+  const validateTallas = (value) => {
+    if (!value) {
+      return "Escribe el nombre de la talla";
+    }
+    // Puedes agregar más validaciones si es necesario
+    return "";
+  };
+
+  const handleChangeTalla = (e) => {
+    const value = e.target.value;
+    const errorMessage = validateTallas(value);
+
+    setTalla(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      talla: errorMessage,
+    }));
+  };
+
+  const validar = async () => {
+    let hasErrors = false;
+    const errors = {};
+
+    if (!Talla) {
+      errors.talla = "Escribe el nombre de la talla";
+      hasErrors = true;
+    }
+
+    setErrors(errors);
+
+    if (hasErrors) {
       show_alerta({
-        message: "Escribe el nombre de la talla",
+        message: "Por favor, completa todos los campos correctamente",
         type: "warning",
       });
+      return;
+    }
+
+    let parametros;
+    let metodo;
+    if (operation === 1) {
+      parametros = { Talla: Talla.trim() };
+      metodo = "POST";
     } else {
-      console.log(Talla);
-      let parametros;
-      let metodo;
-      if (operation === 1) {
-        parametros = {
-          Talla: Talla.trim(),
-        };
-        metodo = "POST";
-      } else {
-        parametros = {
-          IdTalla: IdTalla,
-          Talla: Talla,
-        };
-        metodo = "PUT";
-      }
-      enviarSolicitud(metodo, parametros);
+      parametros = { IdTalla: IdTalla, Talla: Talla.trim() };
+      metodo = "PUT";
+    }
+
+    try {
+      await enviarSolicitud(metodo, parametros);
+      show_alerta({
+        message: `Talla ${
+          operation === 1 ? "creada" : "actualizada"
+        } con éxito`,
+        type: "success",
+      });
+    } catch (error) {
+      show_alerta({
+        message: "Error al guardar la talla",
+        type: "error",
+      });
     }
   };
 
@@ -104,17 +139,24 @@ export const Tallas = () => {
       });
 
       const mensaje = respuesta.data.message;
-      show_alerta({
-        message: mensaje,
-        type: "success",
-      });
 
-      document.getElementById("btnCerrar").click();
-      getTallas();
+      // Verifica si el mensaje indica que la talla ya existe
+      if (mensaje.includes("ya existe")) {
+        show_alerta({
+          message: mensaje,
+          type: "warning", // Tipo de alerta para advertencia
+        });
+      } else {
+        show_alerta({
+          message: mensaje,
+          type: "success",
+        });
+        document.getElementById("btnCerrar").click();
+        getTallas();
+      }
     } catch (error) {
       if (error.response) {
-        const mensaje =
-          error.response.data.error || error.response.data.message;
+        const mensaje = error.response.data.message || "Error en la solicitud";
         show_alerta({
           message: mensaje,
           type: "error",
@@ -259,7 +301,6 @@ export const Tallas = () => {
   return (
     <>
       {/* <!-- Modal para crear talla --> */}
-
       <div
         className="modal fade"
         id="modalTallas"
@@ -299,12 +340,16 @@ export const Tallas = () => {
                 </span>
                 <input
                   type="text"
-                  id="precio"
-                  className="form-control"
-                  placeholder="Talla"
+                  id="talla"
+                  className={`form-control ${errors.talla ? "is-invalid" : ""}`}
+                  placeholder="Ingrese la talla"
+                  required
                   value={Talla}
                   onChange={handleChangeTalla}
-                ></input>
+                />
+                {errors.talla && (
+                  <div className="invalid-feedback">{errors.talla}</div>
+                )}
               </div>
 
               <div className="modal-footer">
@@ -317,8 +362,7 @@ export const Tallas = () => {
                   >
                     Cancelar
                   </button>
-
-                  <button onClick={() => validar()} className="btn btn-primary">
+                  <button onClick={validar} className="btn btn-primary">
                     <i className="fa-solid fa-floppy-disk"></i> Guardar
                   </button>
                 </div>
@@ -327,6 +371,7 @@ export const Tallas = () => {
           </div>
         </div>
       </div>
+
       {/* Fin modal crear talla */}
 
       {/* <!-- Inicio de tallas --> */}

@@ -117,10 +117,17 @@ export const Proveedores = () => {
   };
 
   const guardarProveedor = async () => {
+    // Verificar si todos los campos están completos
     if (!validateAllFields()) {
-      return; // No continuar si hay errores
+      // Si hay errores de validación, no continuar
+      show_alerta({
+        message: "Por favor, completa todos los campos correctamente",
+        type: "error",
+      });
+      return;
     }
 
+    // Limpiar los valores de los campos
     const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, " ");
     const cleanedDireccion = Direccion.trim().replace(/\s+/g, " ");
     const cleanedContacto = Contacto.trim().replace(/\s+/g, " ");
@@ -490,7 +497,7 @@ export const Proveedores = () => {
             Math.ceil((filteredProveedores.length - 1) / itemsPerPage) || 1;
           setCurrentPage(newPage);
 
-          show_alerta({ 
+          show_alerta({
             message: "Proveedor eliminado con éxito",
             type: "success",
           });
@@ -852,10 +859,7 @@ export const Proveedores = () => {
                         </label>
                       </td>
                       <td>
-                        <div
-                          className="d-flex"
-                          
-                        >
+                        <div className="d-flex">
                           <button
                             className="btn btn-warning btn-sm mr-1"
                             title="Editar"

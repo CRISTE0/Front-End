@@ -106,9 +106,11 @@ export const Insumos = () => {
 
     // Comprobar si hay errores
     const hasErrors = Object.values(errors).some((error) => error !== "");
+
     if (hasErrors) {
+      // Mostrar mensaje específico si hay errores en los campos
       show_alerta({
-        message: "Corrige los errores antes de guardar",
+        message: "Por favor, completa todos los campos correctamente",
         type: "error",
       });
       return; // Detener la ejecución si hay errores
@@ -783,10 +785,7 @@ export const Insumos = () => {
                         </label>
                       </td>
                       <td>
-                        <div
-                          className="d-flex"
-                          
-                        >
+                        <div className="d-flex">
                           <button
                             className="btn btn-warning btn-sm mr-2"
                             title="Editar"

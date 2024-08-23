@@ -106,16 +106,27 @@ export const Colores = () => {
     ) : null;
   };
 
-  const validar = () => {
+  const validar = async () => {
+    // Validar el color
     const errorMessage = validateColores(Color);
-    setErrors({ colores: errorMessage });
+    const errors = { colores: errorMessage };
 
-    if (!errorMessage) {
-      // Si Referencia es un valor predeterminado, usa el valor predeterminado
-      const referenciaFinal = Referencia || "#000000";
+    if (errorMessage) {
+      setErrors(errors); // Mostrar errores específicos
+      show_alerta({
+        message: "Por favor, completa todos los campos correctamente", // Mensaje general de error
+        type: "error",
+      });
+      return; // Detener la ejecución si hay errores
+    }
 
+    // Si Referencia es un valor predeterminado, usa el valor predeterminado
+    const referenciaFinal = Referencia || "#000000";
+
+    try {
       let parametros, metodo;
       if (operation === 1) {
+        // Crear nuevo color
         parametros = {
           Color: Color.trim(),
           Referencia: referenciaFinal,
@@ -123,6 +134,7 @@ export const Colores = () => {
         };
         metodo = "POST";
       } else {
+        // Actualizar color existente
         parametros = {
           IdColor,
           Color: Color.trim(),
@@ -131,7 +143,23 @@ export const Colores = () => {
         };
         metodo = "PUT";
       }
-      enviarSolicitud(metodo, parametros);
+
+      // Enviar solicitud
+      await enviarSolicitud(metodo, parametros);
+
+      // Mostrar alerta de éxito después de enviar la solicitud
+      show_alerta({
+        message: `Color ${
+          operation === 1 ? "creado" : "actualizado"
+        } con éxito`,
+        type: "success",
+      });
+    } catch (error) {
+      // Mostrar alerta de error en caso de fallo en la solicitud
+      show_alerta({
+        message: "Error al guardar el color",
+        type: "error",
+      });
     }
   };
 

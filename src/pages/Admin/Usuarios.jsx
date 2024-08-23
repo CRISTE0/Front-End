@@ -96,16 +96,20 @@ export const Usuarios = () => {
   };
 
   const guardarUsuario = async () => {
+    // Reiniciar los errores al inicio de la función
     setErrors({
       usuario: "",
       correo: "",
       contrasenia: "",
-      rol: "", // Asegúrate de limpiar el error del rol también
+      rol: "",
     });
 
     const cleanedUsuario = Usuario.trim();
     const cleanedCorreo = Correo.trim();
     const cleanedContrasenia = Contrasenia.trim();
+
+    // Variable para rastrear si hay errores
+    let hayErrores = false;
 
     if (operation === 1 || operation === 2) {
       // Validar campos requeridos para crear o editar usuario completo
@@ -114,18 +118,21 @@ export const Usuarios = () => {
           ...prevState,
           usuario: "El nombre de usuario es requerido",
         }));
+        hayErrores = true;
       }
       if (!cleanedCorreo) {
         setErrors((prevState) => ({
           ...prevState,
           correo: "El correo electrónico es requerido",
         }));
+        hayErrores = true;
       }
       if (!IdRol) {
         setErrors((prevState) => ({
           ...prevState,
           rol: "El rol es requerido",
         }));
+        hayErrores = true;
       }
     }
 
@@ -135,24 +142,30 @@ export const Usuarios = () => {
         ...prevState,
         contrasenia: "La contraseña es requerida",
       }));
+      hayErrores = true;
     }
 
     // Validar errores específicos para cambiar contraseña
     const contraseniaError = validateContrasenia(cleanedContrasenia);
-
     if (contraseniaError && operation === 3) {
       // Mostrar error solo si estás cambiando la contraseña
       setErrors((prevState) => ({
         ...prevState,
         contrasenia: contraseniaError,
       }));
-      show_alerta({
-        message: "Verifique los errores en el formulario",
-        type: "error",
-      });
-      return;
+      hayErrores = true;
     }
 
+    // Mostrar alerta si hay errores
+    if (hayErrores) {
+      show_alerta({
+        message: "Por favor, completa todos los campos correctamente",
+        type: "error",
+      });
+      return; // Salir de la función si hay errores
+    }
+
+    // Si no hay errores, proceder con la solicitud
     if (operation === 1) {
       // Crear Usuario
       await enviarSolicitud("POST", {
