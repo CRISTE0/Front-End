@@ -129,8 +129,66 @@ export const Catalogo = () => {
     }
   };
 
-  // funcion para guardar producto
+  const validar = () => {
+    let isValid = true;
+
+    // Limpieza de datos y validación de campos
+    const cleanedReferencia = Referencia.trim();
+    const cleanedCantidad = Cantidad.trim();
+    const cleanedValorVenta = ValorVenta.trim();
+
+    // Validación de campos
+    const newErrors = {
+      IdDisenio: IdDisenio ? "" : "Seleccione un diseño",
+      IdInsumo: IdInsumo ? "" : "Seleccione un insumo",
+      Referencia: cleanedReferencia ? "" : "Referencia es requerida",
+      Cantidad: cleanedCantidad ? "" : "Cantidad es requerida",
+      ValorVenta: cleanedValorVenta ? "" : "Valor de venta es requerido",
+    };
+
+    // Verificar si hay algún error
+    isValid = !Object.values(newErrors).some((error) => error);
+
+    // Actualizar el estado de errores
+    setErrors(newErrors);
+
+    // Mostrar alerta si hay errores
+    if (!isValid) {
+      show_alerta({
+        message: "Por favor, completa todos los campos correctamente",
+        type: "error",
+      });
+    }
+
+    return isValid;
+  };
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+
+    // Actualizar el estado de los campos según el id
+    if (id === "Referencia") {
+      setReferencia(value);
+    } else if (id === "Cantidad") {
+      setCantidad(value);
+    } else if (id === "ValorVenta") {
+      setValorVenta(value);
+    } else if (id === "IdDisenio") {
+      setIdDisenio(value);
+    } else if (id === "IdInsumo") {
+      setIdInsumo(value);
+    }
+
+    // Validar en tiempo real
+    validar();
+  };
+
+  // Función para guardar producto
   const guardarProducto = async () => {
+    // Validar campos
+    if (!validar()) return;
+
+    // Realizar validaciones específicas
     const disenioSeleccionado = Disenios.find(
       (disenio) => disenio.IdDisenio == IdDisenio
     );
@@ -139,14 +197,8 @@ export const Catalogo = () => {
       (insumo) => insumo.IdInsumo == IdInsumo
     );
 
-    // Validacion en el diseño
-    if (!IdDisenio) {
-      show_alerta({
-        message: "Diseño no seleccionado",
-        type: "error",
-      });
-      return;
-    } else if (!disenioSeleccionado) {
+    // Validación en el diseño
+    if (!disenioSeleccionado) {
       show_alerta({
         message: "Diseño no encontrado",
         type: "error",
@@ -154,14 +206,8 @@ export const Catalogo = () => {
       return;
     }
 
-    // Validacion en el insumo
-    if (!IdInsumo) {
-      show_alerta({
-        message: "Insumo no seleccionado",
-        type: "error",
-      });
-      return;
-    } else if (!insumoSeleccionado) {
+    // Validación en el insumo
+    if (!insumoSeleccionado) {
       show_alerta({
         message: "Insumo no encontrado",
         type: "error",
@@ -169,57 +215,55 @@ export const Catalogo = () => {
       return;
     }
 
-    // Validacion en la referencia
-    if (!Referencia) {
-      show_alerta({
-        message: "Escribe la referencia",
-        type: "error",
-      });
-      return;
-    } else if (!/^[A-Z]{3}-\d{3}$/.test(Referencia)) {
-      show_alerta({
-        message: "La referencia debe ser en el formato AAA-000",
-        type: "error",
-      });
-      return;
-    }
-
-    // Validacion en la cantidad del producto
-    if (parseInt(Cantidad) > insumoSeleccionado.Cantidad) {
-      show_alerta({
-        message: "La cantidad no puede superar a la del insumo seleccionado",
-        type: "error",
-      });
-      return;
-    }
-
-    // Validacion en valor del producto
-    if (parseFloat(ValorVenta) <= parseFloat(insumoSeleccionado.ValorCompra)) {
-      show_alerta({
-        message:
-          "El valor de venta debe ser mayor que el valor de compra del insumo",
-        type: "error",
-      });
-      return;
-    }
-
-    if (operation === 1) {
-      await enviarSolicitud("POST", {
-        IdDisenio,
-        IdInsumo,
-        Referencia: Referencia.trim(),
-        Cantidad: Cantidad,
-        ValorVenta: ValorVenta,
-      });
-    } else if (operation === 2) {
-      await enviarSolicitud("PUT", {
-        IdProducto,
-        IdDisenio,
-        IdInsumo,
-        Referencia: Referencia.trim(),
-        Cantidad: Cantidad,
-        ValorVenta: ValorVenta,
-      });
+    // Si todas las validaciones son correctas, se envía la solicitud
+    try {
+      if (operation === 1) {
+        await enviarSolicitud("POST", {
+          IdDisenio,
+          IdInsumo,
+          Referencia: Referencia.trim(),
+          Cantidad: Cantidad,
+          ValorVenta: ValorVenta,
+        });
+        show_alerta({
+          message: "Producto creado con éxito",
+          type: "success",
+        });
+      } else if (operation === 2) {
+        await enviarSolicitud("PUT", {
+          IdProducto,
+          IdDisenio,
+          IdInsumo,
+          Referencia: Referencia.trim(),
+          Cantidad: Cantidad,
+          ValorVenta: ValorVenta,
+        });
+        show_alerta({
+          message: "Producto actualizado con éxito",
+          type: "success",
+        });
+      }
+    } catch (error) {
+      if (error.response) {
+        show_alerta({
+          message: error.response.data.message,
+          type: "error",
+        });
+      } else if (error.request) {
+        show_alerta({
+          message: "Error en la solicitud",
+          type: "error",
+        });
+      } else {
+        show_alerta({
+          message: "Error desconocido",
+          type: "error",
+        });
+      }
+      console.log(error);
+    } finally {
+      document.getElementById("btnCerrarCliente").click();
+      getProductosAdmin();
     }
   };
 
@@ -303,35 +347,33 @@ export const Catalogo = () => {
   };
 
   // Función para manejar cambios en la cantidad
-  const handleChangeCantidad = async (e) => {
+  const handleChangeCantidad = (e) => {
     let value = e.target.value;
     setCantidad(value);
-
     const errorMessage = validateCantidad(value);
     setErrors((prevState) => ({
       ...prevState,
       Cantidad: errorMessage,
     }));
   };
-
   // Función para manejar cambios en el valorVenta
-  const handleChangeValorVenta = async (e) => {
+  const handleChangeValorVenta = (e) => {
     let value = e.target.value;
     setValorVenta(value);
 
+    // Obtener el insumo seleccionado para la validación
     const insumoSeleccionado = Insumos.find(
       (insumo) => insumo.IdInsumo === IdInsumo
     );
 
-    let errorMessage = "";
+    let errorMessage = validateValorVenta(value);
+
     if (
       insumoSeleccionado &&
       parseFloat(value) <= parseFloat(insumoSeleccionado.ValorCompra)
     ) {
       errorMessage =
         "El valor de venta debe ser mayor que el valor de compra del insumo";
-    } else {
-      errorMessage = validateValorVenta(value);
     }
 
     setErrors((prevState) => ({
@@ -736,12 +778,19 @@ export const Catalogo = () => {
             </div>
             <div className="modal-body">
               <form id="crearClienteForm">
+                {errors.general && (
+                  <div className="alert alert-danger" role="alert">
+                    {errors.general}
+                  </div>
+                )}
                 <div className="form-row">
                   {/* Diseño del Producto */}
                   <div className="form-group col-md-5">
                     <label htmlFor="idDisenio">Diseño del Producto:</label>
                     <select
-                      className="form-control"
+                      className={`form-control ${
+                        errors.IdDisenio ? "is-invalid" : ""
+                      }`}
                       id="idDisenio"
                       value={IdDisenio}
                       onChange={(e) => handleChangeIdDisenio(e)}
@@ -759,15 +808,12 @@ export const Catalogo = () => {
                         </option>
                       ))}
                     </select>
-
-                    {IdDisenio === "" && (
-                      <p className="text-danger">
-                        Por favor, seleccione un diseño.
-                      </p>
+                    {errors.IdDisenio && (
+                      <p className="text-danger">{errors.IdDisenio}</p>
                     )}
                   </div>
 
-                  {/* ToolTip imagen de referencia*/}
+                  {/* ToolTip imagen de referencia */}
                   <div className="col-md-1 mt-4 pt-3">
                     <i className="tooltipReferenceImage fas fa-info-circle">
                       {selectedDisenio && (
@@ -786,7 +832,9 @@ export const Catalogo = () => {
                   <div className="form-group col-md-5">
                     <label htmlFor="idInsumo">Insumo del Producto:</label>
                     <select
-                      className="form-control"
+                      className={`form-control ${
+                        errors.IdInsumo ? "is-invalid" : ""
+                      }`}
                       id="idInsumo"
                       value={IdInsumo}
                       onChange={(e) => handleChangeIdInsumo(e)}
@@ -801,28 +849,25 @@ export const Catalogo = () => {
                         </option>
                       ))}
                     </select>
-                    {IdInsumo === "" && (
-                      <p className="text-danger">
-                        Por favor, seleccione un insumo.
-                      </p>
+                    {errors.IdInsumo && (
+                      <p className="text-danger">{errors.IdInsumo}</p>
                     )}
                   </div>
 
-                  {/* ToolTip talla del producto*/}
+                  {/* ToolTip talla del producto */}
                   <div className="col-md-1 mt-4 pt-3">
                     <i className="tooltipReferenceImage fas fa-info-circle">
                       {selectedInsumo && (
                         <span className="tooltiptext">
-                          {" "}
                           {`La talla del insumo es: ${convertTallaIdToName(
                             selectedInsumo.IdTalla
-                          )}`}{" "}
+                          )}`}
                         </span>
                       )}
                     </i>
                   </div>
 
-                  {/* Referencia del Producto*/}
+                  {/* Referencia del Producto */}
                   <div className="form-group col-md-6">
                     <label htmlFor="Referencia">Referencia del Producto:</label>
                     <input
@@ -836,7 +881,9 @@ export const Catalogo = () => {
                       value={Referencia}
                       onChange={handleChangeReferencia}
                     />
-                    {renderErrorMessage(errors.Referencia)}
+                    {errors.Referencia && (
+                      <p className="text-danger">{errors.Referencia}</p>
+                    )}
                   </div>
 
                   {/* Cantidad del producto */}
@@ -850,14 +897,16 @@ export const Catalogo = () => {
                       id="cantidadProducto"
                       placeholder={
                         selectedInsumo
-                          ? `La cantidad maxima del insumo es: ${selectedInsumo.Cantidad}`
+                          ? `La cantidad máxima del insumo es: ${selectedInsumo.Cantidad}`
                           : "Ingrese la cantidad del insumo"
                       }
                       required
                       value={Cantidad}
                       onChange={handleChangeCantidad}
                     />
-                    {renderErrorMessage(errors.Cantidad)}
+                    {errors.Cantidad && (
+                      <p className="text-danger">{errors.Cantidad}</p>
+                    )}
                   </div>
 
                   {/* Valor venta del producto */}
@@ -883,7 +932,9 @@ export const Catalogo = () => {
                       value={ValorVenta}
                       onChange={handleChangeValorVenta}
                     />
-                    {renderErrorMessage(errors.ValorVenta)}
+                    {errors.ValorVenta && (
+                      <p className="text-danger">{errors.ValorVenta}</p>
+                    )}
                   </div>
                 </div>
               </form>
@@ -901,7 +952,9 @@ export const Catalogo = () => {
                 type="button"
                 className="btn btn-primary"
                 onClick={() => {
-                  guardarProducto();
+                  if (validar()) {
+                    guardarProducto();
+                  }
                 }}
               >
                 Guardar
@@ -910,6 +963,7 @@ export const Catalogo = () => {
           </div>
         </div>
       </div>
+
       {/* Modal producto */}
 
       {/* Inicio modal ver detalle diseño */}
@@ -1464,9 +1518,7 @@ export const Catalogo = () => {
                         </label>
                       </td>
                       <td>
-                        <div
-                          className="d-flex"
-                        >
+                        <div className="d-flex">
                           <button
                             className="btn btn-warning btn-sm mr-2"
                             title="Editar"
@@ -1497,7 +1549,6 @@ export const Catalogo = () => {
                             onClick={() =>
                               handleDetalleProducto(producto.IdProducto)
                             }
-                            disabled={producto.Estado != "Activo"}
                             data-toggle="modal"
                             data-target="#modalDetalleProducto"
                             title="Detalle"

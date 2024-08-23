@@ -558,6 +558,11 @@ export const Compras = () => {
       timer: 2000,
       showConfirmButton: false,
       timerProgressBar: true,
+      toast: true, // Activa el modo "toast" para mostrar alertas pequeñas
+      position: "top-end", // Posiciona la alerta en la esquina superior derecha
+      customClass: {
+        popup: "small-alert custom-popup-background", // Aplica las clases personalizadas
+      },
       didOpen: () => {
         const progressBar = MySwal.getTimerProgressBar();
         if (progressBar) {
@@ -569,18 +574,27 @@ export const Compras = () => {
   };
 
   const validar = () => {
-    let errorMessage = "";
+    let hasErrors = false;
+    let newErrors = {};
 
-    // Validar campos de la compra (Proveedor, Fecha, Detalles)
+    // Validar campos de la compra (Proveedor, Fecha)
     if (!IdProveedor) {
-      errorMessage = "Selecciona un proveedor";
-      setErrors({ ...errors, IdProveedor: errorMessage });
-      return;
+      newErrors.IdProveedor = "Selecciona un proveedor";
+      hasErrors = true;
     }
 
     if (!Fecha) {
-      errorMessage = "Selecciona una fecha";
-      setErrors({ ...errors, Fecha: errorMessage });
+      newErrors.Fecha = "Selecciona una fecha";
+      hasErrors = true;
+    }
+
+    // Si hay errores en los campos obligatorios, mostrar alerta y salir
+    if (hasErrors) {
+      setErrors(newErrors); // Actualizar el estado de errores
+      show_alerta({
+        message: "Por favor, completa todos los campos correctamente",
+        type: "error",
+      });
       return;
     }
 
@@ -596,11 +610,14 @@ export const Compras = () => {
           detalle.precio === "0"
       )
     ) {
-      errorMessage = "Agrega detalles válidos de compra";
-      showDetalleAlert(errorMessage); // Mostrar la alerta cuando no hay detalles válidos
+      show_alerta({
+        message: "Por favor, completa todos los campos correctamente",
+        type: "error",
+      });
       return;
     }
 
+    // Validar detalles individuales
     const detallesValidados = Detalles.map((detalle, index) => {
       const errors = {};
 
@@ -654,11 +671,15 @@ export const Compras = () => {
       return errors;
     });
 
-    const hasErrors = detallesValidados.some(
+    const hasDetailErrors = detallesValidados.some(
       (errors) => Object.keys(errors).length > 0
     );
 
-    if (hasErrors) {
+    if (hasDetailErrors) {
+      show_alerta({
+        message: "Por favor, completa todos los campos correctamente",
+        type: "error",
+      });
       return;
     }
 
@@ -1217,7 +1238,18 @@ export const Compras = () => {
             />
             <button
               type="button"
-              className="btn btn-dark mr-2 custom-font"
+              className="btn btn-primary mr-2 custom-font"
+              data-toggle="modal"
+              data-target="#modalGenerarReporte"
+              style={{
+                width: "205px",
+              }}
+            >
+              <i className="fa fa-print"></i> Generar Reporte
+            </button>
+            <button
+              type="button"
+              className="btn btn-dark custom-font"
               data-toggle="modal"
               data-target="#modalCompras"
               onClick={() => proveedores.length > 0 && openModal(1)}
@@ -1226,17 +1258,6 @@ export const Compras = () => {
               }}
             >
               <i className="fas fa-pencil-alt"></i> Crear Compra
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary custom-font"
-              data-toggle="modal"
-              data-target="#modalGenerarReporte"
-              style={{
-                width: "205px",
-              }}
-            >
-              <i className="fa fa-print"></i> Generar Reporte
             </button>
           </div>
           <div className="card-body">
