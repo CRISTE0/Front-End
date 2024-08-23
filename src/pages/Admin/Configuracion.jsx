@@ -614,7 +614,6 @@ export const Configuracion = () => {
                               data-toggle="modal"
                               data-target="#modalDetalleRol"
                               onClick={() => openDetailModal(rol)}
-                              disabled={rol.Estado !== "Activo"}
                               title="Detalle"
                             >
                               <i className="fas fa-info-circle"></i>

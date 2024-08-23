@@ -800,7 +800,7 @@ export const Compras = () => {
               </button>
             </div>
             <div className="modal-body">
-              <input type="hidden" id="IdCompra"></input>
+              <input type="hidden" id="IdCompra" />
 
               <div className="row">
                 <div className="col-md-6">
@@ -951,7 +951,9 @@ export const Compras = () => {
                             className="form-control"
                             name="subtotal"
                             placeholder="Subtotal"
-                            value={formatPrice(detalle.subtotal)}
+                            value={formatPrice(
+                              detalle.cantidad * detalle.precio
+                            )}
                             disabled
                           />
                         </td>
@@ -1015,6 +1017,7 @@ export const Compras = () => {
           </div>
         </div>
       </div>
+
       {/* fin modal de crear compra con el detalle */}
 
       {/* Inicio modal ver detalle compra */}
@@ -1072,7 +1075,8 @@ export const Compras = () => {
                         <tr>
                           <th>Insumo</th>
                           <th>Cantidad</th>
-                          <th>Precio</th>
+                          <th>Precio</th>{" "}
+                          {/* Mostrar el precio ingresado en la compra */}
                           <th>SubTotal</th>
                         </tr>
                       </thead>
@@ -1082,10 +1086,12 @@ export const Compras = () => {
                             <tr key={index}>
                               <td>{getInsumoName(detalle.IdInsumo)}</td>
                               <td>{detalle.Cantidad}</td>
-                              <td>{formatPrice(detalle.Precio)}</td>
+                              <td>{formatPrice(detalle.Precio)}</td>{" "}
+                              {/* Precio del insumo tal como se ingresó */}
                               <td>
                                 {formatPrice(detalle.Cantidad * detalle.Precio)}
-                              </td>
+                              </td>{" "}
+                              {/* Subtotal calculado */}
                             </tr>
                           )
                         )}
@@ -1093,7 +1099,7 @@ export const Compras = () => {
                     </table>
                   </div>
                   <div className="form-group">
-                    <label>Total:</label>
+                    <label>Total de la Compra:</label>
                     <input
                       type="text"
                       className="form-control"
@@ -1283,12 +1289,7 @@ export const Compras = () => {
                           {/* Botón de detalle */}
                           <button
                             onClick={() => handleDetalleCompra(compra.IdCompra)}
-                            className={`btn ${
-                              compra.Estado === "Cancelado"
-                                ? "btn-secondary"
-                                : "btn-info"
-                            } btn-sm `}
-                            disabled={compra.Estado === "Cancelado"}
+                            className="btn btn-info btn-sm"
                             data-toggle="modal"
                             data-target="#modalDetalleCompra"
                             title="Ver Detalle"

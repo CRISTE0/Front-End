@@ -631,7 +631,6 @@ export const Usuarios = () => {
                             onClick={() =>
                               handleDetalleUsuario(usuario.IdUsuario)
                             }
-                            disabled={usuario.Estado === "Inactivo"}
                             data-toggle="modal"
                             data-target="#modalDetalleUsuario"
                           >
