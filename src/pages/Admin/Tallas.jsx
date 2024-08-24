@@ -11,23 +11,10 @@ export const Tallas = () => {
   const insumosUrl = "http://localhost:3000/api/insumos";
   const [Tallas, setTallas] = useState([]);
   const [IdTalla, setIdTalla] = useState("");
-  const [Talla, setTalla] = useState("");
+  const [Talla, setTalla] = useState([]);
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [errors, setErrors] = useState({});
-  const tallasValidas = [
-    "XXXS",
-    "XXS",
-    "XS",
-    "S",
-    "M",
-    "L",
-    "XL",
-    "XXL",
-    "XXXL",
-    "XXXXL",
-  ];
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
@@ -36,46 +23,28 @@ export const Tallas = () => {
     getTallas();
   }, []);
 
-  const verificarTallaExistente = async (talla) => {
-    try {
-      const response = await axios.get(`${url}?Talla=${talla}`);
-      return response.data.length > 0;
-    } catch (error) {
-      console.error("Error al verificar si la talla existe:", error);
-      show_alerta({
-        message: "Error al verificar si la talla existe",
-        type: "error",
-      });
-      return false;
-    }
-  };
-
-  const validateTallas = (value) => {
-    if (!value) {
-      return "Escribe el nombre de la talla";
-    }
-    if (!tallasValidas.includes(value.toUpperCase())) {
-      return `Las tallas deben ser: \n ${tallasValidas.join(", ")}`;
-    }
-    return "";
+  const handleChangeTalla = (e) => {
+    setTalla(e.target.value.toUpperCase());
   };
 
   const getTallas = async () => {
     const respuesta = await axios.get(url);
     setTallas(respuesta.data);
+    console.log(respuesta.data);
   };
 
   const getInsumosByTalla = async (IdTalla) => {
     try {
       const response = await axios.get(insumosUrl);
+      // Verifica si la talla está asociado a algún insumo
       const insumos = response.data.filter(
         (insumo) => insumo.IdTalla === IdTalla
       );
-      return insumos.length > 0;
+      return insumos.length > 0; // Devuelve true si hay al menos un insumo asociado
     } catch (error) {
       console.error("Error fetching insumos:", error);
       show_alerta({ message: "Error al verificar los insumos", type: "error" });
-      return false;
+      return false; // Considera que no tiene insumos asociados en caso de error
     }
   };
 
@@ -90,112 +59,34 @@ export const Tallas = () => {
       setIdTalla(IdTalla);
       setTalla(Talla);
     }
+    // window.setTimeout(function () {
+    //   document.getElementById("nombre").focus();
+    // }, 500);
   };
 
-  const handleChangeTalla = (e) => {
-    const value = e.target.value;
-    const errorMessage = validateTallas(value);
-
-    setTalla(value);
-    setErrors((prevState) => ({
-      ...prevState,
-      talla: errorMessage,
-    }));
-  };
-
-  const validar = async () => {
-    let hasErrors = false;
-    const errors = {};
-
-    // Lista de tallas válidas
-    const tallasValidas = [
-      "XXXS",
-      "XXS",
-      "XS",
-      "S",
-      "M",
-      "L",
-      "XL",
-      "XXL",
-      "XXXL",
-      "XXXXL",
-    ];
-
-    if (!Talla) {
-      errors.talla = "Escribe el nombre de la talla";
-      hasErrors = true;
-    } else if (!tallasValidas.includes(Talla.trim().toUpperCase())) {
-      errors.talla = `Las tallas deben ser: \n ${tallasValidas.join(", ")}`;
-      hasErrors = true;
-    }
-
-    setErrors(errors);
-
-    if (hasErrors) {
+  const validar = () => {
+    if (Talla === "") {
       show_alerta({
-        message: "Por favor, completa todos los campos correctamente",
+        message: "Escribe el nombre de la talla",
         type: "warning",
       });
-      return;
-    }
-
-    // Verificar si la talla ya existe (solo para la operación de actualización)
-    if (operation === 2 && (await verificarTallaExistente(Talla.trim()))) {
-      show_alerta({
-        message: `La talla ${Talla} ya existe`,
-        type: "warning",
-      });
-      return;
-    }
-
-    try {
-      const parametros =
-        operation === 1
-          ? { Talla: Talla.trim() }
-          : { IdTalla: IdTalla, Talla: Talla.trim() };
-
-      const metodo = operation === 1 ? "POST" : "PUT";
-
-      const respuesta = await axios({
-        method: metodo,
-        url: url,
-        data: parametros,
-      });
-
-      const mensaje = respuesta.data.message;
-
-      if (mensaje.includes("ya existe")) {
-        show_alerta({
-          message: mensaje,
-          type: "warning",
-        });
+    } else {
+      console.log(Talla);
+      let parametros;
+      let metodo;
+      if (operation === 1) {
+        parametros = {
+          Talla: Talla.trim(),
+        };
+        metodo = "POST";
       } else {
-        show_alerta({
-          message: mensaje,
-          type: "success",
-        });
-        document.getElementById("btnCerrar").click();
-        getTallas();
+        parametros = {
+          IdTalla: IdTalla,
+          Talla: Talla,
+        };
+        metodo = "PUT";
       }
-    } catch (error) {
-      if (error.response) {
-        const mensaje = error.response.data.message || "Error en la solicitud";
-        show_alerta({
-          message: mensaje,
-          type: "error",
-        });
-      } else if (error.request) {
-        show_alerta({
-          message: "Error en la solicitud",
-          type: "error",
-        });
-      } else {
-        show_alerta({
-          message: "Error desconocido",
-          type: "error",
-        });
-      }
-      console.log(error);
+      enviarSolicitud(metodo, parametros);
     }
   };
 
@@ -213,23 +104,17 @@ export const Tallas = () => {
       });
 
       const mensaje = respuesta.data.message;
+      show_alerta({
+        message: mensaje,
+        type: "success",
+      });
 
-      if (mensaje.includes("ya existe")) {
-        show_alerta({
-          message: mensaje,
-          type: "warning",
-        });
-      } else {
-        show_alerta({
-          message: mensaje,
-          type: "success",
-        });
-        document.getElementById("btnCerrar").click();
-        getTallas();
-      }
+      document.getElementById("btnCerrar").click();
+      getTallas();
     } catch (error) {
       if (error.response) {
-        const mensaje = error.response.data.message || "Error en la solicitud";
+        const mensaje =
+          error.response.data.error || error.response.data.message;
         show_alerta({
           message: mensaje,
           type: "error",
@@ -374,6 +259,7 @@ export const Tallas = () => {
   return (
     <>
       {/* <!-- Modal para crear talla --> */}
+
       <div
         className="modal fade"
         id="modalTallas"
@@ -408,21 +294,14 @@ export const Tallas = () => {
               ></input>
 
               <div className="input-group mb-3">
-                <span className="input-group-text mx-2">
-                  <i className="fas fa-solid fa-ruler-combined"></i>
-                </span>
                 <input
                   type="text"
-                  id="talla"
-                  className={`form-control ${errors.talla ? "is-invalid" : ""}`}
-                  placeholder="Ingrese la talla"
-                  required
+                  id="precio"
+                  className="form-control"
+                  placeholder="Talla"
                   value={Talla}
                   onChange={handleChangeTalla}
-                />
-                {errors.talla && (
-                  <div className="invalid-feedback">{errors.talla}</div>
-                )}
+                ></input>
               </div>
 
               <div className="modal-footer">
@@ -435,7 +314,8 @@ export const Tallas = () => {
                   >
                     Cancelar
                   </button>
-                  <button onClick={validar} className="btn btn-primary">
+
+                  <button onClick={() => validar()} className="btn btn-primary">
                     <i className="fa-solid fa-floppy-disk"></i> Guardar
                   </button>
                 </div>
@@ -444,7 +324,6 @@ export const Tallas = () => {
           </div>
         </div>
       </div>
-
       {/* Fin modal crear talla */}
 
       {/* <!-- Inicio de tallas --> */}
