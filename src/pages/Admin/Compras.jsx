@@ -1238,26 +1238,30 @@ export const Compras = () => {
             />
             <button
               type="button"
-              className="btn btn-primary mr-2 custom-font"
+              className="btn btn-primary d-flex align-items-center justify-content-center p-0 mr-2"
               data-toggle="modal"
               data-target="#modalGenerarReporte"
               style={{
                 width: "205px",
+                height: "40px"
               }}
             >
-              <i className="fa fa-print"></i> Generar Reporte
+              <i className="fa fa-print"></i>
+              <span className="d-none d-sm-inline ml-2">Generar Reporte</span>
             </button>
             <button
               type="button"
-              className="btn btn-dark custom-font"
+              className="btn btn-dark d-flex align-items-center justify-content-center p-0"
               data-toggle="modal"
               data-target="#modalCompras"
               onClick={() => proveedores.length > 0 && openModal(1)}
               style={{
                 width: "190px",
+                height: "40px"
               }}
             >
-              <i className="fas fa-pencil-alt"></i> Crear Compra
+              <i className="fas fa-pencil-alt"></i>
+              <span className="d-none d-sm-inline ml-2">Crear Compra</span>
             </button>
           </div>
           <div className="card-body">

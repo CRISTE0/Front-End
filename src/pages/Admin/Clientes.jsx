@@ -842,15 +842,17 @@ export const Clientes = () => {
             />
             <button
               type="button"
-              className="btn btn-dark"
+              className="btn btn-dark d-flex align-items-center justify-content-center p-0"
               data-toggle="modal"
               data-target="#modalCliente"
               onClick={() => openModal(1, "", "", "", "", "", "")}
               style={{
                 width: "150px",
+                height: "40px"
               }}
             >
-              <i className="fas fa-pencil-alt"></i> Crear Cliente
+              <i className="fas fa-pencil-alt"></i>
+              <span className="d-none d-sm-inline ml-2">Crear Cliente</span>
             </button>
           </div>
           <div className="card-body">

@@ -523,14 +523,16 @@ export const Configuracion = () => {
             <button
               onClick={() => openModal(1)}
               type="button"
-              className="btn btn-dark"
+              className="btn btn-dark d-flex align-items-center justify-content-center p-0"
               data-toggle="modal"
               data-target="#modalRoles"
               style={{
                 width: "120px",
+                height: "40px"
               }}
             >
-              <i className="fas fa-pencil-alt"></i> Crear Rol
+              <i className="fas fa-pencil-alt"></i>
+              <span className="d-none d-sm-inline ml-2">Crear Rol</span>
             </button>
           </div>
           <div className="card-body">
@@ -574,9 +576,7 @@ export const Configuracion = () => {
                           </label>
                         </td>
                         <td>
-                          <div
-                            className="d-flex"
-                          >
+                          <div className="d-flex">
                             {/* Botón de actualizar */}
                             <button
                               className="btn btn-warning btn-sm mr-2 "

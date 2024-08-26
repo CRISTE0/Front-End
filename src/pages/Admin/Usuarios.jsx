@@ -569,14 +569,16 @@ export const Usuarios = () => {
               <button
                 onClick={() => openModal(1)}
                 type="button"
-                className="btn btn-dark"
+                className="btn btn-dark d-flex align-items-center justify-content-center p-0"
                 data-toggle="modal"
                 data-target="#modalUsuarios"
                 style={{
-                  width: "150px",
+                  width: "130px",
+                  height: "40px",
                 }}
               >
-                <i className="fas fa-pencil-alt"></i> Crear Usuario
+                <i className="fas fa-pencil-alt"></i>
+                <span className="d-none d-sm-inline ml-2">Crear Usuario</span>
               </button>
             </div>
           </div>

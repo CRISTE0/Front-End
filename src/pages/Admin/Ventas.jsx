@@ -2098,26 +2098,30 @@ export const Ventas = () => {
             />
             <button
               type="button"
-              className="btn btn-primary mr-2 custom-font"
+              className="btn btn-primary d-flex align-items-center justify-content-center p-0 mr-2"
               data-toggle="modal"
               data-target="#modalGenerarReporte"
               style={{
                 width: "205px",
+                height: "40px"
               }}
             >
-              <i className="fa fa-print"></i> Generar Reporte
+              <i className="fa fa-print"></i>
+              <span className="d-none d-sm-inline ml-2">Generar Reporte</span>
             </button>
             <button
               type="button"
-              className="btn btn-dark"
+              className="btn btn-dark d-flex align-items-center justify-content-center p-0"
               data-toggle="modal"
               data-target="#modalCompras"
               onClick={() => Clientes.length > 0 && openModal(1)}
               style={{
                 width: "170px",
+                height: "40px"
               }}
             >
-              <i className="fas fa-pencil-alt"></i> Crear Venta
+              <i className="fas fa-pencil-alt"></i>
+              <span className="d-none d-sm-inline ml-2">Crear Venta</span>
             </button>
           </div>
           <div className="card-body">

@@ -799,15 +799,17 @@ export const Proveedores = () => {
             />
             <button
               type="button"
-              className="btn btn-dark"
+              className="btn btn-dark d-flex align-items-center justify-content-center p-0"
               data-toggle="modal"
               data-target="#modalProveedor"
               style={{
-                width: "180px",
+                width: "165px",
+                height: "40px",
               }}
               onClick={() => openModal(1, "", "", "", "", "", "", "", "")}
             >
-              <i className="fas fa-pencil-alt"></i> Crear Proveedor
+              <i className="fas fa-pencil-alt"></i>
+              <span className="d-none d-sm-inline ml-2">Crear Proveedor</span>
             </button>
           </div>
           <div className="card-body">

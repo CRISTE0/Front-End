@@ -319,7 +319,6 @@ input.Buscador:focus {
   background-color: #f44336; /* Color rojo cuando está inactivo */
 }
 
-
 /* Nuevo estilo para el estado gris */
 .switch-grey .slider {
   background-color: grey !important; /* Color gris cuando el estado no es activo */
@@ -359,7 +358,7 @@ input.Buscador:focus {
   border-color: #20c9a6;
 }
 
-.btn-primary:hover, 
+.btn-primary:hover,
 .btn-primary:focus {
   background-color: #26af94;
   border-color: #20c9a6;
@@ -423,5 +422,20 @@ input:checked + .slider-permiso:before {
 }
 
 .swal2-popup.swal2-toast {
-  background: #05cea4  !important;
+  background: #05cea4 !important;
+}
+
+@media (max-width: 575.98px) {
+  .btn-dark {
+    width: 40px; /* Ancho fijo para hacerlo cuadrado */
+    height: 40px; /* Altura fija para hacerlo cuadrado */
+  }
+
+  .btn-dark span {
+    display: none; /* Ocultar el texto del botón */
+  }
+
+  .btn-dark i {
+    margin: 0; /* Asegurar que el ícono esté centrado */
+  }
 }

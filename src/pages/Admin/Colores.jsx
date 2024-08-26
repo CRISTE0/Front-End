@@ -109,7 +109,7 @@ export const Colores = () => {
   const validar = () => {
     const errorMessage = validateColores(Color);
     setErrors({ colores: errorMessage });
-  
+
     if (errorMessage) {
       // Muestra la alerta si hay un error en el campo
       show_alerta({
@@ -118,10 +118,10 @@ export const Colores = () => {
       });
       return; // Detiene la ejecución si hay un error
     }
-  
+
     // Si Referencia es un valor predeterminado, usa el valor predeterminado
     const referenciaFinal = Referencia || "#000000";
-  
+
     let parametros, metodo;
     if (operation === 1) {
       parametros = {
@@ -141,7 +141,6 @@ export const Colores = () => {
     }
     enviarSolicitud(metodo, parametros);
   };
-  
 
   const enviarSolicitud = async (metodo, parametros) => {
     try {
@@ -388,14 +387,15 @@ export const Colores = () => {
             <button
               onClick={() => openModal(1)}
               type="button"
-              className="btn btn-dark"
+              className="btn btn-dark d-flex align-items-center justify-content-center p-0"
               data-toggle="modal"
               data-target="#modalColores"
               style={{
                 width: "140px",
               }}
             >
-              <i className="fas fa-pencil-alt"></i> Crear Color
+              <i className="fas fa-pencil-alt"></i>
+              <span className="d-none d-sm-inline ml-2">Crear Color</span>
             </button>
           </div>
           <div className="card-body">
