@@ -124,89 +124,70 @@ export const Clientes = () => {
     modal.show();
   };
 
+  const validateAllFields = () => {
+    const nroDocumentoError = validateNroDocumento(NroDocumento);
+    const nombreApellidoError = validateNombreApellido(NombreApellido);
+    const usuarioError = validateUsuario(Usuario);
+    const telefonoError = validateTelefono(Telefono);
+    const direccionError = validateDireccion(Direccion);
+    const correoError = validateCorreo(Correo);
+    const contraseniaError = validateContrasenia(Contrasenia);
+
+    setErrors({
+      nroDocumento: nroDocumentoError,
+      nombreApellido: nombreApellidoError,
+      usuario: usuarioError,
+      telefono: telefonoError,
+      direccion: direccionError,
+      correo: correoError,
+      contrasenia: contraseniaError,
+    });
+
+    return (
+      !nroDocumentoError &&
+      !nombreApellidoError &&
+      !usuarioError &&
+      !telefonoError &&
+      !direccionError &&
+      !correoError &&
+      !contraseniaError
+    );
+  };
+
   const guardarCliente = async () => {
+    // Limpieza de los campos
     const cleanedNombreApellido = NombreApellido.trim().replace(/\s+/g, " ");
     const cleanedUsuario = Usuario.trim().replace(/\s+/g, " ");
     const cleanedDireccion = Direccion.trim().replace(/\s+/g, " ");
-    const cleanedContrasenia = Contrasenia.trim();
+    const cleanedContrasenia = Contrasenia ? Contrasenia.trim() : ""; // Solo limpiar si se proporciona
 
-    if (!TipoDocumento) {
+    // Valida todos los campos
+    const allFieldsValid = validateAllFields();
+
+    if (!allFieldsValid) {
       show_alerta({
-        message: "El tipo documento es necesario",
+        message: "Por favor, completa todos los campos correctamente",
         type: "error",
       });
       return;
     }
 
-    if (!NroDocumento) {
-      show_alerta({
-        message: "El número de documento es necesario",
-        type: "error",
-      });
-      return;
-    }
-
-    if (!NombreApellido) {
-      show_alerta({
-        message: "El nombre y apellido son necesarios",
-        type: "error",
-      });
-      return;
-    }
-
-    if (!Usuario) {
-      show_alerta({
-        message: "El usuario es necesario",
-        type: "error",
-      });
-      return;
-    } else if (
-      !/^[A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+)*$/.test(
-        Usuario
-      )
-    ) {
-      show_alerta({
-        message:
-          "El nombre de usuario puede contener letras, números, caracteres especiales, y un solo espacio entre palabras",
-        type: "error",
-      });
-      return;
-    }
-
-    if (!Telefono) {
-      show_alerta({
-        message: "El teléfono es necesario",
-        type: "error",
-      });
-      return;
-    }
-
-    if (!Direccion) {
-      show_alerta({
-        message: "La dirección es necesaria",
-        type: "error",
-      });
-      return;
-    }
-
-    if (!Correo) {
-      show_alerta({
-        message: "El correo es necesario",
-        type: "error",
-      });
-      return;
-    }
-
+    // Manejo de la contraseña para la operación de creación
     if (operation === 1 && !cleanedContrasenia) {
       setErrors((prevState) => ({
         ...prevState,
         contrasenia: "La contraseña es requerida",
       }));
+      show_alerta({
+        message: "Verifique los errores en el formulario",
+        type: "error",
+      });
+      return;
     }
 
     const contraseniaError = validateContrasenia(cleanedContrasenia);
 
-    if (contraseniaError && operation === 3) {
+    if (contraseniaError && operation === 1) {
       setErrors((prevState) => ({
         ...prevState,
         contrasenia: contraseniaError,
@@ -218,35 +199,40 @@ export const Clientes = () => {
       return;
     }
 
-    if (operation === 1) {
-      await enviarSolicitud("POST", {
-        TipoDocumento,
-        NroDocumento,
-        NombreApellido: cleanedNombreApellido,
-        Usuario: cleanedUsuario,
-        Telefono,
-        Direccion: cleanedDireccion,
-        Correo,
-        Contrasenia: cleanedContrasenia,
-        Estado: "Activo",
+    // Envío de solicitud dependiendo de la operación
+    try {
+      if (operation === 1) {
+        // Crear un nuevo cliente
+        await enviarSolicitud("POST", {
+          TipoDocumento,
+          NroDocumento,
+          NombreApellido: cleanedNombreApellido,
+          Usuario: cleanedUsuario,
+          Telefono,
+          Direccion: cleanedDireccion,
+          Correo,
+          Contrasenia: cleanedContrasenia,
+          Estado: "Activo",
+        });
+      } else if (operation === 2) {
+        // Actualizar un cliente existente (sin contraseña)
+        await enviarSolicitud("PUT", {
+          IdCliente,
+          TipoDocumento,
+          NroDocumento,
+          NombreApellido: cleanedNombreApellido,
+          Usuario: cleanedUsuario,
+          Telefono,
+          Direccion: cleanedDireccion,
+          Correo,
+        });
+      }
+    } catch (error) {
+      show_alerta({
+        message: "Hubo un error al guardar la información. Inténtalo de nuevo.",
+        type: "error",
       });
-    } else if (operation === 2) {
-      await enviarSolicitud("PUT", {
-        IdCliente,
-        TipoDocumento,
-        NroDocumento,
-        NombreApellido: cleanedNombreApellido,
-        Usuario: cleanedUsuario,
-        Telefono,
-        Direccion: cleanedDireccion,
-        Correo,
-        Contrasenia: cleanedContrasenia,
-      });
-    } else if (operation === 3) {
-      await enviarSolicitud("PUT", {
-        IdCliente,
-        Contrasenia: cleanedContrasenia,
-      });
+      console.error("Error al guardar cliente:", error);
     }
   };
 
@@ -516,7 +502,6 @@ export const Clientes = () => {
   };
 
   const deleteCliente = async (IdCliente, NombreCliente) => {
-
     // Verificar si el cliente está asociado a algun producto
     const asociado = await getComprasByClente(IdCliente);
 
@@ -635,6 +620,7 @@ export const Clientes = () => {
 
   return (
     <>
+      {/* Modal de crear y actualizar clientes */}
       <div
         className="modal fade"
         id="modalCliente"
@@ -839,78 +825,7 @@ export const Clientes = () => {
           </div>
         </div>
       </div>
-
-      {/* Modal para cambiar contra */}
-      {/* <div
-        className="modal fade"
-        id="modalCambiarContrasenia"
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="modalUsuariosLabel"
-        aria-hidden="true"
-        data-backdrop="static"
-        data-keyboard="false"
-      >
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="modalCambiarContrasenia">
-                {title}
-              </h5>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div className="input-group mb-3">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="contrasenia"
-                  className={`form-control ${
-                    errors.contrasenia ? "is-invalid" : ""
-                  }`}
-                  placeholder="Contraseña"
-                  value={Contrasenia}
-                  onChange={handleChangeContrasenia}
-                />
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary ml-2"
-                  onClick={toggleShowPassword}
-                >
-                  {showPassword ? (
-                    <i className="fas fa-eye-slash"></i>
-                  ) : (
-                    <i className="fas fa-eye"></i>
-                  )}
-                </button>
-                {renderErrorMessage(errors.contrasenia)}
-              </div>
-            </div>
-            <div className="modal-footer">
-              <div className="text-right">
-                <button
-                  type="button"
-                  id="btnCerrar"
-                  className="btn btn-secondary mr-2"
-                  data-dismiss="modal"
-                >
-                  Cancelar
-                </button>
-                <button className="btn btn-primary" onClick={guardarCliente}>
-                  Guardar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div> */}
-      {/* Fin modal cambiar la contra*/}
+      {/* Modal de crear y actualizar clientes */}
 
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}

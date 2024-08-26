@@ -109,31 +109,39 @@ export const Colores = () => {
   const validar = () => {
     const errorMessage = validateColores(Color);
     setErrors({ colores: errorMessage });
-
-    if (!errorMessage) {
-      // Si Referencia es un valor predeterminado, usa el valor predeterminado
-      const referenciaFinal = Referencia || "#000000";
-
-      let parametros, metodo;
-      if (operation === 1) {
-        parametros = {
-          Color: Color.trim(),
-          Referencia: referenciaFinal,
-          Estado: "Activo",
-        };
-        metodo = "POST";
-      } else {
-        parametros = {
-          IdColor,
-          Color: Color.trim(),
-          Referencia: referenciaFinal,
-          Estado: "Activo",
-        };
-        metodo = "PUT";
-      }
-      enviarSolicitud(metodo, parametros);
+  
+    if (errorMessage) {
+      // Muestra la alerta si hay un error en el campo
+      show_alerta({
+        message: "Por favor, completa todos los campos correctamente",
+        type: "error",
+      });
+      return; // Detiene la ejecución si hay un error
     }
+  
+    // Si Referencia es un valor predeterminado, usa el valor predeterminado
+    const referenciaFinal = Referencia || "#000000";
+  
+    let parametros, metodo;
+    if (operation === 1) {
+      parametros = {
+        Color: Color.trim(),
+        Referencia: referenciaFinal,
+        Estado: "Activo",
+      };
+      metodo = "POST";
+    } else {
+      parametros = {
+        IdColor,
+        Color: Color.trim(),
+        Referencia: referenciaFinal,
+        Estado: "Activo",
+      };
+      metodo = "PUT";
+    }
+    enviarSolicitud(metodo, parametros);
   };
+  
 
   const enviarSolicitud = async (metodo, parametros) => {
     try {

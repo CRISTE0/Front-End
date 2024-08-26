@@ -130,7 +130,8 @@ export const Catalogo = () => {
   };
 
   const validar = () => {
-    let isValid = true;
+    // Inicializa un objeto para almacenar errores
+    let errores = {};
 
     // Limpieza de datos y validación de campos
     const cleanedReferencia = Referencia.trim();
@@ -138,29 +139,36 @@ export const Catalogo = () => {
     const cleanedValorVenta = ValorVenta.trim();
 
     // Validación de campos
-    const newErrors = {
-      IdDisenio: IdDisenio ? "" : "Seleccione un diseño",
-      IdInsumo: IdInsumo ? "" : "Seleccione un insumo",
-      Referencia: cleanedReferencia ? "" : "Referencia es requerida",
-      Cantidad: cleanedCantidad ? "" : "Cantidad es requerida",
-      ValorVenta: cleanedValorVenta ? "" : "Valor de venta es requerido",
-    };
+    if (!IdDisenio) {
+      errores.IdDisenio = "Seleccione un diseño";
+    }
+    if (!IdInsumo) {
+      errores.IdInsumo = "Seleccione un insumo";
+    }
+    if (cleanedReferencia === "") {
+      errores.Referencia = "Referencia es requerida";
+    }
+    if (cleanedCantidad === "") {
+      errores.Cantidad = "Cantidad es requerida";
+    }
+    if (cleanedValorVenta === "") {
+      errores.ValorVenta = "Valor de venta es requerido";
+    }
 
-    // Verificar si hay algún error
-    isValid = !Object.values(newErrors).some((error) => error);
-
-    // Actualizar el estado de errores
-    setErrors(newErrors);
+    // Actualiza el estado de errores
+    setErrors(errores);
 
     // Mostrar alerta si hay errores
-    if (!isValid) {
+    if (Object.keys(errores).length > 0) {
       show_alerta({
         message: "Por favor, completa todos los campos correctamente",
         type: "error",
       });
+      return false;
     }
 
-    return isValid;
+    // Si no hay errores, retorna true para permitir el envío de datos
+    return true;
   };
 
   const handleChange = (e) => {
@@ -809,7 +817,7 @@ export const Catalogo = () => {
                       ))}
                     </select>
                     {errors.IdDisenio && (
-                      <p className="text-danger">{errors.IdDisenio}</p>
+                      <div className="invalid-feedback">{errors.IdDisenio}</div>
                     )}
                   </div>
 
@@ -850,7 +858,7 @@ export const Catalogo = () => {
                       ))}
                     </select>
                     {errors.IdInsumo && (
-                      <p className="text-danger">{errors.IdInsumo}</p>
+                      <div className="invalid-feedback">{errors.IdInsumo}</div>
                     )}
                   </div>
 
@@ -882,7 +890,9 @@ export const Catalogo = () => {
                       onChange={handleChangeReferencia}
                     />
                     {errors.Referencia && (
-                      <p className="text-danger">{errors.Referencia}</p>
+                      <div className="invalid-feedback">
+                        {errors.Referencia}
+                      </div>
                     )}
                   </div>
 
@@ -905,7 +915,7 @@ export const Catalogo = () => {
                       onChange={handleChangeCantidad}
                     />
                     {errors.Cantidad && (
-                      <p className="text-danger">{errors.Cantidad}</p>
+                      <div className="invalid-feedback">{errors.Cantidad}</div>
                     )}
                   </div>
 
@@ -933,7 +943,9 @@ export const Catalogo = () => {
                       onChange={handleChangeValorVenta}
                     />
                     {errors.ValorVenta && (
-                      <p className="text-danger">{errors.ValorVenta}</p>
+                      <div className="invalid-feedback">
+                        {errors.ValorVenta}
+                      </div>
                     )}
                   </div>
                 </div>

@@ -5,6 +5,8 @@ import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import {
   editImageComprobante,
   subirImageComprobante,
@@ -17,29 +19,22 @@ export const Ventas = () => {
   const [ventas, setPedidos] = useState([]);
   const [pedidosCliente, setPedidosCliente] = useState([]);
   const [IdPedido, setIdPedido] = useState("");
-
   const [Clientes, setClientes] = useState([]);
   const [IdCliente, setIdCliente] = useState("");
   const [TipoPago, setTipoPago] = useState("");
   const [Fecha, setFecha] = useState("");
   const [Total, setTotal] = useState("");
-
   const [IdPedidoActualizar, setIdPedidoActualizar] = useState("");
   const [idEstadoPedidoActualizar, setIdEstdosPedidoActualizar] = useState("");
-
   let idPedidoActualizarEstado;
   let idEstadoPedidoActualizarEstado;
-
   const [imagenComprobante, setImagenComprobante] = useState("");
-  const [imagenComprobantePrevisualizar, setImagenComprobantePrevisualizar] = useState("");
-
+  const [imagenComprobantePrevisualizar, setImagenComprobantePrevisualizar] =
+    useState("");
   const { auth } = useAuth();
-
   const [showComprobanteButton, setShowComprobanteButton] = useState(null);
-
   const [estadosPedidos, setEstadosPedidos] = useState([]);
   const [nuevosEstadosPedidos, setNuevosEstadosPedidos] = useState([]);
-
   const [Detalles, setDetalles] = useState([]);
   const [Productos, setProductos] = useState([]);
   const [showDetalleField, setShowDetalleField] = useState(false);
@@ -48,6 +43,9 @@ export const Ventas = () => {
   const [title, setTitle] = useState("");
   const [errors, setErrors] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFinal, setFechaFinal] = useState("");
+  const [fechaFinalDisabled, setFechaFinalDisabled] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
@@ -60,16 +58,253 @@ export const Ventas = () => {
     // getPedidosCliente();
   }, []);
 
+  const handleFechaInicioChange = (e) => {
+    const selectedFechaInicio = e.target.value;
+    setFechaInicio(selectedFechaInicio);
+    // Habilitar fecha final si se ha seleccionado una fecha de inicio
+    setIsFechaFinalDisabled(!selectedFechaInicio);
+    // Limpiar la fecha final si la fecha de inicio se borra
+    if (!selectedFechaInicio) {
+      setFechaFinal("");
+    }
+  };
+
+  const handleFechaFinalChange = (e) => {
+    setFechaFinal(e.target.value);
+  };
+
+  const handleGenerateReport = () => {
+    const fechaInicio = document.getElementById("fechaInicio").value;
+    const fechaFinal = document.getElementById("fechaFinal").value;
+
+    if (!fechaInicio || !fechaFinal) {
+      show_alerta({
+        message: "Por favor, seleccione ambas fechas.",
+        type: "error",
+      });
+      return;
+    }
+
+    // Convertir fechas a objetos Date
+    const inicio = new Date(fechaInicio);
+    const final = new Date(fechaFinal);
+
+    // Filtrar las compras en el rango de fechas seleccionado
+    const pedidosFiltradas = ventas.filter((pedido) => {
+      const fechaPedido = new Date(pedido.Fecha);
+      return fechaPedido >= inicio && fechaPedido <= final;
+    });
+
+    if (pedidosFiltradas.length === 0) {
+      show_alerta({
+        message:
+          "No se encontraron compras en el rango de fechas seleccionado.",
+        type: "error",
+      });
+      return;
+    }
+
+    // Generar el PDF con las compras filtradas
+    generatePDF(pedidosFiltradas);
+
+    // Restablecer el estado del campo de fecha final
+    setFechaFinal(""); // Limpia el valor del campo fechaFinal
+    setFechaInicio(""); // Limpia el valor del campo fechaInicio
+    setFechaFinalDisabled(true); // Establece el estado disabled de fechaFinal a true
+
+    // Cerrar el modal después de generar el reporte
+    $("#modalGenerarReporte").modal("hide");
+  };
+
+  const generatePDF = async (productosFiltrados) => {
+    const doc = new jsPDF();
+
+    // Función para convertir una imagen URL a base64
+    const toBase64 = (url) => {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(xhr.response);
+          } else {
+            reject(new Error(`Error al cargar la imagen: ${xhr.status}`));
+          }
+        };
+        xhr.onerror = () =>
+          reject(new Error("Error de red al cargar la imagen"));
+        xhr.responseType = "blob";
+        xhr.open("GET", url);
+        xhr.send();
+      });
+    };
+
+    try {
+      // URL de la imagen (usa ruta absoluta o ruta relativa si es necesario)
+      const imgUrl = "../../../src/assets/img/imagenesHome/logoSoftShirt.png"; // Cambia esto según tu ruta
+
+      // Convertir la imagen a base64
+      const imgData = await toBase64(imgUrl);
+
+      // Configurar el título del PDF
+      const addHeader = () => {
+        doc.addImage(imgData, "PNG", 170, 15, 30, 30); // Ajusta las coordenadas y el tamaño según sea necesario
+        doc.setFontSize(18);
+        doc.setTextColor("#1cc88a"); // Color verde para el título
+        doc.text("Reporte de Ventas", 14, 22);
+      };
+
+      // Agregar el encabezado en la primera página
+      addHeader();
+
+      // Inicializar la posición Y para la tabla principal
+      let startY = 30;
+
+      // Iterar sobre cada producto
+      productosFiltrados.forEach((producto, index) => {
+        // Calcular la altura necesaria para la tabla de detalles
+        const rowHeight = 10; // Estimación de la altura de cada fila
+        const tableHeight =
+          producto.DetallesPedidosProductos.length * rowHeight;
+
+        // Verificar si hay espacio suficiente en la página actual
+        const pageHeight = doc.internal.pageSize.height;
+        const remainingSpace = pageHeight - startY - 20; // Espacio restante en la página
+
+        if (remainingSpace < tableHeight + 30) {
+          // Si no hay suficiente espacio, crear una nueva página
+          doc.addPage();
+          startY = 20; // Resetear la posición Y en la nueva página
+          // Agregar el encabezado solo en la primera página
+          if (index === 0) {
+            addHeader(); // Agregar el encabezado en la primera página
+          }
+        }
+
+        // Agregar título del producto
+        doc.setFontSize(14);
+        doc.setTextColor("#1cc88a"); // Color verde para el título del producto
+        doc.text(`Venta ${index + 1}`, 14, startY);
+
+        // Incrementar la posición Y
+        startY += 10;
+
+        // Agregar la información principal del producto
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0); // Volver al color negro para el resto del texto
+        doc.text(`Cliente: ${producto.Cliente.NombreApellido}`, 14, startY);
+        doc.text(`Método de Pago: ${producto.TipoPago}`, 14, startY + 5);
+        doc.text(`Fecha: ${producto.Fecha}`, 14, startY + 10);
+        doc.text(`Total: ${formatPrice(producto.Total)}`, 14, startY + 15);
+        doc.text(`Estado: Finalizado`, 14, startY + 20); // Estado fijo a "Finalizado"
+
+        // Verificar si el método de pago es "Transferencia"
+        if (
+          producto.TipoPago === "Transferencia" &&
+          producto.ImagenComprobante
+        ) {
+          // Agregar título "Comprobante de Pago"
+          doc.setFontSize(12);
+          doc.setTextColor(0, 0, 0); // Color negro para el título del comprobante
+          doc.text(`Comprobante de Pago:`, 14, startY + 25);
+
+          // Calcular la posición X para "Ver Comprobante"
+          const comprobanteX =
+            14 + doc.getTextWidth("Comprobante de Pago: ") + 2; // Añadir 2 unidades de espacio después del texto
+
+          // Cambiar el color del texto a verde para el enlace
+          doc.setTextColor("#1cc88a"); // Color verde para el enlace
+
+          // Agregar el enlace "Ver Comprobante" al lado de "Comprobante de Pago:"
+          doc.textWithLink("Ver Comprobante", comprobanteX, startY + 25, {
+            url: producto.ImagenComprobante,
+          });
+
+          // Agregar evento de clic para abrir en una nueva pestaña
+          doc.link(comprobanteX, startY + 25, 40, 10, {
+            url: producto.ImagenComprobante,
+            target: "_blank",
+          });
+        }
+
+        // Incrementar la posición Y para los detalles
+        startY += 35;
+
+        // Configurar las columnas y filas de la tabla de detalles
+        const detailColumns = ["Producto", "Cantidad", "Precio", "Subtotal"];
+
+        // Mapear las filas con el precio real
+        const detailRows = producto.DetallesPedidosProductos.map((detalle) => [
+          detalle.Producto.Referencia, // Utilizar la referencia del producto
+          detalle.Cantidad,
+          formatPrice(detalle.Precio),
+          formatPrice(detalle.SubTotal),
+        ]);
+
+        // Generar la tabla de detalles en el PDF
+        doc.autoTable({
+          head: [detailColumns],
+          body: detailRows,
+          startY: startY,
+          headStyles: {
+            fillColor: "#1cc88a", // Color de fondo del encabezado de la tabla
+            textColor: "#ffffff", // Color del texto del encabezado de la tabla
+          },
+          styles: {
+            fontSize: 10, // Tamaño de fuente en la tabla
+          },
+        });
+
+        // Incrementar la posición Y después de la tabla
+        startY = doc.lastAutoTable.finalY + 10;
+
+        // Dibujar una línea horizontal después de cada producto
+        doc.setLineWidth(0.5);
+        doc.setDrawColor("#1cc88a"); // Color verde para la línea
+        doc.line(14, startY, 200, startY); // Ajusta las coordenadas según sea necesario
+        startY += 10;
+      });
+
+      // Calcular la posición para el texto de copyright
+      const pageHeight = doc.internal.pageSize.height;
+      const footerText = "© Soft-Shirt 2024";
+      const textWidth =
+        (doc.getStringUnitWidth(footerText) * doc.internal.getFontSize()) /
+        doc.internal.scaleFactor;
+      const footerX = (doc.internal.pageSize.width - textWidth) / 2; // Centrar el texto horizontalmente
+      const footerY = pageHeight - 10; // Ajusta la posición vertical según sea necesario
+
+      // Agregar el texto de copyright en la última página
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0); // Color negro para el texto de copyright
+      doc.text(footerText, footerX, footerY);
+
+      // Descargar el PDF
+      doc.save("Reporte_Ventas_Soft-Shirt.pdf");
+    } catch (error) {
+      console.error("Error al generar el PDF:", error);
+    }
+  };
+
+  // Función para formatear precios
+  const formatPrice = (price) => {
+    return `$${price.toFixed(2)}`;
+  };
+
   const getPedidos = async () => {
     try {
       const respuesta = await axios.get(url);
-      // setPedidos(respuesta.data);
+      const pedidosOrdenados = respuesta.data.sort((a, b) => {
+        // Ordenar por fecha de forma descendente (de la más reciente a la más antigua)
+        return new Date(b.Fecha) - new Date(a.Fecha);
+      });
 
       const ventas = respuesta.data.filter(
         (venta) => venta.IdEstadoPedido == 3
       );
 
-      setPedidos(ventas);
+      setPedidos(ventas, pedidosOrdenados);
     } catch (error) {
       show_alerta("Error al obtener los pedidos", "error");
     }
@@ -199,8 +434,8 @@ export const Ventas = () => {
     setTipoPago("");
     setFecha("");
     setTotal("");
-    setImagenComprobante(null)
-    setImagenComprobantePrevisualizar("0")
+    setImagenComprobante(null);
+    setImagenComprobantePrevisualizar("0");
     setDetalles([]);
     setOperation(1); // Indicar que es una operación de creación
     setErrors({});
@@ -211,10 +446,10 @@ export const Ventas = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     console.log(name);
-    
+
     if (name === "IdCliente") {
       setIdCliente(value);
-    }else if (name === "TipoPago") {
+    } else if (name === "TipoPago") {
       setTipoPago(value);
     } else if (name === "Fecha") {
       setFecha(value);
@@ -443,59 +678,65 @@ export const Ventas = () => {
   const validar = async () => {
     let errorMessage = "";
 
-    let idImagenComprobante= "0";
-    let url= "0";
+    let idImagenComprobante = "0";
+    let url = "0";
+
+    // Verificar los campos y establecer errores específicos
+    const errores = {};
 
     if (!IdCliente) {
-      errorMessage = "Selecciona un cliente";
-      setErrors({ IdCliente: errorMessage });
-      return;
+      errores.IdCliente = "Selecciona un cliente";
     }
 
     if (!TipoPago) {
-      errorMessage = "Selecciona un método de pago";
-      setErrors({ TipoPago: errorMessage });
-      return;
+      errores.TipoPago = "Selecciona un método de pago";
     }
 
     if (Detalles.length === 0) {
-      errorMessage = "Agrega al menos un detalle de compra";
-      setErrors({ Detalles: errorMessage });
-      return;
-    }
-
-    if (Detalles.some((detalle) => !detalle.cantidad || !detalle.precio)) {
-      errorMessage =
+      errores.Detalles = "Agrega al menos un detalle de compra";
+    } else if (
+      Detalles.some((detalle) => !detalle.cantidad || !detalle.precio)
+    ) {
+      errores.Detalles =
         "Ingresa una cantidad y un precio válido para cada detalle";
-      setErrors({ Detalles: errorMessage });
+    }
+
+    if (Object.keys(errores).length > 0) {
+      // Si hay errores específicos, actualizarlos en el estado
+      setErrors(errores);
+      // Mostrar un mensaje general de error
+      show_alerta({
+        message: "Por favor, completa todos los campos correctamente",
+        type: "error",
+      });
       return;
     }
 
+    // Si hay alertas adicionales, detener el proceso
     if (hayAlertas()) {
       return;
     }
+
     console.log(Detalles);
     console.log(Fecha);
     console.log(Total);
     console.log(TipoPago);
-    
-    
-    if (TipoPago == "Transferencia") {
 
-        if (!imagenComprobante) {
-          show_alerta({
-            message: "Es necesario un comprobante de pago",
-            type: "error",
-          });        }
+    if (TipoPago === "Transferencia") {
+      if (!imagenComprobante) {
+        show_alerta({
+          message: "Es necesario un comprobante de pago",
+          type: "error",
+        });
+        return; // No continuar si falta el comprobante de pago
+      }
 
-        [idImagenComprobante, url] = await subirImageComprobante(
+      [idImagenComprobante, url] = await subirImageComprobante(
         imagenComprobante
       );
     }
-    // return;
-    
-    // return;
 
+    // Enviar solicitud si no hay errores
     enviarSolicitud("POST", {
       IdCliente: IdCliente,
       TipoPago: TipoPago,
@@ -513,7 +754,6 @@ export const Ventas = () => {
     console.log(parametros);
     try {
       let urlRequest = url;
-      
 
       const respuesta = await axios({
         method: metodo,
@@ -984,7 +1224,6 @@ export const Ventas = () => {
                 <div>
                   <div className="form-row">
                     <div className="accordion col-md-12" id="accordionExample">
-
                       {/* Acordeon crear venta */}
                       <div className="card">
                         <div className="card-header" id="headingOne">
@@ -1048,8 +1287,12 @@ export const Ventas = () => {
                                   value={TipoPago}
                                   onChange={handleChange}
                                 >
-                                  <option value="" disabled>Selecciona un método de pago</option>
-                                  <option value={"Transferencia"}>Transferencia</option>
+                                  <option value="" disabled>
+                                    Selecciona un método de pago
+                                  </option>
+                                  <option value={"Transferencia"}>
+                                    Transferencia
+                                  </option>
                                   <option value={"Efectivo"}>Efectivo </option>
                                 </select>
                                 {renderErrorMessage(errors.TipoPago)}
@@ -1223,7 +1466,7 @@ export const Ventas = () => {
                       </div>
 
                       {/* Acordeon comprobante de la venta */}
-                      {TipoPago == "Transferencia" &&(
+                      {TipoPago == "Transferencia" && (
                         <div className="card">
                           <div className="card-header" id="headingTwo">
                             <h2 className="mb-0">
@@ -1300,42 +1543,42 @@ export const Ventas = () => {
                                 {/* Input file comprobante */}
                                 {/* Renderizar solo si no hay comprobante */}
                                 {imagenComprobantePrevisualizar == "0" && (
-                                    <div className="inputComprobante d-flex justify-content-center align-items-center pt-4">
-                                      <input
-                                        accept=".png, .jpg, .jpeg"
-                                        type="file"
-                                        name="file-3"
-                                        id="inputFileReferencia"
-                                        className={`inputfileComprobante inputfileComprobante-2 ${
-                                          errors.fileComprobante
-                                            ? "is-invalid"
-                                            : ""
-                                        } `}
-                                        onChange={handleChangeImagenComprobante}
-                                      />
-                                      <label
-                                        className="d-flex justify-content-center align-items-center"
-                                        htmlFor="inputFileReferencia"
+                                  <div className="inputComprobante d-flex justify-content-center align-items-center pt-4">
+                                    <input
+                                      accept=".png, .jpg, .jpeg"
+                                      type="file"
+                                      name="file-3"
+                                      id="inputFileReferencia"
+                                      className={`inputfileComprobante inputfileComprobante-2 ${
+                                        errors.fileComprobante
+                                          ? "is-invalid"
+                                          : ""
+                                      } `}
+                                      onChange={handleChangeImagenComprobante}
+                                    />
+                                    <label
+                                      className="d-flex justify-content-center align-items-center"
+                                      htmlFor="inputFileReferencia"
+                                    >
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="iborrainputfileComprobante"
+                                        width="20"
+                                        height="17"
+                                        viewBox="0 0 20 17"
                                       >
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          className="iborrainputfileComprobante"
-                                          width="20"
-                                          height="17"
-                                          viewBox="0 0 20 17"
-                                        >
-                                          <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
-                                        </svg>
-                                        <span
-                                          className="iborrainputfileComprobante"
-                                          id="spanInputFileComprobante"
-                                        >
-                                          Seleccionar archivo
-                                        </span>
-                                      </label>
-                                      {/* {renderErrorMessage(errors.fileComprobante)} */}
-                                    </div>
-                                  )}
+                                        <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
+                                      </svg>
+                                      <span
+                                        className="iborrainputfileComprobante"
+                                        id="spanInputFileComprobante"
+                                      >
+                                        Seleccionar archivo
+                                      </span>
+                                    </label>
+                                    {/* {renderErrorMessage(errors.fileComprobante)} */}
+                                  </div>
+                                )}
 
                                 {/* Boton enviar comprobante */}
                                 {/* {showComprobanteButton && (
@@ -1354,15 +1597,11 @@ export const Ventas = () => {
                                     </button>
                                   </div>
                                 )} */}
-
-
                               </div>
                             </div>
                           </div>
-                          
                         </div>
                       )}
-
                     </div>
                   </div>
                 </div>
@@ -1449,7 +1688,6 @@ export const Ventas = () => {
                           >
                             <div className="card-body">
                               <div className="row mb-3">
-
                                 <div className="col-md-6">
                                   <label>Cliente:</label>
                                   <input
@@ -1481,7 +1719,6 @@ export const Ventas = () => {
                                     disabled
                                   />
                                 </div>
-
                               </div>
                               <div className="table-responsive">
                                 <table className="table table-bordered">
@@ -1528,215 +1765,213 @@ export const Ventas = () => {
                       </div>
 
                       {/* Acordeon comprobante de la venta */}
-                      {pedidoSeleccionado?.TipoPago == "Transferencia" &&(
-
-                      <div className="card">
-                        <div className="card-header" id="headingTwo">
-                          <h2 className="mb-0">
-                            <button
-                              className="btn btn-link btn-block text-left collapsed"
-                              type="button"
-                              data-toggle="collapse"
-                              data-target="#collapseTwo"
-                              aria-expanded="false"
-                              aria-controls="collapseTwo"
-                            >
-                              Comprobante de pago
-                            </button>
-                          </h2>
-                        </div>
-
-                        {/* {insumoSeleccionado && ( */}
-                        <div
-                          id="collapseTwo"
-                          className="collapse"
-                          aria-labelledby="headingTwo"
-                          data-parent="#accordionExample"
-                        >
-                          <div className="card-body">
-                            <div className="container">
-                              {/* Imagen comprobante */}
-                              <div
-                                className="container py-2 d-flex justify-content-center align-items-center"
-                                style={{
-                                  overflow: "visible",
-                                  position: "relative",
-                                }}
+                      {pedidoSeleccionado?.TipoPago == "Transferencia" && (
+                        <div className="card">
+                          <div className="card-header" id="headingTwo">
+                            <h2 className="mb-0">
+                              <button
+                                className="btn btn-link btn-block text-left collapsed"
+                                type="button"
+                                data-toggle="collapse"
+                                data-target="#collapseTwo"
+                                aria-expanded="false"
+                                aria-controls="collapseTwo"
                               >
-                                {/* si existe renderizar la imagen del comprobante, si no mostrar texto  */}
-                                {imagenComprobantePrevisualizar != "0" ? (
-                                  <img
-                                    onClick={handleToggleZoom}
-                                    src={imagenComprobantePrevisualizar}
-                                    alt="Vista previa imagen del comprobante"
-                                    style={{
-                                      cursor: "pointer",
-                                      // width: "80%",
-                                      // height: "auto",
-                                      // maxWidth: "200px",
-                                      // display: "",
-                                      // border: "1px solid black",
-                                      // width: "30%", /* Ajusta al 100% del ancho del contenedor */
-                                      maxWidth:
-                                        "720px" /* Limita el ancho máximo */,
-                                      height:
-                                        "300px" /* Mantiene la proporción */,
+                                Comprobante de pago
+                              </button>
+                            </h2>
+                          </div>
 
-                                      objectFit: "cover",
-                                      position: "relative",
-                                      // top: '-50px', /* Ajusta el desbordamiento hacia arriba */
-                                      left: "0",
+                          {/* {insumoSeleccionado && ( */}
+                          <div
+                            id="collapseTwo"
+                            className="collapse"
+                            aria-labelledby="headingTwo"
+                            data-parent="#accordionExample"
+                          >
+                            <div className="card-body">
+                              <div className="container">
+                                {/* Imagen comprobante */}
+                                <div
+                                  className="container py-2 d-flex justify-content-center align-items-center"
+                                  style={{
+                                    overflow: "visible",
+                                    position: "relative",
+                                  }}
+                                >
+                                  {/* si existe renderizar la imagen del comprobante, si no mostrar texto  */}
+                                  {imagenComprobantePrevisualizar != "0" ? (
+                                    <img
+                                      onClick={handleToggleZoom}
+                                      src={imagenComprobantePrevisualizar}
+                                      alt="Vista previa imagen del comprobante"
+                                      style={{
+                                        cursor: "pointer",
+                                        // width: "80%",
+                                        // height: "auto",
+                                        // maxWidth: "200px",
+                                        // display: "",
+                                        // border: "1px solid black",
+                                        // width: "30%", /* Ajusta al 100% del ancho del contenedor */
+                                        maxWidth:
+                                          "720px" /* Limita el ancho máximo */,
+                                        height:
+                                          "300px" /* Mantiene la proporción */,
 
-                                      zIndex: 1 /* Asegura que la imagen esté sobre otros elementos */,
-                                      transform: isZoomed
-                                        ? "scale(2.1)"
-                                        : "scale(1)" /* Aplica o quita el zoom */,
-                                      transition:
-                                        "transform 0.3s ease-in-out" /* Suaviza el cambio */,
-                                    }}
-                                    className="zoom-image"
-                                  />
-                                ) : (
-                                  <p className="font-weight-bold text-dark">
-                                    Aún no hay un comprobante
-                                  </p>
-                                )}
-                              </div>
+                                        objectFit: "cover",
+                                        position: "relative",
+                                        // top: '-50px', /* Ajusta el desbordamiento hacia arriba */
+                                        left: "0",
 
-                              {/* Input file comprobante */}
-                              {/* Renderizar solo si es un cliente y no hay comprobante */}
-                              {auth.idCliente &&
-                                pedidoSeleccionado?.ImagenComprobante ==
-                                  "0" && (
-                                  <div className="inputComprobante d-flex justify-content-center align-items-center pt-4">
-                                    <input
-                                      accept=".png, .jpg, .jpeg"
-                                      type="file"
-                                      name="file-3"
-                                      id="inputFileReferencia"
-                                      className={`inputfileComprobante inputfileComprobante-2 ${
-                                        errors.fileComprobante
-                                          ? "is-invalid"
-                                          : ""
-                                      } `}
-                                      onChange={handleChangeImagenComprobante}
+                                        zIndex: 1 /* Asegura que la imagen esté sobre otros elementos */,
+                                        transform: isZoomed
+                                          ? "scale(2.1)"
+                                          : "scale(1)" /* Aplica o quita el zoom */,
+                                        transition:
+                                          "transform 0.3s ease-in-out" /* Suaviza el cambio */,
+                                      }}
+                                      className="zoom-image"
                                     />
-                                    <label
-                                      className="d-flex justify-content-center align-items-center"
-                                      htmlFor="inputFileReferencia"
-                                    >
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="iborrainputfileComprobante"
-                                        width="20"
-                                        height="17"
-                                        viewBox="0 0 20 17"
-                                      >
-                                        <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
-                                      </svg>
-                                      <span
-                                        className="iborrainputfileComprobante"
-                                        id="spanInputFileComprobante"
-                                      >
-                                        Seleccionar archivo
-                                      </span>
-                                    </label>
-                                    {/* {renderErrorMessage(errors.fileComprobante)} */}
-                                  </div>
-                                )}
-
-                              {/* Boton enviar comprobante */}
-                              {showComprobanteButton && (
-                                <div className="d-flex justify-content-center align-items-center pt-4">
-                                  <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    onClick={() =>
-                                      enviarComprobante(
-                                        pedidoSeleccionado.IdPedido,
-                                        pedidoSeleccionado.IdImagenComprobante
-                                      )
-                                    }
-                                  >
-                                    Subir Comprobante :)
-                                  </button>
+                                  ) : (
+                                    <p className="font-weight-bold text-dark">
+                                      Aún no hay un comprobante
+                                    </p>
+                                  )}
                                 </div>
-                              )}
 
-                              {auth.idUsuario &&
-                                pedidoSeleccionado?.ImagenComprobante !=
-                                  "0" && (
-                                  <div className="d-flex justify-content-center pt-4">
-                                    <button
-                                      className="btn btn-info"
-                                      onClick={() =>
-                                        handleDownload(pedidoSeleccionado)
-                                      }
-                                    >
-                                      {" "}
-                                      Descargar comprobante
-                                    </button>
-                                  </div>
-                                )}
+                                {/* Input file comprobante */}
+                                {/* Renderizar solo si es un cliente y no hay comprobante */}
+                                {auth.idCliente &&
+                                  pedidoSeleccionado?.ImagenComprobante ==
+                                    "0" && (
+                                    <div className="inputComprobante d-flex justify-content-center align-items-center pt-4">
+                                      <input
+                                        accept=".png, .jpg, .jpeg"
+                                        type="file"
+                                        name="file-3"
+                                        id="inputFileReferencia"
+                                        className={`inputfileComprobante inputfileComprobante-2 ${
+                                          errors.fileComprobante
+                                            ? "is-invalid"
+                                            : ""
+                                        } `}
+                                        onChange={handleChangeImagenComprobante}
+                                      />
+                                      <label
+                                        className="d-flex justify-content-center align-items-center"
+                                        htmlFor="inputFileReferencia"
+                                      >
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          className="iborrainputfileComprobante"
+                                          width="20"
+                                          height="17"
+                                          viewBox="0 0 20 17"
+                                        >
+                                          <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
+                                        </svg>
+                                        <span
+                                          className="iborrainputfileComprobante"
+                                          id="spanInputFileComprobante"
+                                        >
+                                          Seleccionar archivo
+                                        </span>
+                                      </label>
+                                      {/* {renderErrorMessage(errors.fileComprobante)} */}
+                                    </div>
+                                  )}
 
-                              {/*Renderizar botones de acción con comprobante, solo admin puede acceder a ellos */}
-                              {auth.idUsuario &&
-                                pedidoSeleccionado?.ImagenComprobante != "0" &&
-                                pedidoSeleccionado?.IdEstadoPedido == 1 && (
-                                  <div
-                                    className="d-flex pt-4"
-                                    style={{
-                                      justifyContent: "space-evenly",
-                                    }}
-                                  >
+                                {/* Boton enviar comprobante */}
+                                {showComprobanteButton && (
+                                  <div className="d-flex justify-content-center align-items-center pt-4">
                                     <button
                                       type="button"
                                       className="btn btn-primary"
                                       onClick={() =>
-                                        aceptarComprobante(
-                                          pedidoSeleccionado.IdPedido
+                                        enviarComprobante(
+                                          pedidoSeleccionado.IdPedido,
+                                          pedidoSeleccionado.IdImagenComprobante
                                         )
                                       }
                                     >
-                                      Aceptar Comprobante :)
-                                    </button>
-
-                                    <button
-                                      type="button"
-                                      className="btn btn-danger"
-                                      // hacer una especie de funcion en el onclck para determinar si hay o no intentos
-                                      onClick={() => {
-                                        if (pedidoSeleccionado.Intentos > 1) {
-                                          rechazarComprobante(
-                                            pedidoSeleccionado.IdPedido,
-                                            pedidoSeleccionado.Intentos,
-                                            pedidoSeleccionado.Cliente
-                                              .NombreApellido,
-                                            pedidoSeleccionado.Cliente.Correo
-                                          );
-                                        } else {
-                                          rechazarComprobante(
-                                            pedidoSeleccionado.IdPedido,
-                                            pedidoSeleccionado.Intentos,
-                                            pedidoSeleccionado.Cliente
-                                              .NombreApellido,
-                                            pedidoSeleccionado.Cliente.Correo
-                                          );
-                                        }
-                                      }}
-                                    >
-                                      Rechazar Comprobante :(
+                                      Subir Comprobante :)
                                     </button>
                                   </div>
                                 )}
+
+                                {auth.idUsuario &&
+                                  pedidoSeleccionado?.ImagenComprobante !=
+                                    "0" && (
+                                    <div className="d-flex justify-content-center pt-4">
+                                      <button
+                                        className="btn btn-info"
+                                        onClick={() =>
+                                          handleDownload(pedidoSeleccionado)
+                                        }
+                                      >
+                                        {" "}
+                                        Descargar comprobante
+                                      </button>
+                                    </div>
+                                  )}
+
+                                {/*Renderizar botones de acción con comprobante, solo admin puede acceder a ellos */}
+                                {auth.idUsuario &&
+                                  pedidoSeleccionado?.ImagenComprobante !=
+                                    "0" &&
+                                  pedidoSeleccionado?.IdEstadoPedido == 1 && (
+                                    <div
+                                      className="d-flex pt-4"
+                                      style={{
+                                        justifyContent: "space-evenly",
+                                      }}
+                                    >
+                                      <button
+                                        type="button"
+                                        className="btn btn-primary"
+                                        onClick={() =>
+                                          aceptarComprobante(
+                                            pedidoSeleccionado.IdPedido
+                                          )
+                                        }
+                                      >
+                                        Aceptar Comprobante :)
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        className="btn btn-danger"
+                                        // hacer una especie de funcion en el onclck para determinar si hay o no intentos
+                                        onClick={() => {
+                                          if (pedidoSeleccionado.Intentos > 1) {
+                                            rechazarComprobante(
+                                              pedidoSeleccionado.IdPedido,
+                                              pedidoSeleccionado.Intentos,
+                                              pedidoSeleccionado.Cliente
+                                                .NombreApellido,
+                                              pedidoSeleccionado.Cliente.Correo
+                                            );
+                                          } else {
+                                            rechazarComprobante(
+                                              pedidoSeleccionado.IdPedido,
+                                              pedidoSeleccionado.Intentos,
+                                              pedidoSeleccionado.Cliente
+                                                .NombreApellido,
+                                              pedidoSeleccionado.Cliente.Correo
+                                            );
+                                          }
+                                        }}
+                                      >
+                                        Rechazar Comprobante :(
+                                      </button>
+                                    </div>
+                                  )}
+                              </div>
                             </div>
                           </div>
+                          {/* )} */}
                         </div>
-                        {/* )} */}
-                      </div>
                       )}
-
-
                     </div>
                   </div>
                 </div>
@@ -1757,6 +1992,97 @@ export const Ventas = () => {
       </div>
       {/* Fin modal ver detalle venta */}
 
+      {/* Inicio modal reporte venta */}
+      <div>
+        <div
+          className="modal fade"
+          id="modalGenerarReporte"
+          tabIndex="-1"
+          role="dialog"
+          aria-labelledby="ModalGenerarReporteLabel"
+          aria-hidden="true"
+          data-backdrop="static"
+          data-keyboard="false"
+        >
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="ModalGenerarReporteLabel">
+                  Generar Reporte de Ventas
+                </h5>
+                <button
+                  type="button"
+                  className="close"
+                  data-dismiss="modal"
+                  aria-label="Close"
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <form>
+                  <div className="form-group">
+                    <label htmlFor="fechaInicio">Fecha de Inicio</label>
+                    <input
+                      type="date"
+                      id="fechaInicio"
+                      className="form-control"
+                      value={fechaInicio}
+                      onChange={(e) => {
+                        setFechaInicio(e.target.value);
+                        // Habilitar/deshabilitar fechaFinal
+                        setFechaFinalDisabled(!e.target.value);
+                      }}
+                      max={fechaFinal || undefined} // Restringir la fecha final si está establecida
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="fechaFinal">Fecha Final</label>
+                    <input
+                      type="date"
+                      id="fechaFinal"
+                      className="form-control"
+                      value={fechaFinal}
+                      onChange={(e) => {
+                        const selectedDate = e.target.value;
+                        setFechaFinal(selectedDate);
+                        setFechaInicio(
+                          selectedDate
+                            ? fechaInicio > selectedDate
+                              ? fechaInicio
+                              : fechaInicio
+                            : fechaInicio
+                        );
+                      }}
+                      disabled={fechaFinalDisabled}
+                      max={new Date().toISOString().split("T")[0]} // Fecha máxima es hoy
+                    />
+                  </div>
+                </form>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  data-dismiss="modal"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleGenerateReport}
+                >
+                  Generar Reporte
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Fin modal reporte venta */}
+
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
@@ -1772,15 +2098,26 @@ export const Ventas = () => {
             />
             <button
               type="button"
+              className="btn btn-primary mr-2 custom-font"
+              data-toggle="modal"
+              data-target="#modalGenerarReporte"
+              style={{
+                width: "205px",
+              }}
+            >
+              <i className="fa fa-print"></i> Generar Reporte
+            </button>
+            <button
+              type="button"
               className="btn btn-dark"
               data-toggle="modal"
               data-target="#modalCompras"
               onClick={() => Clientes.length > 0 && openModal(1)}
               style={{
-                width: "165px",
+                width: "170px",
               }}
             >
-              <i className="fas fa-pencil-alt"></i> Añadir Venta
+              <i className="fas fa-pencil-alt"></i> Crear Venta
             </button>
           </div>
           <div className="card-body">

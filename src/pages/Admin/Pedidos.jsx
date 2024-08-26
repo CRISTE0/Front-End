@@ -5,17 +5,18 @@ import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
-import { editImageComprobante, subirImageComprobante } from "../../firebase/config";
+import {
+  editImageComprobante,
+  subirImageComprobante,
+} from "../../firebase/config";
 
 import { useAuth } from "../../context/AuthProvider";
-
 
 export const Pedidos = () => {
   const url = "http://localhost:3000/api/pedidos";
   const [pedidos, setPedidos] = useState([]);
   const [pedidosCliente, setPedidosCliente] = useState([]);
   const [IdPedido, setIdPedido] = useState("");
-
 
   const [Clientes, setClientes] = useState([]);
   const [IdCliente, setIdCliente] = useState("");
@@ -25,15 +26,14 @@ export const Pedidos = () => {
   const [IdPedidoActualizar, setIdPedidoActualizar] = useState("");
   const [idEstadoPedidoActualizar, setIdEstdosPedidoActualizar] = useState("");
 
-
   let idPedidoActualizarEstado;
   let idEstadoPedidoActualizarEstado;
 
   const [imagenComprobante, setImagenComprobante] = useState("");
   const [imagenComprobantePrevisualizar, setImagenComprobantePrevisualizar] =
-  useState("");
+    useState("");
 
-  const {auth} = useAuth();
+  const { auth } = useAuth();
 
   const [showComprobanteButton, setShowComprobanteButton] = useState(null);
 
@@ -66,23 +66,31 @@ export const Pedidos = () => {
     try {
       const respuesta = await axios.get(url);
 
-      const pedidosFiltradosAdmin = respuesta.data.filter(pedido => pedido.IdEstadoPedido != 3)
+      // Filtrar los pedidos que no tienen IdEstadoPedido igual a 3
+      const pedidosFiltradosAdmin = respuesta.data.filter(
+        (pedido) => pedido.IdEstadoPedido !== 3
+      );
 
-      setPedidos(pedidosFiltradosAdmin);
+      // Ordenar los pedidos filtrados por fecha de forma descendente (de la más reciente a la más antigua)
+      const pedidosOrdenados = pedidosFiltradosAdmin.sort((a, b) => {
+        return new Date(b.Fecha) - new Date(a.Fecha);
+      });
 
-      pedidosTotales=respuesta.data;
-      getPedidosCliente();
+      // Actualizar el estado con los pedidos ordenados
+      setPedidos(pedidosOrdenados);
 
+      pedidosTotales = respuesta.data; // Mantener los pedidos totales sin filtrar
+      getPedidosCliente(); // Llamada a otra función (si es necesaria)
     } catch (error) {
       show_alerta("Error al obtener los pedidos", "error");
     }
   };
 
-  const getPedidosCliente = async  () => {
+  const getPedidosCliente = async () => {
     try {
-
-
-      const pedidosFiltrados = pedidosTotales.filter(pedido => pedido.Cliente.IdCliente == auth.idCliente);
+      const pedidosFiltrados = pedidosTotales.filter(
+        (pedido) => pedido.Cliente.IdCliente == auth.idCliente
+      );
 
       console.log(pedidosTotales);
       console.log(pedidosFiltrados);
@@ -165,7 +173,6 @@ export const Pedidos = () => {
         }, 0)
       : 0;
 
-
   // Abre el modal del detalle del pedido
   const handleDetallePedido = async (idPedido) => {
     try {
@@ -186,16 +193,13 @@ export const Pedidos = () => {
       setImagenComprobantePrevisualizar(pedido.ImagenComprobante);
 
       setShowComprobanteButton(null);
-      
-      if (auth.idCliente && !pedido.ImagenComprobante ) {
-        
-        setTimeout(()=>{  
-          document.getElementById("spanInputFileComprobante").innerHTML =
-          "Seleccionar archivo";
-        },10);
-      }
-      
 
+      if (auth.idCliente && !pedido.ImagenComprobante) {
+        setTimeout(() => {
+          document.getElementById("spanInputFileComprobante").innerHTML =
+            "Seleccionar archivo";
+        }, 10);
+      }
 
       // Mostrar el modal con los detalles de la compra
       $("#modalDetalleCompra").modal("show");
@@ -207,7 +211,6 @@ export const Pedidos = () => {
       });
 
       console.log(error);
-      
     }
   };
 
@@ -217,7 +220,6 @@ export const Pedidos = () => {
       currency: "COP",
     }).format(value);
   }
-
 
   const openModal = () => {
     setIdPedido(""); // Resetear el IdCompra al abrir el modal para indicar una nueva compra
@@ -410,35 +412,42 @@ export const Pedidos = () => {
     }
   };
 
-  const enviarComprobante = async (idPed,pedidoIdImagenComprobante) => {
+  const enviarComprobante = async (idPed, pedidoIdImagenComprobante) => {
     try {
-
       console.log(pedidoSeleccionado);
       console.log(pedidoIdImagenComprobante);
 
       // return;
 
-
       if (pedidoIdImagenComprobante != "0") {
         console.log("editarComprobante");
 
-        const url = await editImageComprobante(pedidoIdImagenComprobante,imagenComprobante);
+        const url = await editImageComprobante(
+          pedidoIdImagenComprobante,
+          imagenComprobante
+        );
 
-        await axios.put(`http://localhost:3000/api/pedidos/comprobante/${idPed}`, {
-          idImagenComprobante: pedidoIdImagenComprobante,
-          imagenComprobante: url
-        });
-
-      }else{
+        await axios.put(
+          `http://localhost:3000/api/pedidos/comprobante/${idPed}`,
+          {
+            idImagenComprobante: pedidoIdImagenComprobante,
+            imagenComprobante: url,
+          }
+        );
+      } else {
         console.log("crearComprobante");
 
-        const [idImagenComprobante,url] = await subirImageComprobante(imagenComprobante);
+        const [idImagenComprobante, url] = await subirImageComprobante(
+          imagenComprobante
+        );
 
-        await axios.put(`http://localhost:3000/api/pedidos/comprobante/${idPed}`, {
-          idImagenComprobante: idImagenComprobante,
-          imagenComprobante: url
-        });
-
+        await axios.put(
+          `http://localhost:3000/api/pedidos/comprobante/${idPed}`,
+          {
+            idImagenComprobante: idImagenComprobante,
+            imagenComprobante: url,
+          }
+        );
       }
 
       $(".close").click();
@@ -447,7 +456,6 @@ export const Pedidos = () => {
         message: "El comprobante fue cargado correctamente",
         type: "success",
       });
-
     } catch (error) {
       console.log(error);
     }
@@ -490,9 +498,9 @@ export const Pedidos = () => {
       Total: totalCompra,
       Detalles: Detalles,
       idImagenComprobante: "0",
-      imagenComprobante:"0",
-      intentos:3,
-      IdEstadoPedido: 1
+      imagenComprobante: "0",
+      intentos: 3,
+      IdEstadoPedido: 1,
     });
   };
 
@@ -548,27 +556,25 @@ export const Pedidos = () => {
 
     // Cambiar el estado desde el modal
     if (auth.idUsuario) {
-      idPed = IdPedidoActualizar ;
+      idPed = IdPedidoActualizar;
       idEstPed = idEstadoPedidoActualizar;
-      nombreEstado = estadosPedidos.find(estado => estado.IdEstadoPedido == idEstPed)?.NombreEstado || "Estado no encontrado";
-      titleOperation = `¿Seguro de cambiar el estado del pedido a ${nombreEstado}?`
-      confirmButtonTextEstado = "Sí, cambiar"
-
-    }else{
-      idPed = idPedidoActualizarEstado ;
+      nombreEstado =
+        estadosPedidos.find((estado) => estado.IdEstadoPedido == idEstPed)
+          ?.NombreEstado || "Estado no encontrado";
+      titleOperation = `¿Seguro de cambiar el estado del pedido a ${nombreEstado}?`;
+      confirmButtonTextEstado = "Sí, cambiar";
+    } else {
+      idPed = idPedidoActualizarEstado;
       idEstPed = 4;
-      titleOperation = "¿Seguro de cancelar el pedido?"
-      confirmButtonTextEstado = "Sí, cancelar"
-
+      titleOperation = "¿Seguro de cancelar el pedido?";
+      confirmButtonTextEstado = "Sí, cancelar";
     }
-
 
     // console.log(nombreEstado);
     // console.log(idEstPed);
     // console.log(idPed);
 
     // return;
-
 
     const MySwal = withReactContent(Swal);
     MySwal.fire({
@@ -614,7 +620,6 @@ export const Pedidos = () => {
   };
 
   const anularPedido = async (idPedido) => {
-
     try {
       console.log(idPedido);
 
@@ -638,10 +643,8 @@ export const Pedidos = () => {
         type: "error",
       });
       console.log(error);
-      
     }
   };
-
 
   const aceptarComprobante = async (idPedido) => {
     // let idEstPed = idEstadoPedidoActualizar;
@@ -660,12 +663,14 @@ export const Pedidos = () => {
           console.log(idPedido);
           // console.log(idEstadoPedido);
 
-          const respuesta = await axios.put(`http://localhost:3000/api/pedidos/${idPedido}`, {
-            Estado: 2,
-          });
+          const respuesta = await axios.put(
+            `http://localhost:3000/api/pedidos/${idPedido}`,
+            {
+              Estado: 2,
+            }
+          );
 
           let message = respuesta.response.message;
-
 
           // Actualizar la lista de pedidos
           getPedidos();
@@ -680,8 +685,6 @@ export const Pedidos = () => {
             message: message,
             type: "success",
           });
-
-
         } catch (error) {
           show_alerta({
             message: "Hubo un error al cancelar la compra",
@@ -697,7 +700,12 @@ export const Pedidos = () => {
     });
   };
 
-  const rechazarComprobante = async (idPedido,intentosActuales,nombreClientePedido,correoClientePedido) => {
+  const rechazarComprobante = async (
+    idPedido,
+    intentosActuales,
+    nombreClientePedido,
+    correoClientePedido
+  ) => {
     // let idEstPed = idEstadoPedidoActualizar;
     // let idPed = IdPedidoActualizar ;
 
@@ -705,14 +713,12 @@ export const Pedidos = () => {
     let confirmButtonTextAnular;
 
     if (intentosActuales == 1) {
-      
-      titleText = "¿Seguro de rechazar el comprobante y anular el pedido?"; 
+      titleText = "¿Seguro de rechazar el comprobante y anular el pedido?";
       confirmButtonTextAnular = "Sí, rechazar y anular";
-    }else{
+    } else {
       titleText = "¿Seguro de rechazar el comprobante del pedido?";
       confirmButtonTextAnular = "Sí, rechazar";
     }
-
 
     const MySwal = withReactContent(Swal);
     MySwal.fire({
@@ -730,12 +736,14 @@ export const Pedidos = () => {
           console.log(nombreClientePedido);
           console.log(correoClientePedido);
 
-
-          const respuesta = await axios.put(`http://localhost:3000/api/pedidos/comprobante/intentos/${idPedido}`, {
-            intentos: intentosActuales,
-            nombreCliente: nombreClientePedido,
-            correoCliente: correoClientePedido
-          });
+          const respuesta = await axios.put(
+            `http://localhost:3000/api/pedidos/comprobante/intentos/${idPedido}`,
+            {
+              intentos: intentosActuales,
+              nombreCliente: nombreClientePedido,
+              correoCliente: correoClientePedido,
+            }
+          );
 
           let message = respuesta.data.message;
 
@@ -744,33 +752,26 @@ export const Pedidos = () => {
           if (intentosActuales == 1) {
             await anularPedido(idPedido);
 
-              
             // Actualizar la lista de pedidos
             getPedidos();
-            
+
             $(".close").click();
 
             show_alerta({
               message: "Comprobante rechazado y pedido anulado",
               type: "success",
             });
-          }else{
+          } else {
             // Actualizar la lista de pedidos
             getPedidos();
-            
+
             $(".close").click();
-  
+
             show_alerta({
               message: message,
               type: "success",
             });
-
-        
           }
-
-
-
-
         } catch (error) {
           show_alerta({
             message: "Hubo un error al cancelar la compra",
@@ -778,7 +779,6 @@ export const Pedidos = () => {
           });
 
           console.log(error);
-
         }
       } else {
         show_alerta({
@@ -789,8 +789,6 @@ export const Pedidos = () => {
     });
   };
 
-
-
   const openModalEstado = (pedido) => {
     setTitle("Actualizar Estado");
     setIdPedidoActualizar(pedido.IdPedido);
@@ -800,16 +798,14 @@ export const Pedidos = () => {
     if (pedido.IdEstadoPedido == 2) {
       const idsBuscados = [2, 3];
 
-      const nuevosEstadosPedido = estadosPedidos.filter(estado =>idsBuscados.includes(estado.IdEstadoPedido));
+      const nuevosEstadosPedido = estadosPedidos.filter((estado) =>
+        idsBuscados.includes(estado.IdEstadoPedido)
+      );
 
       setNuevosEstadosPedidos(nuevosEstadosPedido);
-
-    }else if (nuevosEstadosPedidos.length < 3){
-
+    } else if (nuevosEstadosPedidos.length < 3) {
       setNuevosEstadosPedidos(estadosPedidos);
-
     }
-
   };
 
   const formatearFecha = (fechaISO) => {
@@ -823,7 +819,7 @@ export const Pedidos = () => {
   };
 
   let totalPages;
-  let currentPedidos
+  let currentPedidos;
 
   // Sirve pa que no se dañe la cantidad de paginas una de admin y otra de cliente
   if (auth.idUsuario) {
@@ -840,9 +836,7 @@ export const Pedidos = () => {
       (currentPage - 1) * itemsPerPage,
       currentPage * itemsPerPage
     );
-
-  }else{
-
+  } else {
     // Filter purchases based on the search term
     const filteredPedidosCliente = pedidosCliente.filter((compra) =>
       Object.values(compra).some((value) =>
@@ -868,7 +862,7 @@ export const Pedidos = () => {
     const response = await fetch(pedido.ImagenComprobante);
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = `Comprobante ${pedido.Cliente.NombreApellido}.jpg`;
     link.click();
@@ -1322,7 +1316,6 @@ export const Pedidos = () => {
                               {/* Imagen comprobante */}
                               <div
                                 className="container py-2 d-flex justify-content-center align-items-center"
-
                                 style={{
                                   overflow: "visible",
                                   position: "relative",
@@ -1330,7 +1323,8 @@ export const Pedidos = () => {
                               >
                                 {/* si existe renderizar la imagen del comprobante, si no mostrar texto  */}
                                 {imagenComprobantePrevisualizar != "0" ? (
-                                  <img onClick={handleToggleZoom}
+                                  <img
+                                    onClick={handleToggleZoom}
                                     src={imagenComprobantePrevisualizar}
                                     alt="Vista previa imagen del comprobante"
                                     style={{
@@ -1360,53 +1354,54 @@ export const Pedidos = () => {
                                     }}
                                     className="zoom-image"
                                   />
-                                ): (
-
-
-                                <p className="font-weight-bold text-dark">Aún no hay un comprobante</p>
+                                ) : (
+                                  <p className="font-weight-bold text-dark">
+                                    Aún no hay un comprobante
+                                  </p>
                                 )}
-
-
                               </div>
 
                               {/* Input file comprobante */}
                               {/* Renderizar solo si es un cliente y no hay comprobante */}
-                              {auth.idCliente && pedidoSeleccionado?.ImagenComprobante == "0" &&(
-
-                              <div className="inputComprobante d-flex justify-content-center align-items-center pt-4">
-                                <input
-                                  accept=".png, .jpg, .jpeg"
-                                  type="file"
-                                  name="file-3"
-                                  id="inputFileReferencia"
-                                  className={`inputfileComprobante inputfileComprobante-2 ${
-                                    errors.fileComprobante ? "is-invalid" : ""
-                                  } `}
-                                  onChange={handleChangeImagenComprobante}
-                                />
-                                <label
-                                  className="d-flex justify-content-center align-items-center"
-                                  htmlFor="inputFileReferencia"
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="iborrainputfileComprobante"
-                                    width="20"
-                                    height="17"
-                                    viewBox="0 0 20 17"
-                                  >
-                                    <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
-                                  </svg>
-                                  <span
-                                    className="iborrainputfileComprobante"
-                                    id="spanInputFileComprobante"
-                                  >
-                                    Seleccionar archivo
-                                  </span>
-                                </label>
-                                {/* {renderErrorMessage(errors.fileComprobante)} */}
-                              </div>
-                              )}
+                              {auth.idCliente &&
+                                pedidoSeleccionado?.ImagenComprobante ==
+                                  "0" && (
+                                  <div className="inputComprobante d-flex justify-content-center align-items-center pt-4">
+                                    <input
+                                      accept=".png, .jpg, .jpeg"
+                                      type="file"
+                                      name="file-3"
+                                      id="inputFileReferencia"
+                                      className={`inputfileComprobante inputfileComprobante-2 ${
+                                        errors.fileComprobante
+                                          ? "is-invalid"
+                                          : ""
+                                      } `}
+                                      onChange={handleChangeImagenComprobante}
+                                    />
+                                    <label
+                                      className="d-flex justify-content-center align-items-center"
+                                      htmlFor="inputFileReferencia"
+                                    >
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="iborrainputfileComprobante"
+                                        width="20"
+                                        height="17"
+                                        viewBox="0 0 20 17"
+                                      >
+                                        <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
+                                      </svg>
+                                      <span
+                                        className="iborrainputfileComprobante"
+                                        id="spanInputFileComprobante"
+                                      >
+                                        Seleccionar archivo
+                                      </span>
+                                    </label>
+                                    {/* {renderErrorMessage(errors.fileComprobante)} */}
+                                  </div>
+                                )}
 
                               {/* Boton enviar comprobante */}
                               {showComprobanteButton && (
@@ -1414,63 +1409,84 @@ export const Pedidos = () => {
                                   <button
                                     type="button"
                                     className="btn btn-primary"
-                                    onClick={() => enviarComprobante(pedidoSeleccionado.IdPedido,pedidoSeleccionado.IdImagenComprobante)}
+                                    onClick={() =>
+                                      enviarComprobante(
+                                        pedidoSeleccionado.IdPedido,
+                                        pedidoSeleccionado.IdImagenComprobante
+                                      )
+                                    }
                                   >
                                     Subir Comprobante :)
                                   </button>
                                 </div>
                               )}
 
-                                  {auth.idUsuario && pedidoSeleccionado?.ImagenComprobante != "0"  && (
-                                    <div className="d-flex justify-content-center pt-4">
-
-
-                                    <button className="btn btn-info" onClick={()=> handleDownload(pedidoSeleccionado)}> Descargar comprobante</button>
-
-                                    </div>                                    
-                                  )}
-
-
-
+                              {auth.idUsuario &&
+                                pedidoSeleccionado?.ImagenComprobante !=
+                                  "0" && (
+                                  <div className="d-flex justify-content-center pt-4">
+                                    <button
+                                      className="btn btn-info"
+                                      onClick={() =>
+                                        handleDownload(pedidoSeleccionado)
+                                      }
+                                    >
+                                      {" "}
+                                      Descargar comprobante
+                                    </button>
+                                  </div>
+                                )}
 
                               {/*Renderizar botones de acción con comprobante, solo admin puede acceder a ellos */}
-                              {auth.idUsuario && pedidoSeleccionado?.ImagenComprobante != "0" && pedidoSeleccionado?.IdEstadoPedido == 1 && (
-                                <div className="d-flex pt-4"
-                                  style={{
-                                    justifyContent:"space-evenly"
-                                  }}
-                                >
-                                  <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    onClick={() => aceptarComprobante(pedidoSeleccionado.IdPedido)}
-                                  >
-                                    Aceptar Comprobante :)
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    className="btn btn-danger"
-                                    // hacer una especie de funcion en el onclck para determinar si hay o no intentos
-                                    onClick={() =>{
-
-                                      if (pedidoSeleccionado.Intentos > 1) {
-
-                                        rechazarComprobante(pedidoSeleccionado.IdPedido,pedidoSeleccionado.Intentos,pedidoSeleccionado.Cliente.NombreApellido,pedidoSeleccionado.Cliente.Correo);
-                                      }else{
-
-
-                                        rechazarComprobante(pedidoSeleccionado.IdPedido,pedidoSeleccionado.Intentos,pedidoSeleccionado.Cliente.NombreApellido,pedidoSeleccionado.Cliente.Correo);
-
-                                      }
-
+                              {auth.idUsuario &&
+                                pedidoSeleccionado?.ImagenComprobante != "0" &&
+                                pedidoSeleccionado?.IdEstadoPedido == 1 && (
+                                  <div
+                                    className="d-flex pt-4"
+                                    style={{
+                                      justifyContent: "space-evenly",
                                     }}
                                   >
-                                    Rechazar Comprobante :(
-                                  </button>
-                                </div>
-                              )}
+                                    <button
+                                      type="button"
+                                      className="btn btn-primary"
+                                      onClick={() =>
+                                        aceptarComprobante(
+                                          pedidoSeleccionado.IdPedido
+                                        )
+                                      }
+                                    >
+                                      Aceptar Comprobante :)
+                                    </button>
 
+                                    <button
+                                      type="button"
+                                      className="btn btn-danger"
+                                      // hacer una especie de funcion en el onclck para determinar si hay o no intentos
+                                      onClick={() => {
+                                        if (pedidoSeleccionado.Intentos > 1) {
+                                          rechazarComprobante(
+                                            pedidoSeleccionado.IdPedido,
+                                            pedidoSeleccionado.Intentos,
+                                            pedidoSeleccionado.Cliente
+                                              .NombreApellido,
+                                            pedidoSeleccionado.Cliente.Correo
+                                          );
+                                        } else {
+                                          rechazarComprobante(
+                                            pedidoSeleccionado.IdPedido,
+                                            pedidoSeleccionado.Intentos,
+                                            pedidoSeleccionado.Cliente
+                                              .NombreApellido,
+                                            pedidoSeleccionado.Cliente.Correo
+                                          );
+                                        }
+                                      }}
+                                    >
+                                      Rechazar Comprobante :(
+                                    </button>
+                                  </div>
+                                )}
                             </div>
                           </div>
                         </div>
@@ -1524,176 +1540,173 @@ export const Pedidos = () => {
           </div>
           <div className="card-body">
             <div className="table-responsive">
-
               {/* Si un usuario esta logueado renderizara la tabla de admin, si no renderizara la tabla del cliente  */}
-              {auth.idUsuario ?(
+              {auth.idUsuario ? (
                 <table className="table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Cliente</th>
-                    <th>Fecha</th>
-                    <th>Total</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentPedidos.map((pedido) => (
-                    <tr
-                      key={pedido.IdPedido}
-                      className={
-                        pedido.IdEstadoPedido === 4 ||
-                        pedido.IdEstadoPedido === 3
-                          ? "table-secondary"
-                          : ""
-                      }
-                    >
-                      <td>{getClienteName(pedido.IdCliente)}</td>
+                  <thead>
+                    <tr>
+                      <th>Cliente</th>
+                      <th>Fecha</th>
+                      <th>Total</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentPedidos.map((pedido) => (
+                      <tr
+                        key={pedido.IdPedido}
+                        className={
+                          pedido.IdEstadoPedido === 4 ||
+                          pedido.IdEstadoPedido === 3
+                            ? "table-secondary"
+                            : ""
+                        }
+                      >
+                        <td>{getClienteName(pedido.IdCliente)}</td>
 
-                      <td>{formatearFecha(pedido.Fecha)}</td>
+                        <td>{formatearFecha(pedido.Fecha)}</td>
 
-                      <td>{formatCurrency(pedido.Total)}</td>
+                        <td>{formatCurrency(pedido.Total)}</td>
 
-                      <td>
-                        {convertEstadoPedidoIdToName(pedido.IdEstadoPedido)}
-                      </td>
+                        <td>
+                          {convertEstadoPedidoIdToName(pedido.IdEstadoPedido)}
+                        </td>
 
-                      <td>
-                        <div className="d-flex">
-                          {pedido.IdEstadoPedido === 4 ||
-                          pedido.IdEstadoPedido === 3 ? (
+                        <td>
+                          <div className="d-flex">
+                            {pedido.IdEstadoPedido === 4 ||
+                            pedido.IdEstadoPedido === 3 ? (
+                              <button
+                                className="btn btn-secondary btn-sm mr-2 rounded-icon"
+                                disabled
+                              >
+                                <i className="fas fa-times-circle"></i>
+                              </button>
+                            ) : (
+                              <button
+                                data-toggle="modal"
+                                data-target="#modalEstadoPedido"
+                                onClick={() => openModalEstado(pedido)}
+                                className="btn btn-danger btn-sm mr-2 rounded-icon"
+                                title="Editar"
+                              >
+                                <i className="fas fa-times-circle"></i>
+                              </button>
+                            )}
+
                             <button
-                              className="btn btn-secondary btn-sm mr-2 rounded-icon"
-                              disabled
-                            >
-                              <i className="fas fa-times-circle"></i>
-                            </button>
-                          ) : (
-                            <button
+                              onClick={() =>
+                                handleDetallePedido(pedido.IdPedido)
+                              }
+                              className={`btn btn-sm ${
+                                pedido.IdEstadoPedido === 9 ||
+                                pedido.IdEstadoPedido === 9
+                                  ? "btn-secondary mr-2 rounded-icon"
+                                  : "btn-info"
+                              }`}
+                              disabled={
+                                pedido.IdEstadoPedido === 9 ||
+                                pedido.IdEstadoPedido === 9
+                              }
                               data-toggle="modal"
-                              data-target="#modalEstadoPedido"
-                              onClick={() => openModalEstado(pedido)}
-                              className="btn btn-danger btn-sm mr-2 rounded-icon"
-                              title="Editar"
+                              data-target="#modalDetalleCompra"
+                              title="Detalle"
                             >
-                              <i className="fas fa-times-circle"></i>
+                              <i className="fas fa-info-circle"></i>
                             </button>
-                          )}
-
-                          <button
-                            onClick={() => handleDetallePedido(pedido.IdPedido)}
-                            className={`btn btn-sm ${
-                              pedido.IdEstadoPedido === 9 ||
-                              pedido.IdEstadoPedido === 9
-                                ? "btn-secondary mr-2 rounded-icon"
-                                : "btn-info"
-                            }`}
-                            disabled={
-                              pedido.IdEstadoPedido === 9 ||
-                              pedido.IdEstadoPedido === 9
-                            }
-                            data-toggle="modal"
-                            data-target="#modalDetalleCompra"
-                            title="Detalle"
-                          >
-                            <i className="fas fa-info-circle"></i>
-                          </button>
-                        </div>
-                      </td>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                // tabla de cliente
+                <table className="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Cliente</th>
+                      <th>Fecha</th>
+                      <th>Total</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {currentPedidos.map((pedido) => (
+                      <tr
+                        key={pedido.IdPedido}
+                        className={
+                          pedido.IdEstadoPedido === 4 ||
+                          pedido.IdEstadoPedido === 3
+                            ? "table-secondary"
+                            : ""
+                        }
+                      >
+                        <td>{getClienteName(pedido.IdCliente)}</td>
 
-              ):
+                        <td>{formatearFecha(pedido.Fecha)}</td>
 
-              // tabla de cliente
-              (
-              <table className="table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Cliente</th>
-                    <th>Fecha</th>
-                    <th>Total</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentPedidos.map((pedido) => (
-                    <tr
-                      key={pedido.IdPedido}
-                      className={
-                        pedido.IdEstadoPedido === 4 ||
-                        pedido.IdEstadoPedido === 3
-                          ? "table-secondary"
-                          : ""
-                      }
-                    >
-                      <td>{getClienteName(pedido.IdCliente)}</td>
+                        <td>{formatCurrency(pedido.Total)}</td>
 
-                      <td>{formatearFecha(pedido.Fecha)}</td>
+                        <td>
+                          {convertEstadoPedidoIdToName(pedido.IdEstadoPedido)}
+                        </td>
 
-                      <td>{formatCurrency(pedido.Total)}</td>
+                        <td>
+                          <div className="d-flex">
+                            {pedido.IdEstadoPedido === 4 ||
+                            pedido.IdEstadoPedido === 2 ||
+                            pedido.IdEstadoPedido == 3 ? (
+                              <button
+                                className="btn btn-secondary btn-sm mr-2 rounded-icon"
+                                disabled
+                              >
+                                <i className="fas fa-times-circle"></i>
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  idPedidoActualizarEstado = pedido.IdPedido;
+                                  // setIdEstdosPedidoActualizar(pedido.IdEstadoPedido);
 
-                      <td>
-                        {convertEstadoPedidoIdToName(pedido.IdEstadoPedido)}
-                      </td>
+                                  cambiarEstadoPedido();
+                                }}
+                                className="btn btn-danger btn-sm mr-2 rounded-icon"
+                                title="Cancelar pedido"
+                              >
+                                <i className="fas fa-times-circle"></i>
+                              </button>
+                            )}
 
-                      <td>
-                        <div className="d-flex">
-                          {pedido.IdEstadoPedido === 4 ||pedido.IdEstadoPedido === 2 || pedido.IdEstadoPedido == 3 ? (
                             <button
-                              className="btn btn-secondary btn-sm mr-2 rounded-icon"
-                              disabled
+                              onClick={() =>
+                                handleDetallePedido(pedido.IdPedido)
+                              }
+                              className={`btn btn-sm ${
+                                pedido.IdEstadoPedido === 9 ||
+                                pedido.IdEstadoPedido === 9
+                                  ? "btn-secondary mr-2 rounded-icon"
+                                  : "btn-info"
+                              }`}
+                              disabled={
+                                pedido.IdEstadoPedido === 9 ||
+                                pedido.IdEstadoPedido === 9
+                              }
+                              data-toggle="modal"
+                              data-target="#modalDetalleCompra"
+                              title="Detalle"
                             >
-                              <i className="fas fa-times-circle"></i>
+                              <i className="fas fa-info-circle"></i>
                             </button>
-                          ) : (
-                            <button
-
-                              onClick={() => {
-                                idPedidoActualizarEstado = pedido.IdPedido;
-                                // setIdEstdosPedidoActualizar(pedido.IdEstadoPedido);
-
-                                cambiarEstadoPedido();
-                              }}
-                              className="btn btn-danger btn-sm mr-2 rounded-icon"
-                              title="Cancelar pedido"
-                            >
-                              <i className="fas fa-times-circle"></i>
-                            </button>
-                          )}
-
-                          <button
-                            onClick={() => handleDetallePedido(pedido.IdPedido)}
-                            className={`btn btn-sm ${
-                              pedido.IdEstadoPedido === 9 ||
-                              pedido.IdEstadoPedido === 9
-                                ? "btn-secondary mr-2 rounded-icon"
-                                : "btn-info"
-                            }`}
-                            disabled={
-                              pedido.IdEstadoPedido === 9 ||
-                              pedido.IdEstadoPedido === 9
-                            }
-                            data-toggle="modal"
-                            data-target="#modalDetalleCompra"
-                            title="Detalle"
-                          >
-                            <i className="fas fa-info-circle"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
-
-
-
             </div>
             <Pagination
               currentPage={currentPage}

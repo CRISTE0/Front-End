@@ -13,12 +13,12 @@ import {
   subirImageReference,
 } from "../../firebase/config";
 import withReactContent from "sweetalert2-react-content";
- 
+
 import { useAuth } from "../../context/AuthProvider";
 export const Disenios = () => {
   const url = "http://localhost:3000/api/disenios";
   const productosUrl = "http://localhost:3000/api/productos";
-  const {auth} = useAuth();
+  const { auth } = useAuth();
   const [Disenios, setDisenios] = useState([]);
   const [DiseniosCliente, setDiseniosCliente] = useState([]);
 
@@ -37,9 +37,10 @@ export const Disenios = () => {
   const [IdImagenReferencia, setIdImagenReferencia] = useState("");
   const [disenioSeleccionado, setDisenioSeleccionado] = useState(null);
 
-
-  const [ImagenDisenioPrevisualizar, setImagenDisenioPrevisualizar] = useState("");
-  const [ImagenReferenciaPrevisualizar, setImagenReferenciaPrevisualizar] = useState("");
+  const [ImagenDisenioPrevisualizar, setImagenDisenioPrevisualizar] =
+    useState("");
+  const [ImagenReferenciaPrevisualizar, setImagenReferenciaPrevisualizar] =
+    useState("");
 
   const [ImagenDisenioUpdate, setImagenDisenioUpdate] = useState("");
   const [ImagenReferenciaUpdate, setImagenReferenciaUpdate] = useState("");
@@ -156,7 +157,6 @@ export const Disenios = () => {
       // setShowColor(true);
       setShowDisenio(true);
 
-
       setTimeout(() => {
         document.getElementById("spanInputFileDisenio").innerHTML =
           "Seleccionar archivo";
@@ -177,7 +177,7 @@ export const Disenios = () => {
       setTamanioImagen(disenio.TamanioImagen);
       setPosicionImagen(disenio.PosicionImagen);
       setPrecioDisenio(disenio.PrecioDisenio);
-      
+
       setImagenDisenio(disenio.ImagenDisenio);
       setImagenReferencia(disenio.ImagenReferencia);
 
@@ -190,19 +190,16 @@ export const Disenios = () => {
       setImagenDisenioUpdate(disenio.ImagenDisenio);
       setImagenReferenciaUpdate(disenio.ImagenReferencia);
 
-      
       // setImagenDisenioPrevisualizar(null);
       // setImagenReferenciaPrevisualizar(null);
 
       // console.log(IdImagenDisenio);
 
-
       document.getElementById("spanInputFileReferencia").innerHTML =
         "Seleccionar archivo";
 
-        document.getElementById("spanInputFileDisenio").innerHTML =
+      document.getElementById("spanInputFileDisenio").innerHTML =
         "Seleccionar archivo";
-
 
       setErrors({
         NombreDisenio: "",
@@ -236,12 +233,37 @@ export const Disenios = () => {
     }
   };
 
+  const validarCampos = () => {
+    // Verifica si algún campo requerido está vacío o inválido
+    if (
+      NombreDisenio === "" ||
+      TamanioImagen === "" ||
+      PosicionImagen === "" ||
+      PrecioDisenio === "" ||
+      isNaN(PrecioDisenio) ||
+      PrecioDisenio < 0 ||
+      !ImagenDisenio ||
+      !ImagenReferencia
+    ) {
+      return "Por favor, completa todos los campos correctamente";
+    }
+
+    // Si no hay errores, devuelve null
+    return null;
+  };
 
   const guardarDisenio = async () => {
-    
+    // Validar campos y mostrar alerta si hay errores
+    const error = validarCampos();
+    if (error) {
+      show_alerta({
+        message: error,
+        type: "error",
+      });
+      return;
+    }
 
     if (operation === 1) {
-
       // Validar si existe un diseño con ese nombre
       const existeNombreDisenio = Disenios.some(
         (disenio) => disenio.NombreDisenio === NombreDisenio
@@ -255,61 +277,13 @@ export const Disenios = () => {
         return;
       }
 
-      if (NombreDisenio === "") {
-        show_alerta({
-          message: "Se necesita un nombre para el diseño",
-          type: "error",
-        });
-        return;
-      } 
-        
-      if (TamanioImagen === "") {
-        show_alerta({
-          message: "Se necesita un tamaño para la imagen del diseño",
-          type: "error",
-        });
-        return;
-      }
-  
-      if (PosicionImagen === "") {
-        show_alerta({
-          message: "Se necesita una posición para la imagen del diseño",
-          type: "error",
-        });
-        return;
-      }
-  
-      if (PrecioDisenio === "" || isNaN(PrecioDisenio) || PrecioDisenio < 0) {
-        show_alerta({
-          message: "El precio del diseño es invalido",
-          type: "error",
-        });
-        return;
-      }
-  
-      if (!ImagenDisenio ) {
-        show_alerta({
-          message: "Se necesita una imagen del diseño",
-          type: "error",
-        });
-        return;
-      }
-  
-      if (!ImagenReferencia) {
-        show_alerta({
-          message: "Se necesita una imagen de referencia del diseño",
-          type: "error",
-        });
-        return;
-      }
-
-
-      const [idDesign, ulrDesign] = await subirImageDesign(ImagenDisenio);     
-
-      const [ulrReference, idReference] = await subirImageReference(ImagenReferencia);
+      const [idDesign, ulrDesign] = await subirImageDesign(ImagenDisenio);
+      const [ulrReference, idReference] = await subirImageReference(
+        ImagenReferencia
+      );
 
       await enviarSolicitud("POST", {
-        IdUsuario: auth.idUsuario || auth.idCliente, 
+        IdUsuario: auth.idUsuario || auth.idCliente,
         NombreDisenio,
         TamanioImagen,
         PosicionImagen,
@@ -326,54 +300,18 @@ export const Disenios = () => {
         type: "success",
       });
     } else if (operation === 2) {
-
-      if (NombreDisenio === "") {
-        show_alerta({
-          message: "Se necesita un nombre para el diseño",
-          type: "error",
-        });
-        return;
-      } 
-      
-      if (PrecioDisenio === "" || isNaN(PrecioDisenio) || PrecioDisenio < 0) {
-        show_alerta({
-          message: "El precio del diseño es invalido",
-          type: "error",
-        });
-        return;
-      }
-
-      if (!ImagenDisenio ) {
-        show_alerta({
-          message: "Se necesita una imagen del diseño",
-          type: "error",
-        });
-        return;
-      }
-  
-      if (!ImagenReferencia) {
-        show_alerta({
-          message: "Se necesita una imagen de referencia del diseño",
-          type: "error",
-        });
-        return;
-      }
-      
-      let inputDisenioFile = document.getElementById("inputFileDisenio").files[0];
-
-      let inputReferenciaFile = document.getElementById("inputFileReferencia").files[0];
+      let inputDisenioFile =
+        document.getElementById("inputFileDisenio").files[0];
+      let inputReferenciaFile = document.getElementById("inputFileReferencia")
+        .files[0];
 
       // Si hay archivos en los inputs de diseño y referencia
-      if (inputDisenioFile) { 
+      if (inputDisenioFile) {
         await editImageDesign(IdImagenDisenio, inputDisenioFile);
-
-        // IdImagenDisenioUpdate = IdImagenDisenio;
-        // ImagenDisenioUpdate = ImagenDisenioTemporalEdit;
       }
 
       if (inputReferenciaFile) {
         await editImageReference(IdImagenReferencia, inputReferenciaFile);
-        // ImagenDisenioUpdate = ImagenReferencia;
       }
 
       await enviarSolicitud("PUT", {
@@ -383,9 +321,9 @@ export const Disenios = () => {
         PosicionImagen,
         PrecioDisenio,
         IdImagenDisenio,
-        ImagenDisenio:ImagenDisenioUpdate,
+        ImagenDisenio: ImagenDisenioUpdate,
         IdImagenReferencia,
-        ImagenReferencia:ImagenReferenciaUpdate,
+        ImagenReferencia: ImagenReferenciaUpdate,
       });
 
       show_alerta({
@@ -396,12 +334,11 @@ export const Disenios = () => {
       setTimeout(() => {
         setImagenDisenio(null);
         setImagenDisenioPrevisualizar(null);
-        setImagenReferencia(null);  
+        setImagenReferencia(null);
         setImagenReferenciaPrevisualizar(null);
       }, 1000);
     }
   };
-
 
   // Función para validar el nombre de diseño
   const validateNombreDisenio = (value) => {
@@ -441,19 +378,16 @@ export const Disenios = () => {
     }));
   };
 
-
   // Función para manejar cambios en el tamaño de la imagen
   const handleChangeTamanioImagen = (e) => {
     const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setTamanioImagen(value);
-
   };
 
   // Función para manejar cambios en la posicion de la imagen
   const handleChangePosicionImagen = (e) => {
     const value = e.target.value.replace(/\s+/g, " "); // Reemplaza múltiples espacios con un solo espacio
     setPosicionImagen(value);
-
   };
 
   // Función para manejar cambios en el precio de diseño
@@ -480,7 +414,7 @@ export const Disenios = () => {
 
     if (file) {
       setImagenDisenio(file);
-      
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagenDisenioPrevisualizar(reader.result);
@@ -526,7 +460,7 @@ export const Disenios = () => {
 
       document.getElementById("inputFileReferencia").value = null;
       setImagenReferencia(null);
-      setImagenReferenciaPrevisualizar(null)
+      setImagenReferenciaPrevisualizar(null);
       spanReferencia.innerHTML = "Seleccionar archivo";
     }
   };
@@ -544,11 +478,9 @@ export const Disenios = () => {
         ? `${url}/${parametros.IdDisenio}`
         : url;
 
-
     console.log(parametros);
 
     // return
-    
 
     try {
       let respuesta;
@@ -703,14 +635,12 @@ export const Disenios = () => {
     }
   };
 
-
   function formatCurrency(value) {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",
     }).format(value);
   }
-
 
   const handleSearchTermChange = (newSearchTerm) => {
     setSearchTerm(newSearchTerm);
@@ -762,7 +692,6 @@ export const Disenios = () => {
             <div className="modal-body">
               <form id="crearClienteForm">
                 <div className="form-row">
-
                   {/* Nombre de diseño */}
                   <div className="form-group col-md-6">
                     <label htmlFor="nombreDiseño">Nombre del Diseño:</label>
@@ -856,37 +785,37 @@ export const Disenios = () => {
                     <br />
 
                     {/* {renderInputDisenio && ( */}
-                      <>
-                        <input
+                    <>
+                      <input
                         accept=".png, .jpg, .jpeg"
-                          type="file"
-                          name="file-2"
-                          id="inputFileDisenio"
-                          className={`inputfile inputfile-2 `}
-                          onChange={handleChangeImagenDisenio}
-                          draggable
-                        />
-                        <label htmlFor="inputFileDisenio">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="iborrainputfile"
-                            width="20"
-                            height="17"
-                            viewBox="0 0 20 17"
-                          >
-                            <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
-                          </svg>
-                          <span
-                            className="iborrainputfile"
-                            id="spanInputFileDisenio"
-                          >
-                            Seleccionar archivo
-                          </span>
-                        </label>
-                      </>
+                        type="file"
+                        name="file-2"
+                        id="inputFileDisenio"
+                        className={`inputfile inputfile-2 `}
+                        onChange={handleChangeImagenDisenio}
+                        draggable
+                      />
+                      <label htmlFor="inputFileDisenio">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="iborrainputfile"
+                          width="20"
+                          height="17"
+                          viewBox="0 0 20 17"
+                        >
+                          <path d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path>
+                        </svg>
+                        <span
+                          className="iborrainputfile"
+                          id="spanInputFileDisenio"
+                        >
+                          Seleccionar archivo
+                        </span>
+                      </label>
+                    </>
                     {/* )} */}
 
-                    {!ImagenDisenio  && (
+                    {!ImagenDisenio && (
                       <p className="text-danger">
                         Por favor, ingresa una imagen para tu diseño, se permite
                         (.png .jpg) .
@@ -906,7 +835,6 @@ export const Disenios = () => {
                         />
                       </div>
                     )}
-
                   </div>
 
                   {/* Imagen referencia*/}
@@ -918,7 +846,7 @@ export const Disenios = () => {
                     <br />
 
                     <input
-                    accept=".png, .jpg, .jpeg"
+                      accept=".png, .jpg, .jpeg"
                       type="file"
                       name="file-3"
                       id="inputFileReferencia"
@@ -945,7 +873,7 @@ export const Disenios = () => {
 
                     {/* {renderErrorMessage(errors.ImagenReferencia)} */}
 
-                    {!ImagenReferencia  && (
+                    {!ImagenReferencia && (
                       <p className="text-danger">
                         Por favor, ingresa una imagen de referencia de tu
                         diseño, se permite (.png .jpg) .
@@ -953,7 +881,7 @@ export const Disenios = () => {
                     )}
 
                     <div className="container py-5 mx-3">
-                      {ImagenReferencia  && (
+                      {ImagenReferencia && (
                         <img
                           src={ImagenReferenciaPrevisualizar}
                           alt="Vista previa imagen del diseño"
@@ -1039,7 +967,6 @@ export const Disenios = () => {
                             disabled
                           />
                         </div>
-
 
                         {/* Tamaño de imagen detalle*/}
                         <div className="form-group col-md-6">
@@ -1207,7 +1134,7 @@ export const Disenios = () => {
                       <td>{disenio.NombreDisenio}</td>
                       <td>{disenio.TamanioImagen}</td>
                       <td>{disenio.PosicionImagen}</td>
-                      <td>{formatCurrency( disenio.PrecioDisenio)}</td>
+                      <td>{formatCurrency(disenio.PrecioDisenio)}</td>
                       {/* <td>{disenio.ColorFuente}</td> */}
                       {/* <td>{cliente.PosicionImagen}</td>
                       <td>{cliente.ImagenDisenio}</td> */}
