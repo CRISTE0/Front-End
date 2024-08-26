@@ -16,7 +16,6 @@ export const Usuarios = () => {
   const [Correo, setCorreo] = useState("");
   const [Contrasenia, setContrasenia] = useState("");
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
-  const [Rol, setRol] = useState(""); // Estado para almacenar el rol seleccionado
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [errors, setErrors] = useState({
@@ -28,12 +27,51 @@ export const Usuarios = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const [roles, setRoles] = useState([]); // Estado para almacenar la lista de roles
+  const [roles2, setRoles2] = useState([]); // Estado para almacenar la lista de roles
   const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
+  const [showAdminRole, setShowAdminRole] = useState(true);
 
   useEffect(() => {
     getUsuarios();
     getRoles();
+    verificarAdmin();
   }, []);
+
+  const verificarAdmin = async () => {
+    try {
+        const response = await axios.get(url);
+        const response2 = await axios.get(rolesUrl);
+        console.log(response.data);
+
+        // Verifica si existe un usuario con IdRol igual a 1 (Admin)
+        if (Array.isArray(response.data)) {
+            const existeAdmin = response.data.some((usuario) => usuario.IdRol === 1);
+
+            if (existeAdmin) {
+                // Filtra los roles para eliminar el rol con IdRol == 1
+                const rolesSinAdmin = response2.data.filter((rol) => rol.IdRol !== 1);
+                console.log('Roles sin Admin:', rolesSinAdmin);
+                
+                console.log(rolesSinAdmin);
+                
+
+                // Actualiza el estado o realiza las operaciones necesarias
+                setRoles2(rolesSinAdmin);
+            } else {
+                console.log('No hay usuarios con el rol Admin.');
+                setRoles2(roles)
+                // Si necesitas hacer algo cuando no existe un admin
+            }
+
+            // // Actualiza el estado basado en si existe o no el rol "Admin"
+            // setShowAdminRole(!existeAdmin);
+        } else {
+            console.error("La respuesta del API no es un array:", response.data);
+        }
+    } catch (error) {
+        console.error("Error al verificar el rol de Admin:", error);
+    }
+};
 
   const getUsuarios = async () => {
     try {
@@ -73,6 +111,7 @@ export const Usuarios = () => {
       setCorreo("");
       setContrasenia(""); // Limpiar el estado de la contraseña
       setIdRol(""); // Limpiar el estado del rol seleccionado al crear usuario
+      verificarAdmin();
       setOperation(1);
       setTitle("Crear Usuario");
     } else if (op === 2 && usuario) {
@@ -517,9 +556,7 @@ export const Usuarios = () => {
                       onChange={handleChangeRol}
                     >
                       <option value="">Selecciona un rol</option>
-                      {roles
-                        .filter((rol) => rol.NombreRol !== "Admin")
-                        .map((rol) => (
+                      {roles2.map((rol) => (
                           <option key={rol.IdRol} value={rol.IdRol}>
                             {rol.NombreRol}
                           </option>
