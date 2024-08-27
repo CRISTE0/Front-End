@@ -32,6 +32,7 @@ import { ConfirmarContrasenia } from "../pages/Landing/ConfirmarContraseña";
 import { RecuperarContraseñaUsuario } from "../pages/Landing/RecuperarContraseñaUsuario";
 import { ConfirmarContraseniaUsuario } from "../pages/Landing/ConfirmarContraseñaUsuario";
 import PublicRoute from "./PublicRoute";
+import Pages404 from "../components/404/404";
 
 export const Rutas = () => {
 
@@ -151,7 +152,7 @@ export const Rutas = () => {
 
 
 
-        <Route path="*" Component={() => <h1>404</h1>} />
+        <Route path="*" element={<Pages404 />} />
         <Route path="/unauthorized" Component={() => <h1>pa onde papi, 🐸 HP</h1>} />
         
       </Routes>
