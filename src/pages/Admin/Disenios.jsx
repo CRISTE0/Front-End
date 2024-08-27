@@ -77,14 +77,38 @@ export const Disenios = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
+  let diseniosTotales;
+
   useEffect(() => {
     getDisenios();
   }, []);
 
+
   const getDisenios = async () => {
     const respuesta = await axios.get(url);
     setDisenios(respuesta.data);
+
+    
+    diseniosTotales=respuesta.data;
+
+    getDiseniosCliente();
+
     console.log(respuesta.data);
+  };
+
+  const getDiseniosCliente = async  () => {
+    try {
+      const diseniosFiltrados = diseniosTotales.filter(disenio => disenio.IdUsuario == auth.idCliente);
+
+      // console.log(pedidosTotales);
+      console.log(diseniosFiltrados);
+
+      setDiseniosCliente(diseniosFiltrados);
+    } catch (error) {
+      console.log(error);
+
+      show_alerta("Error al obtener los pedidos", "error");
+    }
   };
 
   const [showInputsFile, setShowInputsFile] = useState(null);
@@ -688,19 +712,43 @@ export const Disenios = () => {
     setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
   };
 
-  // Filtrar los Disenios según el término de búsqueda
-  const filteredDisenios = Disenios.filter((cliente) =>
-    Object.values(cliente).some((value) =>
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  let totalPages;
+  let currentDiseños;
 
-  // Aplicar paginación a los Disenios filtrados
-  const totalPages = Math.ceil(filteredDisenios.length / itemsPerPage);
-  const currentDiseños = filteredDisenios.slice(
+  if (auth.idUsuario) {
+    // Filtrar los Disenios según el término de búsqueda
+    const filteredDisenios = Disenios.filter((cliente) =>
+      Object.values(cliente).some((value) =>
+        value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
+    // Aplicar paginación a los Disenios filtrados
+   totalPages = Math.ceil(filteredDisenios.length / itemsPerPage);
+   currentDiseños = filteredDisenios.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
-  );
+    );
+
+  }else{
+
+    // Filtrar los Disenios según el término de búsqueda
+    const filteredDisenios = DiseniosCliente.filter((cliente) =>
+      Object.values(cliente).some((value) =>
+        value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
+    // Aplicar paginación a los Disenios filtrados
+    totalPages = Math.ceil(filteredDisenios.length / itemsPerPage);
+    currentDiseños = filteredDisenios.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+    );
+
+  }
+
+
 
   return (
     <>
@@ -1131,6 +1179,8 @@ export const Disenios = () => {
           <h1 className="h3 mb-3 text-center text-dark">Gestión de Diseños</h1>
         </div>
 
+
+        
         {/* <!-- Tabla de diseños --> */}
         <div className="card shadow mb-4">
           <div className="card-header py-1 d-flex justify-content-between align-items-center">
@@ -1153,6 +1203,11 @@ export const Disenios = () => {
           </div>
           <div className="card-body">
             <div className="table-responsive">
+
+            {/* Si un usuario esta logueado renderizara la tabla de admin, si no renderizara la tabla del cliente  */}
+
+            {auth.idUsuario ?(
+              
               <table
                 className="table table-bordered"
                 id="dataTable"
@@ -1249,6 +1304,94 @@ export const Disenios = () => {
                   ))}
                 </tbody>
               </table>
+              ):
+
+              // tabla de cliente
+              (
+                <table
+                className="table table-bordered"
+                id="dataTable"
+                width="100%"
+                cellSpacing="0"
+              >
+                <thead> 
+                  <tr>
+                    <th>Nombre del Diseño</th>
+                    <th>Tamaño de Imagen</th>
+                    <th>Posición de Imagen</th>
+                    <th>Precio del Diseño </th>
+                    {/* <th>Color de fuente</th> */}
+                    {/* <th>Dirección</th>
+                    <th>ImagenDisenio Electrónico</th> */}
+                    {/* <th>Estado</th> */}
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentDiseños.map((disenio) => (
+                    <tr key={disenio.IdDisenio}>
+                      <td>{disenio.NombreDisenio}</td>
+                      <td>{disenio.TamanioImagen}</td>
+                      <td>{disenio.PosicionImagen}</td>
+                      <td>{formatCurrency( disenio.PrecioDisenio)}</td>
+                      {/* <td>{disenio.ColorFuente}</td> */}
+                      {/* <td>{cliente.PosicionImagen}</td>
+                      <td>{cliente.ImagenDisenio}</td> */}
+
+
+                      <td>
+                        <div
+                          className="d-flex"
+                          role="group"
+                          aria-label="Acciones"
+                        >
+                          <button
+                            className="btn btn-warning btn-sm mr-2"
+                            title="Editar"
+                            data-toggle="modal"
+                            data-target="#modalDisenio"
+                            onClick={() => openModal(2, disenio)}
+                            disabled={disenio.Estado != "Activo"}
+                          >
+                            <i className="fas fa-sync-alt"></i>
+                          </button>
+
+                          <button
+                            className="btn btn-danger btn-sm mr-2"
+                            onClick={() =>
+                              deleteDisenio(
+                                disenio.IdDisenio,
+                                disenio.NombreDisenio
+                              )
+                            }
+                            disabled={disenio.Estado != "Activo"}
+                            title="Eliminar"
+                          >
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+
+                          <button
+                            className="btn btn-info btn-sm mr-2"
+                            onClick={() =>
+                              handleDetalleDisenio(disenio.IdDisenio)
+                            }
+                            disabled={disenio.Estado != "Activo"}
+                            data-toggle="modal"
+                            data-target="#modalDetalleDisenio"
+                            title="Detalle"
+                          >
+                            <i className="fas fa-eye"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              )
+              }
+
+
             </div>
             <Pagination
               currentPage={currentPage}

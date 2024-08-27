@@ -4,12 +4,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import imagenesLanding from "../../assets/img/imagenesHome";
-
+import { useAuth } from "../../context/AuthProvider";
 export const ProductoSolo = () => {
   const { id } = useParams();
   const [Producto, setProducto] = useState([]);
   const [ColorProducto, setColorProducto] = useState("");
   const [TallaProducto, setTallaProducto] = useState("");
+  const { triggerRender } = useAuth();
+  const { auth } = useAuth();
   const url = `http://localhost:3000/api/productos/${id}`;
 
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -109,6 +111,7 @@ export const ProductoSolo = () => {
       }));
 
       getProducto();
+      triggerRender();
     } else {
       // Si el producto no existe, agrégalo con una cantidad inicial de 1
       cart.push({ IdProd: Producto.IdProducto, CantidadSeleccionada: 1 });
@@ -117,6 +120,8 @@ export const ProductoSolo = () => {
       console.log(JSON.parse(localStorage.getItem("cart")));
 
       getProducto();
+      triggerRender();
+
       // getCantidadProducto(idProductoSeleccionado);
     }
   };
@@ -145,6 +150,7 @@ export const ProductoSolo = () => {
         }));
 
         getProducto();
+        triggerRender();
 
         console.log(cart);
       } else {
@@ -184,6 +190,7 @@ export const ProductoSolo = () => {
             console.log(JSON.parse(localStorage.getItem("cart")));
 
             getProducto();
+            triggerRender();
 
             show_alerta("El producto fue eliminado del carrito", "success");
           } else if (result.dismiss === Swal.DismissReason.cancel) {
@@ -280,17 +287,6 @@ export const ProductoSolo = () => {
                   <p className="h5 py-2 font-weight-bold text-dark">
                     {formatCurrency(Producto.ValorVenta)}
                   </p>
-
-                  {/* 
-                                <h6>Detalles:</h6>
-                                <ul className="list-unstyled pb-3">
-                                    <li>Producto:  Camiseta Estampada</li>
-                                    <li>Técnica:  Sublimación</li>
-                                    <li>Material: Algodón FTPt</li>
-                                    <li>Sensación: Ultra Suave</li>
-                                    <li>Genero: Unisex</li>
-                                    
-                                </ul> */}
 
                   <div>
                     <div className="row">
@@ -394,7 +390,6 @@ export const ProductoSolo = () => {
                     <section>
                       <div className="container-accordion">
                         <div className="accordion">
-
                           {/* Item 1 */}
                           <div
                             className={`accordion-item ${
@@ -492,7 +487,6 @@ export const ProductoSolo = () => {
                             <hr />
                           </div>
 
-
                           {/* <div
                             className={`accordion-item ${
                               activeIndex === 3 ? "active" : ""
@@ -521,16 +515,14 @@ export const ProductoSolo = () => {
                             </div>
                             <hr />
                           </div> */}
-
-
                         </div>
                       </div>
                     </section>
 
-                    <div className="d-flex justify-content-around pb-3">
+                    <div className="d-flex justify-content-around m-4">
                       <div className="">
                         <button
-                          className="btn btn-success btn-lg"
+                          className="btn btn-success btn-md"
                           onClick={() => botonComprarAhora()}
                         >
                           Comprar ahora
@@ -540,7 +532,7 @@ export const ProductoSolo = () => {
                       {Producto.CantidadSeleccionada == 0 && (
                         <div className="">
                           <button
-                            className="btn btn-success btn-lg"
+                            className="btn btn-success btn-md"
                             onClick={() =>
                               incrementarCantidad(Producto.IdProducto)
                             }

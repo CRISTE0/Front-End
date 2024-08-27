@@ -1,7 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import imagenesLanding from "../../assets/img/imagenesHome";
 
 export const Inicio = () => {
+  const [activeIndex, setActiveIndex] = useState(null);
+
+  const toggleFAQ = (index) => {
+    setActiveIndex(activeIndex === index ? null : index);
+  };
+
   return (
     <>
       {/* <!-- inicio Banner Hero --> */}
@@ -30,7 +36,11 @@ export const Inicio = () => {
             <div className="container">
               <div className="row p-5">
                 <div className="mx-auto col-md-8 col-lg-6 order-lg-last">
-                  <img className="img-fluid p-4" src={imagenesLanding[1]} alt="Imagen slider" />
+                  <img
+                    className="img-fluid p-4"
+                    src={imagenesLanding[1]}
+                    alt="Imagen slider"
+                  />
                 </div>
                 <div className="col-lg-6 mb-0 d-flex align-items-center">
                   <div className="text-align-left align-self-center">
@@ -41,11 +51,11 @@ export const Inicio = () => {
                       El sitio ideal para liberar tu creatividad
                     </h3>
                     <p>
-                      En SoftShirt, entfinemos que la creatividad es un fuego
+                      En SoftShirt, entendemos que la creatividad es un fuego
                       que arde en cada uno de nosotros. Nos enorgullece ser el
                       puente entre tu yo artístico y el mundo, proporcionándote
                       la libertad para realizar obras maestras y llevarlas
-                      contigo en forma de prfinas únicas.
+                      contigo en forma de prendas únicas.
                     </p>
                   </div>
                 </div>
@@ -56,7 +66,11 @@ export const Inicio = () => {
             <div className="container">
               <div className="row p-5">
                 <div className="mx-auto col-md-8 col-lg-6 order-lg-last">
-                  <img className="img-fluid p-4" src={imagenesLanding[2]} alt="Imagen slider" />
+                  <img
+                    className="img-fluid p-4"
+                    src={imagenesLanding[2]}
+                    alt="Imagen slider"
+                  />
                 </div>
                 <div className="col-lg-6 mb-0 d-flex align-items-center">
                   <div className="text-align-left">
@@ -68,7 +82,7 @@ export const Inicio = () => {
                       Con nosotros, puedes desatar todo tu potencial creativo,
                       sin restricciones. Te ofrecemos una plataforma donde tus
                       ideas se convierten en diseños, y esos diseños se
-                      convierten en prfinas de moda.
+                      convierten en prendas de moda.
                     </p>
                   </div>
                 </div>
@@ -79,14 +93,18 @@ export const Inicio = () => {
             <div className="container">
               <div className="row p-5">
                 <div className="mx-auto col-md-8 col-lg-6 order-lg-last">
-                  <img className="img-fluid p-4" src={imagenesLanding[3]} alt="Imagen slider" />
+                  <img
+                    className="img-fluid p-4"
+                    src={imagenesLanding[3]}
+                    alt="Imagen slider"
+                  />
                 </div>
                 <div className="col-lg-6 mb-0 d-flex align-items-center ">
                   <div className="text-align-left">
                     {/* <!-- <h1 className="h1">Repr in voluptate</h1> --> */}
                     <h3 className="h2">Mas que un diseño</h3>
                     <p>
-                      Nuestras camisetas no son solo ropa; son un lienzo en
+                      Nuestras camisetas no son solo ropa, son un lienzo en
                       blanco para tus pensamientos,emociones y pasiones.
                       Queremos que te sientas inspirado y seguro de que tus
                       ideas pueden cobrar vida y que, al llevarlas, compartes
@@ -133,7 +151,13 @@ export const Inicio = () => {
               </p>
             </div>
             <div className="col-md-4 p-1">
-              <img src={imagenesLanding[4]} alt="Nosotros" width="320" height="" className="" />
+              <img
+                src={imagenesLanding[4]}
+                alt="Nosotros"
+                width="320"
+                height=""
+                className=""
+              />
             </div>
           </div>
         </div>
@@ -153,7 +177,9 @@ export const Inicio = () => {
               <div className="h1 text-success text-center">
                 <i className="fa fa-shipping-fast fa-lg"></i>
               </div>
-              <h2 className="h5 mt-4 text-center">Domicilios Área Metropolitana</h2>
+              <h2 className="h5 mt-4 text-center">
+                Domicilios Área Metropolitana
+              </h2>
             </div>
           </div>
 
@@ -191,39 +217,91 @@ export const Inicio = () => {
 
       {/* inicio reseñas  */}
       <section className="bg-light py-2">
-        <div className="container my-4">
-          <div className="row text-center py-3">
-            <div className="col-lg-6 m-auto">
-              {/* <!-- <h1 className="h1">Esto es lo que piensan nuestros clientes</h1> --> */}
-              <h1 className="h1">Clientes Recientes</h1>
+        <div class="container overflow-hidden p-3">
+          <div className="container d-flex justify-content-center">
+            <h1 className="h1 text-dark pb-4">Clientes Recientes</h1>
+          </div>
+
+          <div class="row gy-4 gy-md-0 gx-xxl-5">
+            <div class="col-12 col-md-4 p-2">
+              <div
+                class="card shadow-sm"
+                style={{ borderBottom: " 1px solid #1cc88a" }}
+              >
+                <div class="card-body p-4 ">
+                  <figure>
+                    <img
+                      class="img-fluid rounded rounded-circle mb-4 "
+                      style={{ border: "1px solid #1cc88a" }}
+                      src={imagenesLanding[5]}
+                      alt="Luna John"
+                    />
+                    <figcaption>
+                      <blockquote class="bsb-blockquote-icon mb-4">
+                        La camiseta estampada que compré superó todas mis
+                        expectativas. El diseño es vibrante y los colores son
+                        tan vivos como los mostraban en la tienda. ¡Me encanta
+                        cómo se siente la tela! Sin duda, volveré a comprar
+                        aquí.
+                      </blockquote>
+                      <h4 class="mb-2 text-dark">Juan Flórez</h4>
+                    </figcaption>
+                  </figure>
+                </div>
+              </div>
             </div>
 
-            <div className="row">
-              <div className="col-md-4">
-                <img src={imagenesLanding[5]} className="" alt="Cliente 1" id="section-clientes" />
-                <div className="card-body">
-                  <p className="card-text">
-                    Excelente servicio. ¡Los recomiendo totalmente!
-                  </p>
+            <div class="col-12 col-md-4 p-2">
+              <div
+                class="card shadow-sm"
+                style={{ borderBottom: " 1px solid #1cc88a" }}
+              >
+                <div class="card-body p-4 p-xxl-5">
+                  <figure>
+                    <img
+                      class="img-fluid rounded rounded-circle mb-4 "
+                      style={{ border: "1px solid #1cc88a" }}
+                      src={imagenesLanding[6]}
+                      alt="Mark Smith"
+                    />
+                    <figcaption>
+                      <blockquote class="bsb-blockquote-icon mb-4">
+                        La atención al detalle en el estampado es increíble. La
+                        camiseta no solo es cómoda, sino que también mantiene su
+                        forma después de varios lavados. Estoy muy contenta con
+                        mi compra y con la calidad del servicio.
+                      </blockquote>
+                      <h4 class="mb-2 text-dark">Luna García</h4>
+                    </figcaption>
+                  </figure>
                 </div>
               </div>
+            </div>
 
-              <div className="col-md-4">
-                <img src={imagenesLanding[6]} className="" alt="Cliente 2" id="section-clientes" />
-                <div className="card-body">
-                  <p className="card-text">
-                    Increíble experiencia. Estoy muy satisfecha con su trabajo.
-                  </p>
-                </div>
-              </div>
-
-              <div className="col-md-4">
-                <img src={imagenesLanding[7]} className="" alt="Cliente 3" id="section-clientes" />
-                <div className="card-body">
-                  <p className="card-text">
-                    El personal es amable y profesional. Definitivamente
-                    volveré.
-                  </p>
+            <div class="col-12 col-md-4 p-2">
+              <div
+                class="card shadow-sm"
+                style={{ borderBottom: " 1px solid #1cc88a" }}
+              >
+                <div class="card-body p-4 p-xxl-5">
+                  <figure>
+                    <img
+                      class="img-fluid rounded rounded-circle mb-4 "
+                      style={{ border: "1px solid #1cc88a" }}
+                      src={imagenesLanding[7]}
+                      alt="Luke Reeves"
+                    />
+                    <figcaption>
+                      <blockquote class="bsb-blockquote-icon mb-4">
+                        ¡Estoy encantado con mi nueva camiseta estampada! El
+                        proceso de compra fue sencillo y el producto llegó
+                        rápidamente. La calidad del material es excelente y el
+                        estampado se ve genial. Definitivamente, recomendaré
+                        esta tienda a mis amigos.
+                      </blockquote>
+                      <h4 class="mb-2 text-dark">Jhon Sánchez </h4>
+                    </figcaption>
+                  </figure>
                 </div>
               </div>
             </div>
@@ -233,96 +311,95 @@ export const Inicio = () => {
 
       {/* fin reseñas */}
 
-      {/* inicio FAQs  */}
 
-      <div className="accordion p-3" id="FAQs">
-        <h1 className="h1">Preguntas Frecuentes</h1>
-        <div className="accordion-item">
-          <h2 className="accordion-header" id="headingOne">
-            <button
-              className="btn btn-link btn-block text-left"
-              type="button"
-              data-toggle="collapse"
-              data-target="#collapseOne"
-              aria-expanded="true"
-              aria-controls="collapseOne"
-            >
-              <strong>
-                {" "}
+      {/* inicio FAQs  */}
+      <section id="faqs">
+        <div className="container m-4">
+          <h1 className="d-flex justify-content-center mt-3 text-dark">
+            Preguntas Frecuentes
+          </h1>
+          <div className="parent-container mt-5">
+            <ul className="faq">
+              <li className={activeIndex === 0 ? "active" : ""}>
+                <h3 className="question" onClick={() => toggleFAQ(0)}>
                 ¿Puedo personalizar una camiseta con mi propio diseño?
-              </strong>
-            </button>
-          </h2>
-          <div
-            id="collapseOne"
-            className="accordion-collapse collapse show"
-            aria-labelledby="headingOne"
-            data-parent="#accordionExample"
-          >
-            <div className="accordion-body">
-              <strong>
-                Claro que si puedes personalizar tu propia camiseta,
-              </strong>
-              Utilizando nuestro personalizador de camisetas lo puedes lograr y
-              dejar volar tu imaginacion.
-            </div>
+                  <div
+                    className={`plus-minus-toggle ${
+                      activeIndex === 0 ? "" : "collapsed"
+                    }`}
+                  ></div>
+                </h3>
+                <div
+                  className="answer"
+                  style={{
+                    maxHeight: activeIndex === 0 ? "275px" : "0",
+                    paddingBottom: activeIndex === 0 ? "25px" : "0",
+                    overflow: "hidden",
+                    transition:
+                      "max-height 0.5s ease, padding-bottom 0.5s ease",
+                  }}
+                >
+                  <strong>
+                  Claro que si puedes personalizar tu propia camiseta,
+                </strong>
+                Utilizando nuestro personalizador de camisetas lo puedes lograr y
+                dejar volar tu imaginacion.
+                </div>
+              </li>
+
+              <li className={activeIndex === 1 ? "active" : ""}>
+                <h3 className="question" onClick={() => toggleFAQ(1)}>
+                ¿Cuánto tiempo tomará en llegar mi pedido?
+                  <div
+                    className={`plus-minus-toggle ${
+                      activeIndex === 1 ? "" : "collapsed"
+                    }`}
+                  ></div>
+                </h3>
+                <div
+                  className="answer"
+                  style={{
+                    maxHeight: activeIndex === 1 ? "275px" : "0",
+                    paddingBottom: activeIndex === 1 ? "25px" : "0",
+                    overflow: "hidden",
+                    transition:
+                      "max-height 0.5s ease, padding-bottom 0.5s ease",
+                  }}
+                >
+                  Normalmente nos demoramos en entregar el pedido a la puerta de tu
+                  casa alrededor de 5 días hábiles
+                </div>
+              </li>
+
+              <li className={activeIndex === 2 ? "active" : ""}>
+                <h3 className="question" onClick={() => toggleFAQ(2)}>
+                ¿Con cuantas camisetas puedo inicar un pedido?
+                  <div
+                    className={`plus-minus-toggle ${
+                      activeIndex === 2 ? "" : "collapsed"
+                    }`}
+                  ></div>
+                </h3>
+                <div
+                  className="answer"
+                  style={{
+                    maxHeight: activeIndex === 2 ? "275px" : "0",
+                    paddingBottom: activeIndex === 2 ? "25px" : "0",
+                    overflow: "hidden",
+                    transition:
+                      "max-height 0.5s ease, padding-bottom 0.5s ease",
+                  }}
+                >
+                   Para realizar un pedido solo debes comprar una camiseta y el
+                   límite de camisetas lo definira tu creatividad :) .
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
-        <div className="accordion-item">
-          <h2 className="accordion-header" id="headingTwo">
-            <button
-              className="btn  btn-block text-left collapsed"
-              type="button"
-              data-toggle="collapse"
-              data-target="#collapseTwo"
-              aria-expanded="false"
-              aria-controls="collapseTwo"
-            >
-              <strong>
-                {" "}
-                ¿Cuáles son las opciones de envío y cuánto tiempo tomará recibir
-                mi pedido?
-              </strong>
-            </button>
-          </h2>
-          <div
-            id="collapseTwo"
-            className="accordion-collapse collapse"
-            aria-labelledby="headingTwo"
-            data-parent="#accordionExample"
-          >
-            <div className="accordion-body">
-              Normalmente nos demoramos en entregar el pedido a la puerta de tu
-              casa alrededor de 5 días hábiles
-            </div>
-          </div>
-        </div>
-        <div className="accordion-item">
-          <h2 className="accordion-header" id="headingThree">
-            <button
-              className="btn  btn-block text-left collapsed"
-              type="button"
-              data-toggle="collapse"
-              data-target="#collapseThree"
-              aria-expanded="false"
-              aria-controls="collapseThree"
-            >
-              <strong>¿Con cuantas camisetas puedo inicar un pedido?</strong>
-            </button>
-          </h2>
-          <div
-            id="collapseThree"
-            className="accordion-collapse collapse"
-            aria-labelledby="headingThree"
-            data-parent="#accordionExample"
-          >
-            <div className="accordion-body">
-              Para realizar un pedido solo debes comprar una camiseta y el
-              límite de camisetas lo definira tu creatividad :).
-            </div>
-          </div>
-        </div>
-      </div>
+
+      </section>
+
       {/* fin FAQs  */}
     </>
   );

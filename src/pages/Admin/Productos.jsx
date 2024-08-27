@@ -5,23 +5,34 @@ import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
+import { useAuth } from "../../context/AuthProvider";
+
 
 export const Catalogo = () => {
   const url = "http://localhost:3000/api/productos";
+  const {auth} = useAuth();
+
   const [productosAdmin, setProductosAdmin] = useState([]);
+  const [productosCliente, setProductosCliente] = useState([]);
   const [Disenios, setDisenios] = useState([]);
   const [Insumos, setInsumos] = useState([]);
   const [Tallas, setTallas] = useState([]);
   const [TallaDetalle, setTallaDetalle] = useState([]);
   const [ColorDetalle, setColorDetalle] = useState([]);
   const [IdDisenio, setIdDisenio] = useState("");
-  const [IdInsumo, setIdInsumo] = useState("");
   const [IdProducto, setIdProducto] = useState("");
+  const [IdInsumo, setIdInsumo] = useState("");
+
+  const [TallaCliente, setTallaCliente] = useState([]);
+
+  const [ColorCliente, setColorCliente] = useState([]);
+
   const [Referencia, setReferencia] = useState("");
   const [Cantidad, setCantidad] = useState("");
   const [ValorVenta, setValorVenta] = useState("");
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
+
   const [errors, setErrors] = useState({
     IdDisenio: 0,
     IdInsumo: 0,
@@ -42,6 +53,8 @@ export const Catalogo = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
+  let productosTotales;
+
   useEffect(() => {
     getProductosAdmin();
     getDisenios();
@@ -51,8 +64,29 @@ export const Catalogo = () => {
 
   const getProductosAdmin = async () => {
     const respuesta = await axios.get(url);
+
+    productosTotales=respuesta.data;
+
     setProductosAdmin(respuesta.data);
     console.log(respuesta.data);
+
+    getProductosCliente();
+  };
+
+  const getProductosCliente = async  () => {
+    try {
+      const productosFiltrados = productosTotales.filter(producto => producto.IdUsuario == auth.idCliente);
+
+      // console.log(pedidosTotales);
+      console.log(productosFiltrados);
+
+      setProductosCliente(productosFiltrados);
+
+    } catch (error) {
+      console.log(error);
+
+      show_alerta("Error al obtener los pedidos", "error");
+    }
   };
 
   const getDisenios = async () => {
@@ -85,7 +119,7 @@ export const Catalogo = () => {
 
   const openModal = (op, insumo = null) => {
     if (op === 1) {
-      // Crear cliente
+      // Crear producto
       setIdProducto("");
       setIdDisenio("");
       setIdInsumo("");
@@ -104,7 +138,7 @@ export const Catalogo = () => {
       };
       setErrors(errors);
     } else if (op === 2 && insumo) {
-      // Actualizar Cliente
+      // Actualizar producto
       setIdProducto(insumo.IdProducto);
       setIdDisenio(insumo.IdDisenio);
       setIdInsumo(insumo.IdInsumo);
@@ -126,6 +160,29 @@ export const Catalogo = () => {
         ValorVenta: validateValorVenta(insumo.ValorVenta),
       };
       setErrors(errors);
+    }else if(op === 3){
+
+      // Crear producto
+      setIdProducto("");
+      setIdDisenio("");
+      setIdInsumo("");
+      setColorCliente("");
+      setTallaCliente("");
+      setReferencia("");
+      setCantidad("");
+      setValorVenta("");
+      setOperation(1);
+      setTitle("Crea tu camiseta");
+
+      setSelectedInsumo(null);
+
+      const errors = {
+        Referencia: "",
+        Cantidad: "",
+        ValorVenta: "",
+      };
+      setErrors(errors);
+
     }
   };
 
@@ -207,6 +264,7 @@ export const Catalogo = () => {
       await enviarSolicitud("POST", {
         IdDisenio,
         IdInsumo,
+        IdUsuario: auth.idUsuario || auth.idCliente,
         Referencia: Referencia.trim(),
         Cantidad: Cantidad,
         ValorVenta: ValorVenta,
@@ -479,6 +537,11 @@ export const Catalogo = () => {
         (producto) => producto.IdProducto === IdProducto
       );
 
+      if (productoActual.Cantidad == 0) {
+        show_alerta({message: "No se puede cambiar la publicación, agrega al menos una cantidad al producto",type:"warning"});
+        return;
+      }
+
       const nuevoEstado =
         productoActual.Publicacion === "Activo" ? "Inactivo" : "Activo";
 
@@ -542,9 +605,42 @@ export const Catalogo = () => {
       const productoActual = productosAdmin.find(
         (producto) => producto.IdProducto === IdProducto
       );
+      let nuevoEstadoPublicacion;
+
+      let parametros;
 
       const nuevoEstado =
         productoActual.Estado === "Activo" ? "Inactivo" : "Activo";
+
+        if (nuevoEstado == "Inactivo") {
+          nuevoEstadoPublicacion= "Inactivo";
+
+          parametros = {
+            IdProducto,
+            IdDisenio: productoActual.IdDisenio,
+            IdInsumo: productoActual.IdInsumo,
+            Referencia: productoActual.Referencia,
+            Cantidad: productoActual.Cantidad,
+            ValorVenta: productoActual.ValorVenta,
+            Publicacion: nuevoEstadoPublicacion,
+            Estado: nuevoEstado,
+          };
+        }else{
+          nuevoEstadoPublicacion= productoActual.Publicacion;
+
+
+          parametros = {
+            IdProducto,
+            IdDisenio: productoActual.IdDisenio,
+            IdInsumo: productoActual.IdInsumo,
+            Referencia: productoActual.Referencia,
+            Cantidad: productoActual.Cantidad,
+            ValorVenta: productoActual.ValorVenta,
+            Publicacion: nuevoEstadoPublicacion,
+            Estado: nuevoEstado,
+          };
+        }
+
 
       const MySwal = withReactContent(Swal);
       MySwal.fire({
@@ -556,16 +652,10 @@ export const Catalogo = () => {
         cancelButtonText: "Cancelar",
       }).then(async (result) => {
         if (result.isConfirmed) {
-          const parametros = {
-            IdProducto,
-            IdDisenio: productoActual.IdDisenio,
-            IdInsumo: productoActual.IdInsumo,
-            Referencia: productoActual.Referencia,
-            Cantidad: productoActual.Cantidad,
-            ValorVenta: productoActual.ValorVenta,
-            Publicacion: productoActual.Publicacion,
-            Estado: nuevoEstado,
-          };
+
+          console.log(parametros);
+          
+          
 
           const response = await axios.put(`${url}/${IdProducto}`, parametros);
 
@@ -573,7 +663,7 @@ export const Catalogo = () => {
             setProductosAdmin((prevProducto) =>
               prevProducto.map((producto) =>
                 producto.IdProducto === IdProducto
-                  ? { ...producto, Estado: nuevoEstado }
+                  ? { ...producto, Publicacion: nuevoEstadoPublicacion, Estado: nuevoEstado }
                   : producto
               )
             );
@@ -665,8 +755,13 @@ export const Catalogo = () => {
     setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
   };
 
-  // Filtrar los productosAdmin según el término de búsqueda
-  const filteredproductosAdmin = productosAdmin.filter((insumo) => {
+  
+  let totalPages;
+  let currentproductosAdmin;
+
+  if (auth.idUsuario) {
+    // Filtrar los productosAdmin según el término de búsqueda
+    const filteredproductosAdmin = productosAdmin.filter((insumo) => {
     const colorName = convertDisenioIdToName(insumo.IdDisenio);
     const tallaName = convertInsumoIdToName(insumo.IdInsumo);
     const referencia = insumo.Referencia ? insumo.Referencia.toString() : "";
@@ -674,22 +769,55 @@ export const Catalogo = () => {
     const valorVenta = insumo.ValorVenta ? insumo.ValorVenta.toString() : "";
     const estado = insumo.Estado ? insumo.Estado.toString() : "";
 
-    return (
-      colorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tallaName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      referencia.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cantidad.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      valorVenta.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      estado.toLowerCase().includes(searchTerm.toLocaleLowerCase())
-    );
-  });
+      return (
+        colorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tallaName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        referencia.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        cantidad.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        valorVenta.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        estado.toLowerCase().includes(searchTerm.toLocaleLowerCase())
+      );
+    });
 
-  // Aplicar paginación a los productosAdmin filtrados
-  const totalPages = Math.ceil(filteredproductosAdmin.length / itemsPerPage);
-  const currentproductosAdmin = filteredproductosAdmin.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+    // Aplicar paginación a los productosAdmin filtrados
+    totalPages = Math.ceil(filteredproductosAdmin.length / itemsPerPage);
+     currentproductosAdmin = filteredproductosAdmin.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+
+  }else{
+    // Filtrar los productosAdmin según el término de búsqueda
+    const filteredproductoClientes = productosCliente.filter((insumo) => {
+      const colorName = convertDisenioIdToName(insumo.IdDisenio);
+      const tallaName = convertInsumoIdToName(insumo.IdInsumo);
+      const referencia = insumo.Referencia ? insumo.Referencia.toString() : "";
+      const cantidad = insumo.Cantidad ? insumo.Cantidad.toString() : "";
+      const valorVenta = insumo.ValorVenta ? insumo.ValorVenta.toString() : "";
+      const estado = insumo.Estado ? insumo.Estado.toString() : "";
+  
+        return (
+          colorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          tallaName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          referencia.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          cantidad.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          valorVenta.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          estado.toLowerCase().includes(searchTerm.toLocaleLowerCase())
+        );
+      });
+  
+      // Aplicar paginación a los productosAdmin filtrados
+      totalPages = Math.ceil(filteredproductoClientes.length / itemsPerPage);
+       currentproductosAdmin = filteredproductoClientes.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      );
+  }
+
+
+  
+
+
 
   function formatCurrency(value) {
     return new Intl.NumberFormat("es-CO", {
@@ -708,7 +836,7 @@ export const Catalogo = () => {
 
   return (
     <>
-      {/* Modal producto */}
+      {/* Modal crear producto */}
       <div
         className="modal fade"
         id="modalCliente"
@@ -910,7 +1038,216 @@ export const Catalogo = () => {
           </div>
         </div>
       </div>
-      {/* Modal producto */}
+      {/* Modal crear producto */}
+
+
+      {/* Modal crear producto cliente*/}
+      <div
+        className="modal fade"
+        id="modalProductoCliente"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="modalClienteLabel"
+        aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
+      >
+        <div className="modal-dialog modal-lg" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="modalClienteLabel">
+                {title}
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <form id="crearClienteForm">
+                <div className="form-row">
+
+                  {/* Diseño del Producto */}
+                  <div className="form-group col-md-5">
+                    <label htmlFor="idDisenio">Diseño del Producto:</label>
+                    <select
+                      className="form-control"
+                      id="idDisenio"
+                      value={IdDisenio}
+                      onChange={(e) => handleChangeIdDisenio(e)}
+                      required
+                    >
+                      <option value="" disabled>
+                        Seleccione un Diseño
+                      </option>
+                      {Disenios.map((disenio) => (
+                        <option
+                          key={disenio.IdDisenio}
+                          value={disenio.IdDisenio}
+                        >
+                          {disenio.NombreDisenio}
+                        </option>
+                      ))}
+                    </select>
+
+                    {IdDisenio === "" && (
+                      <p className="text-danger">
+                        Por favor, seleccione un diseño.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* ToolTip imagen de referencia*/}
+                  <div className="col-md-1 mt-4 pt-3">
+                    <i className="tooltipReferenceImage fas fa-info-circle">
+                      {selectedDisenio && (
+                        <span className="tooltiptext">
+                          <img
+                            src={selectedDisenio.ImagenReferencia}
+                            alt={selectedDisenio.NombreDisenio}
+                            style={{ width: "150px", height: "100px" }}
+                          />
+                        </span>
+                      )}
+                    </i>
+                  </div>
+
+                  {/* Insumo del Producto */}
+                  <div className="form-group col-md-5">
+                    <label htmlFor="idInsumo">Insumo del Producto:</label>
+                    <select
+                      className="form-control"
+                      id="idInsumo"
+                      value={IdInsumo}
+                      onChange={(e) => handleChangeIdInsumo(e)}
+                      required
+                    >
+                      <option value="" disabled>
+                        Seleccione un Insumo
+                      </option>
+                      {Insumos.map((insumo) => (
+                        <option key={insumo.IdInsumo} value={insumo.IdInsumo}>
+                          {insumo.Referencia}
+                        </option>
+                      ))}
+                    </select>
+                    {IdInsumo === "" && (
+                      <p className="text-danger">
+                        Por favor, seleccione un insumo.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* ToolTip talla del producto*/}
+                  {/* <div className="col-md-1 mt-4 pt-3">
+                    <i className="tooltipReferenceImage fas fa-info-circle">
+                      {selectedInsumo && (
+                        <span className="tooltiptext">
+                          {" "}
+                          {`La talla del insumo es: ${convertTallaIdToName(
+                            selectedInsumo.IdTalla
+                          )}`}{" "}
+                        </span>
+                      )}
+                    </i>
+                  </div> */}
+
+                  {/* Referencia del Producto*/}
+                  <div className="form-group col-md-6">
+                    <label htmlFor="Referencia">Referencia del Producto:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.Referencia ? "is-invalid" : ""
+                      }`}
+                      id="Referencia"
+                      placeholder="Ingrese la referencia del producto"
+                      required
+                      // disabled
+                      value={Referencia}
+                      onChange={handleChangeReferencia}
+                    />
+                    {renderErrorMessage(errors.Referencia)}
+                  </div>
+
+                  {/* Cantidad del producto */}
+                  <div className="form-group col-md-6">
+                    <label htmlFor="cantidadProducto">Cantidad:</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.Cantidad ? "is-invalid" : ""
+                      }`}
+                      id="cantidadProducto"
+                      placeholder={
+                        selectedInsumo
+                          ? `La cantidad maxima del insumo es: ${selectedInsumo.Cantidad}`
+                          : "Ingrese la cantidad del insumo"
+                      }
+                      required
+                      value={Cantidad}
+                      onChange={handleChangeCantidad}
+                    />
+                    {renderErrorMessage(errors.Cantidad)}
+                  </div>
+
+                  {/* Valor venta del producto */}
+                  <div className="form-group col-md-12">
+                    <label htmlFor="direccionCliente">
+                      Valor de la venta del producto:
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.ValorVenta ? "is-invalid" : ""
+                      }`}
+                      id="direccionCliente"
+                      placeholder={
+                        selectedInsumo
+                          ? `Precio sugerido para el producto es: ${precioSugerido(
+                              selectedDisenio.PrecioDisenio,
+                              selectedInsumo.ValorCompra
+                            )}`
+                          : "Ingrese el valor del producto"
+                      }
+                      required
+                      value={ValorVenta}
+                      onChange={handleChangeValorVenta}
+                    />
+                    {renderErrorMessage(errors.ValorVenta)}
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-dismiss="modal"
+                id="btnCerrarCliente"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  guardarProducto();
+                }}
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Modal crear producto cliente*/}
+
+
 
       {/* Inicio modal ver detalle diseño */}
       <div
@@ -1387,7 +1724,10 @@ export const Catalogo = () => {
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
-            <button
+
+            {auth.idUsuario ? 
+            (
+              <button
               type="button"
               className="btn btn-dark"
               data-toggle="modal"
@@ -1399,9 +1739,34 @@ export const Catalogo = () => {
             >
               <i className="fas fa-pencil-alt"></i> Crear Producto
             </button>
+
+            )
+            
+            :
+            (
+              <button
+              type="button"
+              className="btn btn-dark"
+              data-toggle="modal"
+              data-target="#modalProductoCliente"
+              onClick={() => openModal(3, "", "", "", "", "", "")}
+              style={{
+                width: "175px",
+              }}
+            >
+              <i className="fas fa-pencil-alt"></i> Crear Producto
+            </button>
+            )
+            }
+
+            
+
           </div>
           <div className="card-body">
             <div className="table-responsive">
+
+            {auth.idUsuario ?(
+              
               <table
                 className="table table-bordered"
                 id="dataTable"
@@ -1510,6 +1875,125 @@ export const Catalogo = () => {
                   ))}
                 </tbody>
               </table>
+            )
+            :
+            (
+            <table
+              className="table table-bordered"
+              id="dataTable"
+              width="100%"
+              cellSpacing="0"
+            >
+              <thead>
+                <tr>
+                  <th>Referencia</th>
+                  <th>Diseño</th>
+                  <th>Insumo</th>
+                  <th>Cantidad</th>
+                  <th>Valor de la Venta</th>
+                  {/* <th>Publicación</th>
+                  <th>Estado</th> */}
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentproductosAdmin.map((producto) => (
+                  <tr key={producto.IdProducto}>
+                    <td>{producto.Referencia}</td>
+                    <td>{convertDisenioIdToName(producto.IdDisenio)}</td>
+                    <td>{convertInsumoIdToName(producto.IdInsumo)}</td>
+                    <td>{producto.Cantidad}</td>
+                    <td>{formatCurrency(producto.ValorVenta)}</td>
+                    
+                    {/* <td>
+                      <label
+                        className={`switch ${
+                          producto.Estado !== "Activo" ? "switch-grey" : ""
+                        }`}
+                      >
+                        <input
+                          disabled={producto.Estado !== "Activo"}
+                          type="checkbox"
+                          checked={producto.Publicacion === "Activo"}
+                          onChange={() =>
+                            cambiarPublicacionProducto(producto.IdProducto)
+                          }
+                        />
+                        <span className="slider round"></span>
+                      </label>
+                    </td>
+
+                    <td>
+                      <label className="switch">
+                        <input
+                          type="checkbox"
+                          checked={producto.Estado === "Activo"}
+                          onChange={() =>
+                            cambiarEstadoProducto(producto.IdProducto)
+                          }
+                          className={
+                            producto.Estado === "Activo"
+                              ? "switch-green"
+                              : "switch-red"
+                          }
+                        />
+                        <span className="slider round"></span>
+                      </label>
+                    </td> */}
+
+                    <td>
+                      <div
+                        className="d-flex"
+                      >
+                        {auth.idUsuario && (
+                        <button
+                          className="btn btn-warning btn-sm mr-2"
+                          title="Editar"
+                          data-toggle="modal"
+                          data-target="#modalCliente"
+                          onClick={() => openModal(2, producto)}
+                          disabled={producto.Estado != "Activo"}
+                        >
+                          <i className="fas fa-sync-alt"></i>
+                        </button>
+
+                        )}
+
+                        <button
+                          className="btn btn-danger btn-sm mr-2"
+                          onClick={() =>
+                            deleteInsumo(
+                              producto.IdProducto,
+                              producto.Referencia
+                            )
+                          }
+                          disabled={producto.Estado != "Activo"}
+                          title="Eliminar"
+                        >
+                          <i className="fas fa-trash-alt"></i>
+                        </button>
+
+                        <button
+                          className="btn btn-info btn-sm mr-2"
+                          onClick={() =>
+                            handleDetalleProducto(producto.IdProducto)
+                          }
+                          disabled={producto.Estado != "Activo"}
+                          data-toggle="modal"
+                          data-target="#modalDetalleProducto"
+                          title="Detalle"
+                        >
+                          <i className="fas fa-info-circle"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            )}
+
+              
             </div>
             <Pagination
               currentPage={currentPage}
