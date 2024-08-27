@@ -98,7 +98,6 @@ export const Disenios = () => {
     console.log(respuesta.data);
   };
 
-<<<<<<< HEAD
   const getComprasByDisenios = async (IdDisenio) => {
     try {
       const response = await axios.get(productosUrl);
@@ -111,7 +110,9 @@ export const Disenios = () => {
       console.error("Error fetching productos:", error);
       show_alerta({ message: "Error al verificar el producto", type: "error" });
       return false; // Considera que no tiene productos asociadas en caso de error
-=======
+    }
+  }
+  
   const getDiseniosCliente = async  () => {
     try {
       const diseniosFiltrados = diseniosTotales.filter(disenio => disenio.IdUsuario == auth.idCliente);
@@ -124,7 +125,6 @@ export const Disenios = () => {
       console.log(error);
 
       show_alerta("Error al obtener los pedidos", "error");
->>>>>>> hpNoSabo
     }
   };
 
