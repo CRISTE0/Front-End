@@ -734,6 +734,7 @@ export const Insumos = () => {
               data-target="#modalCliente"
               style={{
                 width: "155px",
+                height: "40px"
               }}
               onClick={() => openModal(1, "", "", "", "", "", "")}
             >
