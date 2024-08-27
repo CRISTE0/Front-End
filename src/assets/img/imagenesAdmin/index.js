@@ -1,5 +1,5 @@
-import disenio from "./diseño.png";
+import logoLogin from "./ImagenLogoLogin.png";
 
 export default[
-    disenio
+    logoLogin
 ]

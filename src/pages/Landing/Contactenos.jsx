@@ -4,39 +4,18 @@ export const Contactenos = () => {
   return (
     <>
       {/* Start Content Page  */}
-      <div className="container-fluid bg-light py-5">
+      
+
+      {/* Start Contact  */}
+      <div className="container d-flex justify-content-center py-5">
+      <div className="card p-4 shadow-lg w-100" style={{ maxWidth: '600px' }}>
+
+      <div className="container-fluid  py-5">
         <div className="col-md-6 m-auto text-center">
-          <h1 className="h1">Contáctenos</h1>
+          <h1 className="h1 text-dark">Contáctenos</h1>
         </div>
       </div>
 
-      {/* Start Map */}
-      {/*  <div id="mapid" style="width: 100%; height: 300px;"></div>
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
-    <script>
-        var mymap = L.map('mapid').setView([-23.013104, -43.394365, 13], 13);
-
-        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-            maxZoom: 18,
-            attribution: 'Zay Telmplte | Template Design by <a href="https://templatemo.com/">Templatemo</a> | Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-                '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-                'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-            id: 'mapbox/streets-v11',
-            tileSize: 512,
-            zoomOffset: -1
-        }).addTo(mymap);
-
-        L.marker([-23.013104, -43.394365, 13]).addTo(mymap)
-            .bindPopup("<b>Zay</b> eCommerce Template<br />Location.").openPopup();
-
-        mymap.scrollWheelZoom.disable();
-        mymap.touchZoom.disable();
-    </script>  */}
-
-      {/* End Map  */}
-
-      {/* Start Contact  */}
-      <div className="container py-5">
         <div className="row py-5">
           <form className="col-md-9 m-auto" method="post" role="form">
             <div className="row">
@@ -45,7 +24,7 @@ export const Contactenos = () => {
                 <input
                   type="text"
                   className="form-control mt-1"
-                  id="name"
+                  id="inputname"
                   name="name"
                   placeholder="Nombre"
                 />
@@ -55,7 +34,7 @@ export const Contactenos = () => {
                 <input
                   type="email"
                   className="form-control mt-1"
-                  id="email"
+                  id="inputemail"
                   name="email"
                   placeholder="Email"
                 />
@@ -66,7 +45,7 @@ export const Contactenos = () => {
               <input
                 type="text"
                 className="form-control mt-1"
-                id="subject"
+                id="inputsubject"
                 name="subject"
                 placeholder="Asunto"
               />
@@ -75,7 +54,7 @@ export const Contactenos = () => {
               <label for="inputmessage">Mensaje</label>
               <textarea
                 className="form-control mt-1"
-                id="message"
+                id="inputmessage"
                 name="message"
                 placeholder="Mensaje"
                 rows="8"
@@ -91,8 +70,9 @@ export const Contactenos = () => {
           </form>
         </div>
       </div>
+      </div>
+
       {/* End Contact  */}
     </>
   );
 };
-

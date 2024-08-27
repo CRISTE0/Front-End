@@ -8,7 +8,8 @@ import axios from "axios";
 
 export const Carrito = () => {
   const { auth } = useAuth();
-
+  let timeoutId = null;
+  const [inputValues, setInputValues] = useState({});
   const { triggerRender } = useAuth();
   const url = "http://localhost:3000/api/pedidos";
 
@@ -100,12 +101,17 @@ export const Carrito = () => {
         show_alerta("Cantidad maxima del producto alcanzada", "error");
         return;
       }
+      
       // Incrementa la cantidad del producto en el carrito
       cart[productIndex].CantidadSeleccionada += 1;
-
+      
+      
+            const newCantidad = cart[productIndex].CantidadSeleccionada;
+            setInputValues(prev => ({...prev, [idProductoSeleccionado]: newCantidad.toString()}));
+            
       // Actualiza el carrito en el localStorage
       localStorage.setItem("cart", JSON.stringify(cart));
-
+      
       // Actualiza el estado del carrito en React
       setCartItems((prevCartItems) =>
         prevCartItems.map((item) =>
@@ -132,6 +138,10 @@ export const Carrito = () => {
       if (cart[productIndex].CantidadSeleccionada > 1) {
         // Reduce la cantidad del producto si es mayor que 1
         cart[productIndex].CantidadSeleccionada -= 1;
+
+        const newCantidad = cart[productIndex].CantidadSeleccionada;
+        setInputValues(prev => ({...prev, [idProductoSeleccionado]: newCantidad.toString()}));
+        
 
         // Actualiza el carrito en el localStorage
         localStorage.setItem("cart", JSON.stringify(cart));
@@ -200,6 +210,59 @@ export const Carrito = () => {
     }
   };
 
+
+  const handleCantidadChange = (e, idProductoSeleccionado, cantidadMaxima, nombreProducto) => {
+    let newValue = e.target.value;
+    
+    // Permitir campo vacío o números positivos
+    if (newValue === '' || /^[1-9]\d*$/.test(newValue)) {
+      let numericValue = newValue === '' ? '' : parseInt(newValue, 10);
+      
+      if (numericValue !== '' && numericValue > cantidadMaxima) {
+        numericValue = cantidadMaxima;
+        newValue = cantidadMaxima.toString();
+      }
+      
+      setInputValues(prev => ({...prev, [idProductoSeleccionado]: newValue}));
+      
+      if (numericValue !== '') {
+        updateCartAndState(idProductoSeleccionado, numericValue);
+      }
+    }
+  };
+  
+  const updateCartAndState = (idProductoSeleccionado, newCantidad) => {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const productIndex = cart.findIndex(item => item.IdProd === idProductoSeleccionado);
+  
+    if (productIndex !== -1) {
+      cart[productIndex].CantidadSeleccionada = newCantidad;
+      localStorage.setItem("cart", JSON.stringify(cart));
+  
+      setCartItems(prevCartItems =>
+        prevCartItems.map(item =>
+          item.id === idProductoSeleccionado
+            ? { ...item, CantidadSeleccionada: newCantidad }
+            : item
+        )
+      );
+  
+      fetchCartItems();
+      triggerRender();
+    }
+  };
+  
+  const handleInputBlur = (idProductoSeleccionado, cantidadMaxima) => {
+    const currentValue = inputValues[idProductoSeleccionado];
+    if (currentValue === '' || parseInt(currentValue, 10) < 1) {
+      setInputValues(prev => ({...prev, [idProductoSeleccionado]: '1'}));
+      updateCartAndState(idProductoSeleccionado, 1);
+    } else if (parseInt(currentValue, 10) > cantidadMaxima) {
+      setInputValues(prev => ({...prev, [idProductoSeleccionado]: cantidadMaxima.toString()}));
+      updateCartAndState(idProductoSeleccionado, cantidadMaxima);
+    }
+  };
+  
   const totalPedido = cartItems.reduce((total, item) => {
     return total + (item.CantidadSeleccionada * item.ValorVenta || 0);
   }, 0);
@@ -292,8 +355,8 @@ export const Carrito = () => {
       >
         <div className="row">
           <div className="col-lg-6">
-            {/* productos cliente */}
 
+            {/* productos cliente */}
             {cartItems.map((item) => (
               <div key={item.IdProducto} className="card mb-3">
                 <div className="card-body">
@@ -362,9 +425,29 @@ export const Carrito = () => {
                         </button>
                       )}
 
-                      <div style={{ width: "40px" }}>
-                        <h5 className="mb-0">{item.CantidadSeleccionada}</h5>
-                      </div>
+                      <div style={{ width: "auto" }}>
+
+                      <input
+                        // min="0"
+                        // min="0" 
+                        type="text"
+                        className="form-control form-control-dm"
+                        style={{ width: "45px", "textAlign":"center" }}
+                        value={inputValues[item.IdProducto] ?? item.CantidadSeleccionada}
+                        onChange={(e) =>
+                          handleCantidadChange(
+                            e,
+                            item.IdProducto,
+                            item.Cantidad,
+                            item.Disenio.NombreDisenio
+                          )
+                        }
+
+                        onBlur={() => handleInputBlur(item.IdProducto, item.Cantidad)}
+
+                      />                 
+                      
+                       </div>
 
                       {/* Aumentar cantidad del producto */}
                       <button
@@ -385,10 +468,10 @@ export const Carrito = () => {
 
           {/* informacion cliente */}
           <div className="col-lg-6">
-            <div className="card  text-dark rounded-3">
+            <div className="card  -dark rounded-3">
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                  <h5 className="mb-0">Ingresa tus datos</h5>
+                  <h5 className="mb-0">Confirma tus datos</h5>
                 </div>
 
                 <div className="mt-4">
@@ -400,6 +483,7 @@ export const Carrito = () => {
                     <input
                       type="text"
                       id="Nombre"
+                      disabled
                       className="form-control form-control-lg"
                       defaultValue={Cliente.NombreApellido}
                     />
@@ -413,18 +497,20 @@ export const Carrito = () => {
                     <input
                       type="text"
                       id="Telefono"
+                      disabled
                       className="form-control form-control-lg"
                       defaultValue={Cliente.Telefono}
                     />
                   </div>
 
-                  <div className="form-outline form-white">
+                  <div className="form-outline form-white mb-4">
                     <label className="form-label" htmlFor="typeExpp">
                       Dirección
                     </label>
                     <input
                       type="text"
                       id="typeExpp"
+                      disabled
                       className="form-control form-control-lg"
                       placeholder=""
                       defaultValue={Cliente.Direccion}
@@ -438,6 +524,7 @@ export const Carrito = () => {
                     <input
                       type="text"
                       id="Correo"
+                      disabled
                       className="form-control form-control-lg"
                       placeholder=""
                       defaultValue={Cliente.Correo}
