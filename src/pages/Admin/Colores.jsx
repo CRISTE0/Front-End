@@ -234,7 +234,7 @@ export const Colores = () => {
       MySwal.fire({
         title: `¿Seguro de cambiar el estado del color ${colorActual.Color}?`,
         icon: "question",
-        text: `El estado actual del color es: ${colorActual.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        html: `El estado actual del color es: <strong> ${colorActual.Estado}</strong>. ¿Desea cambiarlo a ${nuevoEstado}?`,
         showCancelButton: true,
         confirmButtonText: "Sí, cambiar estado",
         cancelButtonText: "Cancelar",

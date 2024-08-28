@@ -519,7 +519,7 @@ export const Proveedores = () => {
       MySwal.fire({
         title: `¿Seguro de cambiar el estado del proveedor ${proveedor.NombreApellido}?`,
         icon: "question",
-        text: `El estado actual del proveedor es: ${proveedor.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        html: `El estado actual del proveedor es: <strong> ${proveedor.Estado}</strong>. ¿Desea cambiarlo a ${nuevoEstado}?`,
         showCancelButton: true,
         confirmButtonText: "Sí, cambiar estado",
         cancelButtonText: "Cancelar",

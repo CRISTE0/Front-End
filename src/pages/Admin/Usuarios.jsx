@@ -401,7 +401,7 @@ export const Usuarios = () => {
       MySwal.fire({
         title: `¿Seguro de cambiar el estado del usuario ${usuario.Usuario}?`,
         icon: "question",
-        text: `El estado actual del usuario es: ${usuario.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        html: `El estado actual del usuario es: <strong> ${usuario.Estado}</strong>. ¿Desea cambiarlo a ${nuevoEstado}?`,
         showCancelButton: true,
         confirmButtonText: "Sí, cambiar estado",
         cancelButtonText: "Cancelar",
