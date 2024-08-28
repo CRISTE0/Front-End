@@ -68,7 +68,7 @@ const Pages404 = (props) => {
           </filter>
         </defs>
       </svg>
-      <h2 className="h2Page404">Page Not Found</h2>
+      <h2 className="h2Page404">Página no encontrada</h2>
       {/* 
       <script> */}
       {/* // Parallax Code var scene = document.getElementById("scene"); var
