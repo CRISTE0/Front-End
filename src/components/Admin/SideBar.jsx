@@ -104,9 +104,8 @@ export const SideBar = ({ isActive }) => {
         <div className="scrollBox">
           <div className="scrollBox-inner">
             {/* <!-- Sidebar - Brand --> */}
-            <a
+            <Link to={"/admin/Dashboard"}
               className="sidebar-brand d-flex align-items-center justify-content-center"
-              href="index.html"
             >
               <div className="sidebar-brand-icon rotate-n-15">
                 {/* <i className="fas fa-user"></i> */}
@@ -114,7 +113,7 @@ export const SideBar = ({ isActive }) => {
                   
               </div>
               {/* <div className="sidebar-brand-text mx-3">SOFT-SHIRT</div> */}
-            </a>
+            </Link>
 
             {/* Render Dashboard if user has permission */}
             {auth.permissions.includes(dashboardItem.permission) && (
