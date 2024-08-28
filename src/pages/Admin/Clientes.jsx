@@ -268,10 +268,10 @@ export const Clientes = () => {
       return "Escribe el usuario";
     }
     if (!/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ!@#$%^&*(),.?":{}|<>]+$/.test(value)) {
-      return "El nombre de usuario solo puede contener letras, números y caracteres especiales, sin espacios";
+      return "El nombre de usuario solo puede contener letras, números, sin espacios";
     }
-    if (value.length < 10 || value.length > 60) {
-      return "El usuario debe tener entre 10 y 60 caracteres";
+    if (value.length < 7 || value.length > 15) {
+      return "El usuario debe tener entre 7 y 15 caracteres";
     }
     return "";
   };

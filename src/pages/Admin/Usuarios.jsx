@@ -39,39 +39,40 @@ export const Usuarios = () => {
 
   const verificarAdmin = async () => {
     try {
-        const response = await axios.get(url);
-        const response2 = await axios.get(rolesUrl);
-        console.log(response.data);
+      const response = await axios.get(url);
+      const response2 = await axios.get(rolesUrl);
+      console.log(response.data);
 
-        // Verifica si existe un usuario con IdRol igual a 1 (Admin)
-        if (Array.isArray(response.data)) {
-            const existeAdmin = response.data.some((usuario) => usuario.IdRol === 1);
+      // Verifica si existe un usuario con IdRol igual a 1 (Admin)
+      if (Array.isArray(response.data)) {
+        const existeAdmin = response.data.some(
+          (usuario) => usuario.IdRol === 1
+        );
 
-            if (existeAdmin) {
-                // Filtra los roles para eliminar el rol con IdRol == 1
-                const rolesSinAdmin = response2.data.filter((rol) => rol.IdRol !== 1);
-                console.log('Roles sin Admin:', rolesSinAdmin);
-                
-                console.log(rolesSinAdmin);
-                
+        if (existeAdmin) {
+          // Filtra los roles para eliminar el rol con IdRol == 1
+          const rolesSinAdmin = response2.data.filter((rol) => rol.IdRol !== 1);
+          console.log("Roles sin Admin:", rolesSinAdmin);
 
-                // Actualiza el estado o realiza las operaciones necesarias
-                setRoles2(rolesSinAdmin);
-            } else {
-                console.log('No hay usuarios con el rol Admin.');
-                setRoles2(roles)
-                // Si necesitas hacer algo cuando no existe un admin
-            }
+          console.log(rolesSinAdmin);
 
-            // // Actualiza el estado basado en si existe o no el rol "Admin"
-            // setShowAdminRole(!existeAdmin);
+          // Actualiza el estado o realiza las operaciones necesarias
+          setRoles2(rolesSinAdmin);
         } else {
-            console.error("La respuesta del API no es un array:", response.data);
+          console.log("No hay usuarios con el rol Admin.");
+          setRoles2(roles);
+          // Si necesitas hacer algo cuando no existe un admin
         }
+
+        // // Actualiza el estado basado en si existe o no el rol "Admin"
+        // setShowAdminRole(!existeAdmin);
+      } else {
+        console.error("La respuesta del API no es un array:", response.data);
+      }
     } catch (error) {
-        console.error("Error al verificar el rol de Admin:", error);
+      console.error("Error al verificar el rol de Admin:", error);
     }
-};
+  };
 
   const getUsuarios = async () => {
     try {
@@ -246,16 +247,22 @@ export const Usuarios = () => {
       return "Escribe el usuario";
     }
 
-    // Expresión regular ajustada para permitir solo letras, tildes y 'ñ' con un solo espacio entre palabras
-    if (
-      !/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value.trim())
-    ) {
-      return "El usuario solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
+    if (value.length < 7 || value.length > 15) {
+      return "El usuario debe tener entre 7 y 15 caracteres";
     }
 
-    // Verificar si hay espacios al inicio o al final
-    if (value !== value.trim()) {
-      return "El usuario no puede contener espacios al inicio ni al final";
+        // Verificar si hay espacios al inicio o al final
+        if (value !== value.trim()) {
+          return "El usuario no puede contener espacios al inicio ni al final";
+        }
+
+    // Expresión regular ajustada para permitir solo letras, números, tildes y 'ñ' con un solo espacio entre palabras
+    if (
+      !/^[A-Za-zñÑáéíóúÁÉÍÓÚ0-9]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ0-9]+)*$/.test(
+        value.trim()
+      )
+    ) {
+      return "El usuario solo puede contener letras, números, tildes y la letra 'ñ', con un solo espacio entre palabras";
     }
 
     return "";
@@ -557,10 +564,10 @@ export const Usuarios = () => {
                     >
                       <option value="">Selecciona un rol</option>
                       {roles2.map((rol) => (
-                          <option key={rol.IdRol} value={rol.IdRol}>
-                            {rol.NombreRol}
-                          </option>
-                        ))}
+                        <option key={rol.IdRol} value={rol.IdRol}>
+                          {rol.NombreRol}
+                        </option>
+                      ))}
                     </select>
                     {renderErrorMessage(errors.rol)}
                   </div>
