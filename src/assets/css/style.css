@@ -425,6 +425,14 @@ input:checked + .slider-permiso:before {
   background: #05cea4 !important;
 }
 
+.custom-control-input:checked ~ .custom-control-label::before {
+  color: #fff;
+  border-color: #169b6a;
+  background-color: #1cc88a;
+}
+
+
+
 @media (max-width: 575.98px) {
   .btn-dark {
     width: 40px; /* Ancho fijo para hacerlo cuadrado */
