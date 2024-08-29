@@ -372,7 +372,6 @@ export const Configuracion = () => {
                     {showErrors && errors.nombreRol && (
                       <div className="invalid-feedback">{errors.nombreRol}</div>
                     )}
-                    <small>Ingresa por favor el nombre del rol</small>
                   </div>
                 </form>
 

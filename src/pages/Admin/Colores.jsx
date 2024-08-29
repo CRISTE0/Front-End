@@ -392,6 +392,7 @@ export const Colores = () => {
               data-target="#modalColores"
               style={{
                 width: "140px",
+                height: "40px"
               }}
             >
               <i className="fas fa-pencil-alt"></i>

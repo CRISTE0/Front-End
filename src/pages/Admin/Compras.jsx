@@ -867,9 +867,6 @@ export const Compras = () => {
                       onChange={handleChange}
                       max={new Date().toISOString().split("T")[0]}
                     />
-                    <small>
-                      Selecciona una fecha dentro de los últimos 8 días.
-                    </small>
                     {renderErrorMessage(errors.Fecha)}
                   </div>
                 </div>

@@ -621,9 +621,6 @@ export const Proveedores = () => {
                       <option value="CE">Cédula de Extranjería</option>
                       <option value="NIT">NIT</option>
                     </select>
-                    <small className="form-text text-muted">
-                      Ingrese un tipo de Documento
-                    </small>
                     {TipoDocumento === "" && (
                       <div
                         className="invalid-feedback"
@@ -650,10 +647,6 @@ export const Proveedores = () => {
                       onChange={handleChangeNroDocumento}
                     />
                     {renderErrorMessage(errors.nroDocumento)}
-                    <small className="form-text text-muted">
-                      Ingrese un documento válido (entre 6 y 10 dígitos
-                      numéricos).
-                    </small>
                   </div>
                   <div className="form-group col-md-6">
                     <label htmlFor="nombreProveedor">
@@ -671,13 +664,6 @@ export const Proveedores = () => {
                       onChange={handleChangeNombreApellido}
                     />
                     {renderErrorMessage(errors.nombreApellido)}
-                    <small className="form-text text-muted">
-                      Ingrese un{" "}
-                      {TipoDocumento === "NIT"
-                        ? "nombre de la empresa"
-                        : "nombre y apellido"}{" "}
-                      válido.
-                    </small>
                   </div>
                   <div className="form-group col-md-6">
                     <label htmlFor="contactoProveedor">Contacto:</label>
@@ -695,13 +681,6 @@ export const Proveedores = () => {
                       }
                     />
                     {renderErrorMessage(errors.contacto)}
-                    <small className="form-text text-muted">
-                      Ingrese{" "}
-                      {TipoDocumento === "NIT"
-                        ? "nombre y apellido"
-                        : "un contacto"}{" "}
-                      válido.
-                    </small>
                   </div>
                 </div>
                 <div className="form-row">
@@ -719,9 +698,6 @@ export const Proveedores = () => {
                       onChange={handleChangeTelefono}
                     />
                     {renderErrorMessage(errors.telefono)}
-                    <small className="form-text text-muted">
-                      Ingrese un número de teléfono válido (10 dígitos).
-                    </small>
                   </div>
                   <div className="form-group col-md-6">
                     <label htmlFor="direccionCliente">Dirección:</label>

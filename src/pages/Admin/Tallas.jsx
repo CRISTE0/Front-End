@@ -408,6 +408,7 @@ export const Tallas = () => {
               data-target="#modalTallas"
               style={{
                 width: "135px",
+                height: "40px"
               }}
             >
               <i className="fas fa-pencil-alt"></i>
