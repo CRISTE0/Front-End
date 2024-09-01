@@ -173,26 +173,28 @@ export const Login = () => {
 
           <div className="mb-3">
             <label htmlFor="password" className="form-label">Contraseña</label>
-            <div className="input-group">
+            <div>
               <input
                 type={showPassword ? "text" : "password"}
-                className={`form-control ${errors.contrasenia ? "is-invalid" : ""}`}
+                className="form-control"
                 name="password"
                 id="password"
                 placeholder="Contraseña"
                 value={Contrasenia}
                 onChange={handleChangeContrasenia}
-              />
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  borderColor: errors.contrasenia ? 'red' : '',
+                  boxShadow: errors.contrasenia ? 'none' : '',
+                }}
               >
-                {showPassword ? (
-                  <i className="fas fa-eye-slash"></i>
-                ) : (
-                  <i className="fas fa-eye"></i>
-                )}
+              </input>
+              <button
+                type="button" //Todo esto es boostrap?
+                className="border-0"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ height: '100%', display: 'flex', alignItems: 'center',  transform: 'translate(310px, -26px)', background: 'transparent' }}
+              >
+                <i className={showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'}></i>
               </button>
             </div>
             {renderErrorMessage(errors.contrasenia)}
