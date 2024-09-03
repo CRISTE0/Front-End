@@ -131,7 +131,13 @@ export const Usuarios = () => {
     }
 
     // Mostrar el modal
-    const modal = new bootstrap.Modal(document.getElementById("modalUsuarios"));
+    const modal = new bootstrap.Modal(
+      document.getElementById("modalUsuarios"),
+      {
+        backdrop: "static",
+        keyboard: false,
+      }
+    );
     modal.show();
   };
 
@@ -143,14 +149,14 @@ export const Usuarios = () => {
       contrasenia: "",
       rol: "",
     });
-
+  
     const cleanedUsuario = Usuario.trim();
     const cleanedCorreo = Correo.trim();
     const cleanedContrasenia = Contrasenia.trim();
-
+  
     // Variable para rastrear si hay errores
     let hayErrores = false;
-
+  
     if (operation === 1 || operation === 2) {
       // Validar campos requeridos para crear o editar usuario completo
       if (!cleanedUsuario) {
@@ -175,7 +181,7 @@ export const Usuarios = () => {
         hayErrores = true;
       }
     }
-
+  
     if (operation === 1 && !cleanedContrasenia) {
       // Validar contraseña solo en creación de usuario
       setErrors((prevState) => ({
@@ -184,7 +190,7 @@ export const Usuarios = () => {
       }));
       hayErrores = true;
     }
-
+  
     // Validar errores específicos para cambiar contraseña
     const contraseniaError = validateContrasenia(cleanedContrasenia);
     if (contraseniaError && operation === 3) {
@@ -195,7 +201,7 @@ export const Usuarios = () => {
       }));
       hayErrores = true;
     }
-
+  
     // Mostrar alerta si hay errores
     if (hayErrores) {
       show_alerta({
@@ -204,34 +210,52 @@ export const Usuarios = () => {
       });
       return; // Salir de la función si hay errores
     }
-
+  
     // Si no hay errores, proceder con la solicitud
-    if (operation === 1) {
-      // Crear Usuario
-      await enviarSolicitud("POST", {
-        Usuario: cleanedUsuario,
-        Correo: cleanedCorreo,
-        Contrasenia: cleanedContrasenia,
-        Estado: "Activo",
-        IdRol: IdRol,
-      });
-    } else if (operation === 2) {
-      // Actualizar Usuario
-      await enviarSolicitud("PUT", {
-        IdUsuario,
-        Usuario: cleanedUsuario,
-        Correo: cleanedCorreo,
-        Contrasenia: cleanedContrasenia, // Incluso si no cambia, enviar la contraseña
-        IdRol: IdRol,
-      });
-    } else if (operation === 3) {
-      // Cambiar Contraseña
-      await enviarSolicitud("PUT", {
-        IdUsuario,
-        Contrasenia: cleanedContrasenia,
-      });
+    try {
+      if (operation === 1) {
+        // Crear Usuario
+        await enviarSolicitud("POST", {
+          Usuario: cleanedUsuario,
+          Correo: cleanedCorreo,
+          Contrasenia: cleanedContrasenia,
+          Estado: "Activo",
+          IdRol: IdRol,
+        });
+      } else if (operation === 2) {
+        // Actualizar Usuario
+        await enviarSolicitud("PUT", {
+          IdUsuario,
+          Usuario: cleanedUsuario,
+          Correo: cleanedCorreo,
+          Contrasenia: cleanedContrasenia, // Incluso si no cambia, enviar la contraseña
+          IdRol: IdRol,
+        });
+      } else if (operation === 3) {
+        // Cambiar Contraseña
+        await enviarSolicitud("PUT", {
+          IdUsuario,
+          Contrasenia: cleanedContrasenia,
+        });
+      }
+  
+      // Cerrar el modal después de una solicitud exitosa
+      const modalElement = document.getElementById("modalUsuarios");
+      const modal = new bootstrap.Modal(modalElement);
+      modal.hide();
+    } catch (error) {
+      // Manejo de errores
+      if (error.response) {
+        show_alerta({ message: error.response.data.message, type: "error" });
+      } else if (error.request) {
+        show_alerta({ message: "Error en la solicitud", type: "error" });
+      } else {
+        show_alerta({ message: "Error desconocido", type: "error" });
+      }
+      console.error("Error en la solicitud:", error);
     }
   };
+  
 
   const handleChangeRol = (e) => {
     setIdRol(e.target.value);
@@ -251,10 +275,10 @@ export const Usuarios = () => {
       return "El usuario debe tener entre 7 y 15 caracteres";
     }
 
-        // Verificar si hay espacios al inicio o al final
-        if (value !== value.trim()) {
-          return "El usuario no puede contener espacios al inicio ni al final";
-        }
+    // Verificar si hay espacios al inicio o al final
+    if (value !== value.trim()) {
+      return "El usuario no puede contener espacios al inicio ni al final";
+    }
 
     // Expresión regular ajustada para permitir solo letras, números, tildes y 'ñ' con un solo espacio entre palabras
     if (
@@ -554,21 +578,31 @@ export const Usuarios = () => {
 
                   <div className="form-group col-md-6">
                     <label htmlFor="rol">Rol:</label>
-                    <select
-                      id="rol"
-                      className={`form-control ${
-                        errors.rol ? "is-invalid" : ""
-                      }`}
-                      value={IdRol}
-                      onChange={handleChangeRol}
-                    >
-                      <option value="">Selecciona un rol</option>
-                      {roles2.map((rol) => (
-                        <option key={rol.IdRol} value={rol.IdRol}>
-                          {rol.NombreRol}
-                        </option>
-                      ))}
-                    </select>
+                    {operation === 1 ? (
+                      <select
+                        id="rol"
+                        className={`form-control ${
+                          errors.rol ? "is-invalid" : ""
+                        }`}
+                        value={IdRol}
+                        onChange={handleChangeRol}
+                      >
+                        <option value="">Selecciona un rol</option>
+                        {roles2.map((rol) => (
+                          <option key={rol.IdRol} value={rol.IdRol}>
+                            {rol.NombreRol}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        id="rol"
+                        className="form-control"
+                        value={getRolName(IdRol)} // Mostrar el nombre del rol basado en el IdRol
+                        readOnly
+                      />
+                    )}
                     {renderErrorMessage(errors.rol)}
                   </div>
                 </div>

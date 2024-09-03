@@ -131,8 +131,8 @@ export const Clientes = () => {
     const telefonoError = validateTelefono(Telefono);
     const direccionError = validateDireccion(Direccion);
     const correoError = validateCorreo(Correo);
-    const contraseniaError = validateContrasenia(Contrasenia);
-
+    const contraseniaError = operation === 1 ? validateContrasenia(Contrasenia) : ""; // Solo valida la contraseña al crear
+  
     setErrors({
       nroDocumento: nroDocumentoError,
       nombreApellido: nombreApellidoError,
@@ -142,7 +142,7 @@ export const Clientes = () => {
       correo: correoError,
       contrasenia: contraseniaError,
     });
-
+  
     return (
       !nroDocumentoError &&
       !nombreApellidoError &&
@@ -153,6 +153,8 @@ export const Clientes = () => {
       !contraseniaError
     );
   };
+  
+  
 
   const guardarCliente = async () => {
     // Limpieza de los campos
@@ -767,7 +769,7 @@ export const Clientes = () => {
                   {operation === 1 && (
                     <div className="form-group col-md-6">
                       <label htmlFor="contraseniaCliente">Contraseña :</label>
-                      <div className="d-flex align-items-center">
+                      <div className="input-group">
                         <input
                           type={showPassword ? "text" : "password"}
                           id="contraseniaNuevo"
@@ -789,8 +791,9 @@ export const Clientes = () => {
                             <i className="fas fa-eye"></i>
                           )}
                         </button>
+                        {renderErrorMessage(errors.contrasenia)}
+
                       </div>
-                      {renderErrorMessage(errors.contrasenia)}
                     </div>
                   )}
                 </div>

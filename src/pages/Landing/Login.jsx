@@ -13,7 +13,6 @@ export const Login = () => {
   const url = "http://localhost:3000/api/authWeb/login";
   const { login } = useAuth();
   const navigate = useNavigate();
-  const { auth } = useAuth();
 
   const [errors, setErrors] = useState({
     usuario: "",
@@ -173,31 +172,29 @@ export const Login = () => {
 
           <div className="mb-3">
             <label htmlFor="password" className="form-label">Contraseña</label>
-            <div>
+            <div className="input-group">
               <input
                 type={showPassword ? "text" : "password"}
-                className="form-control"
+                className={`form-control ${errors.contrasenia ? "is-invalid" : ""}`}
                 name="password"
                 id="password"
                 placeholder="Contraseña"
                 value={Contrasenia}
                 onChange={handleChangeContrasenia}
-                style={{
-                  borderColor: errors.contrasenia ? 'red' : '',
-                  boxShadow: errors.contrasenia ? 'none' : '',
-                }}
-              >
-              </input>
+              />
               <button
-                type="button" //Todo esto es boostrap?
-                className="border-0"
+                type="button"
+                className="btn btn-outline-secondary ml-2"
                 onClick={() => setShowPassword(!showPassword)}
-                style={{ height: '100%', display: 'flex', alignItems: 'center',  transform: 'translate(310px, -26px)', background: 'transparent' }}
               >
-                <i className={showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'}></i>
+               {showPassword ? (
+                            <i className="fas fa-eye-slash"></i>
+                          ) : (
+                            <i className="fas fa-eye"></i>
+                          )} 
               </button>
-            </div>
             {renderErrorMessage(errors.contrasenia)}
+            </div>
           </div>
 
           <div className="d-grid text-center my-3">
