@@ -618,7 +618,7 @@ export const Register = () => {
                       <label htmlFor="contrasenia" className="form-label">
                         Contraseña
                       </label>
-                      <div className="d-flex align-items-center">
+                      <div className="input-group">
                         <input
                           type={showPassword ? "text" : "password"}
                           className={`form-control ${
@@ -642,8 +642,8 @@ export const Register = () => {
                             <i className="fas fa-eye"></i>
                           )}
                         </button>
+                        {renderErrorMessage(errors.contrasenia)}
                       </div>
-                      {renderErrorMessage(errors.contrasenia)}
                     </div>
                     {/* Fin Contraseña */}
 
@@ -652,7 +652,7 @@ export const Register = () => {
                       <label htmlFor="valcontrasenia" className="form-label">
                         Validar Contraseña
                       </label>
-                      <div className="d-flex align-items-center">
+                      <div className="input-group">
                         <input
                           type={showValPassword ? "text" : "password"}
                           className={`form-control ${
@@ -676,8 +676,8 @@ export const Register = () => {
                             <i className="fas fa-eye"></i>
                           )}
                         </button>
+                        {renderErrorMessage(errors.valcontrasenia)}
                       </div>
-                      {renderErrorMessage(errors.valcontrasenia)}
                     </div>
                     {/* Fin Validar Contraseña */}
                   </div>

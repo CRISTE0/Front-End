@@ -13,7 +13,6 @@ export const Login = () => {
   const url = "http://localhost:3000/api/authWeb/login";
   const { login } = useAuth();
   const navigate = useNavigate();
-  const { auth } = useAuth();
 
   const [errors, setErrors] = useState({
     usuario: "",
@@ -185,17 +184,17 @@ export const Login = () => {
               />
               <button
                 type="button"
-                className="btn btn-outline-secondary"
+                className="btn btn-outline-secondary ml-2"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? (
-                  <i className="fas fa-eye-slash"></i>
-                ) : (
-                  <i className="fas fa-eye"></i>
-                )}
+               {showPassword ? (
+                            <i className="fas fa-eye-slash"></i>
+                          ) : (
+                            <i className="fas fa-eye"></i>
+                          )} 
               </button>
-            </div>
             {renderErrorMessage(errors.contrasenia)}
+            </div>
           </div>
 
           <div className="d-grid text-center my-3">
