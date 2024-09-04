@@ -761,9 +761,9 @@ export const Proveedores = () => {
       {/* Botón para abrir el modal de crear proveedor */}
       <div className="container-fluid">
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-3 text-center text-dark">
+          {/* <h1 className="h3 mb-3 text-center text-dark">
             Gestión de Proveedores
-          </h1>
+          </h1> */}
         </div>
 
         {/* <!-- Tabla Proveedores --> */}

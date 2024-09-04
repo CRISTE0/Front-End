@@ -1515,7 +1515,7 @@ export const Pedidos = () => {
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-3 text-center text-dark">Gestión de Pedidos</h1>
+          {/* <h1 className="h3 mb-3 text-center text-dark">Gestión de Pedidos</h1> */}
         </div>
 
         {/* <!-- Tabla de Pedidos --> */}

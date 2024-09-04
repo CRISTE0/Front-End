@@ -826,7 +826,7 @@ export const Clientes = () => {
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-3 text-center text-dark">Gestión de Clientes</h1>
+          {/* <h1 className="h3 mb-3 text-center text-dark">Gestión de Clientes</h1> */}
         </div>
 
         {/* <!-- Tabla de Clientes --> */}
