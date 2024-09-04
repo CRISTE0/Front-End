@@ -1132,7 +1132,7 @@ export const Disenios = () => {
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-3 text-center text-dark">Gestión de Diseños</h1>
+          {/* <h1 className="h3 mb-3 text-center text-dark">Gestión de Diseños</h1> */}
         </div>
 
 
@@ -1156,7 +1156,7 @@ export const Disenios = () => {
               }}
             >
               <i className="fas fa-pencil-alt"></i>
-              <span className="d-none d-sm-inline ml-2"s>Crear Diseño</span>
+              <span className="d-none d-sm-inline ml-2">Crear Diseño</span>
             </button>
           </div>
           <div className="card-body">

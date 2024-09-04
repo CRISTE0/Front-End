@@ -3,9 +3,15 @@ import { AdminFooter } from "./AdminFooter";
 import { Link } from "react-router-dom";
 import { SideBar } from "./SideBar";
 import { useAuth } from "../../context/AuthProvider";
+import { useLocation } from "react-router-dom";
 
 export const AdminHeader = ({ children }) => {
+  const location = useLocation();
+
   const [isActive, setIsActive] = useState(false);
+  // const [TituloDinamico, setTituloDinamico] = useState(null);
+
+  let TituloDinamico;
 
   const changeClass = () => {
     setIsActive(!isActive);
@@ -14,6 +20,56 @@ export const AdminHeader = ({ children }) => {
   const { logout } = useAuth();
 
   const { auth } = useAuth();
+
+
+  switch (location.pathname) {
+    case '/admin/Dashboard':
+      TituloDinamico = "Dashboard";
+      break;
+    case '/admin/Configuracion':
+      TituloDinamico = "Gestión de configuración";
+      break;
+    case '/admin/Proveedores':
+      TituloDinamico = "Gestión de proveedores";
+      break;
+    case '/admin/Usuarios':
+      TituloDinamico = "Gestión de usuarios";
+      break;
+    case '/admin/Insumos':
+      TituloDinamico = "Gestión de insumos";
+      break;
+    case '/admin/Colores':
+      TituloDinamico = "Gestión de colores";
+      break;
+    case '/admin/Tallas':
+      TituloDinamico = "Gestión de tallas";
+      break;
+    case '/admin/Compras':
+      TituloDinamico = "Gestión de compras";
+      break;
+
+    case '/admin/Productos':
+      TituloDinamico = "Gestión de productos";
+      break;
+    
+    case '/admin/Disenios':
+      TituloDinamico = "Gestión de diseños";
+      break;
+    
+    case '/admin/Clientes':
+      TituloDinamico = "Gestión de clientes";
+      break;
+
+    case '/admin/Ventas':
+      TituloDinamico = "Gestión de ventas";
+      break;
+    
+    case '/admin/Pedidos':
+      TituloDinamico = "Gestión de pedidos";
+      break;
+  
+    }
+
 
   return (
     <>
@@ -33,6 +89,10 @@ export const AdminHeader = ({ children }) => {
               {/* <!-- Topbar --> */}
               <nav className="navbar navbar-expand navbar-light bg-white topbar mb-1 static-top shadow">
                 {/* <!-- Sidebar Toggle (Topbar) --> */}
+                
+                <h1 className="text-dark">{TituloDinamico}</h1>
+
+
                 <button
                   id="sidebarToggleTop"
                   className="btn btn-link d-md-none rounded-circle mr-3"
@@ -70,6 +130,7 @@ export const AdminHeader = ({ children }) => {
                         alt="User"
                       /> */}
                     </a>
+
                     {/* <!-- Dropdown - User Information --> */}
                     <div
                       className="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -98,11 +159,6 @@ export const AdminHeader = ({ children }) => {
                         </>
                       )}
 
-                      {/* <a className="dropdown-item" href="#">
-                        <i className="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                        Activity Log
-                      </a>
-                       */}
 
                       <div className="dropdown-divider"></div>
                       <Link className="dropdown-item" onClick={logout}>
@@ -114,6 +170,7 @@ export const AdminHeader = ({ children }) => {
                 </ul>
               </nav>
               {/* <!-- End of Topbar --> */}
+
               {children}
               {/* {<AdminFooter />} */}
             </div>

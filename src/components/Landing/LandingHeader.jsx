@@ -32,15 +32,18 @@ export const LandingHeader = () => {
   useEffect(() => {
     const obtenerDatosCarrito = async () => {
       try {
-        const sumaCantidades = await fetchCartItemsNav();
+        const sumaCantidades = await fetchCartItemsNav(auth);
         setCantidadTotal(sumaCantidades);
       } catch (error) {
         console.error("Error fetching cart items:", error);
       }
     };
 
-    obtenerDatosCarrito();
-  }, [renderTrigger]); // renderTrigger como dependencia
+    if (isClient) {
+      obtenerDatosCarrito();
+    }
+
+  }, [isClient,renderTrigger]); // renderTrigger como dependencia
 
 
   return (

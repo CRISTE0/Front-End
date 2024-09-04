@@ -30,18 +30,6 @@ function generateIdImageReference  () {
 }
 
 
-// export async function subirImageDesign(fileD)  {
-//   if (!fileD) {
-//     return ("No aplica");
-//   }
-//   const storageRef= ref(storage,`Disenios/${v4()}`)
-//   await uploadBytes(storageRef,fileD)
-//   const url = await getDownloadURL(storageRef)
-//   console.log(url);
-//   return url;
-// }
-
-
 // sirve para el admin(aunque se debe cambiar la otra func)
 export async function subirImageDesign(fileDesign)  {
 
@@ -65,6 +53,20 @@ export async function subirImageReference(fileReference)  {
 
   // const blob = await fetch(fileReference).then((res) => res.blob());
   await uploadBytes(storageRef,fileReference)
+  const url = await getDownloadURL(storageRef)
+  console.log(url);
+  return [url,idImagenReferencia];
+
+}
+
+export async function subirImageReferenceDiseniador(fileReference)  {
+  const idImagenReferencia = v4();
+
+  const storageRef= ref(storage,`Referencias/${idImagenReferencia}`)
+
+  const blob = await fetch(fileReference).then((res) => res.blob());
+  
+  await uploadBytes(storageRef,blob)
   const url = await getDownloadURL(storageRef)
   console.log(url);
   return [url,idImagenReferencia];

@@ -519,6 +519,8 @@ export const ProductoSolo = () => {
                       </div>
                     </section>
 
+                    {auth.idCliente && (
+
                     <div className="d-flex justify-content-around m-4">
                       <div className="">
                         <button
@@ -542,6 +544,8 @@ export const ProductoSolo = () => {
                         </div>
                       )}
                     </div>
+                      
+                    )}
                   </div>
                 </div>
               </div>
