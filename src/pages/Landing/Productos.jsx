@@ -16,6 +16,8 @@ export const Productos = () => {
 
   const [Productos, setProductos] = useState([]);
 
+  const {auth} = useAuth();
+
   const { triggerRender } = useAuth();
   
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -136,6 +138,7 @@ export const Productos = () => {
                           </li>
 
                           {/* Agregar el producto al carrito */}
+                          {auth.idCliente &&(
                           <li>
                             <a
                               className="btn btn-success text-white mt-2"
@@ -144,6 +147,8 @@ export const Productos = () => {
                               <i className="fas fa-cart-plus"></i>
                             </a>
                           </li>
+
+                          )}
                         </ul>
                       </div>
                     </div>

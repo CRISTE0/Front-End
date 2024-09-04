@@ -76,3 +76,10 @@
 .inputfileComprobante-2 + label:hover {
     color: #35805a;
 }
+
+
+/* estilo carrito  */
+
+#botonRealizarPedido:hover{
+  background-color: #4a8e5b !important;
+}

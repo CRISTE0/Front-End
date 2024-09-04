@@ -4,7 +4,10 @@ import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
 import { useAuth } from "../../context/AuthProvider";
 
+
+
 import axios from "axios";
+import { useNavigate } from "react-router";
 
 export const Carrito = () => {
   const { auth } = useAuth();
@@ -12,10 +15,14 @@ export const Carrito = () => {
   const [inputValues, setInputValues] = useState({});
   const { triggerRender } = useAuth();
   const url = "http://localhost:3000/api/pedidos";
+  const navigate = useNavigate();
+
+  const [showMessage,setShowMessage] = useState(null);
+
 
   console.log(auth);
 
-  // validar si no se estropea sin el filtro
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [cartItems, setCartItems] = useState([]);
   const [Cliente, setCliente] = useState("");
@@ -50,9 +57,16 @@ export const Carrito = () => {
 
     // Filtra los elementos que no sean null y que tengan Publicacion como 'Activo'
     const activeItems = itemDetails.filter(
-      (item) => item && item.Publicacion === "Activo"
+      (item) => item && item.Publicacion == "Activo" ||
+      (item.Publicacion == "Inactivo" && item.IdUsuario == auth.idCliente)
     );
     setCartItems(activeItems);
+
+    if (activeItems.length == 0) {
+      setShowMessage(true)
+    }else{
+      setShowMessage(false)
+    }
 
     console.log(itemDetails);
 
@@ -304,6 +318,14 @@ export const Carrito = () => {
 
   const enviarSolicitud = async () => {
     try {
+
+      if (cartItems == 0) {
+        show_alerta("Agrega al menos un producto al carrito","warning")
+        return;
+      }
+
+      setIsSubmitting(true);
+
       let parametros = {
         IdCliente: auth.idCliente,
         Detalles: obtenerDetalles(cartItems),
@@ -319,7 +341,6 @@ export const Carrito = () => {
       console.log(parametros);
       console.log(obtenerFechaActual());
 
-      // return;
 
       const respuesta = await axios({
         method: "POST",
@@ -331,9 +352,10 @@ export const Carrito = () => {
 
       show_alerta(respuesta.data.message, "success");
 
-      // document.getElementById("btnCerrar").click();
-      // getPedidos();
-      // getProductos();
+
+      localStorage.removeItem("cart");
+      navigate("/admin/Pedidos");
+
     } catch (error) {
       console.log(error);
 
@@ -344,6 +366,8 @@ export const Carrito = () => {
       } else {
         show_alerta("Error desconocido", "error");
       }
+    }finally{
+      setIsSubmitting(false);
     }
   };
 
@@ -387,7 +411,7 @@ export const Carrito = () => {
                       {/* Eliminar producto del carrito */}
                       {item.CantidadSeleccionada == 1 && (
                         <button
-                          className="m-3"
+                          className="m-"
                           onClick={() =>
                             disminuirCantidad(
                               item.IdProducto,
@@ -407,7 +431,7 @@ export const Carrito = () => {
                       {/* Disminuir cantidad del producto */}
                       {item.CantidadSeleccionada > 1 && (
                         <button
-                          className="m-3"
+                          className="m-"
                           onClick={() =>
                             disminuirCantidad(
                               item.IdProducto,
@@ -464,6 +488,25 @@ export const Carrito = () => {
                 </div>
               </div>
             ))}
+
+            {showMessage &&(
+              <div className="card mb-3">
+              <div className="card-body">
+                <div className="d-flex justify-content-center">
+                    
+                    <div className="mx-3">
+                      {/* nombre producto */}
+                      <h4 className="text-dark">Aún no haz agregado productos al carrito :)</h4>
+
+                      {/* precio producto */}
+                      <p className="small mb-0">
+                        {/* {formatCurrency(item.ValorVenta)} */}
+                      </p>
+                    </div>
+                </div>
+              </div>
+            </div>
+            )}
           </div>
 
           {/* informacion cliente */}
@@ -539,11 +582,6 @@ export const Carrito = () => {
                   <p className="mb-2">{formatCurrency(totalPedido)}</p>
                 </div>
 
-                {/* <div className="d-flex justify-content-between">
-                  <p className="mb-2">Shipping</p>
-                  <p className="mb-2">$20.00</p>
-                </div> */}
-
                 <div className="d-flex justify-content-between mb-4">
                   <p className="mb-2">Total</p>
                   <p className="mb-2">{formatCurrency(totalPedido)}</p>
@@ -551,8 +589,8 @@ export const Carrito = () => {
 
                 <button
                   type="button"
-                  data-mdb-button-init
-                  data-mdb-ripple-init
+                  id="botonRealizarPedido"
+                  disabled={isSubmitting}
                   className="btn btn-success btn-block btn-lg"
                 >
                   <div

@@ -7,37 +7,53 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
 import { useAuth } from "../../context/AuthProvider";
 
-
 export const Catalogo = () => {
   const url = "http://localhost:3000/api/productos";
-  const {auth} = useAuth();
+  const { auth } = useAuth();
 
   const [productosAdmin, setProductosAdmin] = useState([]);
   const [productosCliente, setProductosCliente] = useState([]);
   const [Disenios, setDisenios] = useState([]);
+  const [DiseniosCliente, setDiseniosCliente] = useState([]);
   const [Insumos, setInsumos] = useState([]);
+  const [InsumosTotales, setInsumosTotales] = useState([]);
   const [Tallas, setTallas] = useState([]);
+  const [Colores, setColores] = useState([]);
   const [TallaDetalle, setTallaDetalle] = useState([]);
   const [ColorDetalle, setColorDetalle] = useState([]);
   const [IdDisenio, setIdDisenio] = useState("");
   const [IdProducto, setIdProducto] = useState("");
   const [IdInsumo, setIdInsumo] = useState("");
 
-  const [TallaCliente, setTallaCliente] = useState([]);
 
-  const [ColorCliente, setColorCliente] = useState([]);
+  const [InsumosCliente, setInsumosCliente] = useState([]);
+
+  const [IdTallaCliente, setIdTallaCliente] = useState("");
+  const [IdColorCliente, setIdColorCliente] = useState("");
+
+
+  const [TallasCliente, setTallasCliente] = useState([]);
+  const [ColoresCliente, setColoresCliente] = useState([]);
+
 
   const [Referencia, setReferencia] = useState("");
   const [Cantidad, setCantidad] = useState("");
+  const [CantidadAnterior, setCantidadAnterior] = useState("");
   const [ValorVenta, setValorVenta] = useState("");
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
 
+  const [ShowBotonAgregarCarrito, setTShowBotonAgregarCarrito] = useState(null);
+
+
   const [errors, setErrors] = useState({
     IdDisenio: 0,
     IdInsumo: 0,
+    IdColorCliente: 0,
+    IdTallaCliente: 0,
     Referencia: "",
     Cantidad: 0,
+    CantidadCliente: 0,
     ValorVenta: 0,
   });
   const [searchTerm, setSearchTerm] = useState("");
@@ -58,14 +74,23 @@ export const Catalogo = () => {
   useEffect(() => {
     getProductosAdmin();
     getDisenios();
-    getInsumos(); // Obtener los Disenios cuando el componente se monta
+    
+    getInsumos(); 
     getTallas();
+    getColores();
+
+    console.log(auth.idCliente);
+
+    // obtenerDiseniosCliente();
+
+    // ObtenerColoresTallasCliente();
+    
   }, []);
 
   const getProductosAdmin = async () => {
     const respuesta = await axios.get(url);
 
-    productosTotales=respuesta.data;
+    productosTotales = respuesta.data;
 
     setProductosAdmin(respuesta.data);
     console.log(respuesta.data);
@@ -73,15 +98,16 @@ export const Catalogo = () => {
     getProductosCliente();
   };
 
-  const getProductosCliente = async  () => {
+  const getProductosCliente = async () => {
     try {
-      const productosFiltrados = productosTotales.filter(producto => producto.IdUsuario == auth.idCliente);
+      const productosFiltrados = productosTotales.filter(
+        (producto) => producto.IdUsuario == auth.idCliente
+      );
 
       // console.log(pedidosTotales);
       console.log(productosFiltrados);
 
       setProductosCliente(productosFiltrados);
-
     } catch (error) {
       console.log(error);
 
@@ -97,25 +123,128 @@ export const Catalogo = () => {
     console.log(DiseniosActivos);
 
     setDisenios(DiseniosActivos);
+
+    obtenerDiseniosCliente(DiseniosActivos);
+
   };
 
   const getInsumos = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/insumos");
     const InsumosActivas = respuesta.data.filter(
-      (insumo) => insumo.Estado === "Activo"
+      (insumo) => insumo.Estado == "Activo"
     );
+
+    if (auth.idCliente) {
+      obtenerInsumosCliente(InsumosActivas)
+    }
+
+
     setInsumos(InsumosActivas);
+    setInsumosTotales(respuesta.data);
   };
 
   const getTallas = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/tallas");
     const TallasActivas = respuesta.data.filter(
-      (talla) => talla.Estado === "Activo"
+      (talla) => talla.Estado === "Activo" 
     );
     console.log(TallasActivas);
 
     setTallas(TallasActivas);
   };
+
+
+  const getColores = async () => {
+    const respuesta = await axios.get("http://localhost:3000/api/colores");
+    const ColoresActivas = respuesta.data.filter(
+      (color) => color.Estado == "Activo"
+    );
+    console.log(ColoresActivas);
+
+    setColores(ColoresActivas);
+  };
+
+    // Obtener los insumos que seran usados por el cliente, estos estan activos y con cantidad
+   const obtenerInsumosCliente = (insumos) => {
+    try {
+  
+      // Filtrar insumos activos con cantidad mayor a 0
+      const insumosFiltrados = insumos.filter(insumo => 
+        insumo.Estado == "Activo" && insumo.Cantidad >= 3
+      );
+
+      console.log(insumosFiltrados);
+      
+  
+      setInsumosCliente(insumosFiltrados);
+    } catch (error) {
+      console.error("Error filtrando insumos:", error);
+    }
+  }
+
+  const obtenerDiseniosCliente = (disenios) =>{
+    
+    const disenioFiltradosCliente = disenios.filter(disenio => disenio.IdUsuario == auth.idCliente);
+      
+    console.log(disenioFiltradosCliente);
+
+    setDiseniosCliente(disenioFiltradosCliente);
+  }
+
+  const ObtenerColoresTallasCliente = async () => {
+    const coloresUnicos = [];
+    const tallasUnicas = [];
+
+    // Filtrar colores y tallas que esten en los insumos para el select del cliente
+    InsumosCliente.forEach(insumo => {
+      if (!coloresUnicos.includes(insumo.IdColor)) {
+        coloresUnicos.push(insumo.IdColor);
+      }
+      if (!tallasUnicas.includes(insumo.IdTalla)) {
+        tallasUnicas.push(insumo.IdTalla);
+      }
+    });
+
+    // Filtrar los colores para el select del cliente
+    const coloresFiltrados = Colores.filter(color => coloresUnicos.includes(color.IdColor));
+
+    
+    // Filtrar las tallas para el select del cliente
+    const tallasFiltrados = Tallas.filter(talla => tallasUnicas.includes(talla.IdTalla));
+
+    console.log(coloresFiltrados);
+    console.log(tallasFiltrados);
+    
+
+
+    setColoresCliente(coloresFiltrados);
+    setTallasCliente(tallasFiltrados);
+  };
+
+  //   Agregar producto del carrito
+  const AgregarProductoCarrito = (ProductoS) => {
+
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    // Si el producto no existe, agrégalo con una cantidad inicial de 1
+    cart.push({ IdProd: ProductoS.IdProducto, CantidadSeleccionada: 1 });
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    show_alerta({"message":"Producto agregado al carrito correctamente", "type":"success"})
+    console.log(JSON.parse(localStorage.getItem("cart")));
+
+    getProductosAdmin();
+
+
+  };
+
+  const validarProductoClienteCarrito = (idProductoCliente) =>{
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    const productoClienteEncontrado = cart.find(item => item.IdProd == idProductoCliente);
+
+    return !productoClienteEncontrado;
+  }
 
   const openModal = (op, insumo = null) => {
     if (op === 1) {
@@ -131,6 +260,13 @@ export const Catalogo = () => {
 
       setSelectedInsumo(null);
 
+      
+      const disenioFiltradosAdmin = Disenios.filter(disenio => disenio.IdUsuario == 1);
+      
+      console.log(disenioFiltradosAdmin);
+
+      setDisenios(disenioFiltradosAdmin);
+
       const errors = {
         Referencia: "",
         Cantidad: "",
@@ -144,9 +280,11 @@ export const Catalogo = () => {
       setIdInsumo(insumo.IdInsumo);
       setReferencia(insumo.Referencia);
       setCantidad(insumo.Cantidad);
+      setCantidadAnterior(insumo.Cantidad);
       setValorVenta(insumo.ValorVenta);
       setOperation(2);
       setTitle("Actualizar Datos");
+
       setErrors({
         IdDisenio: 0,
         IdInsumo: 0,
@@ -160,21 +298,26 @@ export const Catalogo = () => {
         ValorVenta: validateValorVenta(insumo.ValorVenta),
       };
       setErrors(errors);
-    }else if(op === 3){
 
+      const BuscarInsumo = Insumos.find((i) => i.IdInsumo == insumo.IdInsumo);
+
+      console.log(BuscarInsumo);
+
+      setSelectedInsumo(BuscarInsumo);
+    } else if (op === 3) {
       // Crear producto
       setIdProducto("");
       setIdDisenio("");
       setIdInsumo("");
-      setColorCliente("");
-      setTallaCliente("");
+      setIdColorCliente("");
+      setIdTallaCliente("");
       setReferencia("");
       setCantidad("");
       setValorVenta("");
-      setOperation(1);
+      setOperation(3);
       setTitle("Crea tu camiseta");
 
-      setSelectedInsumo(null);
+      ObtenerColoresTallasCliente();
 
       const errors = {
         Referencia: "",
@@ -182,41 +325,88 @@ export const Catalogo = () => {
         ValorVenta: "",
       };
       setErrors(errors);
-
     }
   };
 
+  // Funcion para validar todos los campos
   const validar = () => {
     // Inicializa un objeto para almacenar errores
     let errores = {};
 
-    // Limpieza de datos y validación de campos
-    const cleanedReferencia = Referencia.trim();
-    const cleanedCantidad = Cantidad.trim();
-    const cleanedValorVenta = ValorVenta.trim();
-
     // Validación de campos
+
     if (!IdDisenio) {
       errores.IdDisenio = "Seleccione un diseño";
     }
-    if (!IdInsumo) {
-      errores.IdInsumo = "Seleccione un insumo";
-    }
-    if (cleanedReferencia === "") {
-      errores.Referencia = "Referencia es requerida";
-    }
-    if (cleanedCantidad === "") {
+    
+    if (Cantidad === "") {
       errores.Cantidad = "Cantidad es requerida";
     }
-    if (cleanedValorVenta === "") {
-      errores.ValorVenta = "Valor de venta es requerido";
+
+    // Validar solo los campos del admin 
+    if (operation == 1 || operation == 2) {
+      
+      if (!IdInsumo) {
+        errores.IdInsumo = "Seleccione un insumo";
+      }
+      if (Referencia === "") {
+        errores.Referencia = "Referencia es requerida";
+      }
+      if (ValorVenta === "") {
+        errores.ValorVenta = "Valor de venta es requerido";
+      }
+
+      if (!/^\d+$/.test(Cantidad)) {
+        errores.Cantidad = "La cantidad solo puede contener números";
+      }
+      
+      const numericValue = parseInt(Cantidad, 10);
+      
+      if (selectedInsumo && Cantidad > selectedInsumo.Cantidad) {
+        errores.Cantidad =
+        "La cantidad no puede superar a la del insumo seleccionado";
+      }
+      if (Cantidad < CantidadAnterior) {
+        errores.Cantidad = "La cantidad no puede ser menor que la actual";
+      }
+      
+      if (numericValue <= 0) {
+        errores.Cantidad = "La cantidad debe ser un número positivo";
+      }
+      
     }
+    // Validar solo los campos del cliente 
+    else{
+      if (!IdColorCliente) {
+        errores.IdColorCliente = "ColorCliente";
+      }
+      if (!IdTallaCliente) {
+        errores.IdTallaCliente = "TallaCliente";
+      }
+      
+      if (!/^\d+$/.test(Cantidad)) {
+        errores.CantidadCliente = "La cantidad solo puede contener números";
+      }
+      const numericValue = parseInt(Cantidad, 10);
+      
+      if (numericValue < 1 || numericValue > 3) {
+        errores.CantidadCliente = "La cantidad debe estar entre 1 y 3";
+      }
+      if (numericValue <= 0) {
+        errores.CantidadCliente = "La cantidad debe ser un número positivo";
+      }
+    }
+
+
+    
 
     // Actualiza el estado de errores
     setErrors(errores);
 
     // Mostrar alerta si hay errores
     if (Object.keys(errores).length > 0) {
+      console.log(errores);
+      
       show_alerta({
         message: "Por favor, completa todos los campos correctamente",
         type: "error",
@@ -228,39 +418,40 @@ export const Catalogo = () => {
     return true;
   };
 
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-
-    // Actualizar el estado de los campos según el id
-    if (id === "Referencia") {
-      setReferencia(value);
-    } else if (id === "Cantidad") {
-      setCantidad(value);
-    } else if (id === "ValorVenta") {
-      setValorVenta(value);
-    } else if (id === "IdDisenio") {
-      setIdDisenio(value);
-    } else if (id === "IdInsumo") {
-      setIdInsumo(value);
-    }
-
-    // Validar en tiempo real
-    validar();
-  };
 
   // Función para guardar producto
+
   const guardarProducto = async () => {
     // Validar campos
     if (!validar()) return;
+
+    let IdInsumoCliente;
+
+    let insumoSeleccionado;
+
+    if (operation == 3) {
+      IdInsumoCliente = encontrarInsumoCliente();
+    }
 
     // Realizar validaciones específicas
     const disenioSeleccionado = Disenios.find(
       (disenio) => disenio.IdDisenio == IdDisenio
     );
 
-    const insumoSeleccionado = Insumos.find(
-      (insumo) => insumo.IdInsumo == IdInsumo
-    );
+    if (operation == 1 || operation == 2) {
+      insumoSeleccionado = Insumos.find(
+        (insumo) => insumo.IdInsumo == IdInsumo
+      );
+
+      // Validación en el insumo
+      if (!insumoSeleccionado) {
+        show_alerta({
+          message: "Insumo no encontrado",
+          type: "error",
+        });
+        return;
+      }
+    }
 
     // Validación en el diseño
     if (!disenioSeleccionado) {
@@ -271,14 +462,7 @@ export const Catalogo = () => {
       return;
     }
 
-    // Validación en el insumo
-    if (!insumoSeleccionado) {
-      show_alerta({
-        message: "Insumo no encontrado",
-        type: "error",
-      });
-      return;
-    }
+    
 
     // Si todas las validaciones son correctas, se envía la solicitud
     try {
@@ -287,28 +471,47 @@ export const Catalogo = () => {
           IdDisenio,
           IdInsumo,
           IdUsuario: auth.idUsuario || auth.idCliente,
-        Referencia: Referencia.trim(),
+          Referencia: Referencia.trim(),
           Cantidad: Cantidad,
           ValorVenta: ValorVenta,
+          Publicacion: "Activo",
+          Estado:"Activo"
         });
         show_alerta({
           message: "Producto creado con éxito",
           type: "success",
         });
-      } else if (operation === 2) {
+      }
+       else if (operation === 2) {
         await enviarSolicitud("PUT", {
-          IdProducto,
-          IdDisenio,
-          IdInsumo,
-          Referencia: Referencia.trim(),
-          Cantidad: Cantidad,
-          ValorVenta: ValorVenta,
+          Cantidad: Cantidad.trim(),
+          // ValorVenta: ValorVenta,
         });
         show_alerta({
           message: "Producto actualizado con éxito",
           type: "success",
         });
+
       }
+      else if (operation === 3) {
+        
+        await enviarSolicitud("POST", {
+          IdDisenio,
+          IdInsumo: IdInsumoCliente,
+          IdUsuario: auth.idUsuario || auth.idCliente,
+          Referencia: generarReferenciaUnica(productosAdmin),
+          Cantidad: Cantidad,
+          ValorVenta: generarValorVentaCliente(IdDisenio,IdInsumoCliente),
+          Publicacion: "Inactivo",
+          Estado:"Activo"
+        });
+
+        show_alerta({
+          message: "Producto creado con éxito",
+          type: "success",
+        });
+      }
+
     } catch (error) {
       if (error.response) {
         show_alerta({
@@ -328,7 +531,7 @@ export const Catalogo = () => {
       }
       console.log(error);
     } finally {
-      document.getElementById("btnCerrarCliente").click();
+      $(".close").click();
       getProductosAdmin();
     }
   };
@@ -345,6 +548,48 @@ export const Catalogo = () => {
     return "";
   };
 
+  const encontrarInsumoCliente = () => {
+    const insumoEncontrado = InsumosCliente.find(insumo => insumo.IdColor == IdColorCliente && insumo.IdTalla == IdTallaCliente);
+    return insumoEncontrado.IdInsumo;
+  }
+
+  // Función para generar una referencia aleatoria 
+  const generarReferencia = () => {
+    const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const numeros = "0123456789";
+    
+    // Generar tres letras aleatorias
+    let parteLetras = "";
+    for (let i = 0; i < 3; i++) {
+      parteLetras += letras.charAt(Math.floor(Math.random() * letras.length));
+    }
+    
+    // Generar tres números aleatorios
+    let parteNumeros = "";
+    for (let i = 0; i < 3; i++) {
+      parteNumeros += numeros.charAt(Math.floor(Math.random() * numeros.length));
+    }
+    
+    // Combinar las partes
+    return `${parteLetras}-${parteNumeros}`;
+  };
+
+  // Función para verificar si la referencia es única
+  const esReferenciaUnica = (referencia, productos) => {
+    return !productos.some(producto => producto.referencia === referencia);
+  };
+
+  // Función principal para generar una referencia única
+  const generarReferenciaUnica = (productos) => {
+    let nuevaReferencia;
+    do {
+      nuevaReferencia = generarReferencia();
+    } while (!esReferenciaUnica(nuevaReferencia, productos));
+    
+    return nuevaReferencia;
+  };
+
+
   // Función para validar la cantidad
   const validateCantidad = (value) => {
     if (!value) {
@@ -356,8 +601,43 @@ export const Catalogo = () => {
     if (selectedInsumo && value > selectedInsumo.Cantidad) {
       return "La cantidad no puede superar a la del insumo seleccionado";
     }
+    if (value < CantidadAnterior) {
+      return "La cantidad no puede ser menor que la actual";
+    }
     return "";
   };
+
+  // Función para validar la cantidad del cliente
+  const validateCantidadCliente = (value) => {
+    if (!value) {
+      return "Escribe la cantidad";
+    }
+    if (!/^\d+$/.test(value)) {
+      return "La cantidad solo puede contener números";
+    }
+    const numericValue = parseInt(value, 10);
+    if (numericValue <= 0) {
+      return "La cantidad debe ser un número positivo";
+    }
+    if (numericValue < 1 || numericValue > 3) {
+      return "La cantidad debe estar entre 1 y 3";
+    }
+    return "";
+  };
+
+  const generarValorVentaCliente = (IdDisenioCliente,IdInsumoCliente) =>{
+    const disenioCliente = DiseniosCliente.filter(disenio => disenio.IdDisenio == IdDisenioCliente)
+    const insumoCliente = InsumosCliente.filter(insumo => insumo.IdInsumo == IdInsumoCliente)
+
+    const valorVentaProductoCliente = precioSugerido(disenioCliente[0].PrecioDisenio,insumoCliente[0].ValorCompra)
+
+    console.log(disenioCliente[0].PrecioDisenio);
+    console.log(insumoCliente);
+    console.log(valorVentaProductoCliente);
+    
+
+    return Math.round(valorVentaProductoCliente);
+  }
 
   // Función para validar el valorVenta
   const validateValorVenta = (value) => {
@@ -370,12 +650,14 @@ export const Catalogo = () => {
     return "";
   };
 
+  //Funcion para mostrar la talla en el tooltip
   const convertTallaIdToName = (tallaId) => {
     const talla = Tallas.find((talla) => talla.IdTalla == tallaId);
     console.log(talla);
     return talla ? talla.Talla : "";
   };
 
+  // Función para manejar cambios en el diseño
   const handleChangeIdDisenio = (e) => {
     const value = e.target.value;
 
@@ -387,6 +669,7 @@ export const Catalogo = () => {
     setSelectedDisenio(disenio);
   };
 
+  // Función para manejar cambios en el insumo
   const handleChangeIdInsumo = (e) => {
     const value = e.target.value;
 
@@ -397,6 +680,37 @@ export const Catalogo = () => {
     setSelectedInsumo(insumo);
     setIdInsumo(value);
   };
+
+  // Función para manejar cambios en el color del cliente
+  const handleChangeColorCliente = (e) => {
+    const value = e.target.value;
+
+    // Filtra las tallas que estan relacionadas con el color seleccionado
+    const tallasFiltradas = InsumosCliente
+    .filter(insumo => insumo.IdColor === parseInt(value) && insumo.Cantidad > 0 && insumo.Estado === 'Activo')
+    .map(insumo => insumo.IdTalla);
+
+
+    // Filtrar las nuevas tallas para el select del cliente
+    const nuevasTallasFiltradasCliente = Tallas.filter(talla => tallasFiltradas.includes(talla.IdTalla));
+
+
+    console.log(tallasFiltradas);
+    
+
+    setIdColorCliente(value);
+    setIdTallaCliente("");
+    setTallasCliente(nuevasTallasFiltradasCliente);
+
+  };
+
+  // Función para manejar cambios en la talla del cliente
+  const handleChangeTallaCliente = (e) => {
+    const value = e.target.value;
+
+    setIdTallaCliente(value);
+  };
+
 
   // Función para manejar cambios en la referencia
   const handleChangeReferencia = (e) => {
@@ -422,6 +736,18 @@ export const Catalogo = () => {
       Cantidad: errorMessage,
     }));
   };
+
+  // Función para manejar cambios en la cantidad del cliente
+  const handleChangeCantidadCliente = (e) => {
+    let value = e.target.value;
+    setCantidad(value);
+    const errorMessage = validateCantidadCliente(value);
+    setErrors((prevState) => ({
+      ...prevState,
+      CantidadCliente: errorMessage,
+    }));
+  };
+
   // Función para manejar cambios en el valorVenta
   const handleChangeValorVenta = (e) => {
     let value = e.target.value;
@@ -588,7 +914,11 @@ export const Catalogo = () => {
       );
 
       if (productoActual.Cantidad == 0) {
-        show_alerta({message: "No se puede cambiar la publicación, agrega al menos una cantidad al producto",type:"warning"});
+        show_alerta({
+          message:
+            "No se puede cambiar la publicación, agrega al menos una cantidad al producto",
+          type: "warning",
+        });
         return;
       }
 
@@ -606,12 +936,8 @@ export const Catalogo = () => {
       }).then(async (result) => {
         if (result.isConfirmed) {
           const parametros = {
-            IdProducto,
             IdDisenio: productoActual.IdDisenio,
             IdInsumo: productoActual.IdInsumo,
-            Referencia: productoActual.Referencia,
-            Cantidad: productoActual.Cantidad,
-            ValorVenta: productoActual.ValorVenta,
             Publicacion: nuevoEstado,
             Estado: productoActual.Estado,
           };
@@ -656,42 +982,34 @@ export const Catalogo = () => {
         (producto) => producto.IdProducto === IdProducto
       );
       let nuevoEstadoPublicacion;
-
+  
       let parametros;
-
+  
       const nuevoEstado =
         productoActual.Estado === "Activo" ? "Inactivo" : "Activo";
-
-        if (nuevoEstado == "Inactivo") {
-          nuevoEstadoPublicacion= "Inactivo";
-
-          parametros = {
-            IdProducto,
-            IdDisenio: productoActual.IdDisenio,
-            IdInsumo: productoActual.IdInsumo,
-            Referencia: productoActual.Referencia,
-            Cantidad: productoActual.Cantidad,
-            ValorVenta: productoActual.ValorVenta,
-            Publicacion: nuevoEstadoPublicacion,
-            Estado: nuevoEstado,
-          };
-        }else{
-          nuevoEstadoPublicacion= productoActual.Publicacion;
-
-
-          parametros = {
-            IdProducto,
-            IdDisenio: productoActual.IdDisenio,
-            IdInsumo: productoActual.IdInsumo,
-            Referencia: productoActual.Referencia,
-            Cantidad: productoActual.Cantidad,
-            ValorVenta: productoActual.ValorVenta,
-            Publicacion: nuevoEstadoPublicacion,
-            Estado: nuevoEstado,
-          };
-        }
-
-
+  
+      if (nuevoEstado === "Inactivo") {
+        nuevoEstadoPublicacion = "Inactivo";
+  
+        parametros = {
+          
+          IdDisenio: productoActual.IdDisenio,
+          IdInsumo: productoActual.IdInsumo,
+          Publicacion: nuevoEstadoPublicacion,
+          Estado: nuevoEstado,
+        };
+      } else {
+        nuevoEstadoPublicacion = productoActual.Publicacion;
+  
+        parametros = {
+          
+          IdDisenio: productoActual.IdDisenio,
+          IdInsumo: productoActual.IdInsumo,
+          Publicacion: nuevoEstadoPublicacion,
+          Estado: nuevoEstado,
+        };
+      }
+  
       const MySwal = withReactContent(Swal);
       MySwal.fire({
         title: `¿Seguro de cambiar el estado del producto ${productoActual.Referencia}?`,
@@ -702,25 +1020,42 @@ export const Catalogo = () => {
         cancelButtonText: "Cancelar",
       }).then(async (result) => {
         if (result.isConfirmed) {
-
-          console.log(parametros);
-          
-          
-
-          const response = await axios.put(`${url}/${IdProducto}`, parametros);
-
-          if (response.status === 200) {
-            setProductosAdmin((prevProducto) =>
-              prevProducto.map((producto) =>
-                producto.IdProducto === IdProducto
-                  ? { ...producto, Publicacion: nuevoEstadoPublicacion, Estado: nuevoEstado }
-                  : producto
-              )
-            );
-
+          try {
+            console.log(parametros);
+  
+            const respuesta = await axios.put(`${url}/${IdProducto}`, parametros);
+  
+            if (respuesta.status === 200) {
+              setProductosAdmin((prevProducto) =>
+                prevProducto.map((producto) =>
+                  producto.IdProducto === IdProducto
+                    ? {
+                        ...producto,
+                        Publicacion: nuevoEstadoPublicacion,
+                        Estado: nuevoEstado,
+                      }
+                    : producto
+                )
+              );
+  
+              show_alerta({
+                message: "Estado del producto cambiado con éxito",
+                type: "success",
+              });
+            } else {
+              console.log(respuesta.data);
+              show_alerta({
+                message: respuesta.data?.message || "Error desconocido",
+                type: "error",
+              });
+            }
+          } catch (error) {
+            console.error("Error al cambiar el estado del producto:", error);
             show_alerta({
-              message: "Estado del producto cambiado con éxito",
-              type: "success",
+              message:
+                error.response?.data?.message ||
+                "Error al intentar cambiar el estado del producto",
+              type: "error",
             });
           }
         } else {
@@ -731,21 +1066,21 @@ export const Catalogo = () => {
         }
       });
     } catch (error) {
-      console.error("Error updating state:", error);
+      console.error("Error general:", error);
       show_alerta({
         message: "Error cambiando el estado del producto",
         type: "error",
       });
     }
   };
-
+  
   const convertDisenioIdToName = (disenioId) => {
     const disenio = Disenios.find((disenio) => disenio.IdDisenio === disenioId);
     return disenio ? disenio.NombreDisenio : "";
   };
 
   const convertInsumoIdToName = (insumoId) => {
-    const insumo = Insumos.find((insumo) => insumo.IdInsumo === insumoId);
+    const insumo = InsumosTotales.find((insumo) => insumo.IdInsumo === insumoId);
     return insumo ? insumo.Referencia : "";
   };
 
@@ -805,19 +1140,18 @@ export const Catalogo = () => {
     setCurrentPage(1); // Resetear la página actual al cambiar el término de búsqueda
   };
 
-  
   let totalPages;
   let currentproductosAdmin;
 
   if (auth.idUsuario) {
     // Filtrar los productosAdmin según el término de búsqueda
     const filteredproductosAdmin = productosAdmin.filter((insumo) => {
-    const colorName = convertDisenioIdToName(insumo.IdDisenio);
-    const tallaName = convertInsumoIdToName(insumo.IdInsumo);
-    const referencia = insumo.Referencia ? insumo.Referencia.toString() : "";
-    const cantidad = insumo.Cantidad ? insumo.Cantidad.toString() : "";
-    const valorVenta = insumo.ValorVenta ? insumo.ValorVenta.toString() : "";
-    const estado = insumo.Estado ? insumo.Estado.toString() : "";
+      const colorName = convertDisenioIdToName(insumo.IdDisenio);
+      const tallaName = convertInsumoIdToName(insumo.IdInsumo);
+      const referencia = insumo.Referencia ? insumo.Referencia.toString() : "";
+      const cantidad = insumo.Cantidad ? insumo.Cantidad.toString() : "";
+      const valorVenta = insumo.ValorVenta ? insumo.ValorVenta.toString() : "";
+      const estado = insumo.Estado ? insumo.Estado.toString() : "";
 
       return (
         colorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -831,12 +1165,11 @@ export const Catalogo = () => {
 
     // Aplicar paginación a los productosAdmin filtrados
     totalPages = Math.ceil(filteredproductosAdmin.length / itemsPerPage);
-     currentproductosAdmin = filteredproductosAdmin.slice(
+    currentproductosAdmin = filteredproductosAdmin.slice(
       (currentPage - 1) * itemsPerPage,
       currentPage * itemsPerPage
     );
-
-  }else{
+  } else {
     // Filtrar los productosAdmin según el término de búsqueda
     const filteredproductoClientes = productosCliente.filter((insumo) => {
       const colorName = convertDisenioIdToName(insumo.IdDisenio);
@@ -845,29 +1178,24 @@ export const Catalogo = () => {
       const cantidad = insumo.Cantidad ? insumo.Cantidad.toString() : "";
       const valorVenta = insumo.ValorVenta ? insumo.ValorVenta.toString() : "";
       const estado = insumo.Estado ? insumo.Estado.toString() : "";
-  
-        return (
-          colorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          tallaName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          referencia.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          cantidad.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          valorVenta.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          estado.toLowerCase().includes(searchTerm.toLocaleLowerCase())
-        );
-      });
-  
-      // Aplicar paginación a los productosAdmin filtrados
-      totalPages = Math.ceil(filteredproductoClientes.length / itemsPerPage);
-       currentproductosAdmin = filteredproductoClientes.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
+
+      return (
+        colorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tallaName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        referencia.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        cantidad.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        valorVenta.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        estado.toLowerCase().includes(searchTerm.toLocaleLowerCase())
       );
+    });
+
+    // Aplicar paginación a los productosAdmin filtrados
+    totalPages = Math.ceil(filteredproductoClientes.length / itemsPerPage);
+    currentproductosAdmin = filteredproductoClientes.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
   }
-
-
-  
-
-
 
   function formatCurrency(value) {
     return new Intl.NumberFormat("es-CO", {
@@ -881,7 +1209,7 @@ export const Catalogo = () => {
     let margen = subTotal * 0.3;
     let total = subTotal + margen;
 
-    return formatCurrency(total);
+    return operation == 1 || operation == 2 ? formatCurrency(total) : total ;
   };
 
   return (
@@ -920,162 +1248,250 @@ export const Catalogo = () => {
                   </div>
                 )}
                 <div className="form-row">
-                  {/* Diseño del Producto */}
-                  <div className="form-group col-md-5">
-                    <label htmlFor="idDisenio">Diseño del Producto:</label>
-                    <select
-                      className={`form-control ${
-                        errors.IdDisenio ? "is-invalid" : ""
-                      }`}
-                      id="idDisenio"
-                      value={IdDisenio}
-                      onChange={(e) => handleChangeIdDisenio(e)}
-                      required
-                    >
-                      <option value="" disabled>
-                        Seleccione un Diseño
-                      </option>
-                      {Disenios.map((disenio) => (
-                        <option
-                          key={disenio.IdDisenio}
-                          value={disenio.IdDisenio}
+                  {operation == 1 ? (
+                    <>
+                      {/* Diseño del Producto */}
+                      <div className="form-group col-md-5">
+                        <label htmlFor="idDisenio">Diseño del Producto:</label>
+                        <select
+                          className={`form-control ${
+                            errors.IdDisenio ? "is-invalid" : ""
+                          }`}
+                          id="idDisenio"
+                          value={IdDisenio}
+                          onChange={(e) => handleChangeIdDisenio(e)}
+                          required
                         >
-                          {disenio.NombreDisenio}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.IdDisenio && (
-                      <div className="invalid-feedback">{errors.IdDisenio}</div>
-                    )}
-                  </div>
+                          <option value="" disabled>
+                            Seleccione un Diseño
+                          </option>
+                          {Disenios.map((disenio) => (
+                            <option
+                              key={disenio.IdDisenio}
+                              value={disenio.IdDisenio}
+                            >
+                              {disenio.NombreDisenio}
+                            </option>
+                          ))}
+                        </select>
 
-                  {/* ToolTip imagen de referencia */}
-                  <div className="col-md-1 mt-4 pt-3">
-                    <i className="tooltipReferenceImage fas fa-info-circle">
-                      {selectedDisenio && (
-                        <span className="tooltiptext">
-                          <img
-                            src={selectedDisenio.ImagenReferencia}
-                            alt={selectedDisenio.NombreDisenio}
-                            style={{ width: "150px", height: "100px" }}
-                          />
-                        </span>
-                      )}
-                    </i>
-                  </div>
-
-                  {/* Insumo del Producto */}
-                  <div className="form-group col-md-5">
-                    <label htmlFor="idInsumo">Insumo del Producto:</label>
-                    <select
-                      className={`form-control ${
-                        errors.IdInsumo ? "is-invalid" : ""
-                      }`}
-                      id="idInsumo"
-                      value={IdInsumo}
-                      onChange={(e) => handleChangeIdInsumo(e)}
-                      required
-                    >
-                      <option value="" disabled>
-                        Seleccione un Insumo
-                      </option>
-                      {Insumos.map((insumo) => (
-                        <option key={insumo.IdInsumo} value={insumo.IdInsumo}>
-                          {insumo.Referencia}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.IdInsumo && (
-                      <div className="invalid-feedback">{errors.IdInsumo}</div>
-                    )}
-                  </div>
-
-                  {/* ToolTip talla del producto */}
-                  <div className="col-md-1 mt-4 pt-3">
-                    <i className="tooltipReferenceImage fas fa-info-circle">
-                      {selectedInsumo && (
-                        <span className="tooltiptext">
-                          {`La talla del insumo es: ${convertTallaIdToName(
-                            selectedInsumo.IdTalla
-                          )}`}
-                        </span>
-                      )}
-                    </i>
-                  </div>
-
-                  {/* Referencia del Producto */}
-                  <div className="form-group col-md-6">
-                    <label htmlFor="Referencia">Referencia del Producto:</label>
-                    <input
-                      type="text"
-                      className={`form-control ${
-                        errors.Referencia ? "is-invalid" : ""
-                      }`}
-                      id="Referencia"
-                      placeholder="Ingrese la referencia del producto"
-                      required
-                      value={Referencia}
-                      onChange={handleChangeReferencia}
-                    />
-                    {errors.Referencia && (
-                      <div className="invalid-feedback">
-                        {errors.Referencia}
+                        {errors.IdDisenio && (
+                          <div className="invalid-feedback">
+                            {errors.IdDisenio}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  {/* Cantidad del producto */}
-                  <div className="form-group col-md-6">
-                    <label htmlFor="cantidadProducto">Cantidad:</label>
-                    <input
-                      type="text"
-                      className={`form-control ${
-                        errors.Cantidad ? "is-invalid" : ""
-                      }`}
-                      id="cantidadProducto"
-                      placeholder={
-                        selectedInsumo
-                          ? `La cantidad máxima del insumo es: ${selectedInsumo.Cantidad}`
-                          : "Ingrese la cantidad del insumo"
-                      }
-                      required
-                      value={Cantidad}
-                      onChange={handleChangeCantidad}
-                    />
-                    {errors.Cantidad && (
-                      <div className="invalid-feedback">{errors.Cantidad}</div>
-                    )}
-                  </div>
-
-                  {/* Valor venta del producto */}
-                  <div className="form-group col-md-12">
-                    <label htmlFor="direccionCliente">
-                      Valor de la venta del producto:
-                    </label>
-                    <input
-                      type="text"
-                      className={`form-control ${
-                        errors.ValorVenta ? "is-invalid" : ""
-                      }`}
-                      id="direccionCliente"
-                      placeholder={
-                        selectedInsumo
-                          ? `Precio sugerido para el producto es: ${precioSugerido(
-                              selectedDisenio.PrecioDisenio,
-                              selectedInsumo.ValorCompra
-                            )}`
-                          : "Ingrese el valor del producto"
-                      }
-                      required
-                      value={ValorVenta}
-                      onChange={handleChangeValorVenta}
-                    />
-                    {errors.ValorVenta && (
-                      <div className="invalid-feedback">
-                        {errors.ValorVenta}
+                      {/* ToolTip imagen de referencia */}
+                      <div className="col-md-1 mt-4 pt-3">
+                        <i className="tooltipReferenceImage fas fa-info-circle">
+                          {selectedDisenio && (
+                            <span className="tooltiptext">
+                              <img
+                                src={selectedDisenio.ImagenReferencia}
+                                alt={selectedDisenio.NombreDisenio}
+                                style={{ width: "150px", height: "100px" }}
+                              />
+                            </span>
+                          )}
+                        </i>
                       </div>
-                    )}
-                  </div>
+
+                      {/* Insumo del Producto */}
+                      <div className="form-group col-md-5">
+                        <label htmlFor="idInsumo">Insumo del Producto:</label>
+                        <select
+                          className={`form-control ${
+                            errors.IdInsumo ? "is-invalid" : ""
+                          }`}
+                          id="idInsumo"
+                          // disabled={!IdDisenio}
+                          value={IdInsumo}
+                          onChange={(e) => handleChangeIdInsumo(e)}
+                          required
+                        >
+                          <option value="" disabled>
+                            Seleccione un Insumo
+                          </option>
+                          {Insumos.map((insumo) => (
+                            <option
+                              key={insumo.IdInsumo}
+                              value={insumo.IdInsumo}
+                            >
+                              {insumo.Referencia}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.IdInsumo && (
+                          <div className="invalid-feedback">
+                            {errors.IdInsumo}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* ToolTip talla del producto */}
+                      <div className="col-md-1 mt-4 pt-3">
+                        <i className="tooltipReferenceImage fas fa-info-circle">
+                          {selectedInsumo && (
+                            <span className="tooltiptext">
+                              {`La talla del insumo es: ${convertTallaIdToName(
+                                selectedInsumo.IdTalla
+                              )}`}
+                            </span>
+                          )}
+                        </i>
+                      </div>
+
+                      {/* Referencia del Producto */}
+                      <div className="form-group col-md-6">
+                        <label htmlFor="Referencia">
+                          Referencia del Producto:
+                        </label>
+                        <input
+                          type="text"
+                          className={`form-control ${
+                            errors.Referencia ? "is-invalid" : ""
+                          }`}
+                          id="Referencia"
+                          placeholder="Ingrese la referencia del producto"
+                          required
+                          value={Referencia}
+                          onChange={handleChangeReferencia}
+                        />
+                        {errors.Referencia && (
+                          <div className="invalid-feedback">
+                            {errors.Referencia}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Cantidad del producto */}
+                      <div className="form-group col-md-6">
+                        <label htmlFor="cantidadProducto">Cantidad:</label>
+                        <input
+                          type="text"
+                          className={`form-control ${
+                            errors.Cantidad ? "is-invalid" : ""
+                          }`}
+                          id="cantidadProducto"
+                          placeholder={
+                            selectedInsumo
+                              ? `La cantidad máxima del insumo es: ${selectedInsumo.Cantidad}`
+                              : "Ingrese la cantidad del insumo"
+                          }
+                          required
+                          value={Cantidad}
+                          onChange={handleChangeCantidad}
+                        />
+                        {errors.Cantidad && (
+                          <div className="invalid-feedback">
+                            {errors.Cantidad}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Valor venta del producto */}
+                      <div className="form-group col-md-12">
+                        <label htmlFor="direccionCliente">
+                          Valor de la venta del producto:
+                        </label>
+                        <input
+                          type="text"
+                          className={`form-control ${
+                            errors.ValorVenta ? "is-invalid" : ""
+                          }`}
+                          id="direccionCliente"
+                          placeholder={
+                            selectedInsumo && selectedDisenio
+                              ? `Precio sugerido para el producto es: ${precioSugerido(
+                                  selectedDisenio.PrecioDisenio,
+                                  selectedInsumo.ValorCompra
+                                )}`
+                              : "Ingrese el valor del producto"
+                          }
+                          required
+                          value={ValorVenta}
+                          onChange={handleChangeValorVenta}
+                        />
+                        {errors.ValorVenta && (
+                          <div className="invalid-feedback">
+                            {errors.ValorVenta}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Diseño del Producto */}
+                      <div className="form-group col-md-6">
+                        <label>Diseño del Producto:</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          disabled
+                          value={convertDisenioIdToName(IdDisenio)}
+                        />
+                      </div>
+
+                      {/* Insumo del Producto */}
+                      <div className="form-group col-md-6">
+                        <label>Insumo del Producto:</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          disabled
+                          value={convertInsumoIdToName(IdInsumo)}
+                        />
+                      </div>
+
+                      {/* Referencia del Producto */}
+                      <div className="form-group col-md-6">
+                        <label>Referencia del Producto:</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          disabled
+                          value={Referencia}
+                        />
+                      </div>
+
+                      {/* Cantidad del producto */}
+                      <div className="form-group col-md-6">
+                        <label htmlFor="cantidadProducto">Cantidad:</label>
+                        <input
+                          type="text"
+                          className={`form-control ${
+                            errors.Cantidad ? "is-invalid" : ""
+                          }`}
+                          id="cantidadProducto"
+                          placeholder={
+                            selectedInsumo
+                              ? `La cantidad máxima del insumo es: ${selectedInsumo.Cantidad}`
+                              : "Ingrese la cantidad del insumo"
+                          }
+                          required
+                          value={Cantidad}
+                          onChange={handleChangeCantidad}
+                        />
+                        {errors.Cantidad && (
+                          <div className="invalid-feedback">
+                            {errors.Cantidad}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Referencia del Producto */}
+                      <div className="form-group col-md-12">
+                        <label>Valor de la venta del producto:</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          disabled
+                          value={formatCurrency(ValorVenta)}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </form>
             </div>
@@ -1103,7 +1519,6 @@ export const Catalogo = () => {
           </div>
         </div>
       </div>
-
       {/* Modal crear producto */}
 
 
@@ -1137,9 +1552,9 @@ export const Catalogo = () => {
               <form id="crearClienteForm">
                 <div className="form-row">
 
-                  {/* Diseño del Producto */}
+                  {/* Diseño del Producto cliente*/}
                   <div className="form-group col-md-5">
-                    <label htmlFor="idDisenio">Diseño del Producto:</label>
+                    <label htmlFor="idDisenio">Diseño de la camiseta</label>
                     <select
                       className="form-control"
                       id="idDisenio"
@@ -1150,7 +1565,7 @@ export const Catalogo = () => {
                       <option value="" disabled>
                         Seleccione un Diseño
                       </option>
-                      {Disenios.map((disenio) => (
+                      {DiseniosCliente.map((disenio) => (
                         <option
                           key={disenio.IdDisenio}
                           value={disenio.IdDisenio}
@@ -1167,7 +1582,7 @@ export const Catalogo = () => {
                     )}
                   </div>
 
-                  {/* ToolTip imagen de referencia*/}
+                  {/* ToolTip imagen de referenciacliente*/}
                   <div className="col-md-1 mt-4 pt-3">
                     <i className="tooltipReferenceImage fas fa-info-circle">
                       {selectedDisenio && (
@@ -1181,29 +1596,56 @@ export const Catalogo = () => {
                       )}
                     </i>
                   </div>
+                  
 
-                  {/* Insumo del Producto */}
-                  <div className="form-group col-md-5">
-                    <label htmlFor="idInsumo">Insumo del Producto:</label>
+                  {/* Color del producto cliente*/}
+                  <div className="form-group col-md-6">
+                    <label htmlFor="idInsumo">Color de la camiseta</label>
                     <select
                       className="form-control"
                       id="idInsumo"
-                      value={IdInsumo}
-                      onChange={(e) => handleChangeIdInsumo(e)}
+                      value={IdColorCliente}
+                      onChange={(e) => handleChangeColorCliente(e)}
                       required
                     >
                       <option value="" disabled>
-                        Seleccione un Insumo
+                        Seleccione un color
                       </option>
-                      {Insumos.map((insumo) => (
-                        <option key={insumo.IdInsumo} value={insumo.IdInsumo}>
-                          {insumo.Referencia}
+                      {ColoresCliente.map((insumo) => (
+                        <option key={insumo.IdColor} value={insumo.IdColor}>
+                          {insumo.Color}
                         </option>
                       ))}
                     </select>
-                    {IdInsumo === "" && (
+                    {IdColorCliente === "" && (
                       <p className="text-danger">
-                        Por favor, seleccione un insumo.
+                        Por favor, seleccione un color.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Talla del producto cliente*/}
+                  <div className="form-group col-md-6">
+                    <label htmlFor="idColor">Talla de la camiseta</label>
+                    <select
+                      className="form-control"
+                      id="idColor"
+                      value={IdTallaCliente}
+                      onChange={(e) => handleChangeTallaCliente(e)}
+                      required
+                    >
+                      <option value="" disabled>
+                        Seleccione una talla
+                      </option>
+                      {TallasCliente.map((talla) => (
+                        <option key={talla.IdTalla} value={talla.IdTalla}>
+                          {talla.Talla}
+                        </option>
+                      ))}
+                    </select>
+                    {IdTallaCliente === "" && (
+                      <p className="text-danger">
+                        Por favor, seleccione una talla.
                       </p>
                     )}
                   </div>
@@ -1223,7 +1665,7 @@ export const Catalogo = () => {
                   </div> */}
 
                   {/* Referencia del Producto*/}
-                  <div className="form-group col-md-6">
+                  {/* <div className="form-group col-md-5 ">
                     <label htmlFor="Referencia">Referencia del Producto:</label>
                     <input
                       type="text"
@@ -1238,31 +1680,27 @@ export const Catalogo = () => {
                       onChange={handleChangeReferencia}
                     />
                     {renderErrorMessage(errors.Referencia)}
-                  </div>
+                  </div> */}
 
-                  {/* Cantidad del producto */}
+                  {/* Cantidad del producto cliente*/}
                   <div className="form-group col-md-6">
-                    <label htmlFor="cantidadProducto">Cantidad:</label>
+                    <label htmlFor="cantidadProducto">Cantidad</label>
                     <input
                       type="text"
                       className={`form-control ${
-                        errors.Cantidad ? "is-invalid" : ""
+                        errors.CantidadCliente ? "is-invalid" : ""
                       }`}
                       id="cantidadProducto"
-                      placeholder={
-                        selectedInsumo
-                          ? `La cantidad maxima del insumo es: ${selectedInsumo.Cantidad}`
-                          : "Ingrese la cantidad del insumo"
-                      }
+                      placeholder={"Ingrese la cantidad del producto"}
                       required
                       value={Cantidad}
-                      onChange={handleChangeCantidad}
+                      onChange={handleChangeCantidadCliente}
                     />
-                    {renderErrorMessage(errors.Cantidad)}
+                    {renderErrorMessage(errors.CantidadCliente)}
                   </div>
 
                   {/* Valor venta del producto */}
-                  <div className="form-group col-md-12">
+                  {/* <div className="form-group col-md-12">
                     <label htmlFor="direccionCliente">
                       Valor de la venta del producto:
                     </label>
@@ -1272,20 +1710,14 @@ export const Catalogo = () => {
                         errors.ValorVenta ? "is-invalid" : ""
                       }`}
                       id="direccionCliente"
-                      placeholder={
-                        selectedInsumo
-                          ? `Precio sugerido para el producto es: ${precioSugerido(
-                              selectedDisenio.PrecioDisenio,
-                              selectedInsumo.ValorCompra
-                            )}`
-                          : "Ingrese el valor del producto"
-                      }
+                      placeholder={"Ingrese el valor del producto"}
                       required
                       value={ValorVenta}
                       onChange={handleChangeValorVenta}
                     />
                     {renderErrorMessage(errors.ValorVenta)}
-                  </div>
+                  </div> */}
+
                 </div>
               </form>
             </div>
@@ -1312,8 +1744,6 @@ export const Catalogo = () => {
         </div>
       </div>
       {/* Modal crear producto cliente*/}
-
-
 
       {/* Inicio modal ver detalle diseño */}
       <div
@@ -1779,7 +2209,7 @@ export const Catalogo = () => {
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
           <h1 className="h3 mb-3 text-center text-dark">
-            Gestión de Productos
+            {/* Gestión de Productos */}
           </h1>
         </div>
 
@@ -1791,281 +2221,209 @@ export const Catalogo = () => {
               onSearchTermChange={handleSearchTermChange}
             />
 
-            {auth.idUsuario ? 
-            (
+            {/* Renderizar boton para crear producto admin o cliente */}
+            {auth.idUsuario ? (
               <button
-              type="button"
-              className="btn btn-dark d-flex align-items-center justify-content-center p-0"
-              data-toggle="modal"
-              data-target="#modalCliente"
-              onClick={() => openModal(1, "", "", "", "", "", "")}
-              style={{
-                width: "175px",
-                height: "40px"
-                
-              }}
-            >
-              <i className="fas fa-pencil-alt"></i> 
-              <span className="d-none d-sm-inline ml-2">Crear Producto</span>
-            </button>
-
-            )
-            
-            :
-            (
+                type="button"
+                className="btn btn-dark d-flex align-items-center justify-content-center p-0"
+                data-toggle="modal"
+                data-target="#modalCliente"
+                onClick={() => openModal(1, "", "", "", "", "", "")}
+                style={{
+                  width: "175px",
+                  height: "40px",
+                }}
+              >
+                <i className="fas fa-pencil-alt"></i>
+                <span className="d-none d-sm-inline ml-2">Crear Producto</span>
+              </button>
+            ) : (
               <button
-              type="button"
-              className="btn btn-dark"
-              data-toggle="modal"
-              data-target="#modalProductoCliente"
-              onClick={() => openModal(3, "", "", "", "", "", "")}
-              style={{
-                width: "175px",
-                height: "40px"
-                
-              }}
-            >
-              <i className="fas fa-pencil-alt"></i> 
-              <span className="d-none d-sm-inline ml-2">Crear Producto</span>
-            </button>
-
-            )
-            
-            
-            }
-
-            
-
+                type="button"
+                className="btn btn-dark"
+                data-toggle="modal"
+                data-target="#modalProductoCliente"
+                onClick={() => openModal(3, "", "", "", "", "", "")}
+                style={{
+                  width: "175px",
+                  height: "40px",
+                }}
+              >
+                <i className="fas fa-pencil-alt"></i>
+                <span className="d-none d-sm-inline ml-2">Crear Producto</span>
+              </button>
+            )}
           </div>
           <div className="card-body">
             <div className="table-responsive">
-
-            {auth.idUsuario ?(
-              
-              <table
-                className="table table-bordered"
-                id="dataTable"
-                width="100%"
-                cellSpacing="0"
-              >
-                <thead>
-                  <tr>
-                    <th>Referencia</th>
-                    <th>Diseño</th>
-                    <th>Insumo</th>
-                    <th>Cantidad</th>
-                    <th>Valor de la Venta</th>
-                    <th>Publicación</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentproductosAdmin.map((producto) => (
-                    <tr key={producto.IdProducto}>
-                      <td>{producto.Referencia}</td>
-                      <td>{convertDisenioIdToName(producto.IdDisenio)}</td>
-                      <td>{convertInsumoIdToName(producto.IdInsumo)}</td>
-                      <td>{producto.Cantidad}</td>
-                      <td>{formatCurrency(producto.ValorVenta)}</td>
-                      <td>
-                        <label
-                          className={`switch ${
-                            producto.Estado !== "Activo" ? "switch-grey" : ""
-                          }`}
-                        >
-                          <input
-                            disabled={producto.Estado !== "Activo"}
-                            type="checkbox"
-                            checked={producto.Publicacion === "Activo"}
-                            onChange={() =>
-                              cambiarPublicacionProducto(producto.IdProducto)
-                            }
-                          />
-                          <span className="slider round"></span>
-                        </label>
-                      </td>
-
-                      <td>
-                        <label className="switch">
-                          <input
-                            type="checkbox"
-                            checked={producto.Estado === "Activo"}
-                            onChange={() =>
-                              cambiarEstadoProducto(producto.IdProducto)
-                            }
-                            className={
-                              producto.Estado === "Activo"
-                                ? "switch-green"
-                                : "switch-red"
-                            }
-                          />
-                          <span className="slider round"></span>
-                        </label>
-                      </td>
-                      <td>
-                        <div className="d-flex">
-                          <button
-                            className="btn btn-warning btn-sm mr-2"
-                            title="Editar"
-                            data-toggle="modal"
-                            data-target="#modalCliente"
-                            onClick={() => openModal(2, producto)}
-                            disabled={producto.Estado != "Activo"}
-                          >
-                            <i className="fas fa-sync-alt"></i>
-                          </button>
-
-                        <button
-                          className="btn btn-danger btn-sm mr-2"
-                          onClick={() =>
-                            deleteInsumo(
-                              producto.IdProducto,
-                              producto.Referencia
-                            )
-                          }
-                          disabled={producto.Estado != "Activo"}
-                          title="Eliminar"
-                        >
-                          <i className="fas fa-trash-alt"></i>
-                        </button>
-
-                          <button
-                            className="btn btn-info btn-sm mr-2"
-                            onClick={() =>
-                              handleDetalleProducto(producto.IdProducto)
-                            }
-                            data-toggle="modal"
-                            data-target="#modalDetalleProducto"
-                            title="Detalle"
-                          >
-                            <i className="fas fa-info-circle"></i>
-                          </button>
-                        </div>
-                      </td>
+              {auth.idUsuario ? (
+                <table
+                  className="table table-bordered"
+                  id="dataTable"
+                  width="100%"
+                  cellSpacing="0"
+                >
+                  <thead>
+                    <tr>
+                      <th>Referencia</th>
+                      <th>Diseño</th>
+                      <th>Insumo</th>
+                      <th>Cantidad</th>
+                      <th>Valor de la Venta</th>
+                      <th>Publicación</th>
+                      <th>Estado</th>
+                      <th>Acciones</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            )
-            :
-            (
-            <table
-              className="table table-bordered"
-              id="dataTable"
-              width="100%"
-              cellSpacing="0"
-            >
-              <thead>
-                <tr>
-                  <th>Referencia</th>
-                  <th>Diseño</th>
-                  <th>Insumo</th>
-                  <th>Cantidad</th>
-                  <th>Valor de la Venta</th>
-                  {/* <th>Publicación</th>
+                  </thead>
+                  <tbody>
+                    {currentproductosAdmin.map((producto) => (
+                      <tr key={producto.IdProducto}>
+                        <td>{producto.Referencia}</td>
+                        <td>{convertDisenioIdToName(producto.IdDisenio)}</td>
+                        <td>{convertInsumoIdToName(producto.IdInsumo)}</td>
+                        <td>{producto.Cantidad}</td>
+                        <td>{formatCurrency(producto.ValorVenta)}</td>
+                        <td>
+                          <label
+                            className={`switch ${
+                              producto.Estado !== "Activo" ? "switch-grey" : ""
+                            }`}
+                          >
+                            <input
+                              disabled={producto.Estado !== "Activo"}
+                              type="checkbox"
+                              checked={producto.Publicacion === "Activo"}
+                              onChange={() =>
+                                cambiarPublicacionProducto(producto.IdProducto)
+                              }
+                            />
+                            <span className="slider round"></span>
+                          </label>
+                        </td>
+
+                        <td>
+                          <label className="switch">
+                            <input
+                              type="checkbox"
+                              checked={producto.Estado === "Activo"}
+                              onChange={() =>
+                                cambiarEstadoProducto(producto.IdProducto)
+                              }
+                              className={
+                                producto.Estado === "Activo"
+                                  ? "switch-green"
+                                  : "switch-red"
+                              }
+                            />
+                            <span className="slider round"></span>
+                          </label>
+                        </td>
+                        <td>
+                          <div className="d-flex">
+                            <button
+                              className="btn btn-warning btn-sm mr-2"
+                              title="Editar"
+                              data-toggle="modal"
+                              data-target="#modalCliente"
+                              onClick={() => openModal(2, producto)}
+                              disabled={producto.Estado != "Activo"}
+                            >
+                              <i className="fas fa-sync-alt"></i>
+                            </button>
+
+                            <button
+                              className="btn btn-danger btn-sm mr-2"
+                              onClick={() =>
+                                deleteInsumo(
+                                  producto.IdProducto,
+                                  producto.Referencia
+                                )
+                              }
+                              disabled={producto.Estado != "Activo"}
+                              title="Eliminar"
+                            >
+                              <i className="fas fa-trash-alt"></i>
+                            </button>
+
+                            <button
+                              className="btn btn-info btn-sm mr-2"
+                              onClick={() =>
+                                handleDetalleProducto(producto.IdProducto)
+                              }
+                              data-toggle="modal"
+                              data-target="#modalDetalleProducto"
+                              title="Detalle"
+                            >
+                              <i className="fas fa-info-circle"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <table
+                  className="table table-bordered"
+                  id="dataTable"
+                  width="100%"
+                  cellSpacing="0"
+                >
+                  <thead>
+                    <tr>
+                      <th>Referencia</th>
+                      <th>Diseño</th>
+                      <th>Insumo</th>
+                      <th>Cantidad</th>
+                      <th>Valor de la Venta</th>
+                      {/* <th>Publicación</th>
                   <th>Estado</th> */}
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentproductosAdmin.map((producto) => (
-                  <tr key={producto.IdProducto}>
-                    <td>{producto.Referencia}</td>
-                    <td>{convertDisenioIdToName(producto.IdDisenio)}</td>
-                    <td>{convertInsumoIdToName(producto.IdInsumo)}</td>
-                    <td>{producto.Cantidad}</td>
-                    <td>{formatCurrency(producto.ValorVenta)}</td>
-                    
-                    {/* <td>
-                      <label
-                        className={`switch ${
-                          producto.Estado !== "Activo" ? "switch-grey" : ""
-                        }`}
-                      >
-                        <input
-                          disabled={producto.Estado !== "Activo"}
-                          type="checkbox"
-                          checked={producto.Publicacion === "Activo"}
-                          onChange={() =>
-                            cambiarPublicacionProducto(producto.IdProducto)
-                          }
-                        />
-                        <span className="slider round"></span>
-                      </label>
-                    </td>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentproductosAdmin.map((producto) => (
+                      <tr key={producto.IdProducto}>
+                        <td>{producto.Referencia}</td>
+                        <td>{convertDisenioIdToName(producto.IdDisenio)}</td>
+                        <td>{convertInsumoIdToName(producto.IdInsumo)}</td>
+                        <td>{producto.Cantidad}</td>
+                        <td>{formatCurrency(producto.ValorVenta)}</td>
 
-                    <td>
-                      <label className="switch">
-                        <input
-                          type="checkbox"
-                          checked={producto.Estado === "Activo"}
-                          onChange={() =>
-                            cambiarEstadoProducto(producto.IdProducto)
-                          }
-                          className={
-                            producto.Estado === "Activo"
-                              ? "switch-green"
-                              : "switch-red"
-                          }
-                        />
-                        <span className="slider round"></span>
-                      </label>
-                    </td> */}
+                        <td>
+                          <div className="d-flex">
 
-                    <td>
-                      <div
-                        className="d-flex"
-                      >
-                        {auth.idUsuario && (
-                        <button
-                          className="btn btn-warning btn-sm mr-2"
-                          title="Editar"
-                          data-toggle="modal"
-                          data-target="#modalCliente"
-                          onClick={() => openModal(2, producto)}
-                          disabled={producto.Estado != "Activo"}
-                        >
-                          <i className="fas fa-sync-alt"></i>
-                        </button>
+                            {validarProductoClienteCarrito(producto.IdProducto) && producto.Cantidad != 0 &&(
+                              <button
+                                className="btn btn-success btn-sm mr-2"
+                                onClick={() =>
+                                  AgregarProductoCarrito(producto)
+                                }
+                                title="Agregar al carrito"
+                              >
+                                <i className="fas fa-cart-plus"></i>
+                              </button>
+                            )}
 
-                        )}
-
-                        <button
-                          className="btn btn-danger btn-sm mr-2"
-                          onClick={() =>
-                            deleteInsumo(
-                              producto.IdProducto,
-                              producto.Referencia
-                            )
-                          }
-                          disabled={producto.Estado != "Activo"}
-                          title="Eliminar"
-                        >
-                          <i className="fas fa-trash-alt"></i>
-                        </button>
-
-                        <button
-                          className="btn btn-info btn-sm mr-2"
-                          onClick={() =>
-                            handleDetalleProducto(producto.IdProducto)
-                          }
-                          disabled={producto.Estado != "Activo"}
-                          data-toggle="modal"
-                          data-target="#modalDetalleProducto"
-                          title="Detalle"
-                        >
-                          <i className="fas fa-info-circle"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            )}
-
-              
+                            <button
+                              className="btn btn-info btn-sm mr-2"
+                              onClick={() =>
+                                handleDetalleProducto(producto.IdProducto)
+                              }
+                              disabled={producto.Estado != "Activo"}
+                              data-toggle="modal"
+                              data-target="#modalDetalleProducto"
+                              title="Detalle"
+                            >
+                              <i className="fas fa-info-circle"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
             <Pagination
               currentPage={currentPage}

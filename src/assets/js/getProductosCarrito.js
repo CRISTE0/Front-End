@@ -1,6 +1,7 @@
 import axios from "axios";
 
-export const fetchCartItemsNav = async () => {
+export const fetchCartItemsNav = async (auth) => {
+
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const itemDetails = await Promise.all(
       cart.map(item =>
@@ -14,7 +15,9 @@ export const fetchCartItemsNav = async () => {
     );
 
     // Filtra los elementos que no sean null y que tengan Publicacion como 'Activo'
-    const activeItems = itemDetails.filter(item => item && item.Publicacion === 'Activo');
+    const activeItems = itemDetails.filter(item => item && item.Publicacion === 'Activo' ||
+      (item.Publicacion == "Inactivo" && item.IdUsuario == auth.idCliente)
+    );
     
     const sumaCantidades = activeItems.reduce((acumulador, producto) => acumulador + producto.CantidadSeleccionada, 0);
 
