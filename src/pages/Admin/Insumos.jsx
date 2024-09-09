@@ -460,7 +460,7 @@ export const Insumos = () => {
       MySwal.fire({
         title: `¿Seguro de cambiar el estado del insumo ${insumoActual.Referencia}?`,
         icon: "question",
-        text: `El estado actual del insumo es: ${insumoActual.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        html: `El estado actual del insumo es: <strong> ${insumoActual.Estado}</strong>. ¿Desea cambiarlo a ${nuevoEstado}?`,
         showCancelButton: true,
         confirmButtonText: "Sí, cambiar estado",
         cancelButtonText: "Cancelar",

@@ -576,18 +576,18 @@ export const Compras = () => {
   const validar = () => {
     let hasErrors = false;
     let newErrors = {};
-
+  
     // Validar campos de la compra (Proveedor, Fecha)
     if (!IdProveedor) {
       newErrors.IdProveedor = "Selecciona un proveedor";
       hasErrors = true;
     }
-
+  
     if (!Fecha) {
       newErrors.Fecha = "Selecciona una fecha";
       hasErrors = true;
     }
-
+  
     // Si hay errores en los campos obligatorios, mostrar alerta y salir
     if (hasErrors) {
       setErrors(newErrors); // Actualizar el estado de errores
@@ -597,7 +597,7 @@ export const Compras = () => {
       });
       return;
     }
-
+  
     // Validar detalles de la compra
     if (
       Detalles.length === 0 ||
@@ -616,15 +616,15 @@ export const Compras = () => {
       });
       return;
     }
-
+  
     // Validar detalles individuales
     const detallesValidados = Detalles.map((detalle, index) => {
       const errors = {};
-
+  
       if (!detalle.IdInsumo) {
         errors.IdInsumo = "Selecciona un insumo";
       }
-
+  
       if (
         !detalle.cantidad ||
         detalle.cantidad <= 0 ||
@@ -639,7 +639,7 @@ export const Compras = () => {
           });
         }
       }
-
+  
       if (
         !detalle.precio ||
         detalle.precio <= 0 ||
@@ -660,21 +660,21 @@ export const Compras = () => {
           });
         }
       }
-
+  
       if (Object.keys(errors).length > 0) {
         setErrors((prevErrors) => ({
           ...prevErrors,
           Detalles: { ...prevErrors.Detalles, [index]: errors },
         }));
       }
-
+  
       return errors;
     });
-
+  
     const hasDetailErrors = detallesValidados.some(
       (errors) => Object.keys(errors).length > 0
     );
-
+  
     if (hasDetailErrors) {
       show_alerta({
         message: "Por favor, completa todos los campos correctamente",
@@ -682,7 +682,16 @@ export const Compras = () => {
       });
       return;
     }
-
+  
+    // Validar que el precio total no supere los 10 millones
+    if (totalCompra > 10000000) {
+      show_alerta({
+        message: "El precio total no puede superar los 10 millones",
+        type: "error",
+      });
+      return;
+    }
+  
     // Si pasa la validación, enviar la solicitud
     enviarSolicitud("POST", {
       IdProveedor: IdProveedor,
@@ -691,6 +700,7 @@ export const Compras = () => {
       detalles: Detalles,
     });
   };
+  
 
   const enviarSolicitud = async (metodo, parametros) => {
     try {

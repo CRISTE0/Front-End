@@ -50,22 +50,22 @@ export const Usuarios = () => {
         );
 
         if (existeAdmin) {
-          // Filtra los roles para eliminar el rol con IdRol == 1
-          const rolesSinAdmin = response2.data.filter((rol) => rol.IdRol !== 1);
-          console.log("Roles sin Admin:", rolesSinAdmin);
-
-          console.log(rolesSinAdmin);
+          // Filtra los roles para eliminar el rol con IdRol == 1 y solo mostrar los roles activos
+          const rolesSinAdmin = response2.data
+            .filter((rol) => rol.IdRol !== 1) // Excluir rol Admin
+            .filter((rol) => rol.Estado === "Activo"); // Incluir solo roles activos
+          console.log("Roles sin Admin y activos:", rolesSinAdmin);
 
           // Actualiza el estado o realiza las operaciones necesarias
           setRoles2(rolesSinAdmin);
         } else {
           console.log("No hay usuarios con el rol Admin.");
-          setRoles2(roles);
-          // Si necesitas hacer algo cuando no existe un admin
+          // Solo mostrar los roles activos
+          const rolesActivos = response2.data.filter(
+            (rol) => rol.Estado === "Activo"
+          );
+          setRoles2(rolesActivos);
         }
-
-        // // Actualiza el estado basado en si existe o no el rol "Admin"
-        // setShowAdminRole(!existeAdmin);
       } else {
         console.error("La respuesta del API no es un array:", response.data);
       }
@@ -149,14 +149,14 @@ export const Usuarios = () => {
       contrasenia: "",
       rol: "",
     });
-  
+
     const cleanedUsuario = Usuario.trim();
     const cleanedCorreo = Correo.trim();
     const cleanedContrasenia = Contrasenia.trim();
-  
+
     // Variable para rastrear si hay errores
     let hayErrores = false;
-  
+
     if (operation === 1 || operation === 2) {
       // Validar campos requeridos para crear o editar usuario completo
       if (!cleanedUsuario) {
@@ -181,7 +181,7 @@ export const Usuarios = () => {
         hayErrores = true;
       }
     }
-  
+
     if (operation === 1 && !cleanedContrasenia) {
       // Validar contraseña solo en creación de usuario
       setErrors((prevState) => ({
@@ -190,7 +190,7 @@ export const Usuarios = () => {
       }));
       hayErrores = true;
     }
-  
+
     // Validar errores específicos para cambiar contraseña
     const contraseniaError = validateContrasenia(cleanedContrasenia);
     if (contraseniaError && operation === 3) {
@@ -201,7 +201,7 @@ export const Usuarios = () => {
       }));
       hayErrores = true;
     }
-  
+
     // Mostrar alerta si hay errores
     if (hayErrores) {
       show_alerta({
@@ -210,7 +210,7 @@ export const Usuarios = () => {
       });
       return; // Salir de la función si hay errores
     }
-  
+
     // Si no hay errores, proceder con la solicitud
     try {
       if (operation === 1) {
@@ -238,7 +238,7 @@ export const Usuarios = () => {
           Contrasenia: cleanedContrasenia,
         });
       }
-  
+
       // Cerrar el modal después de una solicitud exitosa
       const modalElement = document.getElementById("modalUsuarios");
       const modal = new bootstrap.Modal(modalElement);
@@ -255,7 +255,6 @@ export const Usuarios = () => {
       console.error("Error en la solicitud:", error);
     }
   };
-  
 
   const handleChangeRol = (e) => {
     setIdRol(e.target.value);
@@ -767,7 +766,7 @@ export const Usuarios = () => {
         data-backdrop="static"
         data-keyboard="false"
       >
-        <div className="modal-dialog modal-lg" role="document">
+        <div className="modal-dialog modal-l" role="document">
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="modalDetalleUsuarioLabel">
@@ -785,37 +784,35 @@ export const Usuarios = () => {
             <div className="modal-body">
               {usuarioSeleccionado && (
                 <>
-                  <div className="row mb-3">
-                    <div className="col-md-6">
-                      <label htmlFor="usuario">Usuario:</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="usuario"
-                        value={usuarioSeleccionado.Usuario}
-                        disabled
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label htmlFor="correo">Correo:</label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        id="correo"
-                        value={usuarioSeleccionado.Correo}
-                        disabled
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label htmlFor="rol">Rol:</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="rol"
-                        value={getRolName(usuarioSeleccionado.IdRol)}
-                        disabled
-                      />
-                    </div>
+                  <div className="mb-2">
+                    <label htmlFor="usuario">Usuario:</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="usuario"
+                      value={usuarioSeleccionado.Usuario}
+                      disabled
+                    />
+                  </div>
+                  <div className="mb-2">
+                    <label htmlFor="correo">Correo:</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      id="correo"
+                      value={usuarioSeleccionado.Correo}
+                      disabled
+                    />
+                  </div>
+                  <div className="mb-2">
+                    <label htmlFor="rol">Rol:</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="rol"
+                      value={getRolName(usuarioSeleccionado.IdRol)}
+                      disabled
+                    />
                   </div>
                 </>
               )}

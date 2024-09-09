@@ -259,7 +259,7 @@ export const Configuracion = () => {
       MySwal.fire({
         title: `¿Seguro de cambiar el estado del rol ${rolActual.NombreRol}?`,
         icon: "question",
-        text: `El estado actual del rol es: ${rolActual.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        html: `El estado actual del rol es: <strong> ${rolActual.Estado}</strong>. ¿Desea cambiarlo a ${nuevoEstado}?`,
         showCancelButton: true,
         confirmButtonText: "Sí, cambiar estado",
         cancelButtonText: "Cancelar",
@@ -462,7 +462,7 @@ export const Configuracion = () => {
               {detailRol && (
                 <form>
                   <div className="form-group">
-                    <label htmlFor="nombre">Nombre del Rol:</label>
+                    <label htmlFor="nombre">Nombre del rol:</label>
                     <input
                       type="text"
                       className="form-control"

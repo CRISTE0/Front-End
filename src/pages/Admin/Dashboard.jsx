@@ -1,8 +1,118 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { ChartLine } from "../../components/Charts/ChartLine";
 import { ChartPie } from "../../components/Charts/ChartPie";
+import dayjs from "dayjs"; // Importa dayjs para manejar fechas
 
 export const Dashboard = () => {
+  const [pedidosPendientes, setPedidosPendientes] = useState(0);
+  const [totalCompras, setTotalCompras] = useState(0);
+  const [gananciaDiaria, setGananciaDiaria] = useState(0);
+  const [gananciaMensual, setGananciaMensual] = useState(0);
+
+  useEffect(() => {
+    const fetchPedidos = async () => {
+      try {
+        // Obtener pedidos
+        const response = await axios.get("http://localhost:3000/api/pedidos");
+        const pedidos = response.data;
+
+        // Filtrar pedidos con IdEstadoPedido igual a 1
+        const pedidosFiltrados = pedidos.filter(
+          (pedido) => pedido.IdEstadoPedido == 1
+        );
+
+        // Contar los pedidos pendientes
+        setPedidosPendientes(pedidosFiltrados.length);
+      } catch (error) {
+        console.error("Error al obtener los pedidos:", error);
+      }
+    };
+
+    const fetchCompras = async () => {
+      try {
+        // Obtener todas las compras
+        const response = await axios.get("http://localhost:3000/api/compras");
+        const compras = response.data;
+
+        // Sumar el total de las compras
+        const total = compras.reduce((acc, compra) => acc + compra.Total, 0);
+
+        // Actualizar el estado con el total
+        setTotalCompras(total);
+      } catch (error) {
+        console.error("Error al obtener las compras:", error);
+      }
+    };
+
+    const fetchGananciaDiaria = async () => {
+      try {
+        // Obtener pedidos
+        const response = await axios.get("http://localhost:3000/api/pedidos");
+        const pedidos = response.data;
+
+        // Obtener la fecha actual en formato YYYY-MM-DD
+        const fechaActual = dayjs().format("YYYY-MM-DD");
+
+        // Filtrar los pedidos con IdEstadoPedido igual a 3 y fecha actual
+        const pedidosDelDia = pedidos.filter(
+          (pedido) =>
+            pedido.IdEstadoPedido == 3 && pedido.Fecha.startsWith(fechaActual)
+        );
+
+        // Sumar el total de esos pedidos
+        const ganancia = pedidosDelDia.reduce(
+          (acc, pedido) => acc + pedido.Total,
+          0
+        );
+
+        // Actualizar el estado con la ganancia diaria
+        setGananciaDiaria(ganancia);
+      } catch (error) {
+        console.error("Error al obtener las ganancias diarias:", error);
+      }
+    };
+
+    const fetchGananciaMensual = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/pedidos");
+        const pedidos = response.data;
+
+        // Obtener el mes actual
+        const mesActual = dayjs().month() + 1;
+        const anioActual = dayjs().year();
+
+        // Filtrar pedidos del mes actual con IdEstadoPedido igual a 3
+        const pedidosDelMes = pedidos.filter((pedido) => {
+          const fechaPedido = dayjs(pedido.Fecha);
+          const mesPedido = fechaPedido.month() + 1; // month() devuelve 0-11
+          const anioPedido = fechaPedido.year();
+
+          return (
+            pedido.IdEstadoPedido == 3 &&
+            mesPedido == mesActual &&
+            anioPedido == anioActual
+          );
+        });
+
+        // Sumar el campo Total de los pedidos filtrados
+        const totalGananciaMensual = pedidosDelMes.reduce(
+          (sum, pedido) => sum + pedido.Total,
+          0
+        );
+
+        setGananciaMensual(totalGananciaMensual);
+      } catch (error) {
+        console.error("Error al obtener las ganancias mensuales:", error);
+      }
+    };
+
+    fetchPedidos();
+    fetchCompras();
+    fetchGananciaDiaria();
+    fetchGananciaMensual();
+  }, []);
+
   return (
     <>
       {/* <!-- Begin Page Content --> */}
@@ -14,7 +124,6 @@ export const Dashboard = () => {
 
         {/* <!-- Content Row --> */}
         <div className="row">
-          {/* <!-- Earnings (Monthly) Card Example --> */}
           <div className="col-xl-3 col-md-6 mb-4">
             <div className="card border-left-primary shadow h-100 py-2">
               <div className="card-body">
@@ -24,18 +133,18 @@ export const Dashboard = () => {
                       Ganancia Mensual
                     </div>
                     <div className="h5 mb-0 font-weight-bold text-gray-800">
-                      $215,000
+                      ${gananciaMensual.toLocaleString()}
                     </div>
                   </div>
                   <div className="col-auto">
-                    <i className="fas fa-calendar fa-2x text-gray-300"></i>
+                    <i className="fas fa-chart-line fa-2x text-gray-300"></i>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* <!-- Earnings (Monthly) Card Example --> */}
+          {/* <!-- Earnings (Daily) Card Example --> */}
           <div className="col-xl-3 col-md-6 mb-4">
             <div className="card border-left-success shadow h-100 py-2">
               <div className="card-body">
@@ -45,7 +154,7 @@ export const Dashboard = () => {
                       Ganancia Diaria
                     </div>
                     <div className="h5 mb-0 font-weight-bold text-gray-800">
-                      $40,000
+                      ${gananciaDiaria.toLocaleString()}
                     </div>
                   </div>
                   <div className="col-auto">
@@ -56,37 +165,21 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          {/* <!-- Earnings (Monthly) Card Example --> */}
+          {/* <!-- Capital Invertido / Mes --> */}
           <div className="col-xl-3 col-md-6 mb-4">
             <div className="card border-left-info shadow h-100 py-2">
               <div className="card-body">
                 <div className="row no-gutters align-items-center">
                   <div className="col mr-2">
                     <div className="text-xs font-weight-bold text-info text-uppercase mb-1">
-                      Tasks
+                      Capital Invertido / Mes
                     </div>
-                    <div className="row no-gutters align-items-center">
-                      <div className="col-auto">
-                        <div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">
-                          50%
-                        </div>
-                      </div>
-                      <div className="col">
-                        <div className="progress progress-sm mr-2">
-                          <div
-                            className="progress-bar bg-info"
-                            role="progressbar"
-                            style={{ width: +50 }}
-                            aria-valuenow="50"
-                            aria-valuemin="0"
-                            aria-valuemax="100"
-                          ></div>
-                        </div>
-                      </div>
+                    <div className="h5 mb-0 font-weight-bold text-gray-800">
+                      ${totalCompras.toLocaleString()}
                     </div>
                   </div>
                   <div className="col-auto">
-                    <i className="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                    <i className="fas fa-coins fa-2x text-gray-300"></i>
                   </div>
                 </div>
               </div>
@@ -103,11 +196,11 @@ export const Dashboard = () => {
                       Pedidos Pendientes
                     </div>
                     <div className="h5 mb-0 font-weight-bold text-gray-800">
-                      18
+                      {pedidosPendientes}
                     </div>
                   </div>
                   <div className="col-auto">
-                    <i className="fas fa-comments fa-2x text-gray-300"></i>
+                    <i className="fa fa-clock fa-2x text-gray-300"></i>
                   </div>
                 </div>
               </div>
@@ -116,325 +209,52 @@ export const Dashboard = () => {
         </div>
 
         {/* <!-- Content Row --> */}
-
         <div className="row">
           {/* <!-- Area Chart --> */}
-          <div className="col-xl-8 col-lg-7">
+          <div className="col-xl-8 col-lg-5">
             <div className="card shadow mb-4">
-              {/* <!-- Card Header - Dropdown --> */}
               <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                 <h6 className="m-0 font-weight-bold text-primary">
-                  Earnings Overview
+                  Resumen de ganancias
                 </h6>
-                <div className="dropdown no-arrow">
-                  <a
-                    className="dropdown-toggle"
-                    href="#"
-                    role="button"
-                    id="dropdownMenuLink"
-                    data-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                  >
-                    <i className="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                  </a>
-                  <div
-                    className="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                    aria-labelledby="dropdownMenuLink"
-                  >
-                    <div className="dropdown-header">Dropdown Header:</div>
-                    <a className="dropdown-item" href="#">
-                      Action
-                    </a>
-                    <a className="dropdown-item" href="#">
-                      Another action
-                    </a>
-                    <div className="dropdown-divider"></div>
-                    <a className="dropdown-item" href="#">
-                      Something else here
-                    </a>
-                  </div>
+              </div>
+              <div
+                className="card-body"
+                style={{
+                  padding: "0.5rem",
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <div className="chart-area" style={{ width: "80%" }}>
+                  <ChartLine />
                 </div>
               </div>
-              {/* <!-- Card Body --> */}
-
-              <div className="card-body">
-                <div className="chart-area">
-
-                <ChartLine />
-
-                </div>
-              </div>
-              {/* chart-line */}
             </div>
           </div>
 
           {/* <!-- Pie Chart --> */}
           <div className="col-xl-4 col-lg-5">
             <div className="card shadow mb-4">
-              {/* <!-- Card Header - Dropdown --> */}
               <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                 <h6 className="m-0 font-weight-bold text-primary">
-                  Revenue Sources
+                  Productos más vendidos
                 </h6>
-                <div className="dropdown no-arrow">
-                  <a
-                    className="dropdown-toggle"
-                    href="#"
-                    role="button"
-                    id="dropdownMenuLink"
-                    data-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                  >
-                    <i className="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                  </a>
-                  <div
-                    className="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                    aria-labelledby="dropdownMenuLink"
-                  >
-                    <div className="dropdown-header">Dropdown Header:</div>
-                    <a className="dropdown-item" href="#">
-                      Action
-                    </a>
-                    <a className="dropdown-item" href="#">
-                      Another action
-                    </a>
-                    <div className="dropdown-divider"></div>
-                    <a className="dropdown-item" href="#">
-                      Something else here
-                    </a>
-                  </div>
-                </div>
               </div>
-              {/* <!-- Card Body --> */}
-              <div className="card-body">
+              <div
+                className="card-body"
+                style={{
+                  paddingTop: "39px",
+                }}
+              >
                 <div className="chart-pie pt-4 pb-2">
-
-                  <ChartPie/>
+                  <ChartPie />
                 </div>
-                <div className="mt-4 text-center small">
-                  <span className="mr-2">
-                    <i className="fas fa-circle text-primary"></i> Direct
-                  </span>
-                  <span className="mr-2">
-                    <i className="fas fa-circle text-success"></i> Social
-                  </span>
-                  <span className="mr-2">
-                    <i className="fas fa-circle text-info"></i> Referral
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* <!-- Content Row --> */}
-        <div className="row">
-          {/* <!-- Content Column --> */}
-          <div className="col-lg-6 mb-4">
-            {/* <!-- Project Card Example --> */}
-            <div className="card shadow mb-4">
-              <div className="card-header py-3">
-                <h6 className="m-0 font-weight-bold text-primary">Projects</h6>
-              </div>
-              <div className="card-body">
-                <h4 className="small font-weight-bold">
-                  Server Migration <span className="float-right">20%</span>
-                </h4>
-                <div className="progress mb-4">
-                  <div
-                    className="progress-bar bg-danger"
-                    role="progressbar"
-                    style={{ width: 20 }}
-                    aria-valuenow="20"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  ></div>
-                </div>
-                <h4 className="small font-weight-bold">
-                  Sales Tracking <span className="float-right">40%</span>
-                </h4>
-                <div className="progress mb-4">
-                  <div
-                    className="progress-bar bg-warning"
-                    role="progressbar"
-                    style={{ width: 40 }}
-                    aria-valuenow="40"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  ></div>
-                </div>
-                <h4 className="small font-weight-bold">
-                  Customer Database <span className="float-right">60%</span>
-                </h4>
-                <div className="progress mb-4">
-                  <div
-                    className="progress-bar"
-                    role="progressbar"
-                    style={{ width: 60 }}
-                    aria-valuenow="60"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  ></div>
-                </div>
-                <h4 className="small font-weight-bold">
-                  Payout Details <span className="float-right">80%</span>
-                </h4>
-                <div className="progress mb-4">
-                  <div
-                    className="progress-bar bg-info"
-                    role="progressbar"
-                    style={{ width: 80 }}
-                    aria-valuenow="80"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  ></div>
-                </div>
-                <h4 className="small font-weight-bold">
-                  Account Setup <span className="float-right">Complete!</span>
-                </h4>
-                <div className="progress">
-                  <div
-                    className="progress-bar bg-success"
-                    role="progressbar"
-                    style={{ width: 100 }}
-                    aria-valuenow="100"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            {/* <!-- Color System --> */}
-            <div className="row">
-              <div className="col-lg-6 mb-4">
-                <div className="card bg-primary text-white shadow">
-                  <div className="card-body">
-                    Primary
-                    <div className="text-white-50 small">#4e73df</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-lg-6 mb-4">
-                <div className="card bg-success text-white shadow">
-                  <div className="card-body">
-                    Success
-                    <div className="text-white-50 small">#1cc88a</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-lg-6 mb-4">
-                <div className="card bg-info text-white shadow">
-                  <div className="card-body">
-                    Info
-                    <div className="text-white-50 small">#36b9cc</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-lg-6 mb-4">
-                <div className="card bg-warning text-white shadow">
-                  <div className="card-body">
-                    Warning
-                    <div className="text-white-50 small">#f6c23e</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-lg-6 mb-4">
-                <div className="card bg-danger text-white shadow">
-                  <div className="card-body">
-                    Danger
-                    <div className="text-white-50 small">#e74a3b</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-lg-6 mb-4">
-                <div className="card bg-secondary text-white shadow">
-                  <div className="card-body">
-                    Secondary
-                    <div className="text-white-50 small">#858796</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-lg-6 mb-4">
-                <div className="card bg-light text-black shadow">
-                  <div className="card-body">
-                    Light
-                    <div className="text-black-50 small">#f8f9fc</div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-lg-6 mb-4">
-                <div className="card bg-dark text-white shadow">
-                  <div className="card-body">
-                    Dark
-                    <div className="text-white-50 small">#5a5c69</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="col-lg-6 mb-4">
-            {/* <!-- Illustrations --> */}
-            <div className="card shadow mb-4">
-              <div className="card-header py-3">
-                <h6 className="m-0 font-weight-bold text-primary">
-                  Illustrations
-                </h6>
-              </div>
-              <div className="card-body">
-                <div className="text-center">
-                  <img
-                    className="img-fluid px-3 px-sm-4 mt-3 mb-4"
-                    style={{ width: 25 }}
-                    src="img/undraw_posting_photo.svg"
-                    alt="..."
-                  />
-                </div>
-                <p>
-                  Add some quality, svg illustrations to your project courtesy
-                  of
-                  <a target="_blank" rel="nofollow" href="https://undraw.co/">
-                    unDraw
-                  </a>
-                  , a constantly updated collection of beautiful svg images that
-                  you can use completely free and without attribution!
-                </p>
-                <a target="_blank" rel="nofollow" href="https://undraw.co/">
-                  Browse Illustrations on unDraw &rarr;
-                </a>
-              </div>
-            </div>
-
-            {/* <!-- Approach --> */}
-            <div className="card shadow mb-4">
-              <div className="card-header py-3">
-                <h6 className="m-0 font-weight-bold text-primary">
-                  Development Approach
-                </h6>
-              </div>
-              <div className="card-body">
-                <p>
-                  SB Admin 2 makes extensive use of Bootstrap 4 utility
-                  classNamees in order to reduce CSS bloat and poor page
-                  performance. Custom CSS classNamees are used to create custom
-                  components and custom utility classNamees.
-                </p>
-                <p className="mb-0">
-                  Before working with this theme, you should become familiar
-                  with the Bootstrap framework, especially the utility
-                  classNamees.
-                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
-      {/* <!-- /.container-fluid --> */}
-
-      {/* <!-- End of Main Content --> */}
     </>
   );
 };

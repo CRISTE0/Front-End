@@ -253,7 +253,7 @@ export const Tallas = () => {
       MySwal.fire({
         title: `¿Seguro de cambiar el estado de la talla ${tallaActual.Talla}?`,
         icon: "question",
-        text: `El estado actual de la talla es: ${tallaActual.Estado}. ¿Desea cambiarlo a ${nuevoEstado}?`,
+        html: `El estado actual de la talla es: <strong> ${tallaActual.Estado}</strong>. ¿Desea cambiarlo a ${nuevoEstado}?`,
         showCancelButton: true,
         confirmButtonText: "Sí, cambiar estado",
         cancelButtonText: "Cancelar",

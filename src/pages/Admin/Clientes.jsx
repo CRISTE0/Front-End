@@ -131,8 +131,9 @@ export const Clientes = () => {
     const telefonoError = validateTelefono(Telefono);
     const direccionError = validateDireccion(Direccion);
     const correoError = validateCorreo(Correo);
-    const contraseniaError = operation === 1 ? validateContrasenia(Contrasenia) : ""; // Solo valida la contraseña al crear
-  
+    const contraseniaError =
+      operation === 1 ? validateContrasenia(Contrasenia) : ""; // Solo valida la contraseña al crear
+
     setErrors({
       nroDocumento: nroDocumentoError,
       nombreApellido: nombreApellidoError,
@@ -142,7 +143,7 @@ export const Clientes = () => {
       correo: correoError,
       contrasenia: contraseniaError,
     });
-  
+
     return (
       !nroDocumentoError &&
       !nombreApellidoError &&
@@ -153,8 +154,6 @@ export const Clientes = () => {
       !contraseniaError
     );
   };
-  
-  
 
   const guardarCliente = async () => {
     // Limpieza de los campos
@@ -239,7 +238,7 @@ export const Clientes = () => {
   };
 
   // Función para validar el número de documento
-  const validateNroDocumento = (value) => {
+  const validateNroDocumento = (value, tipoDocumento) => {
     if (!value) {
       return "Escribe el número de documento";
     }
@@ -247,10 +246,17 @@ export const Clientes = () => {
       return "El número de documento solo puede contener dígitos";
     }
     if (value.startsWith("0")) {
-      return "El número de documento no puede empezar con cero";
+      return "El número de documento no puede comenzar con 0";
     }
-    if (value.length < 6 || value.length > 10) {
+    if (/^0+$/.test(value)) {
+      return "El número de documento no puede ser todo ceros";
+    }
+    const length = value.length;
+    if (tipoDocumento === "CC" && (length < 6 || length > 10)) {
       return "El número de documento debe tener entre 6 y 10 dígitos";
+    }
+    if (tipoDocumento === "CE" && (length < 6 || length > 7)) {
+      return "El número de documento debe tener entre 6 y 7 dígitos";
     }
     return "";
   };
@@ -261,6 +267,10 @@ export const Clientes = () => {
     }
     if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ]+( [A-Za-zñÑáéíóúÁÉÍÓÚ]+)*$/.test(value)) {
       return "El nombre y apellido solo puede contener letras, tildes y la letra 'ñ' con un solo espacio entre palabras";
+    }
+    const length = value.length;
+    if (length < 2 || length > 60) {
+      return "El nombre y apellido debe tener entre 2 y 60 caracteres";
     }
     return "";
   };
@@ -283,14 +293,25 @@ export const Clientes = () => {
     if (!value) {
       return "Escribe el teléfono";
     }
+    // El teléfono debe contener solo dígitos
     if (!/^\d+$/.test(value)) {
       return "El teléfono solo puede contener dígitos";
     }
-    if (value.startsWith("0")) {
-      return "El teléfono no puede empezar con cero";
+    // El teléfono debe comenzar con 3
+    if (!value.startsWith("3")) {
+      return "El número de teléfono móvil debe comenzar con 3";
     }
-    if (value.length !== 10) {
+    // El teléfono debe tener exactamente 10 dígitos
+    if (!/^\d{10}$/.test(value)) {
       return "El teléfono debe tener exactamente 10 dígitos";
+    }
+    // El teléfono no debe comenzar con 0
+    if (value.startsWith("0")) {
+      return "El teléfono no puede comenzar con 0";
+    }
+    // El teléfono no debe ser todo ceros
+    if (/^0+$/.test(value)) {
+      return "El teléfono no puede ser todo ceros";
     }
     return "";
   };
@@ -339,17 +360,23 @@ export const Clientes = () => {
   const handleChangeTipoDocumento = (e) => {
     const value = e.target.value;
     setTipoDocumento(value);
+
+    const errorMessage = validateNroDocumento(NroDocumento, value);
+    setErrors((prevState) => ({
+      ...prevState,
+      nroDocumento: errorMessage,
+    }));
   };
 
   // Función para manejar cambios en el número de documento
   const handleChangeNroDocumento = (e) => {
     let value = e.target.value;
-    // Limitar la longitud del valor ingresado a entre 6 y 10 caracteres
+    // Limitar la longitud del valor ingresado a 10 caracteres
     if (value.length > 10) {
       value = value.slice(0, 10);
     }
     setNroDocumento(value);
-    const errorMessage = validateNroDocumento(value);
+    const errorMessage = validateNroDocumento(value, TipoDocumento);
     setErrors((prevState) => ({
       ...prevState,
       nroDocumento: errorMessage,
@@ -691,7 +718,9 @@ export const Clientes = () => {
                     {renderErrorMessage(errors.nroDocumento)}
                   </div>
                   <div className="form-group col-md-6">
-                    <label htmlFor="nombreCliente">Nombre del Cliente:</label>
+                    <label htmlFor="nombreCliente">
+                      Nombre y apellido del cliente:
+                    </label>
                     <input
                       type="text"
                       className={`form-control ${
@@ -792,7 +821,6 @@ export const Clientes = () => {
                           )}
                         </button>
                         {renderErrorMessage(errors.contrasenia)}
-
                       </div>
                     </div>
                   )}
@@ -844,7 +872,7 @@ export const Clientes = () => {
               onClick={() => openModal(1, "", "", "", "", "", "")}
               style={{
                 width: "150px",
-                height: "40px"
+                height: "40px",
               }}
             >
               <i className="fas fa-pencil-alt"></i>
@@ -862,7 +890,7 @@ export const Clientes = () => {
                 <thead>
                   <tr>
                     <th>Tipo de Documento</th>
-                    <th>Número de Documento</th>
+                    <th>N°Documento</th>
                     <th>Nombre y Apellido</th>
                     <th>Usuario</th>
                     <th>Teléfono</th>
