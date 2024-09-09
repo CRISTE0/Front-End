@@ -334,12 +334,14 @@ export const Colores = () => {
             <div className="modal-body">
               <input type="hidden" id="Color"></input>
               <div className="form-group">
+                <label htmlFor="color">Color:</label>
                 <input
                   type="text"
                   className={`form-control ${
                     errors.colores ? "is-invalid" : ""
                   }`}
                   id="nombreProveedor"
+
                   placeholder="Ingrese el color"
                   required
                   value={Color}

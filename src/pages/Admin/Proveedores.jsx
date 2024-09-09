@@ -31,7 +31,7 @@ export const Proveedores = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [NombreApellidoLabel, setNombreApellidoLabel] = useState(
-    "Nombre del Proveedor"
+    "Nombre y apellido del proveedor"
   );
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -74,7 +74,7 @@ export const Proveedores = () => {
       setCorreo("");
       setOperation(1);
       setTitle("Crear Proveedor");
-      setNombreApellidoLabel("Nombre del Proveedor");
+      setNombreApellidoLabel("Nombre y apellido del proveedor");
     } else if (op === 2 && proveedor) {
       // Actualizar Proveedor
       setIdProveedor(proveedor.IdProveedor);
@@ -111,7 +111,7 @@ export const Proveedores = () => {
       setNombreApellidoLabel(
         proveedor.TipoDocumento === "NIT"
           ? "Nombre de la Empresa"
-          : "Nombre del Proveedor"
+          : "Nombre y apellido del proveedor"
       );
     }
   };
@@ -281,7 +281,7 @@ export const Proveedores = () => {
     const value = e.target.value;
     setTipoDocumento(value);
     setNombreApellidoLabel(
-      value === "NIT" ? "Nombre de la Empresa" : "Nombre del Proveedor"
+      value === "NIT" ? "Nombre de la Empresa" : "Nombre y apellido del proveedor"
     );
 
     // Validar el número de documento al cambiar el tipo de documento
@@ -798,7 +798,7 @@ export const Proveedores = () => {
               >
                 <thead>
                   <tr>
-                    <th>Documento</th>
+                    <th>Tipo de Documento</th>
                     <th>N°Documento</th>
                     <th>Proveedor</th>
                     <th>Contacto</th>

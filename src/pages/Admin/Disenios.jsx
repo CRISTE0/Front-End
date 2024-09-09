@@ -366,25 +366,47 @@ export const Disenios = () => {
 
   // Función para validar el nombre de diseño
   const validateNombreDisenio = (value) => {
+    // Verificar que el campo no esté vacío
     if (!value) {
       return "Escribe el nombre del diseño";
     }
+  
+    // Verificar que el nombre esté entre 2 y 40 caracteres
+    if (value.length < 2 || value.length > 40) {
+      return "El nombre del diseño debe tener entre 2 y 40 caracteres";
+    }
+  
+    // Verificar que el valor tenga el formato adecuado
     if (!/^[A-Za-zñÑáéíóúÁÉÍÓÚ0-9]+( [A-Za-zñÑáéíóúÁÉÍÓÚ0-9]+)*$/.test(value)) {
       return "El nombre del diseño solo puede contener letras, tildes, la letra 'ñ' y números con un solo espacio entre palabras";
     }
+  
     return "";
   };
+  
 
   // Función para validar el precio de diseño
   const validatePrecioDisenio = (value) => {
+    // Verificar que el campo no esté vacío
     if (!value) {
       return "Digite el precio del diseño";
     }
+  
+    // Verificar que el valor sea un número válido
     if (!/^\d+(\.\d+)?$/.test(value)) {
       return "El precio del diseño solo puede contener números y decimales";
     }
+  
+    // Convertir el valor a número para verificar el rango
+    const numero = parseFloat(value);
+  
+    // Verificar que el valor no exceda 1 millón
+    if (numero > 1000000) {
+      return "El precio del diseño no puede exceder 1 millón";
+    }
+  
     return "";
-  };
+  };  
 
   // Función para manejar cambios en el nombre de diseño
   const handleChangeNombreDisenio = (e) => {
