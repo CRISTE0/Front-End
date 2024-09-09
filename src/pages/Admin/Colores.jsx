@@ -229,7 +229,19 @@ export const Colores = () => {
       const colorActual = Colores.find((color) => color.IdColor === IdColor);
       const nuevoEstado =
         colorActual.Estado === "Activo" ? "Inactivo" : "Activo";
-
+  
+      // Si el nuevo estado es "Inactivo", verifica si el color está asociado a algún insumo
+      if (nuevoEstado === "Inactivo") {
+        const isAssociated = await getInsumosByColor(IdColor);
+        if (isAssociated) {
+          show_alerta({
+            message: `El color ${colorActual.Color} está asociado a un insumo y no se puede cambiar a Inactivo.`,
+            type: "warning",
+          });
+          return;
+        }
+      }
+  
       const MySwal = withReactContent(Swal);
       MySwal.fire({
         title: `¿Seguro de cambiar el estado del color ${colorActual.Color}?`,
@@ -246,7 +258,7 @@ export const Colores = () => {
             Color: colorActual.Color,
             Referencia: colorActual.Referencia,
           };
-
+  
           try {
             const response = await axios.put(`${url}/${IdColor}`, parametros);
             if (response.status === 200) {
@@ -257,7 +269,7 @@ export const Colores = () => {
                     : color
                 )
               );
-
+  
               show_alerta({
                 message: "Estado del color cambiado con éxito",
                 type: "success",
@@ -284,6 +296,7 @@ export const Colores = () => {
       });
     }
   };
+  
 
   const handleSearchTermChange = (newSearchTerm) => {
     setSearchTerm(newSearchTerm);

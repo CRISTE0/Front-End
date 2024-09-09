@@ -231,14 +231,24 @@ export const Tallas = () => {
       }
     });
   };
-
   const cambiarEstadoTalla = async (IdTalla) => {
     try {
       const tallaActual = Tallas.find((talla) => talla.IdTalla === IdTalla);
-
-      const nuevoEstado =
-        tallaActual.Estado === "Activo" ? "Inactivo" : "Activo";
-
+      
+      // Verificar si la talla está asociada a un insumo
+      const isAssociated = await getInsumosByTalla(IdTalla);
+      
+      // Si está asociada y se está intentando desactivar, mostrar un mensaje
+      if (isAssociated && tallaActual.Estado === "Activo") {
+        show_alerta({
+          message: `La talla ${tallaActual.Talla} está asociada a un insumo y no se puede cambiar a Inactivo.`,
+          type: "warning",
+        });
+        return; // Salir de la función sin hacer el cambio
+      }
+  
+      const nuevoEstado = tallaActual.Estado === "Activo" ? "Inactivo" : "Activo";
+  
       const MySwal = withReactContent(Swal);
       MySwal.fire({
         title: `¿Seguro de cambiar el estado de la talla ${tallaActual.Talla}?`,
@@ -254,12 +264,9 @@ export const Tallas = () => {
             Talla: tallaActual.Talla,
             Estado: nuevoEstado,
           };
-
-          const response = await axios.put(
-            `${url}/${IdTalla}`,
-            parametrosTalla
-          );
-
+  
+          const response = await axios.put(`${url}/${IdTalla}`, parametrosTalla);
+  
           if (response.status === 200) {
             setTallas((prevTalla) =>
               prevTalla.map((talla) =>
@@ -268,9 +275,9 @@ export const Tallas = () => {
                   : talla
               )
             );
-
+  
             show_alerta({
-              message: "Estado de la talla cambiada con éxito",
+              message: "Estado de la talla cambiado con éxito",
               type: "success",
             });
           }
@@ -289,6 +296,7 @@ export const Tallas = () => {
       });
     }
   };
+  
 
   const handleSearchTermChange = (newSearchTerm) => {
     setSearchTerm(newSearchTerm);
