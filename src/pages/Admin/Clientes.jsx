@@ -862,8 +862,8 @@ export const Clientes = () => {
                 className="btn btn-primary"
                 onClick={() => {
                   guardarCliente();
-                  disabled={isSubmitting}
                 }}
+                disabled={isSubmitting}
               >
                 Guardar
               </button>

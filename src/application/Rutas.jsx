@@ -33,6 +33,7 @@ import { RecuperarContraseñaUsuario } from "../pages/Landing/RecuperarContrase�
 import { ConfirmarContraseniaUsuario } from "../pages/Landing/ConfirmarContraseñaUsuario";
 import PublicRoute from "./PublicRoute";
 import Pages404 from "../components/404/404";
+import { ActualizarDatos } from "../pages/Admin/ActualizarDatos";
 
 export const Rutas = () => {
 
@@ -62,6 +63,7 @@ export const Rutas = () => {
 
         <Route path="/ConfirmarConstraseñaUsuario/:cookieParams" Component={()=> <LandingLayout> <ConfirmarContraseniaUsuario /> </LandingLayout> } />
 
+        <Route path="/ActualizarDatos/:id" element={ <ActualizarDatos />  } />
 
 
         {/* <Route element={<PrivateRoute requiredPermissions={["ProductoSolo"]}/>}> 

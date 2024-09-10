@@ -216,7 +216,7 @@ export const LandingHeader = () => {
                         Centro Personal
                       </Link>
 
-                      <Link to={"/"} className="dropdown-item" >
+                      <Link to={`/ActualizarDatos/${auth.idCliente}`} className="dropdown-item" >
                         <i className="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
                         Ajustes
                       </Link>
