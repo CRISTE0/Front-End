@@ -156,7 +156,7 @@ export const LandingHeader = () => {
                 {!isClient && !isUser && (
                     <li className="nav-item">
                       <Link className="nav-link" to={"/Login"}>
-                        Login
+                        Iniciar Sesión
                       </Link>
                     </li>
                   )}

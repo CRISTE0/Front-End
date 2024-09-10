@@ -2,16 +2,11 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Swal from 'sweetalert2';
 import withReactContent from "sweetalert2-react-content";
-
 import axios from "axios";
-
 
 export const RecuperarContraseñaUsuario= () => {
   const [Correo, setCorreo] = useState("");
-
   const urlRecuperar = "http://localhost:3000/api/restablecerContraseniaUsuario";
-
-
   const [errors, setErrors] = useState({
     correo: "",
   });
@@ -34,24 +29,17 @@ export const RecuperarContraseñaUsuario= () => {
     });
   };
 
-  // Función para manejar cambios en el correo electrónico
   const handleChangeCorreo = (e) => {
     const value = e.target.value;
-    setCorreo(value); // Actualiza el estado del correo electrónico
-
-    // Valida el correo electrónico y obtiene el mensaje de error
+    setCorreo(value); 
     const errorMessage = validateCorreo(value);
-
-    // Actualiza el estado de los errores con el mensaje de error correspondiente
     setErrors((prevState) => ({
       ...prevState,
-      correo: errorMessage, // Actualiza el error de correo con el mensaje de error obtenido
+      correo: errorMessage, 
     }));
   };
 
-
-   // Función para validar el correo electrónico
-   const validateCorreo = (value) => {
+  const validateCorreo = (value) => {
     if (!value) {
       return "Ingresa tu correo electrónico";
     }
@@ -68,8 +56,7 @@ export const RecuperarContraseñaUsuario= () => {
     return "";
   };
 
-   // Función para renderizar los mensajes de error
-   const renderErrorMessage = (errorMessage) => {
+  const renderErrorMessage = (errorMessage) => {
     return errorMessage ? (
       <div className="invalid-feedback">{errorMessage}</div>
     ) : null;
@@ -96,16 +83,12 @@ export const RecuperarContraseñaUsuario= () => {
     restablecerContrasenia();
   }
 
-
   const restablecerContrasenia = async()=> {
     try {
       let respuesta;
       respuesta = await axios.post(urlRecuperar, {Correo} ,{withCredentials:true} );
-      
       const msj = respuesta.data.message;
-      console.log(respuesta);
       show_alerta(msj, "success");
-
     } catch (error) {
       if (error.response) {
         show_alerta(error.response.data.message, "error");
@@ -113,9 +96,7 @@ export const RecuperarContraseñaUsuario= () => {
         show_alerta("Error en la solicitud", "error");
       } else {
         show_alerta("Error desconocido", "error");
-        console.log(error);
       }
-      console.log(error);
     }
   }
 
@@ -124,36 +105,35 @@ export const RecuperarContraseñaUsuario= () => {
       {/* formulario */}
       <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
         <div className="row w-100">
-          <div className="col-12 text-center">
-            <h2 className="fw-bold my-4">Recuperar Contraseña Usuario</h2>
+ 
+          <div className="col-12 col-md-6 mx-auto">
+            <div className="p-4 bg-white rounded shadow">
+            <div className="col-12 text-center">
+            <h2 className="fw-bold my-5">Recuperar Contraseña</h2>
           </div>
-          <div className="w-100">
-            <div className="mb-3 text-center">
-              <label htmlFor="correo" className="form-label">
-                Correo Usuario
-              </label>
-              <div className="col-12 col-md-3 mx-auto">
-                <input
-                  type="text"
-                  className={`form-control ${
-                    errors.correo ? "is-invalid" : ""
-                  }`}
-                  id="Correo"
-                  placeholder="Correo Usuario"
-                  onChange={handleChangeCorreo}
-                />
-                 {renderErrorMessage(errors.correo)}
+              <div className="mb-3 text-center">
+                <label htmlFor="correo" className="form-label">
+                  Correo del Usuario
+                </label>
+                <div className="col-12">
+                  <input
+                    type="text"
+                    className={`form-control ${errors.correo ? "is-invalid" : ""}`}
+                    id="Correo"
+                    placeholder="Correo del Usuario"
+                    onChange={handleChangeCorreo}
+                  />
+                  {renderErrorMessage(errors.correo)}
+                </div>
               </div>
-            </div>
 
-            <div className="d-grid text-center">
-              <div className="col-12 col-md-3 mx-auto">
-                <button  className="btn btn-success my-5" onClick={validarCorreo}>
-                 Enviar Email
-                </button>
+              <div className="d-grid text-center">
+                <div className="col-12">
+                  <button className="btn btn-primary  my-3" onClick={validarCorreo}>
+                    Enviar Email
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="my-3 text-center">
             </div>
           </div>
         </div>
