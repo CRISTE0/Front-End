@@ -6,6 +6,7 @@ import { ChromePicker } from "react-color";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
+import { AdminFooter } from "../../components/Admin/AdminFooter";
 
 export const Colores = () => {
   const url = "http://localhost:3000/api/colores";
@@ -503,6 +504,7 @@ export const Colores = () => {
           </div>
         </div>
       </div>
+      <AdminFooter/>
     </>
   );
 };

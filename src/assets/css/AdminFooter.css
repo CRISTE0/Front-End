@@ -1,0 +1,25 @@
+.admin-footer {
+    position: relative;
+    bottom: 0;
+    width: 100%; /* Ancho del footer, ajusta el porcentaje según necesites */
+    max-width: 96%; /* Ancho máximo del footer para pantallas grandes */
+    background-color: #ffffff; /* Color de fondo */
+    padding: 10px 0; /* Espaciado superior e inferior */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra */
+    text-align: center;
+    margin: 0 auto; /* Centra el footer horizontalmente */
+    flex: 1 1 auto;
+  }
+  
+  
+  .footer-content {
+    max-width: 600px; /* Ancho máximo del contenedor */
+    margin: 0 auto; /* Centra el contenedor horizontalmente */
+    padding: 0 20px; /* Espaciado interno horizontal */
+  }
+  
+  .footer-content .copyright {
+    color: #6c757d; /* Color del texto */
+    font-size: 14px; /* Tamaño de fuente */
+  }
+  

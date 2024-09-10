@@ -3,6 +3,7 @@ import axios from "axios";
 import { ChartLine } from "../../components/Charts/ChartLine";
 import { ChartPie } from "../../components/Charts/ChartPie";
 import dayjs from "dayjs"; // Importa dayjs para manejar fechas
+import { AdminFooter } from "../../components/Admin/AdminFooter";
 
 export const Dashboard = () => {
   const [pedidosPendientes, setPedidosPendientes] = useState(0);
@@ -255,6 +256,7 @@ export const Dashboard = () => {
           </div>
         </div>
       </div>
+      <AdminFooter/>
     </>
   );
 };

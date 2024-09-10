@@ -11,6 +11,7 @@ import {
 } from "../../firebase/config";
 
 import { useAuth } from "../../context/AuthProvider";
+import { AdminFooter } from "../../components/Admin/AdminFooter";
 
 export const Pedidos = () => {
   const url = "http://localhost:3000/api/pedidos";
@@ -1717,6 +1718,7 @@ export const Pedidos = () => {
         </div>
         {/* Fin tabla de compras */}
       </div>
+      <AdminFooter/>
     </>
   );
 };

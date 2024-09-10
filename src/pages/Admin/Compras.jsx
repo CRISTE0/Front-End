@@ -7,6 +7,7 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { AdminFooter } from "../../components/Admin/AdminFooter";
 
 export const Compras = () => {
   const url = "http://localhost:3000/api/compras";
@@ -14,7 +15,10 @@ export const Compras = () => {
   const [IdCompra, setIdCompra] = useState("");
   const [proveedores, setProveedores] = useState([]);
   const [IdProveedor, setIdProveedor] = useState("");
-  const [Fecha, setFecha] = useState("");
+  const [Fecha, setFecha] = useState(() => {
+    const currentDate = new Date();
+    return currentDate.toISOString().split("T")[0];
+  });
   const [Total, setTotal] = useState("");
   const [Detalles, setDetalles] = useState([]);
   const [Insumos, setInsumos] = useState([]);
@@ -370,8 +374,8 @@ export const Compras = () => {
     setDetalles([]);
     setOperation(1); // Indicar que es una operación de creación
     setErrors({});
-    setTitle("Registrar Compra");
     setShowDetalleField(false); // Ocultar el campo de detalles al abrir el modal
+    setTitle("Registrar Compra");
   };
 
   // Función para manejar cambios en el formulario
@@ -381,30 +385,45 @@ export const Compras = () => {
     if (name === "IdProveedor") {
       setIdProveedor(value);
     } else if (name === "Fecha") {
-      const selectedDate = new Date(value);
-      const currentDate = new Date();
-
-      // Calcular la fecha hace 8 días
-      const minDate = new Date();
-      minDate.setDate(currentDate.getDate() - 8);
-
-      if (selectedDate > currentDate) {
-        // Si la fecha seleccionada es después de la fecha actual,
-        // establecer la fecha actual como valor de Fecha
-        const formattedCurrentDate = currentDate.toISOString().split("T")[0];
-        setFecha(formattedCurrentDate);
-      } else if (selectedDate < minDate) {
-        // Si la fecha seleccionada es anterior a 8 días atrás, establecer la fecha mínima
-        const formattedMinDate = minDate.toISOString().split("T")[0];
-        setFecha(formattedMinDate);
-      } else {
-        // Establecer la fecha seleccionada sin modificarla
-        setFecha(value);
-      }
+      handleFechaChange(value);
     } else if (name === "Total") {
       setTotal(value);
     }
   };
+
+  // Función para manejar la lógica de cambio de fecha
+  const handleFechaChange = (value) => {
+    const selectedDate = new Date(value);
+    const currentDate = new Date();
+
+    // Calcular la fecha mínima (7 días atrás)
+    const minDate = new Date();
+    minDate.setDate(currentDate.getDate() - 7);
+
+    // Convertir las fechas a formato 'YYYY-MM-DD'
+    const formattedMinDate = minDate.toISOString().split("T")[0];
+    const formattedMaxDate = currentDate.toISOString().split("T")[0];
+
+    if (value === "") {
+      setFecha(formattedMaxDate); // Establecer la fecha actual si el campo está vacío
+    } else if (selectedDate > currentDate) {
+      // Si la fecha seleccionada es posterior a la fecha actual, ajustar a la fecha actual
+      setFecha(formattedMaxDate);
+    } else if (selectedDate < minDate) {
+      // Si la fecha seleccionada es anterior a la fecha mínima, ajustar a la fecha mínima
+      setFecha(formattedMinDate);
+    } else {
+      // Establecer la fecha seleccionada sin cambios
+      setFecha(value);
+    }
+  };
+
+  // Obtener las fechas en formato 'YYYY-MM-DD'
+  const minDate = new Date();
+  minDate.setDate(minDate.getDate() - 7);
+  const formattedMinDate = minDate.toISOString().split("T")[0];
+
+  const maxDate = new Date().toISOString().split("T")[0];
 
   // Función para manejar los cambios en los detalles de la compra
   const handleDetailChange = (index, e) => {
@@ -576,18 +595,18 @@ export const Compras = () => {
   const validar = () => {
     let hasErrors = false;
     let newErrors = {};
-  
+
     // Validar campos de la compra (Proveedor, Fecha)
     if (!IdProveedor) {
       newErrors.IdProveedor = "Selecciona un proveedor";
       hasErrors = true;
     }
-  
+
     if (!Fecha) {
       newErrors.Fecha = "Selecciona una fecha";
       hasErrors = true;
     }
-  
+
     // Si hay errores en los campos obligatorios, mostrar alerta y salir
     if (hasErrors) {
       setErrors(newErrors); // Actualizar el estado de errores
@@ -597,7 +616,7 @@ export const Compras = () => {
       });
       return;
     }
-  
+
     // Validar detalles de la compra
     if (
       Detalles.length === 0 ||
@@ -616,15 +635,15 @@ export const Compras = () => {
       });
       return;
     }
-  
+
     // Validar detalles individuales
     const detallesValidados = Detalles.map((detalle, index) => {
       const errors = {};
-  
+
       if (!detalle.IdInsumo) {
         errors.IdInsumo = "Selecciona un insumo";
       }
-  
+
       if (
         !detalle.cantidad ||
         detalle.cantidad <= 0 ||
@@ -639,7 +658,7 @@ export const Compras = () => {
           });
         }
       }
-  
+
       if (
         !detalle.precio ||
         detalle.precio <= 0 ||
@@ -660,21 +679,21 @@ export const Compras = () => {
           });
         }
       }
-  
+
       if (Object.keys(errors).length > 0) {
         setErrors((prevErrors) => ({
           ...prevErrors,
           Detalles: { ...prevErrors.Detalles, [index]: errors },
         }));
       }
-  
+
       return errors;
     });
-  
+
     const hasDetailErrors = detallesValidados.some(
       (errors) => Object.keys(errors).length > 0
     );
-  
+
     if (hasDetailErrors) {
       show_alerta({
         message: "Por favor, completa todos los campos correctamente",
@@ -682,7 +701,7 @@ export const Compras = () => {
       });
       return;
     }
-  
+
     // Validar que el precio total no supere los 10 millones
     if (totalCompra > 10000000) {
       show_alerta({
@@ -691,7 +710,7 @@ export const Compras = () => {
       });
       return;
     }
-  
+
     // Si pasa la validación, enviar la solicitud
     enviarSolicitud("POST", {
       IdProveedor: IdProveedor,
@@ -700,7 +719,6 @@ export const Compras = () => {
       detalles: Detalles,
     });
   };
-  
 
   const enviarSolicitud = async (metodo, parametros) => {
     try {
@@ -804,7 +822,7 @@ export const Compras = () => {
 
   return (
     <>
-      {/* Modal para crear o editar una compra con detalles */}
+      {/* Modal para crear una compra con detalles */}
       <div
         className="modal fade"
         id="modalCompras"
@@ -862,7 +880,6 @@ export const Compras = () => {
                     )}
                   </div>
                 </div>
-
                 <div className="col-md-6">
                   <div className="form-group">
                     <label>Fecha:</label>
@@ -875,10 +892,12 @@ export const Compras = () => {
                       name="Fecha"
                       value={Fecha}
                       onChange={handleChange}
-                      max={new Date().toISOString().split("T")[0]}
+                      min={formattedMinDate} // Mínimo: 7 días atrás
+                      max={maxDate} // Máximo: hoy
                     />
                     <small>
-                      Selecciona una fecha dentro de los últimos 8 días.
+                      Selecciona una fecha dentro de los últimos 7 días,
+                      incluyendo hoy.
                     </small>
                     {renderErrorMessage(errors.Fecha)}
                   </div>
@@ -1253,7 +1272,7 @@ export const Compras = () => {
               data-target="#modalGenerarReporte"
               style={{
                 width: "205px",
-                height: "40px"
+                height: "40px",
               }}
             >
               <i className="fa fa-print"></i>
@@ -1267,7 +1286,7 @@ export const Compras = () => {
               onClick={() => proveedores.length > 0 && openModal(1)}
               style={{
                 width: "190px",
-                height: "40px"
+                height: "40px",
               }}
             >
               <i className="fas fa-pencil-alt"></i>
@@ -1348,6 +1367,7 @@ export const Compras = () => {
 
         {/* Fin tabla de compras */}
       </div>
+      <AdminFooter />
     </>
   );
 };

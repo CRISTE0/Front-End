@@ -5,6 +5,7 @@ import withReactContent from "sweetalert2-react-content";
 import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
+import { AdminFooter } from "../../components/Admin/AdminFooter";
 
 export const Usuarios = () => {
   const url = "http://localhost:3000/api/usuarios";
@@ -830,6 +831,7 @@ export const Usuarios = () => {
           </div>
         </div>
       </div>
+      <AdminFooter/>
     </>
   );
 };

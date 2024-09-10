@@ -5,6 +5,8 @@ import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
 import imagenesAdmin from "../../assets/img/imagenesAdmin";
+import { AdminFooter } from "../../components/Admin/AdminFooter";
+
 import {
   editImageDesign,
   editImageReference,
@@ -1382,6 +1384,7 @@ export const Disenios = () => {
         </div>
         {/* Fin tabla de diseños */}
       </div>
+      <AdminFooter/>
     </>
   );
 };
