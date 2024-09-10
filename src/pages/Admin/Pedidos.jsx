@@ -110,7 +110,7 @@ export const Pedidos = () => {
   };
 
   const getProductoName = (idProducto) => {
-    const producto = Productos.find((item) => item.IdProducto === idProducto);
+    const producto = Productos.find((item) => item.IdProducto == idProducto);
     return producto ? producto.Referencia : "Producto no encontrado";
   };
 
@@ -1249,6 +1249,8 @@ export const Pedidos = () => {
                                   <thead>
                                     <tr>
                                       <th>Producto</th>
+                                      <th>Talla</th>
+                                      <th>Color</th>
                                       <th>Cantidad</th>
                                       <th>Precio</th>
                                     </tr>
@@ -1257,11 +1259,9 @@ export const Pedidos = () => {
                                     {pedidoSeleccionado.DetallesPedidosProductos.map(
                                       (detalle, index) => (
                                         <tr key={index}>
-                                          <td>
-                                            {getProductoName(
-                                              detalle.IdProducto
-                                            )}
-                                          </td>
+                                          <td>{detalle.Producto.Referencia}</td>
+                                          <td>{detalle.Insumo.Talla.Talla}</td>
+                                          <td>{detalle.Insumo.Color.Color}</td>
                                           <td>{detalle.Cantidad}</td>
                                           <td>
                                             {formatCurrency(detalle.Precio)}

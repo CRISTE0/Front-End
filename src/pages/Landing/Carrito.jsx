@@ -20,7 +20,7 @@ export const Carrito = () => {
   const [showMessage,setShowMessage] = useState(null);
 
 
-  console.log(auth);
+  // console.log(auth);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -47,13 +47,26 @@ export const Carrito = () => {
         (item) =>
           axios
             .get(`http://localhost:3000/api/productos/${item.IdProd}`)
-            .then((res) => ({
-              ...res.data,
-              CantidadSeleccionada: item.CantidadSeleccionada,
-            }))
+            .then((res) => {
+              // Filtrar el ProductoInsumos para mantener solo el insumo con el IdIns seleccionado
+              const insumoSeleccionado = res.data.ProductoInsumos.find(
+                (insumo) => insumo.IdInsumo == item.IdIns
+              );
+    
+              // Devolver el objeto del producto con el insumo seleccionado y la cantidad
+              return {
+                ...res.data,
+                ProductoInsumos: insumoSeleccionado
+                  ? [insumoSeleccionado] // Si el insumo fue encontrado, mantenlo en el array
+                  : [], // Si no se encontró, devuelve un array vacío
+                CantidadSeleccionada: item.CantidadSeleccionada,
+              };
+            })
             .catch(() => null) // Manejo de error de fetch
       )
     );
+
+
 
     // Filtra los elementos que no sean null y que tengan Publicacion como 'Activo'
     const activeItems = itemDetails.filter(
@@ -69,6 +82,7 @@ export const Carrito = () => {
     }
 
     console.log(itemDetails);
+
 
     console.log(activeItems);
   };
@@ -98,21 +112,23 @@ export const Carrito = () => {
   };
 
   const incrementarCantidad = (
-    idProductoSeleccionado,
+    idInsumoProductoSeleccionado,
     cantidadProductoDisponible
   ) => {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
     // Encuentra el índice del producto en el carrito
     const productIndex = cart.findIndex(
-      (item) => item.IdProd === idProductoSeleccionado
+      (item) => item.IdIns == idInsumoProductoSeleccionado
     );
 
+
+    // si encuentra el producto
     if (productIndex !== -1) {
       if (
         cart[productIndex].CantidadSeleccionada >= cantidadProductoDisponible
       ) {
-        show_alerta("Cantidad maxima del producto alcanzada", "error");
+        show_alerta("Cantidad máxima del producto alcanzada", "error");
         return;
       }
       
@@ -121,7 +137,7 @@ export const Carrito = () => {
       
       
             const newCantidad = cart[productIndex].CantidadSeleccionada;
-            setInputValues(prev => ({...prev, [idProductoSeleccionado]: newCantidad.toString()}));
+            setInputValues(prev => ({...prev, [idInsumoProductoSeleccionado]: newCantidad.toString()}));
             
       // Actualiza el carrito en el localStorage
       localStorage.setItem("cart", JSON.stringify(cart));
@@ -129,7 +145,7 @@ export const Carrito = () => {
       // Actualiza el estado del carrito en React
       setCartItems((prevCartItems) =>
         prevCartItems.map((item) =>
-          item.id === idProductoSeleccionado
+          item.ProductoInsumos[0].IdInsumo == idInsumoProductoSeleccionado
             ? { ...item, CantidadSeleccionada: item.CantidadSeleccionada + 1 }
             : item
         )
@@ -140,12 +156,12 @@ export const Carrito = () => {
     }
   };
 
-  const disminuirCantidad = (idProductoSeleccionado, NombreDisenio) => {
+  const disminuirCantidad = (idInsumoProductoSeleccionado, NombreDisenio) => {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
     // Encuentra el índice del producto en el carrito
     const productIndex = cart.findIndex(
-      (item) => item.IdProd === idProductoSeleccionado
+      (item) => item.IdIns == idInsumoProductoSeleccionado
     );
 
     if (productIndex !== -1) {
@@ -154,7 +170,7 @@ export const Carrito = () => {
         cart[productIndex].CantidadSeleccionada -= 1;
 
         const newCantidad = cart[productIndex].CantidadSeleccionada;
-        setInputValues(prev => ({...prev, [idProductoSeleccionado]: newCantidad.toString()}));
+        setInputValues(prev => ({...prev, [idInsumoProductoSeleccionado]: newCantidad.toString()}));
         
 
         // Actualiza el carrito en el localStorage
@@ -163,7 +179,7 @@ export const Carrito = () => {
         // Actualiza el estado del carrito en React
         setCartItems((prevCartItems) =>
           prevCartItems.map((item) =>
-            item.id === idProductoSeleccionado
+            item.ProductoInsumos[0].IdInsumo == idInsumoProductoSeleccionado
               ? { ...item, CantidadSeleccionada: item.CantidadSeleccionada - 1 }
               : item
           )
@@ -202,7 +218,7 @@ export const Carrito = () => {
 
             // Actualiza el estado del carrito en React
             setCartItems((prevCartItems) =>
-              prevCartItems.filter((item) => item.id !== idProductoSeleccionado)
+              prevCartItems.filter((item) => item.id !== idInsumoProductoSeleccionado)
             );
            triggerRender();
 
@@ -225,7 +241,7 @@ export const Carrito = () => {
   };
 
 
-  const handleCantidadChange = (e, idProductoSeleccionado, cantidadMaxima, nombreProducto) => {
+  const handleCantidadChange = (e, idInsumoProductoSeleccionado, cantidadMaxima) => {
     let newValue = e.target.value;
     
     // Permitir campo vacío o números positivos
@@ -235,19 +251,20 @@ export const Carrito = () => {
       if (numericValue !== '' && numericValue > cantidadMaxima) {
         numericValue = cantidadMaxima;
         newValue = cantidadMaxima.toString();
+        show_alerta("Cantidad máxima del producto alcanzada", "warning");
       }
       
-      setInputValues(prev => ({...prev, [idProductoSeleccionado]: newValue}));
+      setInputValues(prev => ({...prev, [idInsumoProductoSeleccionado]: newValue}));
       
       if (numericValue !== '') {
-        updateCartAndState(idProductoSeleccionado, numericValue);
+        updateCartAndState(idInsumoProductoSeleccionado, numericValue);
       }
     }
   };
   
-  const updateCartAndState = (idProductoSeleccionado, newCantidad) => {
+  const updateCartAndState = (idInsumoProductoSeleccionado, newCantidad) => {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const productIndex = cart.findIndex(item => item.IdProd === idProductoSeleccionado);
+    const productIndex = cart.findIndex(item => item.IdIns == idInsumoProductoSeleccionado);
   
     if (productIndex !== -1) {
       cart[productIndex].CantidadSeleccionada = newCantidad;
@@ -255,7 +272,7 @@ export const Carrito = () => {
   
       setCartItems(prevCartItems =>
         prevCartItems.map(item =>
-          item.id === idProductoSeleccionado
+          item.ProductoInsumos[0].IdInsumo == idInsumoProductoSeleccionado
             ? { ...item, CantidadSeleccionada: newCantidad }
             : item
         )
@@ -305,14 +322,20 @@ export const Carrito = () => {
   const obtenerDetalles = (productos) => {
     return productos.map((producto) => ({
       IdProducto: producto.IdProducto,
-      cantidad: producto.CantidadSeleccionada,
-      precio: producto.ValorVenta,
-      subtotal: obtenerSubtotal(
+      Precio: producto.ValorVenta,
+      SubTotal: obtenerSubtotal(
         producto.CantidadSeleccionada,
         producto.ValorVenta
       ),
+      // Mapeo de los insumos utilizados en el producto
+      InsumosUtilizados: producto.ProductoInsumos.map((insumo) => ({
+        IdInsumo: insumo.InsumoProd.IdInsumo,
+        CantidadUtilizada: insumo.CantidadProductoInsumo
+      }))
     }));
   };
+  
+  
 
   console.log(obtenerFechaActual());
 
@@ -341,6 +364,8 @@ export const Carrito = () => {
       console.log(parametros);
       console.log(obtenerFechaActual());
 
+      // return;
+
 
       const respuesta = await axios({
         method: "POST",
@@ -353,8 +378,8 @@ export const Carrito = () => {
       show_alerta(respuesta.data.message, "success");
 
 
-      localStorage.removeItem("cart");
-      navigate("/admin/Pedidos");
+      // localStorage.removeItem("cart");
+      // navigate("/admin/Pedidos");
 
     } catch (error) {
       console.log(error);
@@ -382,7 +407,7 @@ export const Carrito = () => {
 
             {/* productos cliente */}
             {cartItems.map((item) => (
-              <div key={item.IdProducto} className="card mb-3">
+              <div key={`${item.IdProducto}-${item.ProductoInsumos[0].IdInsumo}`} className="card mb-3">
                 <div className="card-body">
                   <div className="d-flex justify-content-between">
                     <div className="d-flex flex-row align-items-center">
@@ -398,7 +423,7 @@ export const Carrito = () => {
 
                       <div className="mx-3">
                         {/* nombre producto */}
-                        <h5>{item.Disenio.NombreDisenio}</h5>
+                        <h5>{item.Disenio.NombreDisenio} <small style={{fontSize: "11px"}}>{item.ProductoInsumos[0].InsumoProd.Color.Color} - {item.ProductoInsumos[0].InsumoProd.Talla.Talla}</small></h5>
 
                         {/* precio producto */}
                         <p className="small mb-0">
@@ -414,7 +439,7 @@ export const Carrito = () => {
                           className="m-"
                           onClick={() =>
                             disminuirCantidad(
-                              item.IdProducto,
+                              item.ProductoInsumos[0].IdInsumo,
                               item.Disenio.NombreDisenio
                             )
                           }
@@ -434,7 +459,7 @@ export const Carrito = () => {
                           className="m-"
                           onClick={() =>
                             disminuirCantidad(
-                              item.IdProducto,
+                              item.ProductoInsumos[0].IdInsumo,
                               item.Disenio.NombreDisenio
                             )
                           }
@@ -449,25 +474,25 @@ export const Carrito = () => {
                         </button>
                       )}
 
+                      {/* input cantidad */}
                       <div style={{ width: "auto" }}>
-
                       <input
                         // min="0"
                         // min="0" 
                         type="text"
                         className="form-control form-control-dm"
                         style={{ width: "45px", "textAlign":"center" }}
-                        value={inputValues[item.IdProducto] ?? item.CantidadSeleccionada}
+                        value={inputValues[item.ProductoInsumos[0].IdInsumo] ?? item.ProductoInsumos[0].CantidadProductoInsumo}
                         onChange={(e) =>
                           handleCantidadChange(
                             e,
-                            item.IdProducto,
-                            item.Cantidad,
+                            item.ProductoInsumos[0].IdInsumo,
+                            item.ProductoInsumos[0].CantidadProductoInsumo,
                             item.Disenio.NombreDisenio
                           )
                         }
 
-                        onBlur={() => handleInputBlur(item.IdProducto, item.Cantidad)}
+                        onBlur={() => handleInputBlur(item.ProductoInsumos[0].IdInsumo, item.ProductoInsumos[0].CantidadProductoInsumo)}
 
                       />                 
                       
@@ -477,7 +502,7 @@ export const Carrito = () => {
                       <button
                         className=""
                         onClick={() =>
-                          incrementarCantidad(item.IdProducto, item.Cantidad)
+                          incrementarCantidad(item.ProductoInsumos[0].IdInsumo, item.ProductoInsumos[0].CantidadProductoInsumo)
                         }
                         style={{ border: "none", background: "transparent" }}
                       >

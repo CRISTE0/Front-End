@@ -17,25 +17,26 @@ export const Catalogo = () => {
   const [Disenios, setDisenios] = useState([]);
   const [DiseniosCliente, setDiseniosCliente] = useState([]);
   const [Insumos, setInsumos] = useState([]);
+  const [DetallesInsumos, setDetallesInsumos] = useState([]);
+
   const [InsumosTotales, setInsumosTotales] = useState([]);
   const [Tallas, setTallas] = useState([]);
   const [Colores, setColores] = useState([]);
+  const [ColoresDisponibles, setColoresDisponibles] = useState([]);
+
   const [TallaDetalle, setTallaDetalle] = useState([]);
   const [ColorDetalle, setColorDetalle] = useState([]);
   const [IdDisenio, setIdDisenio] = useState("");
   const [IdProducto, setIdProducto] = useState("");
   const [IdInsumo, setIdInsumo] = useState("");
 
-
   const [InsumosCliente, setInsumosCliente] = useState([]);
 
   const [IdTallaCliente, setIdTallaCliente] = useState("");
   const [IdColorCliente, setIdColorCliente] = useState("");
 
-
   const [TallasCliente, setTallasCliente] = useState([]);
   const [ColoresCliente, setColoresCliente] = useState([]);
-
 
   const [Referencia, setReferencia] = useState("");
   const [Cantidad, setCantidad] = useState("");
@@ -45,7 +46,6 @@ export const Catalogo = () => {
   const [title, setTitle] = useState("");
 
   const [ShowBotonAgregarCarrito, setTShowBotonAgregarCarrito] = useState(null);
-
 
   const [errors, setErrors] = useState({
     IdDisenio: 0,
@@ -57,6 +57,9 @@ export const Catalogo = () => {
     CantidadCliente: 0,
     ValorVenta: 0,
   });
+
+  const [alertas, setAlertas] = useState([]);
+
   const [searchTerm, setSearchTerm] = useState("");
 
   const [selectedDisenio, setSelectedDisenio] = useState(null);
@@ -75,8 +78,8 @@ export const Catalogo = () => {
   useEffect(() => {
     getProductosAdmin();
     getDisenios();
-    
-    getInsumos(); 
+
+    getInsumos();
     getTallas();
     getColores();
 
@@ -85,7 +88,6 @@ export const Catalogo = () => {
     // obtenerDiseniosCliente();
 
     // ObtenerColoresTallasCliente();
-    
   }, []);
 
   const getProductosAdmin = async () => {
@@ -126,19 +128,17 @@ export const Catalogo = () => {
     setDisenios(DiseniosActivos);
 
     obtenerDiseniosCliente(DiseniosActivos);
-
   };
 
   const getInsumos = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/insumos");
     const InsumosActivas = respuesta.data.filter(
-      (insumo) => insumo.Estado == "Activo"
+      (insumo) => insumo.Estado == "Activo" && insumo.Cantidad > 0
     );
 
-    if (auth.idCliente) {
-      obtenerInsumosCliente(InsumosActivas)
-    }
-
+    // if (auth.idCliente) {
+    obtenerInsumosCliente(InsumosActivas);
+    // }
 
     setInsumos(InsumosActivas);
     setInsumosTotales(respuesta.data);
@@ -147,13 +147,12 @@ export const Catalogo = () => {
   const getTallas = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/tallas");
     const TallasActivas = respuesta.data.filter(
-      (talla) => talla.Estado === "Activo" 
+      (talla) => talla.Estado === "Activo"
     );
     console.log(TallasActivas);
 
     setTallas(TallasActivas);
   };
-
 
   const getColores = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/colores");
@@ -165,39 +164,38 @@ export const Catalogo = () => {
     setColores(ColoresActivas);
   };
 
-    // Obtener los insumos que seran usados por el cliente, estos estan activos y con cantidad
-   const obtenerInsumosCliente = (insumos) => {
+  // Obtener los insumos que seran usados por el cliente, estos estan activos y con cantidad
+  const obtenerInsumosCliente = (insumos) => {
     try {
-  
       // Filtrar insumos activos con cantidad mayor a 0
-      const insumosFiltrados = insumos.filter(insumo => 
-        insumo.Estado == "Activo" && insumo.Cantidad >= 3
+      const insumosFiltrados = insumos.filter(
+        (insumo) => insumo.Estado == "Activo" && insumo.Cantidad >= 3
       );
 
       console.log(insumosFiltrados);
-      
-  
+
       setInsumosCliente(insumosFiltrados);
     } catch (error) {
       console.error("Error filtrando insumos:", error);
     }
-  }
+  };
 
-  const obtenerDiseniosCliente = (disenios) =>{
-    
-    const disenioFiltradosCliente = disenios.filter(disenio => disenio.IdUsuario == auth.idCliente);
-      
+  const obtenerDiseniosCliente = (disenios) => {
+    const disenioFiltradosCliente = disenios.filter(
+      (disenio) => disenio.IdUsuario == auth.idCliente
+    );
+
     console.log(disenioFiltradosCliente);
 
     setDiseniosCliente(disenioFiltradosCliente);
-  }
+  };
 
   const ObtenerColoresTallasCliente = async () => {
     const coloresUnicos = [];
     const tallasUnicas = [];
 
     // Filtrar colores y tallas que esten en los insumos para el select del cliente
-    InsumosCliente.forEach(insumo => {
+    InsumosCliente.forEach((insumo) => {
       if (!coloresUnicos.includes(insumo.IdColor)) {
         coloresUnicos.push(insumo.IdColor);
       }
@@ -207,16 +205,17 @@ export const Catalogo = () => {
     });
 
     // Filtrar los colores para el select del cliente
-    const coloresFiltrados = Colores.filter(color => coloresUnicos.includes(color.IdColor));
+    const coloresFiltrados = Colores.filter((color) =>
+      coloresUnicos.includes(color.IdColor)
+    );
 
-    
     // Filtrar las tallas para el select del cliente
-    const tallasFiltrados = Tallas.filter(talla => tallasUnicas.includes(talla.IdTalla));
+    const tallasFiltrados = Tallas.filter((talla) =>
+      tallasUnicas.includes(talla.IdTalla)
+    );
 
     console.log(coloresFiltrados);
     console.log(tallasFiltrados);
-    
-
 
     setColoresCliente(coloresFiltrados);
     setTallasCliente(tallasFiltrados);
@@ -224,28 +223,30 @@ export const Catalogo = () => {
 
   //   Agregar producto del carrito
   const AgregarProductoCarrito = (ProductoS) => {
-
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
     // Si el producto no existe, agrégalo con una cantidad inicial de 1
     cart.push({ IdProd: ProductoS.IdProducto, CantidadSeleccionada: 1 });
     localStorage.setItem("cart", JSON.stringify(cart));
 
-    show_alerta({"message":"Producto agregado al carrito correctamente", "type":"success"})
+    show_alerta({
+      message: "Producto agregado al carrito correctamente",
+      type: "success",
+    });
     console.log(JSON.parse(localStorage.getItem("cart")));
 
     getProductosAdmin();
-
-
   };
 
-  const validarProductoClienteCarrito = (idProductoCliente) =>{
+  const validarProductoClienteCarrito = (idProductoCliente) => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    const productoClienteEncontrado = cart.find(item => item.IdProd == idProductoCliente);
+    const productoClienteEncontrado = cart.find(
+      (item) => item.IdProd == idProductoCliente
+    );
 
     return !productoClienteEncontrado;
-  }
+  };
 
   const openModal = (op, insumo = null) => {
     if (op === 1) {
@@ -261,12 +262,15 @@ export const Catalogo = () => {
 
       setSelectedInsumo(null);
 
-      
-      const disenioFiltradosAdmin = Disenios.filter(disenio => disenio.IdUsuario == 1);
-      
+      const disenioFiltradosAdmin = Disenios.filter(
+        (disenio) => disenio.IdUsuario == 1
+      );
+
       console.log(disenioFiltradosAdmin);
 
       setDisenios(disenioFiltradosAdmin);
+
+      ObtenerColoresTallasCliente();
 
       const errors = {
         Referencia: "",
@@ -329,77 +333,65 @@ export const Catalogo = () => {
     }
   };
 
-  // Funcion para validar todos los campos
+  let detallesInsumosGuardar;
+
+  // Función para validar todos los campos
   const validar = () => {
     // Inicializa un objeto para almacenar errores
     let errores = {};
 
     // Validación de campos
-
     if (!IdDisenio) {
       errores.IdDisenio = "Seleccione un diseño";
     }
     
-    if (Cantidad === "") {
-      errores.Cantidad = "Cantidad es requerida";
+    if (Referencia === "") {
+      errores.Referencia = "Referencia es requerida";
     }
-
-    // Validar solo los campos del admin 
-    if (operation == 1 || operation == 2) {
-      
-      if (!IdInsumo) {
-        errores.IdInsumo = "Seleccione un insumo";
-      }
-      if (Referencia === "") {
-        errores.Referencia = "Referencia es requerida";
-      }
-      if (ValorVenta === "") {
-        errores.ValorVenta = "Valor de venta es requerido";
-      }
-
-      if (!/^\d+$/.test(Cantidad)) {
-        errores.Cantidad = "La cantidad solo puede contener números";
-      }
-      
-      const numericValue = parseInt(Cantidad, 10);
-      
-      if (selectedInsumo && Cantidad > selectedInsumo.Cantidad) {
-        errores.Cantidad =
-        "La cantidad no puede superar a la del insumo seleccionado";
-      }
-      if (Cantidad < CantidadAnterior) {
-        errores.Cantidad = "La cantidad no puede ser menor que la actual";
-      }
-      
-      if (numericValue <= 0) {
-        errores.Cantidad = "La cantidad debe ser un número positivo";
-      }
-      
-    }
-    // Validar solo los campos del cliente 
-    else{
-      if (!IdColorCliente) {
-        errores.IdColorCliente = "ColorCliente";
-      }
-      if (!IdTallaCliente) {
-        errores.IdTallaCliente = "TallaCliente";
-      }
-      
-      if (!/^\d+$/.test(Cantidad)) {
-        errores.CantidadCliente = "La cantidad solo puede contener números";
-      }
-      const numericValue = parseInt(Cantidad, 10);
-      
-      if (numericValue < 1 || numericValue > 3) {
-        errores.CantidadCliente = "La cantidad debe estar entre 1 y 3";
-      }
-      if (numericValue <= 0) {
-        errores.CantidadCliente = "La cantidad debe ser un número positivo";
-      }
-    }
-
-
     
+    if (ValorVenta === "") {
+      errores.ValorVenta = "Valor de venta es requerido";
+    }
+
+    // Verificar que haya al menos una fila agregada
+    if (DetallesInsumos.length === 0) {
+      show_alerta({ message: "Debe agregar al menos una fila de insumos con color, talla y cantidad.", type: "error" });
+      return;
+    }
+
+    // Crear un conjunto para verificar duplicados
+    const combinaciones = new Set();
+    
+    // Validar las filas de los detalles de insumos (color, talla, cantidad)
+    DetallesInsumos.forEach((detalle, index) => {
+      if (!detalle.IdColor || !detalle.IdTalla || !detalle.cantidad) {
+        errores[`detalle_${index}`] = `La fila ${index + 1} está incompleta. Por favor, seleccione un color, talla y cantidad.`;
+      } else if (parseInt(detalle.cantidad) <= 0) {
+        errores[`detalle_cantidad_${index}`] = `La cantidad de la fila ${index + 1} debe ser mayor que 0.`;
+      } else {
+        // Verificar si la cantidad supera la cantidad disponible en el insumo
+        const insumoSeleccionado = InsumosCliente.find(
+          (insumo) =>
+            insumo.IdColor === parseInt(detalle.IdColor) &&
+            insumo.IdTalla === parseInt(detalle.IdTalla) &&
+            insumo.Estado === "Activo"
+        );
+
+        if (insumoSeleccionado && parseInt(detalle.cantidad) > insumoSeleccionado.Cantidad) {
+          errores[`detalle_cantidad_supera_${index}`] = `La cantidad de la fila ${index + 1} supera la cantidad disponible (${insumoSeleccionado.Cantidad}).`;
+        }
+        
+        // Verificar duplicados
+        const clave = `${detalle.IdColor}-${detalle.IdTalla}`;
+        if (combinaciones.has(clave)) {
+          // errores[`detalle_duplicado_${index}`] = `La combinación de color y talla en la fila ${index + 1} ya existe.`;
+          show_alerta({message:`La combinación de color y talla en la fila ${index + 1} ya existe.`,type:"error"});
+          return;
+        } else {
+          combinaciones.add(clave);
+        }
+      }
+    });
 
     // Actualiza el estado de errores
     setErrors(errores);
@@ -407,13 +399,37 @@ export const Catalogo = () => {
     // Mostrar alerta si hay errores
     if (Object.keys(errores).length > 0) {
       console.log(errores);
-      
+
       show_alerta({
         message: "Por favor, completa todos los campos correctamente",
         type: "error",
       });
       return false;
     }
+
+    // Si no hay errores, reemplazar IdColor e IdTalla por IdInsumo
+    const nuevosDetallesInsumos = DetallesInsumos.map((detalle) => {
+      const insumoSeleccionado = InsumosCliente.find(
+        (insumo) =>
+          insumo.IdColor === parseInt(detalle.IdColor) &&
+          insumo.IdTalla === parseInt(detalle.IdTalla) &&
+          insumo.Estado === "Activo"
+      );
+
+      if (insumoSeleccionado) {
+        return {
+          IdInsumo: insumoSeleccionado.IdInsumo, // Reemplaza IdColor e IdTalla por IdInsumo
+          cantidad: detalle.cantidad, // Mantiene la cantidad
+        };
+      }
+
+      return detalle; // Si no encuentra el insumo, retorna el detalle sin modificar
+    });
+
+    // Actualizar el estado de DetallesInsumos con los nuevos valores
+    // setDetallesInsumos([...nuevosDetallesInsumos]);
+
+    detallesInsumosGuardar = nuevosDetallesInsumos;
 
     // Si no hay errores, retorna true para permitir el envío de datos
     return true;
@@ -434,25 +450,16 @@ export const Catalogo = () => {
       IdInsumoCliente = encontrarInsumoCliente();
     }
 
+    console.log(detallesInsumosGuardar);
+    
+
+    // return;
+
     // Realizar validaciones específicas
     const disenioSeleccionado = Disenios.find(
       (disenio) => disenio.IdDisenio == IdDisenio
     );
 
-    if (operation == 1 || operation == 2) {
-      insumoSeleccionado = Insumos.find(
-        (insumo) => insumo.IdInsumo == IdInsumo
-      );
-
-      // Validación en el insumo
-      if (!insumoSeleccionado) {
-        show_alerta({
-          message: "Insumo no encontrado",
-          type: "error",
-        });
-        return;
-      }
-    }
 
     // Validación en el diseño
     if (!disenioSeleccionado) {
@@ -463,27 +470,23 @@ export const Catalogo = () => {
       return;
     }
 
-    
-
     // Si todas las validaciones son correctas, se envía la solicitud
     try {
       if (operation === 1) {
         await enviarSolicitud("POST", {
           IdDisenio,
-          IdInsumo,
           IdUsuario: auth.idUsuario || auth.idCliente,
           Referencia: Referencia.trim(),
-          Cantidad: Cantidad,
           ValorVenta: ValorVenta,
           Publicacion: "Activo",
-          Estado:"Activo"
+          Estado: "Activo",
+          Insumos:detallesInsumosGuardar
         });
         show_alerta({
           message: "Producto creado con éxito",
           type: "success",
         });
-      }
-       else if (operation === 2) {
+      } else if (operation === 2) {
         await enviarSolicitud("PUT", {
           Cantidad: Cantidad.trim(),
           // ValorVenta: ValorVenta,
@@ -492,19 +495,16 @@ export const Catalogo = () => {
           message: "Producto actualizado con éxito",
           type: "success",
         });
-
-      }
-      else if (operation === 3) {
-        
+      } else if (operation === 3) {
         await enviarSolicitud("POST", {
           IdDisenio,
           IdInsumo: IdInsumoCliente,
           IdUsuario: auth.idUsuario || auth.idCliente,
           Referencia: generarReferenciaUnica(productosAdmin),
           Cantidad: Cantidad,
-          ValorVenta: generarValorVentaCliente(IdDisenio,IdInsumoCliente),
+          ValorVenta: generarValorVentaCliente(IdDisenio, IdInsumoCliente),
           Publicacion: "Inactivo",
-          Estado:"Activo"
+          Estado: "Activo",
         });
 
         show_alerta({
@@ -512,7 +512,6 @@ export const Catalogo = () => {
           type: "success",
         });
       }
-
     } catch (error) {
       if (error.response) {
         show_alerta({
@@ -550,34 +549,39 @@ export const Catalogo = () => {
   };
 
   const encontrarInsumoCliente = () => {
-    const insumoEncontrado = InsumosCliente.find(insumo => insumo.IdColor == IdColorCliente && insumo.IdTalla == IdTallaCliente);
+    const insumoEncontrado = InsumosCliente.find(
+      (insumo) =>
+        insumo.IdColor == IdColorCliente && insumo.IdTalla == IdTallaCliente
+    );
     return insumoEncontrado.IdInsumo;
-  }
+  };
 
-  // Función para generar una referencia aleatoria 
+  // Función para generar una referencia aleatoria
   const generarReferencia = () => {
     const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const numeros = "0123456789";
-    
+
     // Generar tres letras aleatorias
     let parteLetras = "";
     for (let i = 0; i < 3; i++) {
       parteLetras += letras.charAt(Math.floor(Math.random() * letras.length));
     }
-    
+
     // Generar tres números aleatorios
     let parteNumeros = "";
     for (let i = 0; i < 3; i++) {
-      parteNumeros += numeros.charAt(Math.floor(Math.random() * numeros.length));
+      parteNumeros += numeros.charAt(
+        Math.floor(Math.random() * numeros.length)
+      );
     }
-    
+
     // Combinar las partes
     return `${parteLetras}-${parteNumeros}`;
   };
 
   // Función para verificar si la referencia es única
   const esReferenciaUnica = (referencia, productos) => {
-    return !productos.some(producto => producto.referencia === referencia);
+    return !productos.some((producto) => producto.referencia === referencia);
   };
 
   // Función principal para generar una referencia única
@@ -586,10 +590,9 @@ export const Catalogo = () => {
     do {
       nuevaReferencia = generarReferencia();
     } while (!esReferenciaUnica(nuevaReferencia, productos));
-    
+
     return nuevaReferencia;
   };
-
 
   // Función para validar la cantidad
   const validateCantidad = (value) => {
@@ -626,19 +629,25 @@ export const Catalogo = () => {
     return "";
   };
 
-  const generarValorVentaCliente = (IdDisenioCliente,IdInsumoCliente) =>{
-    const disenioCliente = DiseniosCliente.filter(disenio => disenio.IdDisenio == IdDisenioCliente)
-    const insumoCliente = InsumosCliente.filter(insumo => insumo.IdInsumo == IdInsumoCliente)
+  const generarValorVentaCliente = (IdDisenioCliente, IdInsumoCliente) => {
+    const disenioCliente = DiseniosCliente.filter(
+      (disenio) => disenio.IdDisenio == IdDisenioCliente
+    );
+    const insumoCliente = InsumosCliente.filter(
+      (insumo) => insumo.IdInsumo == IdInsumoCliente
+    );
 
-    const valorVentaProductoCliente = precioSugerido(disenioCliente[0].PrecioDisenio,insumoCliente[0].ValorCompra)
+    const valorVentaProductoCliente = precioSugerido(
+      disenioCliente[0].PrecioDisenio,
+      insumoCliente[0].ValorCompra
+    );
 
     console.log(disenioCliente[0].PrecioDisenio);
     console.log(insumoCliente);
     console.log(valorVentaProductoCliente);
-    
 
     return Math.round(valorVentaProductoCliente);
-  }
+  };
 
   // Función para validar el valorVenta
   const validateValorVenta = (value) => {
@@ -683,35 +692,31 @@ export const Catalogo = () => {
   };
 
   // Función para manejar cambios en el color del cliente
-  const handleChangeColorCliente = (e) => {
-    const value = e.target.value;
+  // const handleChangeColorCliente = (e) => {
+  //   const value = e.target.value;
 
-    // Filtra las tallas que estan relacionadas con el color seleccionado
-    const tallasFiltradas = InsumosCliente
-    .filter(insumo => insumo.IdColor === parseInt(value) && insumo.Cantidad > 0 && insumo.Estado === 'Activo')
-    .map(insumo => insumo.IdTalla);
+  //   // Filtra las tallas que estan relacionadas con el color seleccionado
+  //   const tallasFiltradas = InsumosCliente
+  //   .filter(insumo => insumo.IdColor === parseInt(value) && insumo.Cantidad > 0 && insumo.Estado === 'Activo')
+  //   .map(insumo => insumo.IdTalla);
 
+  //   // Filtrar las nuevas tallas para el select del cliente
+  //   const nuevasTallasFiltradasCliente = Tallas.filter(talla => tallasFiltradas.includes(talla.IdTalla));
 
-    // Filtrar las nuevas tallas para el select del cliente
-    const nuevasTallasFiltradasCliente = Tallas.filter(talla => tallasFiltradas.includes(talla.IdTalla));
+  //   console.log(tallasFiltradas);
 
+  //   setIdColorCliente(value);
+  //   setIdTallaCliente("");
+  //   setTallasCliente(nuevasTallasFiltradasCliente);
 
-    console.log(tallasFiltradas);
-    
-
-    setIdColorCliente(value);
-    setIdTallaCliente("");
-    setTallasCliente(nuevasTallasFiltradasCliente);
-
-  };
+  // };
 
   // Función para manejar cambios en la talla del cliente
-  const handleChangeTallaCliente = (e) => {
-    const value = e.target.value;
+  // const handleChangeTallaCliente = (e) => {
+  //   const value = e.target.value;
 
-    setIdTallaCliente(value);
-  };
-
+  //   setIdTallaCliente(value);
+  // };
 
   // Función para manejar cambios en la referencia
   const handleChangeReferencia = (e) => {
@@ -782,6 +787,7 @@ export const Catalogo = () => {
     ) : null;
   };
 
+  // Funcion para enviar solicitud
   const enviarSolicitud = async (metodo, parametros) => {
     let urlRequest =
       metodo === "PUT" || metodo === "DELETE"
@@ -792,6 +798,7 @@ export const Catalogo = () => {
       let respuesta;
       if (metodo === "POST") {
         console.log(parametros);
+        // return;
         respuesta = await axios.post(url, parametros);
       } else if (metodo === "PUT") {
         respuesta = await axios.put(urlRequest, parametros);
@@ -983,17 +990,16 @@ export const Catalogo = () => {
         (producto) => producto.IdProducto === IdProducto
       );
       let nuevoEstadoPublicacion;
-  
+
       let parametros;
-  
+
       const nuevoEstado =
         productoActual.Estado === "Activo" ? "Inactivo" : "Activo";
-  
+
       if (nuevoEstado === "Inactivo") {
         nuevoEstadoPublicacion = "Inactivo";
-  
+
         parametros = {
-          
           IdDisenio: productoActual.IdDisenio,
           IdInsumo: productoActual.IdInsumo,
           Publicacion: nuevoEstadoPublicacion,
@@ -1001,16 +1007,15 @@ export const Catalogo = () => {
         };
       } else {
         nuevoEstadoPublicacion = productoActual.Publicacion;
-  
+
         parametros = {
-          
           IdDisenio: productoActual.IdDisenio,
           IdInsumo: productoActual.IdInsumo,
           Publicacion: nuevoEstadoPublicacion,
           Estado: nuevoEstado,
         };
       }
-  
+
       const MySwal = withReactContent(Swal);
       MySwal.fire({
         title: `¿Seguro de cambiar el estado del producto ${productoActual.Referencia}?`,
@@ -1023,9 +1028,12 @@ export const Catalogo = () => {
         if (result.isConfirmed) {
           try {
             console.log(parametros);
-  
-            const respuesta = await axios.put(`${url}/${IdProducto}`, parametros);
-  
+
+            const respuesta = await axios.put(
+              `${url}/${IdProducto}`,
+              parametros
+            );
+
             if (respuesta.status === 200) {
               setProductosAdmin((prevProducto) =>
                 prevProducto.map((producto) =>
@@ -1038,7 +1046,7 @@ export const Catalogo = () => {
                     : producto
                 )
               );
-  
+
               show_alerta({
                 message: "Estado del producto cambiado con éxito",
                 type: "success",
@@ -1074,14 +1082,16 @@ export const Catalogo = () => {
       });
     }
   };
-  
+
   const convertDisenioIdToName = (disenioId) => {
     const disenio = Disenios.find((disenio) => disenio.IdDisenio === disenioId);
     return disenio ? disenio.NombreDisenio : "";
   };
 
   const convertInsumoIdToName = (insumoId) => {
-    const insumo = InsumosTotales.find((insumo) => insumo.IdInsumo === insumoId);
+    const insumo = InsumosTotales.find(
+      (insumo) => insumo.IdInsumo === insumoId
+    );
     return insumo ? insumo.Referencia : "";
   };
 
@@ -1135,6 +1145,159 @@ export const Catalogo = () => {
       });
     }
   };
+
+  // __________________________________detalle color y tamaño ___________________
+
+  // Función para añadir un nuevo detalle a la tabla
+  const addDetail = () => {
+    const newDetail = {
+      IdColor: "",
+      IdTalla: "",
+      cantidad: "",
+    };
+
+    setDetallesInsumos([...DetallesInsumos, newDetail]);
+  };
+
+  // Función para eliminar un detalle de la tabla
+  const removeDetail = (index) => {
+    const updatedDetalles = DetallesInsumos.filter((_, i) => i !== index);
+    setDetallesInsumos(updatedDetalles);
+  };
+
+  
+// Función para manejar cambios en el color
+const handleChangeColorCliente = (index, e) => {
+  const value = e.target.value;
+
+  // Actualiza la selección del color
+  const updatedDetalles = [...DetallesInsumos];
+  updatedDetalles[index].IdColor = parseInt(value);
+  updatedDetalles[index].IdTalla = ""; // Reseteamos la talla al cambiar de color
+  setDetallesInsumos(updatedDetalles);
+
+  // Filtra las tallas relacionadas con el color seleccionado
+  const tallasFiltradas = InsumosCliente.filter(
+    (insumo) =>
+      insumo.IdColor === parseInt(value) &&
+      insumo.Cantidad > 0 && 
+      insumo.Estado === "Activo"
+  ).map((insumo) => insumo.IdTalla);
+
+  // Actualiza las tallas disponibles para esa fila
+  setTallasCliente((prevState) => {
+    const newTallasCliente = [...prevState];
+    const nuevasTallasFiltradasCliente = Tallas.filter((talla) =>
+      tallasFiltradas.includes(talla.IdTalla)
+    );
+
+    newTallasCliente[index] = nuevasTallasFiltradasCliente;
+    return newTallasCliente;
+  });
+
+  // Mantener los colores que aún tienen tallas disponibles
+  actualizarColoresDisponibles();
+};
+  
+
+  // Función para manejar cambios en la talla 
+  const handleChangeTallaCliente = (index, e) => {
+    const value = e.target.value;
+
+    // Actualiza la selección de la talla
+    const updatedDetalles = [...DetallesInsumos];
+    updatedDetalles[index].IdTalla = parseInt(value);
+    setDetallesInsumos(updatedDetalles);
+
+
+    // Mantener los colores que aún tienen tallas disponibles
+    actualizarColoresDisponibles();
+  };
+
+  // Función para actualizar la lista de colores disponibles, verificando si aún tienen tallas
+  const actualizarColoresDisponibles = () => {
+    const coloresFiltrados = InsumosCliente.filter((insumo) => {
+      const tallasDisponibles = InsumosCliente.filter(
+        (i) => i.IdColor === insumo.IdColor && i.Cantidad > 0 && i.Estado === "Activo"
+      ).map((i) => i.IdTalla);
+
+      // Verificar si el color aún tiene tallas disponibles
+      return tallasDisponibles.length > 0;
+    }).map((insumo) => insumo.IdColor);
+
+    // Actualiza los colores disponibles sin eliminar los que aún tienen tallas
+    setColoresDisponibles(coloresFiltrados);
+  };
+
+  // Función para manejar los cambios en otros campos (como cantidad)
+  const handleDetailChange = (index, e) => {
+    const { name, value } = e.target;
+  
+    // Validar solo números
+    const regex = /^[0-9\b]+$/;
+    if (name === "cantidad" && (!regex.test(value) && value !== "")) {
+      return; // Ignora la entrada si no es un número
+    }
+  
+    const detallesActualizados = [...DetallesInsumos];
+    detallesActualizados[index] = {
+      ...detallesActualizados[index],
+      [name]: value,
+    };
+  
+    // Validar que la cantidad no supere la cantidad disponible del insumo seleccionado
+    if (name === "cantidad" && detallesActualizados[index].IdColor && detallesActualizados[index].IdTalla) {
+      const insumoSeleccionado = InsumosCliente.find(
+        insumo =>
+          insumo.IdColor === detallesActualizados[index].IdColor &&
+          insumo.IdTalla === detallesActualizados[index].IdTalla &&
+          insumo.Estado === "Activo"
+      );
+  
+      if (insumoSeleccionado && parseInt(value) > insumoSeleccionado.Cantidad) {
+        alertas[index] = `La cantidad máxima disponible es ${insumoSeleccionado.Cantidad}`;
+        detallesActualizados[index].cantidad = insumoSeleccionado.Cantidad; // Asignar la cantidad máxima disponible
+      } else {
+        alertas[index] = ""; // Limpiar la alerta si está dentro del rango
+      }
+    }
+  
+    setDetallesInsumos(detallesActualizados);
+    setAlertas([...alertas]); // Actualizar alertas
+  };
+
+// Obtener tallas disponibles para el color seleccionado
+const getTallasDisponibles = (index) => {
+  const colorSeleccionado = DetallesInsumos[index].IdColor;
+  if (!colorSeleccionado) return [];
+
+  // Filtrar las tallas disponibles para el color seleccionado
+  const tallasDisponibles = InsumosCliente
+    .filter(insumo => insumo.IdColor === colorSeleccionado && insumo.Estado === "Activo")
+    .map(insumo => insumo.IdTalla);
+
+  return Tallas.filter(talla => tallasDisponibles.includes(talla.IdTalla));
+};
+
+
+
+// Obtener colores disponibles, excluyendo los que no tienen tallas disponibles
+const getColoresDisponibles = (index) => {
+  // Filtrar los colores que tengan al menos una talla disponible y activa
+  const coloresDisponibles = Colores.filter(color => {
+    const tallasRelacionadas = InsumosCliente
+      .filter(insumo => insumo.IdColor === color.IdColor && insumo.Estado === "Activo")
+      .map(insumo => insumo.IdTalla);
+    
+    // Verificar si el color tiene al menos una talla activa
+    return tallasRelacionadas.length > 0;
+  });
+
+  return coloresDisponibles;
+};
+
+
+  // __________________________________detalle color y tamaño ___________________
 
   const handleSearchTermChange = (newSearchTerm) => {
     setSearchTerm(newSearchTerm);
@@ -1210,7 +1373,7 @@ export const Catalogo = () => {
     let margen = subTotal * 0.3;
     let total = subTotal + margen;
 
-    return operation == 1 || operation == 2 ? formatCurrency(total) : total ;
+    return operation == 1 || operation == 2 ? formatCurrency(total) : total;
   };
 
   return (
@@ -1298,50 +1461,6 @@ export const Catalogo = () => {
                         </i>
                       </div>
 
-                      {/* Insumo del Producto */}
-                      <div className="form-group col-md-5">
-                        <label htmlFor="idInsumo">Insumo del Producto:</label>
-                        <select
-                          className={`form-control ${
-                            errors.IdInsumo ? "is-invalid" : ""
-                          }`}
-                          id="idInsumo"
-                          // disabled={!IdDisenio}
-                          value={IdInsumo}
-                          onChange={(e) => handleChangeIdInsumo(e)}
-                          required
-                        >
-                          <option value="" disabled>
-                            Seleccione un Insumo
-                          </option>
-                          {Insumos.map((insumo) => (
-                            <option
-                              key={insumo.IdInsumo}
-                              value={insumo.IdInsumo}
-                            >
-                              {insumo.Referencia}
-                            </option>
-                          ))}
-                        </select>
-                        {errors.IdInsumo && (
-                          <div className="invalid-feedback">
-                            {errors.IdInsumo}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* ToolTip talla del producto */}
-                      <div className="col-md-1 mt-4 pt-3">
-                        <i className="tooltipReferenceImage fas fa-info-circle">
-                          {selectedInsumo && (
-                            <span className="tooltiptext">
-                              {`La talla del insumo es: ${convertTallaIdToName(
-                                selectedInsumo.IdTalla
-                              )}`}
-                            </span>
-                          )}
-                        </i>
-                      </div>
 
                       {/* Referencia del Producto */}
                       <div className="form-group col-md-6">
@@ -1366,30 +1485,6 @@ export const Catalogo = () => {
                         )}
                       </div>
 
-                      {/* Cantidad del producto */}
-                      <div className="form-group col-md-6">
-                        <label htmlFor="cantidadProducto">Cantidad:</label>
-                        <input
-                          type="text"
-                          className={`form-control ${
-                            errors.Cantidad ? "is-invalid" : ""
-                          }`}
-                          id="cantidadProducto"
-                          placeholder={
-                            selectedInsumo
-                              ? `La cantidad máxima del insumo es: ${selectedInsumo.Cantidad}`
-                              : "Ingrese la cantidad del insumo"
-                          }
-                          required
-                          value={Cantidad}
-                          onChange={handleChangeCantidad}
-                        />
-                        {errors.Cantidad && (
-                          <div className="invalid-feedback">
-                            {errors.Cantidad}
-                          </div>
-                        )}
-                      </div>
 
                       {/* Valor venta del producto */}
                       <div className="form-group col-md-12">
@@ -1420,11 +1515,144 @@ export const Catalogo = () => {
                           </div>
                         )}
                       </div>
+
+                      {/* detalles del insumo */}
+                      <div className="table-responsive">
+                        <table className="table table-bordered">
+                          <thead>
+                            <tr>
+                              <th>Color</th>
+                              <th>Talla</th>
+                              <th>Cantidad</th>
+                              <th>Acción</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {DetallesInsumos.map((detalle, index) => (
+                              <tr key={index}>
+                                {/* Select de Color */}
+                                <td>
+                                  <select
+                                    className="form-control"
+                                    name="IdColor"
+                                    value={detalle.IdColor}
+                                    onChange={(e) =>
+                                      handleChangeColorCliente(index, e)
+                                    }
+                                  >
+                                    <option value="">
+                                      Selecciona un color
+                                    </option>
+                                    {getColoresDisponibles(index).map(
+                                      (color) => (
+                                        <option
+                                          key={color.IdColor}
+                                          value={color.IdColor}
+                                        >
+                                          {color.Color}
+                                        </option>
+                                      )
+                                    )}
+                                  </select>
+                                  {errors.Detalles &&
+                                    errors.Detalles[index] &&
+                                    errors.Detalles[index].IdColor && (
+                                      <div className="invalid-feedback">
+                                        {errors.Detalles[index].IdColor}
+                                      </div>
+                                    )}
+                                </td>
+
+                                {/* Select de Talla */}
+                                <td>
+                                  <select
+                                    className={`form-control ${
+                                      errors.Detalles &&
+                                      errors.Detalles[index] &&
+                                      errors.Detalles[index].IdTalla
+                                        ? "is-invalid"
+                                        : ""
+                                    }`}
+                                    value={detalle.IdTalla}
+                                    onChange={(e) =>
+                                      handleChangeTallaCliente(index, e)
+                                    } // Llama a la función para manejar el cambio de talla
+                                    disabled={!detalle.IdColor} // Deshabilitar si no se ha seleccionado un color
+                                  >
+                                    <option value="">
+                                      Selecciona una talla
+                                    </option>
+                                    {getTallasDisponibles(index).map(
+                                      (talla) => (
+                                        <option
+                                          key={talla.IdTalla}
+                                          value={talla.IdTalla}
+                                        >
+                                          {talla.Talla}
+                                        </option>
+                                      )
+                                    )}
+                                  </select>
+                                  {errors.Detalles &&
+                                    errors.Detalles[index] &&
+                                    errors.Detalles[index].IdTalla && (
+                                      <div className="invalid-feedback">
+                                        {errors.Detalles[index].IdTalla}
+                                      </div>
+                                    )}
+                                </td>
+
+                                {/* Input de Cantidad */}
+                                <td>
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    name="cantidad"
+                                    placeholder="Cantidad"
+                                    value={detalle.cantidad}
+                                    onChange={(e) => handleDetailChange(index, e)}
+                                    disabled={!detalle.IdColor || !detalle.IdTalla} // Deshabilitar si no se ha seleccionado color y talla
+                                    min="0"
+                                    onInput={(e) => e.target.value = e.target.value.replace(/[^1-9]/g, '')} // Asegurar que solo se acepten números
+                                  />
+                                  {alertas[index] && (
+                                    <span style={{ color: "red" }} className="alerta">
+                                      {alertas[index]}
+                                    </span>
+                                  )}
+                                </td>
+
+                                {/* Botón para eliminar fila */}
+                                <td>
+                                  <button
+                                    type="button"
+                                    className="btn btn-danger"
+                                    onClick={() => removeDetail(index)} // Llama a la función para eliminar el detalle
+                                  >
+                                    X
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Botón para añadir más filas de detalles */}
+                      <div className="text-right mb-3">
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={addDetail}
+                        >
+                          Añadir Detalle
+                        </button>
+                      </div>
                     </>
                   ) : (
                     <>
                       {/* Diseño del Producto */}
-                      <div className="form-group col-md-6">
+                      {/* <div className="form-group col-md-6">
                         <label>Diseño del Producto:</label>
                         <input
                           type="text"
@@ -1432,10 +1660,10 @@ export const Catalogo = () => {
                           disabled
                           value={convertDisenioIdToName(IdDisenio)}
                         />
-                      </div>
+                      </div> */}
 
                       {/* Insumo del Producto */}
-                      <div className="form-group col-md-6">
+                      {/* <div className="form-group col-md-6">
                         <label>Insumo del Producto:</label>
                         <input
                           type="text"
@@ -1443,10 +1671,10 @@ export const Catalogo = () => {
                           disabled
                           value={convertInsumoIdToName(IdInsumo)}
                         />
-                      </div>
+                      </div> */}
 
                       {/* Referencia del Producto */}
-                      <div className="form-group col-md-6">
+                      {/* <div className="form-group col-md-6">
                         <label>Referencia del Producto:</label>
                         <input
                           type="text"
@@ -1454,10 +1682,10 @@ export const Catalogo = () => {
                           disabled
                           value={Referencia}
                         />
-                      </div>
+                      </div> */}
 
                       {/* Cantidad del producto */}
-                      <div className="form-group col-md-6">
+                      {/* <div className="form-group col-md-6">
                         <label htmlFor="cantidadProducto">Cantidad:</label>
                         <input
                           type="text"
@@ -1479,10 +1707,10 @@ export const Catalogo = () => {
                             {errors.Cantidad}
                           </div>
                         )}
-                      </div>
+                      </div> */}
 
                       {/* Referencia del Producto */}
-                      <div className="form-group col-md-12">
+                      {/* <div className="form-group col-md-12">
                         <label>Valor de la venta del producto:</label>
                         <input
                           type="text"
@@ -1490,7 +1718,7 @@ export const Catalogo = () => {
                           disabled
                           value={formatCurrency(ValorVenta)}
                         />
-                      </div>
+                      </div> */}
                     </>
                   )}
                 </div>
@@ -1522,9 +1750,8 @@ export const Catalogo = () => {
       </div>
       {/* Modal crear producto */}
 
-
       {/* Modal crear producto cliente*/}
-      <div
+      {/* <div
         className="modal fade"
         id="modalProductoCliente"
         tabIndex="-1"
@@ -1552,8 +1779,7 @@ export const Catalogo = () => {
             <div className="modal-body">
               <form id="crearClienteForm">
                 <div className="form-row">
-
-                  {/* Diseño del Producto cliente*/}
+                  Diseño del Producto cliente
                   <div className="form-group col-md-5">
                     <label htmlFor="idDisenio">Diseño de la camiseta</label>
                     <select
@@ -1583,7 +1809,7 @@ export const Catalogo = () => {
                     )}
                   </div>
 
-                  {/* ToolTip imagen de referenciacliente*/}
+                  ToolTip imagen de referenciacliente
                   <div className="col-md-1 mt-4 pt-3">
                     <i className="tooltipReferenceImage fas fa-info-circle">
                       {selectedDisenio && (
@@ -1597,9 +1823,8 @@ export const Catalogo = () => {
                       )}
                     </i>
                   </div>
-                  
 
-                  {/* Color del producto cliente*/}
+                  Color del producto cliente
                   <div className="form-group col-md-6">
                     <label htmlFor="idInsumo">Color de la camiseta</label>
                     <select
@@ -1625,7 +1850,7 @@ export const Catalogo = () => {
                     )}
                   </div>
 
-                  {/* Talla del producto cliente*/}
+                  Talla del producto cliente
                   <div className="form-group col-md-6">
                     <label htmlFor="idColor">Talla de la camiseta</label>
                     <select
@@ -1649,7 +1874,7 @@ export const Catalogo = () => {
                         Por favor, seleccione una talla.
                       </p>
                     )}
-                  </div>
+                  </div> */}
 
                   {/* ToolTip talla del producto*/}
                   {/* <div className="col-md-1 mt-4 pt-3">
@@ -1682,8 +1907,8 @@ export const Catalogo = () => {
                     />
                     {renderErrorMessage(errors.Referencia)}
                   </div> */}
-
-                  {/* Cantidad del producto cliente*/}
+{/* 
+                  Cantidad del producto cliente
                   <div className="form-group col-md-6">
                     <label htmlFor="cantidadProducto">Cantidad</label>
                     <input
@@ -1698,7 +1923,7 @@ export const Catalogo = () => {
                       onChange={handleChangeCantidadCliente}
                     />
                     {renderErrorMessage(errors.CantidadCliente)}
-                  </div>
+                  </div> */}
 
                   {/* Valor venta del producto */}
                   {/* <div className="form-group col-md-12">
@@ -1718,8 +1943,7 @@ export const Catalogo = () => {
                     />
                     {renderErrorMessage(errors.ValorVenta)}
                   </div> */}
-
-                </div>
+                {/* </div>
               </form>
             </div>
             <div className="modal-footer">
@@ -1743,8 +1967,10 @@ export const Catalogo = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       {/* Modal crear producto cliente*/}
+
+
 
       {/* Inicio modal ver detalle diseño */}
       <div
@@ -2209,9 +2435,9 @@ export const Catalogo = () => {
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
         <div className="d-flex align-items-center justify-content-between">
-          <h1 className="h3 mb-3 text-center text-dark">
-            {/* Gestión de Productos */}
-          </h1>
+          {/* <h1 className="h3 mb-3 text-center text-dark">
+            Gestión de Productos
+          </h1> */}
         </div>
 
         {/* <!-- Tabla de Productos --> */}
@@ -2393,18 +2619,20 @@ export const Catalogo = () => {
 
                         <td>
                           <div className="d-flex">
-
-                            {validarProductoClienteCarrito(producto.IdProducto) && producto.Cantidad != 0 &&(
-                              <button
-                                className="btn btn-success btn-sm mr-2"
-                                onClick={() =>
-                                  AgregarProductoCarrito(producto)
-                                }
-                                title="Agregar al carrito"
-                              >
-                                <i className="fas fa-cart-plus"></i>
-                              </button>
-                            )}
+                            {validarProductoClienteCarrito(
+                              producto.IdProducto
+                            ) &&
+                              producto.Cantidad != 0 && (
+                                <button
+                                  className="btn btn-success btn-sm mr-2"
+                                  onClick={() =>
+                                    AgregarProductoCarrito(producto)
+                                  }
+                                  title="Agregar al carrito"
+                                >
+                                  <i className="fas fa-cart-plus"></i>
+                                </button>
+                              )}
 
                             <button
                               className="btn btn-info btn-sm mr-2"

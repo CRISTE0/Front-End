@@ -10,6 +10,15 @@ export const ProductoSolo = () => {
   const [Producto, setProducto] = useState([]);
   const [ColorProducto, setColorProducto] = useState("");
   const [TallaProducto, setTallaProducto] = useState("");
+
+  const [Colores, setColores] = useState([]); // Colores disponibles
+  const [Tallas, setTallas] = useState([]); // Tallas disponibles
+  const [TallaSeleccionada, setTallaSeleccionada] = useState(""); // Talla seleccionada
+  const [ColorSeleccionado, setColorSeleccionado] = useState(""); // Color seleccionado
+  const [TallasDisponibles, setTallasDisponibles] = useState([]);
+  const [ColoresDisponibles, setColoresDisponibles] = useState([]);
+  const [InsumoSeleccionado, setInsumoSeleccionado] = useState(null);
+
   const { triggerRender } = useAuth();
   const { auth } = useAuth();
   const url = `http://localhost:3000/api/productos/${id}`;
@@ -29,6 +38,7 @@ export const ProductoSolo = () => {
   const getProducto = async () => {
     const respuesta = await axios.get(url);
 
+    // repuesta de la peticion 
     const productData = respuesta.data;
 
     // Busca si el producto está en el carrito
@@ -36,6 +46,7 @@ export const ProductoSolo = () => {
       (item) => item.IdProd == productData.IdProducto
     );
 
+    // la CantidadSeleccionada es solo mientras está en esta pagina  
     if (itemInCart) {
       // Si lo esta se agrega la cantidad seleccionada al producto
       productData.CantidadSeleccionada = itemInCart.CantidadSeleccionada;
@@ -53,9 +64,55 @@ export const ProductoSolo = () => {
 
     console.log(productoDetalle);
 
-    getColor();
-    getTalla();
+   // Filtrar tallas y colores únicos
+    const tallas = [
+      ...new Set(
+        productData.ProductoInsumos.map((insumo) => insumo.InsumoProd.Talla.Talla)
+      ),
+    ];
+    const colores = [
+      ...new Set(
+        productData.ProductoInsumos.map((insumo) => insumo.InsumoProd.Color.Color)
+      ),
+    ];
+
+    setTallasDisponibles(tallas);
+    setColoresDisponibles(colores);
+
+    // getColor();
+    // getTalla();
   };
+
+  // Manejar la selección de la talla
+  const handleTallaSeleccionada = (talla) => {
+    setTallaSeleccionada(talla);
+
+    // Filtrar colores disponibles según la talla seleccionada
+    const coloresParaTalla = Producto.ProductoInsumos.filter(
+      (insumo) => insumo.InsumoProd.Talla.Talla === talla
+    ).map((insumo) => insumo.InsumoProd.Color.Color);
+
+    setColoresDisponibles([...new Set(coloresParaTalla)]);
+    setColorSeleccionado(null); // Reiniciar color al cambiar talla
+    setInsumoSeleccionado(null); // Reiniciar insumo al cambiar talla
+
+  };
+
+
+  // Manejar la selección del color
+  const handleColorSeleccionado = (color) => {
+    setColorSeleccionado(color);
+
+     // Filtrar el insumo seleccionado con la combinación de talla y color
+     const insumo = Producto.ProductoInsumos.find(
+      (insumo) =>
+        insumo.InsumoProd.Talla.Talla === TallaSeleccionada &&
+        insumo.InsumoProd.Color.Color === color
+    );
+
+    setInsumoSeleccionado(insumo);
+  };
+
 
   const getColor = async () => {
     const respuesta = await axios.get(
@@ -81,19 +138,29 @@ export const ProductoSolo = () => {
     getProducto();
   }, [id]);
 
-  if (!TallaProducto) {
-    return <h1>Loading...</h1>;
-  }
+  // if (!TallaProducto) {
+  //   return <h1>Loading...</h1>;
+  // }
+
+
 
   //   Incrementar cantidad del carrito
   const incrementarCantidad = (idProductoSeleccionado) => {
     // Encuentra el índice del producto en el carrito
     const productIndex = cart.findIndex(
-      (item) => item.IdProd == Producto.IdProducto
+      (item) => item.IdIns == InsumoSeleccionado.IdInsumo
     );
 
+    console.log(InsumoSeleccionado);
+    
+    // return;
+    
+    // si encuentra el producto
     if (productIndex !== -1) {
-      if (cart[productIndex].CantidadSeleccionada >= Producto.Cantidad) {
+
+
+      // validacion de la cantidad disponible
+      if (cart[productIndex].CantidadSeleccionada >= InsumoSeleccionado.CantidadProductoInsumo) {
         show_alerta("Cantidad maxima del producto alcanzada", "error");
         return;
       }
@@ -114,7 +181,7 @@ export const ProductoSolo = () => {
       triggerRender();
     } else {
       // Si el producto no existe, agrégalo con una cantidad inicial de 1
-      cart.push({ IdProd: Producto.IdProducto, CantidadSeleccionada: 1 });
+      cart.push({ IdProd: Producto.IdProducto, CantidadSeleccionada: 1, IdIns:InsumoSeleccionado.IdInsumo });
       localStorage.setItem("cart", JSON.stringify(cart));
 
       console.log(JSON.parse(localStorage.getItem("cart")));
@@ -124,6 +191,8 @@ export const ProductoSolo = () => {
 
       // getCantidadProducto(idProductoSeleccionado);
     }
+
+    // navigate("/Carrito");
   };
 
   // Disminuir cantidad del carrito
@@ -226,15 +295,15 @@ export const ProductoSolo = () => {
     });
   };
 
-  const botonComprarAhora = () => {
-    if (Producto.CantidadSeleccionada == 0) {
-      incrementarCantidad();
-      navigate("/Carrito");
-    } else {
-      console.log("vagar");
-      navigate("/Carrito");
-    }
-  };
+  // const botonComprarAhora = () => {
+  //   if (Producto.CantidadSeleccionada == 0) {
+  //     incrementarCantidad();
+  //     navigate("/Carrito");
+  //   } else {
+  //     console.log("vagar");
+  //     navigate("/Carrito");
+  //   }
+  // };
 
   // Funcion para formatear el precio
   const formatCurrency = (value) => {
@@ -291,28 +360,63 @@ export const ProductoSolo = () => {
                   <div>
                     <div className="row">
                       {/* Color del producto */}
-                      <div className="col-12">
-                        <ul className="list-inline ">
+
+                      {/* Talla del producto */}
+                      <div className="col-12 pb-5">
+                        {/* <ul className="list-inline pb-1">
+                          <li className="list-inline-item">Talla:</li>
+                          <li className="font-weight-bold text-dark">
+                            {TallaProducto.Talla}{" "}
+                          </li>
+                        </ul> */}
+
+                        <h6>Selecciona una talla:</h6>
+                        {TallasDisponibles.map((talla, index) => (
+                        <button
+                          key={index}
+                          className={`btn mx-1 my-1 btn-sm ${
+                            TallaSeleccionada === talla
+                              ? "btn-primary"
+                              : "btn-outline-primary"
+                          }`}
+                          onClick={() => handleTallaSeleccionada(talla)}
+                        >
+                          {talla}
+                        </button>
+                      ))}
+
+
+                      </div>
+
+                      <div className="col-12 pb-5">
+                        {/* <ul className="list-inline ">
                           <li className="list-inline-item">Color:</li>
 
                           <li className="font-weight-bold text-dark">
                             {ColorProducto.Color}
                           </li>
-                        </ul>
-                      </div>
+                        </ul> */}
 
-                      {/* Talla del producto */}
-                      <div className="col-12">
-                        <ul className="list-inline pb-1">
-                          <li className="list-inline-item">Talla:</li>
-                          <li className="font-weight-bold text-dark">
-                            {TallaProducto.Talla}{" "}
-                          </li>
-                        </ul>
+                        <h6>Selecciona un color:</h6>
+                        {ColoresDisponibles.map((color, index) => (
+                          <button
+                            key={index}
+                            className={`btn mx-1 my-1 btn-sm ${
+                              ColorSeleccionado === color
+                                ? "btn-success"
+                                : "btn-outline-success"
+                            }`}
+                            onClick={() => handleColorSeleccionado(color)}
+                            disabled={!TallaSeleccionada}
+                          >
+                            {color}
+                          </button>
+                        ))}
+
                       </div>
 
                       {/* Cantidad del producto */}
-                      <div className="col-12">
+                      {/* <div className="col-12">
                         <ul className="list-inline pb-3">
                           {Producto.CantidadSeleccionada > 0 && (
                             <li className="list-inline-item text-right">
@@ -321,7 +425,7 @@ export const ProductoSolo = () => {
                           )}
 
                           <div className="d-flex flex-row align-items-center mt-2">
-                            {/* Eliminar producto del carrito */}
+
                             {Producto.CantidadSeleccionada == 1 && (
                               <button
                                 className="mr-3"
@@ -341,7 +445,6 @@ export const ProductoSolo = () => {
                               </button>
                             )}
 
-                            {/* Disminuir cantidad del producto */}
                             {Producto.CantidadSeleccionada > 1 && (
                               <button
                                 className="mr-3"
@@ -367,7 +470,6 @@ export const ProductoSolo = () => {
                                   </h5>
                                 </div>
 
-                                {/* Aumentar cantidad del producto */}
 
                                 <button
                                   className=""
@@ -383,7 +485,7 @@ export const ProductoSolo = () => {
                             )}
                           </div>
                         </ul>
-                      </div>
+                      </div> */}
                     </div>
 
                     {/* Detalles de la camiseta */}
@@ -519,22 +621,24 @@ export const ProductoSolo = () => {
                       </div>
                     </section>
 
-                    {auth.idCliente && (
-
                     <div className="d-flex justify-content-around m-4">
-                      <div className="">
+                      {/* <div className="">
                         <button
                           className="btn btn-success btn-md"
+                          disabled={!TallaSeleccionada || !ColorSeleccionado}
+
                           onClick={() => botonComprarAhora()}
                         >
                           Comprar ahora
                         </button>
-                      </div>
+                      </div> */}
 
-                      {Producto.CantidadSeleccionada == 0 && (
+                      {/* {Producto.CantidadSeleccionada == 0 && ( */}
                         <div className="">
                           <button
                             className="btn btn-success btn-md"
+                            disabled={!TallaSeleccionada || !ColorSeleccionado}
+
                             onClick={() =>
                               incrementarCantidad(Producto.IdProducto)
                             }
@@ -542,10 +646,8 @@ export const ProductoSolo = () => {
                             Agrega al carrito
                           </button>
                         </div>
-                      )}
+                       {/* )} */}
                     </div>
-                      
-                    )}
                   </div>
                 </div>
               </div>
