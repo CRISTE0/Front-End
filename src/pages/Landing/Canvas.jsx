@@ -1017,6 +1017,20 @@ export const Canvas = () => {
 
       show_alerta( respuesta.data.message,"success");
 
+
+      
+        // // Si el producto no existe, agrégalo con una cantidad inicial de 1
+        // cart.push({ IdProd: Producto.IdProducto, CantidadSeleccionada: 1, IdIns:InsumoSeleccionado.IdInsumo });
+        // localStorage.setItem("cart", JSON.stringify(cart));
+  
+        // console.log(JSON.parse(localStorage.getItem("cart")));
+  
+        // getProducto();
+        // triggerRender();
+  
+        // getCantidadProducto(idProductoSeleccionado);
+      
+
     } else {
       throw new Error("No se encontraron insumos válidos.");
     }
