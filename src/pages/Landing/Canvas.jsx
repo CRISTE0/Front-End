@@ -9,6 +9,7 @@ import {
   subirImageReferenceDiseniador,
 } from "../../firebase/config";
 import { useAuth } from "../../context/AuthProvider";
+import { useNavigate } from "react-router";
 export const Canvas = () => {
   // variables diseñador
   const canvasRef = useRef(null);
@@ -549,6 +550,8 @@ export const Canvas = () => {
   const [ImagenReferencia, setImagenReferencia] = useState(null);
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
+  const navigate = useNavigate();
+
 
   const [isFirstView, setIsFirstView] = useState(true);
 
@@ -917,33 +920,6 @@ export const Canvas = () => {
         console.log(error);
         console.log(error.response.data.error);
       }
-      finally{
-
-      }
-      //POST
-      // await axios({ method: metodo, url: url, data: parametros })
-      //   .then(function (respuesta) {
-      //     console.log(respuesta);
-
-      //     var msj = respuesta.data.message;
-
-          
-      //     setDisenioClientePost(respuesta.data.nuevoDisenio);
-
-      //     show_alerta(msj, "success");
-      //     document.getElementById("btnCerrar").click();
-      //   })
-      //   .catch(function (error) {
-      //     if (!error.response.data.error) {
-      //       let mensaje = error.response.data.message;
-
-      //       show_alerta(mensaje, "error");
-      //     } else {
-      //       show_alerta(error.response.data.error, "error");
-      //     }
-      //     console.log(error);
-      //     console.log(error.response.data.error);
-      //   });
     }
   };
   //Fin enviar solicitud creacion
@@ -1017,19 +993,20 @@ export const Canvas = () => {
 
       show_alerta( respuesta.data.message,"success");
 
+      let productoNuevo = respuesta.data.nuevoProducto
 
+      console.log(productoNuevo);
       
+      if (productoNuevo) {
         // // Si el producto no existe, agrégalo con una cantidad inicial de 1
-        // cart.push({ IdProd: Producto.IdProducto, CantidadSeleccionada: 1, IdIns:InsumoSeleccionado.IdInsumo });
-        // localStorage.setItem("cart", JSON.stringify(cart));
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        cart.push({ IdProd: productoNuevo.IdProducto, CantidadSeleccionada: 1, IdIns:idInsumoCliente });
+        localStorage.setItem("cart", JSON.stringify(cart));
   
-        // console.log(JSON.parse(localStorage.getItem("cart")));
-  
-        // getProducto();
-        // triggerRender();
-  
-        // getCantidadProducto(idProductoSeleccionado);
-      
+        console.log(JSON.parse(localStorage.getItem("cart"))); 
+
+        navigate("/carrito");
+      }      
 
     } else {
       throw new Error("No se encontraron insumos válidos.");
