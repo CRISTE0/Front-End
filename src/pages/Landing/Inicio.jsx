@@ -217,89 +217,89 @@ export const Inicio = () => {
 
       {/* inicio reseñas  */}
       <section className="bg-light py-2">
-        <div class="container overflow-hidden p-3">
+        <div className="container overflow-hidden p-3">
           <div className="container d-flex justify-content-center">
             <h1 className="h1 text-dark pb-4">Clientes Recientes</h1>
           </div>
 
-          <div class="row gy-4 gy-md-0 gx-xxl-5">
-            <div class="col-12 col-md-4 p-2">
+          <div className="row gy-4 gy-md-0 gx-xxl-5">
+            <div className="col-12 col-md-4 p-2">
               <div
-                class="card shadow-sm"
+                className="card shadow-sm"
                 style={{ borderBottom: " 1px solid #1cc88a" }}
               >
-                <div class="card-body p-4 ">
+                <div className="card-body p-4 ">
                   <figure>
                     <img
-                      class="img-fluid rounded rounded-circle mb-4 "
+                      className="img-fluid rounded rounded-circle mb-4 "
                       style={{ border: "1px solid #1cc88a" }}
                       src={imagenesLanding[5]}
                       alt="Luna John"
                     />
                     <figcaption>
-                      <blockquote class="bsb-blockquote-icon mb-4">
+                      <blockquote className="bsb-blockquote-icon mb-4">
                         La camiseta estampada que compré superó todas mis
                         expectativas. El diseño es vibrante y los colores son
                         tan vivos como los mostraban en la tienda. ¡Me encanta
                         cómo se siente la tela! Sin duda, volveré a comprar
                         aquí.
                       </blockquote>
-                      <h4 class="mb-2 text-dark">Juan Flórez</h4>
+                      <h4 className="mb-2 text-dark">Juan Flórez</h4>
                     </figcaption>
                   </figure>
                 </div>
               </div>
             </div>
 
-            <div class="col-12 col-md-4 p-2">
+            <div className="col-12 col-md-4 p-2">
               <div
-                class="card shadow-sm"
+                className="card shadow-sm"
                 style={{ borderBottom: " 1px solid #1cc88a" }}
               >
-                <div class="card-body p-4 p-xxl-5">
+                <div className="card-body p-4 p-xxl-5">
                   <figure>
                     <img
-                      class="img-fluid rounded rounded-circle mb-4 "
+                      className="img-fluid rounded rounded-circle mb-4 "
                       style={{ border: "1px solid #1cc88a" }}
                       src={imagenesLanding[6]}
                       alt="Mark Smith"
                     />
                     <figcaption>
-                      <blockquote class="bsb-blockquote-icon mb-4">
+                      <blockquote className="bsb-blockquote-icon mb-4">
                         La atención al detalle en el estampado es increíble. La
                         camiseta no solo es cómoda, sino que también mantiene su
                         forma después de varios lavados. Estoy muy contenta con
                         mi compra y con la calidad del servicio.
                       </blockquote>
-                      <h4 class="mb-2 text-dark">Luna García</h4>
+                      <h4 className="mb-2 text-dark">Luna García</h4>
                     </figcaption>
                   </figure>
                 </div>
               </div>
             </div>
 
-            <div class="col-12 col-md-4 p-2">
+            <div className="col-12 col-md-4 p-2">
               <div
-                class="card shadow-sm"
+                className="card shadow-sm"
                 style={{ borderBottom: " 1px solid #1cc88a" }}
               >
-                <div class="card-body p-4 p-xxl-5">
+                <div className="card-body p-4 p-xxl-5">
                   <figure>
                     <img
-                      class="img-fluid rounded rounded-circle mb-4 "
+                      className="img-fluid rounded rounded-circle mb-4 "
                       style={{ border: "1px solid #1cc88a" }}
                       src={imagenesLanding[7]}
                       alt="Luke Reeves"
                     />
                     <figcaption>
-                      <blockquote class="bsb-blockquote-icon mb-4">
+                      <blockquote className="bsb-blockquote-icon mb-4">
                         ¡Estoy encantado con mi nueva camiseta estampada! El
                         proceso de compra fue sencillo y el producto llegó
                         rápidamente. La calidad del material es excelente y el
                         estampado se ve genial. Definitivamente, recomendaré
                         esta tienda a mis amigos.
                       </blockquote>
-                      <h4 class="mb-2 text-dark">Jhon Sánchez </h4>
+                      <h4 className="mb-2 text-dark">Jhon Sánchez </h4>
                     </figcaption>
                   </figure>
                 </div>

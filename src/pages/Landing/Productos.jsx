@@ -138,7 +138,7 @@ export const Productos = () => {
                           </li>
 
                           {/* Agregar el producto al carrito */}
-                          {auth.idCliente &&(
+                          {/* {auth.idCliente &&(
                           <li>
                             <a
                               className="btn btn-success text-white mt-2"
@@ -148,7 +148,7 @@ export const Productos = () => {
                             </a>
                           </li>
 
-                          )}
+                          )} */}
                         </ul>
                       </div>
                     </div>
@@ -160,9 +160,9 @@ export const Productos = () => {
                         {producto.Disenio.NombreDisenio}
                       </p>
 
-                      {getCantidadProducto(producto.IdProducto) !== 0 &&(
+                      {/* {getCantidadProducto(producto.IdProducto) !== 0 &&(
                         <p>Cantidad Seleccionada : {getCantidadProducto(producto.IdProducto)} </p>
-                      )}
+                      )} */}
 
                       <p className="text-center mb-0">{formatCurrency(producto.ValorVenta)}</p>
                     </div>
