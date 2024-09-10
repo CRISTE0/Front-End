@@ -38,6 +38,7 @@ export const Configuracion = () => {
 
   const [showErrors, setShowErrors] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Función para validar el nombre del rol
   const validateNombreRol = (value) => {
@@ -98,7 +99,6 @@ export const Configuracion = () => {
       setLoading(false); // Ocultar el loader después de obtener los roles
     }
   };
-  
 
   const getPermisos = async () => {
     setLoading(true); // Mostrar el loader antes de realizar la solicitud
@@ -126,7 +126,7 @@ export const Configuracion = () => {
     } finally {
       setLoading(false); // Ocultar el loader después de obtener los usuarios o en caso de error
     }
-  };  
+  };
 
   const handlePermisosChange = (permisoId) => {
     setSelectedPermisos((prevSelectedPermisos) =>
@@ -202,49 +202,34 @@ export const Configuracion = () => {
   };
 
   const enviarSolicitud = async (metodo, parametros) => {
+    let urlPut, urlDelete;
+
     if (metodo === "PUT") {
-      let urlPut = `${url}/${parametros.IdRol}`;
-
-      await axios({ method: metodo, url: urlPut, data: parametros })
-        .then((respuesta) => {
-          var msj = respuesta.data.message;
-          show_alerta({ message: msj, type: "success" });
-          document.getElementById("btnCerrar").click();
-          getRoles();
-        })
-        .catch((error) => {
-          show_alerta({
-            message: error.response?.data?.message || "Error en la solicitud",
-            type: "error",
-          });
-        });
+      urlPut = `${url}/${parametros.IdRol}`;
     } else if (metodo === "DELETE") {
-      let urlDelete = `${url}/${parametros.IdRol}`;
+      urlDelete = `${url}/${parametros.IdRol}`;
+    }
 
-      await axios({ method: metodo, url: urlDelete, data: parametros })
-        .then((respuesta) => {
-          var msj = respuesta.data.message;
-          show_alerta({ message: msj, type: "success" });
-          document.getElementById("btnCerrar").click();
-          getRoles();
-        })
-        .catch((error) => {
-          show_alerta({ message: "Error en la solicitud", type: "error" });
-        });
-    } else {
-      await axios({ method: metodo, url: url, data: parametros })
-        .then((respuesta) => {
-          var msj = respuesta.data.message;
-          show_alerta({ message: msj, type: "success" });
-          document.getElementById("btnCerrar").click();
-          getRoles();
-        })
-        .catch((error) => {
-          show_alerta({
-            message: error.response?.data?.message || "Error en la solicitud",
-            type: "error",
-          });
-        });
+    setIsSubmitting(true);
+
+    try {
+      const response = await axios({
+        method: metodo,
+        url: metodo === "PUT" ? urlPut : metodo === "DELETE" ? urlDelete : url,
+        data: parametros,
+      });
+
+      const msj = response.data.message;
+      show_alerta({ message: msj, type: "success" });
+      document.getElementById("btnCerrar").click();
+      getRoles();
+    } catch (error) {
+      show_alerta({
+        message: error.response?.data?.message || "Error en la solicitud",
+        type: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -453,6 +438,7 @@ export const Configuracion = () => {
                 type="button"
                 className="btn btn-primary"
                 onClick={() => validar()}
+                disabled={isSubmitting}
               >
                 <i className="fa-solid fa-floppy-disk"></i> Guardar
               </button>

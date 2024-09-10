@@ -36,6 +36,7 @@ export const Compras = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     getCompras();
@@ -750,6 +751,9 @@ export const Compras = () => {
       if (compraSeleccionada) {
         $("#modalDetalleCompra").modal("hide");
       }
+
+      setIsSubmitting(true)
+
     } catch (error) {
       if (error.response) {
         show_alerta({
@@ -767,6 +771,8 @@ export const Compras = () => {
           type: "error",
         });
       }
+    }finally {
+      setIsSubmitting(false)
     }
   };
 
@@ -1072,6 +1078,7 @@ export const Compras = () => {
                 type="button"
                 className="btn btn-primary"
                 onClick={() => validar()}
+                disabled={isSubmitting}
               >
                 Guardar
               </button>

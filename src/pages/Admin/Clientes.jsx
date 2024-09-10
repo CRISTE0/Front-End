@@ -38,6 +38,7 @@ export const Clientes = () => {
   const itemsPerPage = 4;
   const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     getClientes();
@@ -497,6 +498,8 @@ export const Clientes = () => {
         respuesta = await axios.delete(urlRequest);
       }
 
+      setIsSubmitting(true)
+
       const msj = respuesta.data.message;
       show_alerta({
         message: msj,
@@ -539,6 +542,8 @@ export const Clientes = () => {
         });
       }
       console.log(error);
+    }finally {
+      setIsSubmitting(false)
     }
   };
 
@@ -857,6 +862,7 @@ export const Clientes = () => {
                 className="btn btn-primary"
                 onClick={() => {
                   guardarCliente();
+                  disabled={isSubmitting}
                 }}
               >
                 Guardar

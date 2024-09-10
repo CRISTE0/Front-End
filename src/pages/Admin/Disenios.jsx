@@ -48,6 +48,7 @@ export const Disenios = () => {
   const [ImagenDisenioUpdate, setImagenDisenioUpdate] = useState("");
   const [ImagenReferenciaUpdate, setImagenReferenciaUpdate] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   let IdImagenDisenioCreate;
   let ImagenDisenioCreate;
@@ -551,6 +552,8 @@ export const Disenios = () => {
         respuesta = await axios.delete(urlRequest);
       }
 
+      setIsSubmitting(true)
+
       const msj = respuesta.data.message;
       show_alerta({
         message: msj,
@@ -593,6 +596,8 @@ export const Disenios = () => {
         });
       }
       console.log(error);
+    }finally {
+      setIsSubmitting(false)
     }
   };
 
@@ -995,6 +1000,7 @@ export const Disenios = () => {
                 onClick={() => {
                   guardarDisenio();
                 }}
+                disabled={isSubmitting}
               >
                 Guardar
               </button>

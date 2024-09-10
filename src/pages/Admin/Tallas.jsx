@@ -34,6 +34,7 @@ export const Tallas = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     getTallas();
@@ -168,6 +169,8 @@ export const Tallas = () => {
         data: parametros,
       });
 
+      setIsSubmitting(true)
+
       const mensaje = respuesta.data.message;
       show_alerta({
         message: mensaje,
@@ -196,6 +199,8 @@ export const Tallas = () => {
         });
       }
       console.log(error);
+    }finally {
+      setIsSubmitting(false)
     }
   };
 
@@ -402,6 +407,7 @@ export const Tallas = () => {
                     type="button"
                     onClick={() => validar()}
                     className="btn btn-primary"
+                    disabled={isSubmitting}
                   >
                     <i className="fa-solid fa-floppy-disk"></i> Guardar
                   </button>

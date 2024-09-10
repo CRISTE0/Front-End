@@ -33,6 +33,7 @@ export const Insumos = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     getInsumos();
@@ -323,6 +324,8 @@ export const Insumos = () => {
         respuesta = await axios.delete(urlRequest);
       }
 
+      setIsSubmitting(true)
+
       const msj = respuesta.data.message;
       show_alerta({
         message: msj,
@@ -351,6 +354,8 @@ export const Insumos = () => {
         });
       }
       console.error(error);
+    }finally {
+      setIsSubmitting(false)
     }
   };
 
@@ -736,6 +741,7 @@ export const Insumos = () => {
                 onClick={() => {
                   guardarInsumo();
                 }}
+                disabled={isSubmitting}
               >
                 Guardar
               </button>

@@ -39,6 +39,7 @@ export const Proveedores = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     getProveedores();
@@ -449,6 +450,8 @@ export const Proveedores = () => {
       document.getElementById("btnCerrar").click();
       getProveedores();
 
+      setIsSubmitting(true)
+
       if (metodo === "POST") {
         show_alerta({ message: "Proveedor creado con éxito", type: "success" });
       } else if (metodo === "PUT") {
@@ -471,6 +474,8 @@ export const Proveedores = () => {
         show_alerta({ message: "Error desconocido", type: "error" });
       }
       console.log(error);
+    }finally {
+      setIsSubmitting(false)
     }
   };
 
@@ -765,6 +770,7 @@ export const Proveedores = () => {
                 onClick={() => {
                   guardarProveedor();
                 }}
+                disabled={isSubmitting}
               >
                 Guardar
               </button>

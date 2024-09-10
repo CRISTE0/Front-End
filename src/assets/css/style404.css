@@ -1,7 +1,6 @@
 @import url("https://fonts.googleapis.com/css?family=Audiowide&display=swap");
 
-.htmlPage404
- {
+.htmlPage404 {
   margin: 0px;
   overflow: hidden;
 }
@@ -17,13 +16,6 @@
   overflow: hidden;
 }
 
-/* .wrap {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-} */
-
 .h2Page404 {
   position: absolute;
   top: 50%;
@@ -33,10 +25,10 @@
   text-transform: uppercase;
   transform: translate(-50%, -50%);
   display: block;
-  color: #12000a;
+  color: #006400; /* Color verde oscuro */
   font-weight: 300;
   font-family: Audiowide;
-  text-shadow: 0px 0px 4px #12000a;
+  text-shadow: 0px 0px 4px #004d00; /* Sombra verde más oscuro */
   animation: fadeInText 3s ease-in 3.5s forwards,
     flicker4 5s linear 7.5s infinite, hueRotate 6s ease-in-out 3s infinite;
 }
@@ -61,7 +53,7 @@
 #id1_1,
 #id2_1,
 #id3_1 {
-  stroke: #29a53a;
+  stroke: #29a53a; /* Color verde */
   stroke-width: 3px;
   fill: transparent;
   filter: url(#glow);
@@ -70,7 +62,7 @@
 #id1_2,
 #id2_2,
 #id3_2 {
-  stroke: #12000a;
+  stroke: #29a53a; /* Color verde */
   stroke-width: 3px;
   fill: transparent;
   filter: url(#glow);
@@ -126,7 +118,7 @@
 
 @keyframes flicker1 {
   0% {
-    stroke: #29a53a;
+    stroke: #29a53a; /* Color verde */
   }
   1% {
     stroke: transparent;
@@ -135,10 +127,10 @@
     stroke: transparent;
   }
   4% {
-    stroke: #29a53a;
+    stroke: #29a53a; /* Color verde */
   }
   6% {
-    stroke: #29a53a;
+    stroke: #29a53a; /* Color verde */
   }
   7% {
     stroke: transparent;
@@ -147,19 +139,19 @@
     stroke: transparent;
   }
   14% {
-    stroke: #29a53a;
+    stroke: #29a53a; /* Color verde */
   }
   100% {
-    stroke: #29a53a;
+    stroke: #29a53a; /* Color verde */
   }
 }
 
 @keyframes flicker2 {
   0% {
-    stroke: #29a53a;
+    stroke: #29a53a; /* Color verde */
   }
   50% {
-    stroke: #29a53a;
+    stroke: #29a53a; /* Color verde */
   }
   51% {
     stroke: transparent;
@@ -168,16 +160,16 @@
     stroke: transparent;
   }
   62% {
-    stroke: #29a53a;
+    stroke: #29a53a; /* Color verde */
   }
   100% {
-    stroke: #29a53a;
+    stroke: #29a53a; /* Color verde */
   }
 }
 
 @keyframes flicker3 {
   0% {
-    stroke: #29a53a;
+    stroke: #29a53a; /* Color verde */
   }
   1% {
     stroke: transparent;
@@ -186,10 +178,10 @@
     stroke: transparent;
   }
   11% {
-    stroke: #29a53a;
+    stroke: #29a53a; /* Color verde */
   }
   40% {
-    stroke: #29a53a;
+    stroke: #29a53a; /* Color verde */
   }
   41% {
     stroke: transparent;
@@ -198,80 +190,29 @@
     stroke: transparent;
   }
   46% {
-    stroke: #29a53a;
+    stroke: #29a53a; /* Color verde */
   }
   100% {
-    stroke: #29a53a;
+    stroke: #29a53a; /* Color verde */
   }
 }
 
 @keyframes flicker4 {
-  0% {
-    color: #29a53a;
-    text-shadow: 0px 0px 4px #29a53a;
-  }
-  30% {
-    color: #29a53a;
-    text-shadow: 0px 0px 4px #29a53a;
-  }
-  31% {
-    color: #12000a;
-    text-shadow: 0px 0px 4px #12000a;
-  }
-  32% {
-    color: #29a53a;
-    text-shadow: 0px 0px 4px #29a53a;
-  }
-  36% {
-    color: #29a53a;
-    text-shadow: 0px 0px 4px #29a53a;
-  }
-  37% {
-    color: #12000a;
-    text-shadow: 0px 0px 4px #12000a;
-  }
-  41% {
-    color: #12000a;
-    text-shadow: 0px 0px 4px #12000a;
-  }
-  42% {
-    color: #29a53a;
-    text-shadow: 0px 0px 4px #29a53a;
-  }
-  85% {
-    color: #29a53a;
-    text-shadow: 0px 0px 4px #29a53a;
-  }
-  86% {
-    color: #12000a;
-    text-shadow: 0px 0px 4px #12000a;
-  }
-  95% {
-    color: #12000a;
-    text-shadow: 0px 0px 4px #12000a;
-  }
-  96% {
-    color: #29a53a;
-    text-shadow: 0px 0px 4px #29a53a;
-  }
+  0%,
   100% {
-    color: #29a53a;
-    text-shadow: 0px 0px 4px #29a53a;
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }
 
 @keyframes fadeInText {
-  1% {
-    color: #12000a;
-    text-shadow: 0px 0px 4px #12000a;
+  from {
+    opacity: 0;
   }
-  70% {
-    color: #29a53a;
-    text-shadow: 0px 0px 14px #29a53a;
-  }
-  100% {
-    color: #29a53a;
-    text-shadow: 0px 0px 4px #29a53a;
+  to {
+    opacity: 1;
   }
 }
 
@@ -279,10 +220,8 @@
   0% {
     filter: hue-rotate(0deg);
   }
-  50% {
-    filter: hue-rotate(-120deg);
-  }
   100% {
-    filter: hue-rotate(0deg);
+    filter: hue-rotate(120deg); /* Rotación de color para mantener el verde */
   }
 }
+

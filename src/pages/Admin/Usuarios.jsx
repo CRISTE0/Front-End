@@ -33,6 +33,7 @@ export const Usuarios = () => {
   const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
   const [showAdminRole, setShowAdminRole] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     getUsuarios();
@@ -394,6 +395,8 @@ export const Usuarios = () => {
         data: parametros,
       });
 
+      setIsSubmitting(true)
+
       const msj = respuesta.data.message;
       show_alerta({ message: msj, type: "success" });
       // document.getElementById("btnCerrar").click();
@@ -407,6 +410,8 @@ export const Usuarios = () => {
         show_alerta({ message: "Error desconocido", type: "error" });
       }
       console.error("Error en la solicitud:", error);
+    }finally {
+      setIsSubmitting(false)
     }
   };
 
@@ -634,6 +639,7 @@ export const Usuarios = () => {
                 type="button"
                 className="btn btn-primary"
                 onClick={guardarUsuario}
+                disabled={isSubmitting}
               >
                 Guardar
               </button>

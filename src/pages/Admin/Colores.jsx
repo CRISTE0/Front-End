@@ -24,6 +24,7 @@ export const Colores = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     getColores();
@@ -148,12 +149,17 @@ export const Colores = () => {
     enviarSolicitud(metodo, parametros);
   };
 
+
+
   const enviarSolicitud = async (metodo, parametros) => {
     try {
       let urlRequest = url;
       if (metodo === "PUT" || metodo === "DELETE") {
         urlRequest = `${url}/${parametros.IdColor}`;
       }
+
+      setIsSubmitting(true)
+
       const respuesta = await axios({
         method: metodo,
         url: urlRequest,
@@ -182,6 +188,8 @@ export const Colores = () => {
           type: "error",
         });
       }
+    } finally {
+      setIsSubmitting(false)
     }
   };
 
@@ -389,7 +397,7 @@ export const Colores = () => {
                 >
                   Cancelar
                 </button>
-                <button onClick={() => validar()} className="btn btn-primary">
+                <button onClick={() => validar()} className="btn btn-primary" disabled={isSubmitting}>
                   <i className="fa-solid fa-floppy-disk"></i> Guardar
                 </button>
               </div>
