@@ -111,12 +111,11 @@ export const LandingHeader = () => {
 
       <nav className="navbar navbar-expand-lg navbar-light shadow">
         <div className="container d-flex justify-content-between align-items-center">
-          <a
+          <Link to={"/"}
             className="navbar-brand text-success logo h1 align-self-center"
-            href="index.html"
           >
             <img src={imagenesLanding[0]} alt="LogoSoftShirt" width="120" />{" "}
-          </a>
+          </Link>
 
           <button
             className="navbar-toggler border-0"

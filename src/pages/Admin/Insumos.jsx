@@ -6,6 +6,7 @@ import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
 import { AdminFooter } from "../../components/Admin/AdminFooter";
+import Loader from "../../components/Loader/loader";
 
 export const Insumos = () => {
   const url = "http://localhost:3000/api/insumos";
@@ -31,6 +32,7 @@ export const Insumos = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getInsumos();
@@ -39,25 +41,48 @@ export const Insumos = () => {
   }, []);
 
   const getInsumos = async () => {
-    const respuesta = await axios.get(url);
-    setInsumos(respuesta.data);
-    console.log(respuesta.data);
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
+    try {
+      const response = await axios.get(url);
+      setInsumos(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching insumos:", error);
+    } finally {
+      setLoading(false); // Ocultar el loader después de obtener los insumos
+    }
   };
-
+  
   const getColores = async () => {
-    const respuesta = await axios.get("http://localhost:3000/api/colores");
-    const coloresActivos = respuesta.data.filter(
-      (color) => color.Estado === "Activo"
-    );
-    setColores(coloresActivos);
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
+    try {
+      const response = await axios.get("http://localhost:3000/api/colores");
+      // Filtrar solo los colores activos
+      const coloresActivos = response.data.filter(
+        (color) => color.Estado === "Activo"
+      );
+      setColores(coloresActivos);
+    } catch (error) {
+      console.error("Error fetching colores:", error);
+    } finally {
+      setLoading(false); // Ocultar el loader después de obtener los colores
+    }
   };
-
+  
   const getTallas = async () => {
-    const respuesta = await axios.get("http://localhost:3000/api/tallas");
-    const tallasActivas = respuesta.data.filter(
-      (talla) => talla.Estado === "Activo"
-    );
-    setTallas(tallasActivas);
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
+    try {
+      const response = await axios.get("http://localhost:3000/api/tallas");
+      // Filtrar solo las tallas activas
+      const tallasActivas = response.data.filter(
+        (talla) => talla.Estado === "Activo"
+      );
+      setTallas(tallasActivas);
+    } catch (error) {
+      console.error("Error fetching tallas:", error);
+    } finally {
+      setLoading(false); // Ocultar el loader después de obtener las tallas
+    }
   };
 
   const openModal = (op, insumo = null) => {
@@ -552,6 +577,10 @@ export const Insumos = () => {
       style: "currency",
       currency: "COP",
     }).format(value);
+  }
+
+  if (loading) {
+    return <Loader />;
   }
 
   return (

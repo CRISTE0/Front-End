@@ -6,6 +6,7 @@ import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
 import { AdminFooter } from "../../components/Admin/AdminFooter";
+import Loader from "../../components/Loader/loader";
 
 export const Usuarios = () => {
   const url = "http://localhost:3000/api/usuarios";
@@ -31,6 +32,7 @@ export const Usuarios = () => {
   const [roles2, setRoles2] = useState([]); // Estado para almacenar la lista de roles
   const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
   const [showAdminRole, setShowAdminRole] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getUsuarios();
@@ -76,6 +78,7 @@ export const Usuarios = () => {
   };
 
   const getUsuarios = async () => {
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
       const respuesta = await axios.get(url);
       setUsuarios(respuesta.data);
@@ -84,10 +87,14 @@ export const Usuarios = () => {
         message: "Error al obtener los usuarios",
         type: "error",
       });
+    } finally {
+      setLoading(false); // Ocultar el loader después de obtener los usuarios o en caso de error
     }
   };
+  
 
   const getRoles = async () => {
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
       const response = await axios.get(rolesUrl);
       // Filtrar solo los roles activos
@@ -97,8 +104,11 @@ export const Usuarios = () => {
       setRoles(rolesActivos);
     } catch (error) {
       console.error("Error fetching roles:", error);
+    } finally {
+      setLoading(false); // Ocultar el loader después de obtener los roles
     }
   };
+  
 
   const getRolName = (roleId) => {
     const rol = roles.find((rol) => rol.IdRol === roleId);
@@ -480,6 +490,10 @@ export const Usuarios = () => {
     currentPage * itemsPerPage
   );
 
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
     <>
       {/* Modal para crear/editar usuario */}
@@ -730,15 +744,6 @@ export const Usuarios = () => {
                             <i className="fas fa-solid fa-info-circle"></i>
                           </button>
                         </div>
-                        {/* <button
-                          type="button"
-                          className="btn btn-primary btn-sm mr-2"
-                          title="Cambiar Contraseña"
-                          onClick={() => openModalCambiarContrasenia(usuario)}
-                          disabled={usuario.Estado === "Inactivo"}
-                        >
-                          <i className="fas fa-key"></i>
-                        </button> */}
                       </td>
                     </tr>
                   ))}
@@ -831,7 +836,7 @@ export const Usuarios = () => {
           </div>
         </div>
       </div>
-      <AdminFooter/>
+      <AdminFooter />
     </>
   );
 };

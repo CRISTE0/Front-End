@@ -6,6 +6,7 @@ import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
 import { AdminFooter } from "../../components/Admin/AdminFooter";
+import Loader from "../../components/Loader/loader";
 
 export const Configuracion = () => {
   let url = "http://localhost:3000/api/roles";
@@ -36,6 +37,7 @@ export const Configuracion = () => {
         );
 
   const [showErrors, setShowErrors] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Función para validar el nombre del rol
   const validateNombreRol = (value) => {
@@ -81,26 +83,50 @@ export const Configuracion = () => {
   };
 
   const getRoles = async () => {
-    const respuesta = await axios.get(url);
-    setRoles(respuesta.data);
-    console.log(respuesta.data);
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
+    try {
+      const response = await axios.get(url);
+      // Filtrar solo los roles activos
+      const rolesActivos = response.data.filter(
+        (rol) => rol.Estado === "Activo"
+      );
+      setRoles(rolesActivos);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+    } finally {
+      setLoading(false); // Ocultar el loader después de obtener los roles
+    }
   };
+  
 
   const getPermisos = async () => {
-    const respuesta = await axios.get(urlPermisos);
-    setPermisos(respuesta.data);
-    console.log(respuesta.data);
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
+    try {
+      const respuesta = await axios.get(urlPermisos);
+      // Puedes filtrar o manipular los datos aquí si es necesario
+      setPermisos(respuesta.data);
+      console.log(respuesta.data);
+    } catch (error) {
+      console.error("Error fetching permisos:", error);
+      // Puedes manejar el error aquí, como mostrar una alerta o mensaje de error
+    } finally {
+      setLoading(false); // Ocultar el loader después de la solicitud
+    }
   };
 
   const getUsuarios = async () => {
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
       const respuesta = await axios.get(urlUsuarios);
       return respuesta.data;
     } catch (error) {
       console.error("Error al obtener usuarios:", error);
-      return [];
+      return []; // Retornar un array vacío en caso de error
+    } finally {
+      setLoading(false); // Ocultar el loader después de obtener los usuarios o en caso de error
     }
-  };
+  };  
 
   const handlePermisosChange = (permisoId) => {
     setSelectedPermisos((prevSelectedPermisos) =>
@@ -319,6 +345,10 @@ export const Configuracion = () => {
     currentPage * itemsPerPage
   );
 
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
     <>
       {/* <!-- Modal para crear rol --> */}
@@ -528,7 +558,7 @@ export const Configuracion = () => {
               data-target="#modalRoles"
               style={{
                 width: "120px",
-                height: "40px"
+                height: "40px",
               }}
             >
               <i className="fas fa-pencil-alt"></i>
@@ -635,7 +665,7 @@ export const Configuracion = () => {
         </div>
         {/* Fin tabla roles */}
       </div>
-      <AdminFooter/>
+      <AdminFooter />
     </>
   );
 };

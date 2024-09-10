@@ -6,7 +6,7 @@ import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
 import { AdminFooter } from "../../components/Admin/AdminFooter";
-
+import Loader from "../../components/Loader/loader";
 
 export const Clientes = () => {
   const url = "http://localhost:3000/api/clientes";
@@ -37,15 +37,25 @@ export const Clientes = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getClientes();
   }, []);
 
   const getClientes = async () => {
-    const respuesta = await axios.get(url);
-    setClientes(respuesta.data);
-    console.log(respuesta.data);
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
+    try {
+      const respuesta = await axios.get(url);
+      // Puedes filtrar o manipular los datos aquí si es necesario
+      setClientes(respuesta.data);
+      console.log(respuesta.data);
+    } catch (error) {
+      console.error("Error fetching clientes:", error);
+      // Puedes manejar el error aquí, como mostrar una alerta o mensaje de error
+    } finally {
+      setLoading(false); // Ocultar el loader después de la solicitud
+    }
   };
 
   const getComprasByClente = async (IdCliente) => {
@@ -649,6 +659,10 @@ export const Clientes = () => {
     currentPage * itemsPerPage
   );
 
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
     <>
       {/* Modal de crear y actualizar clientes */}
@@ -979,7 +993,7 @@ export const Clientes = () => {
         </div>
         {/* Fin tabla de clientes */}
       </div>
-      <AdminFooter/>
+      <AdminFooter />
     </>
   );
 };

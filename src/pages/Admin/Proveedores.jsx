@@ -6,6 +6,7 @@ import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
 import { AdminFooter } from "../../components/Admin/AdminFooter";
+import Loader from "../../components/Loader/loader";
 
 export const Proveedores = () => {
   let url = "http://localhost:3000/api/proveedores";
@@ -21,6 +22,7 @@ export const Proveedores = () => {
   const [Correo, setCorreo] = useState("");
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
+  const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({
     nroDocumento: "",
     nombreApellido: "",
@@ -43,8 +45,15 @@ export const Proveedores = () => {
   }, []);
 
   const getProveedores = async () => {
-    const respuesta = await axios.get(url);
-    setProveedores(respuesta.data);
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
+    try {
+      const response = await axios.get(url);
+      setProveedores(response.data);
+    } catch (error) {
+      console.error("Error fetching proveedores:", error);
+    } finally {
+      setLoading(false); // Ocultar el loader después de obtener los proveedores
+    }
   };
 
   const getComprasByProveedor = async (IdProveedor) => {
@@ -282,7 +291,9 @@ export const Proveedores = () => {
     const value = e.target.value;
     setTipoDocumento(value);
     setNombreApellidoLabel(
-      value === "NIT" ? "Nombre de la Empresa" : "Nombre y apellido del proveedor"
+      value === "NIT"
+        ? "Nombre de la Empresa"
+        : "Nombre y apellido del proveedor"
     );
 
     // Validar el número de documento al cambiar el tipo de documento
@@ -574,6 +585,10 @@ export const Proveedores = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <>
@@ -879,7 +894,7 @@ export const Proveedores = () => {
         </div>
         {/* Fin tabla proveedores */}
       </div>
-      <AdminFooter/>
+      <AdminFooter />
     </>
   );
 };

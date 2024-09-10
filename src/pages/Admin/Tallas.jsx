@@ -6,6 +6,7 @@ import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
 import { AdminFooter } from "../../components/Admin/AdminFooter";
+import Loader from "../../components/Loader/loader";
 
 export const Tallas = () => {
   const url = "http://localhost:3000/api/tallas";
@@ -32,6 +33,7 @@ export const Tallas = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getTallas();
@@ -62,9 +64,18 @@ export const Tallas = () => {
   };
 
   const getTallas = async () => {
-    const respuesta = await axios.get(url);
-    setTallas(respuesta.data);
-    console.log(respuesta.data);
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
+    try {
+      const respuesta = await axios.get(url);
+      setTallas(respuesta.data);
+    } catch (error) {
+      show_alerta({
+        message: "Error al obtener las tallas",
+        type: "error",
+      });
+    } finally {
+      setLoading(false); // Ocultar el loader después de obtener las tallas o en caso de error
+    }
   };
 
   const getInsumosByTalla = async (IdTalla) => {
@@ -235,10 +246,10 @@ export const Tallas = () => {
   const cambiarEstadoTalla = async (IdTalla) => {
     try {
       const tallaActual = Tallas.find((talla) => talla.IdTalla === IdTalla);
-      
+
       // Verificar si la talla está asociada a un insumo
       const isAssociated = await getInsumosByTalla(IdTalla);
-      
+
       // Si está asociada y se está intentando desactivar, mostrar un mensaje
       if (isAssociated && tallaActual.Estado === "Activo") {
         show_alerta({
@@ -247,9 +258,10 @@ export const Tallas = () => {
         });
         return; // Salir de la función sin hacer el cambio
       }
-  
-      const nuevoEstado = tallaActual.Estado === "Activo" ? "Inactivo" : "Activo";
-  
+
+      const nuevoEstado =
+        tallaActual.Estado === "Activo" ? "Inactivo" : "Activo";
+
       const MySwal = withReactContent(Swal);
       MySwal.fire({
         title: `¿Seguro de cambiar el estado de la talla ${tallaActual.Talla}?`,
@@ -265,9 +277,12 @@ export const Tallas = () => {
             Talla: tallaActual.Talla,
             Estado: nuevoEstado,
           };
-  
-          const response = await axios.put(`${url}/${IdTalla}`, parametrosTalla);
-  
+
+          const response = await axios.put(
+            `${url}/${IdTalla}`,
+            parametrosTalla
+          );
+
           if (response.status === 200) {
             setTallas((prevTalla) =>
               prevTalla.map((talla) =>
@@ -276,7 +291,7 @@ export const Tallas = () => {
                   : talla
               )
             );
-  
+
             show_alerta({
               message: "Estado de la talla cambiado con éxito",
               type: "success",
@@ -297,7 +312,6 @@ export const Tallas = () => {
       });
     }
   };
-  
 
   const handleSearchTermChange = (newSearchTerm) => {
     setSearchTerm(newSearchTerm);
@@ -317,6 +331,10 @@ export const Tallas = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <>
@@ -417,7 +435,7 @@ export const Tallas = () => {
               data-target="#modalTallas"
               style={{
                 width: "135px",
-                height: "40px"
+                height: "40px",
               }}
             >
               <i className="fas fa-pencil-alt"></i>
@@ -501,7 +519,7 @@ export const Tallas = () => {
         </div>
         {/* Fin tabla tallas */}
       </div>
-      <AdminFooter/>
+      <AdminFooter />
     </>
   );
 };

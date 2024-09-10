@@ -4,115 +4,107 @@ import { ChartLine } from "../../components/Charts/ChartLine";
 import { ChartPie } from "../../components/Charts/ChartPie";
 import dayjs from "dayjs"; // Importa dayjs para manejar fechas
 import { AdminFooter } from "../../components/Admin/AdminFooter";
+import Loader from "../../components/Loader/loader";
 
 export const Dashboard = () => {
   const [pedidosPendientes, setPedidosPendientes] = useState(0);
   const [totalCompras, setTotalCompras] = useState(0);
   const [gananciaDiaria, setGananciaDiaria] = useState(0);
   const [gananciaMensual, setGananciaMensual] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPedidos = async () => {
       try {
-        // Obtener pedidos
         const response = await axios.get("http://localhost:3000/api/pedidos");
         const pedidos = response.data;
-
-        // Filtrar pedidos con IdEstadoPedido igual a 1
         const pedidosFiltrados = pedidos.filter(
           (pedido) => pedido.IdEstadoPedido == 1
         );
-
-        // Contar los pedidos pendientes
         setPedidosPendientes(pedidosFiltrados.length);
       } catch (error) {
         console.error("Error al obtener los pedidos:", error);
+      } finally {
+        setLoading(false);
       }
     };
-
+  
     const fetchCompras = async () => {
       try {
-        // Obtener todas las compras
         const response = await axios.get("http://localhost:3000/api/compras");
         const compras = response.data;
-
-        // Sumar el total de las compras
         const total = compras.reduce((acc, compra) => acc + compra.Total, 0);
-
-        // Actualizar el estado con el total
         setTotalCompras(total);
       } catch (error) {
         console.error("Error al obtener las compras:", error);
+      } finally {
+        setLoading(false);
       }
     };
-
+  
     const fetchGananciaDiaria = async () => {
       try {
-        // Obtener pedidos
         const response = await axios.get("http://localhost:3000/api/pedidos");
         const pedidos = response.data;
-
-        // Obtener la fecha actual en formato YYYY-MM-DD
         const fechaActual = dayjs().format("YYYY-MM-DD");
-
-        // Filtrar los pedidos con IdEstadoPedido igual a 3 y fecha actual
         const pedidosDelDia = pedidos.filter(
           (pedido) =>
             pedido.IdEstadoPedido == 3 && pedido.Fecha.startsWith(fechaActual)
         );
-
-        // Sumar el total de esos pedidos
         const ganancia = pedidosDelDia.reduce(
           (acc, pedido) => acc + pedido.Total,
           0
         );
-
-        // Actualizar el estado con la ganancia diaria
         setGananciaDiaria(ganancia);
       } catch (error) {
         console.error("Error al obtener las ganancias diarias:", error);
+      } finally {
+        setLoading(false);
       }
     };
-
+  
     const fetchGananciaMensual = async () => {
       try {
         const response = await axios.get("http://localhost:3000/api/pedidos");
         const pedidos = response.data;
-
-        // Obtener el mes actual
         const mesActual = dayjs().month() + 1;
         const anioActual = dayjs().year();
-
-        // Filtrar pedidos del mes actual con IdEstadoPedido igual a 3
         const pedidosDelMes = pedidos.filter((pedido) => {
           const fechaPedido = dayjs(pedido.Fecha);
-          const mesPedido = fechaPedido.month() + 1; // month() devuelve 0-11
+          const mesPedido = fechaPedido.month() + 1;
           const anioPedido = fechaPedido.year();
-
           return (
             pedido.IdEstadoPedido == 3 &&
             mesPedido == mesActual &&
             anioPedido == anioActual
           );
         });
-
-        // Sumar el campo Total de los pedidos filtrados
         const totalGananciaMensual = pedidosDelMes.reduce(
           (sum, pedido) => sum + pedido.Total,
           0
         );
-
         setGananciaMensual(totalGananciaMensual);
       } catch (error) {
         console.error("Error al obtener las ganancias mensuales:", error);
+      } finally {
+        setLoading(false);
       }
     };
-
-    fetchPedidos();
-    fetchCompras();
-    fetchGananciaDiaria();
-    fetchGananciaMensual();
+  
+    const fetchAllData = async () => {
+      await fetchPedidos();
+      await fetchCompras();
+      await fetchGananciaDiaria();
+      await fetchGananciaMensual();
+    };
+  
+    fetchAllData();
   }, []);
+  
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <>

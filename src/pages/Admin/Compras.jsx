@@ -8,6 +8,7 @@ import show_alerta from "../../components/Show_Alerta/show_alerta";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { AdminFooter } from "../../components/Admin/AdminFooter";
+import Loader from "../../components/Loader/loader";
 
 export const Compras = () => {
   const url = "http://localhost:3000/api/compras";
@@ -34,6 +35,7 @@ export const Compras = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getCompras();
@@ -272,10 +274,9 @@ export const Compras = () => {
   };
 
   const getProveedores = async () => {
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
-      const respuesta = await axios.get(
-        "http://localhost:3000/api/proveedores"
-      );
+      const respuesta = await axios.get("http://localhost:3000/api/proveedores");
       const proveedoresActivos = respuesta.data.filter(
         (proveedor) => proveedor.Estado === "Activo"
       );
@@ -285,10 +286,14 @@ export const Compras = () => {
         message: "Error al obtener los proveedores",
         type: "error",
       });
+    } finally {
+      setLoading(false); // Ocultar el loader después de obtener los proveedores o en caso de error
     }
   };
+  
 
   const getInsumos = async () => {
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
       const respuesta = await axios.get("http://localhost:3000/api/insumos");
       const insumosActivos = respuesta.data.filter(
@@ -300,8 +305,11 @@ export const Compras = () => {
         message: "Error al obtener los insumos",
         type: "error",
       });
+    } finally {
+      setLoading(false); // Ocultar el loader después de obtener los insumos o en caso de error
     }
   };
+  
 
   // Calcular el precio total de la compra en función de los detalles
   const totalCompra =
@@ -819,6 +827,10 @@ export const Compras = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <>

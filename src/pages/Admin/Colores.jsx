@@ -7,6 +7,7 @@ import Pagination from "../../components/Pagination/Pagination";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
 import { AdminFooter } from "../../components/Admin/AdminFooter";
+import Loader from "../../components/Loader/loader";
 
 export const Colores = () => {
   const url = "http://localhost:3000/api/colores";
@@ -22,12 +23,14 @@ export const Colores = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getColores();
   }, []);
 
   const getColores = async () => {
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
       const respuesta = await axios.get(url);
       setColores(respuesta.data);
@@ -36,8 +39,10 @@ export const Colores = () => {
         message: "Error al obtener los colores",
         type: "error",
       });
+    } finally {
+      setLoading(false); // Ocultar el loader después de obtener los colores o en caso de error
     }
-  };
+  };  
 
   const getInsumosByColor = async (IdColor) => {
     try {
@@ -317,6 +322,10 @@ export const Colores = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <>
