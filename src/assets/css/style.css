@@ -431,6 +431,15 @@ input:checked + .slider-permiso:before {
   background-color: #1cc88a;
 }
 
+#descargarApp{
+  text-decoration: none;
+}
+
+
+#descargarApp:hover{
+  color: #1cc88a;
+}
+
 
 
 @media (max-width: 575.98px) {

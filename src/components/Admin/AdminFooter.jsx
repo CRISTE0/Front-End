@@ -8,7 +8,7 @@ export const AdminFooter = () => {
       <footer className="admin-footer">
         <div className="footer-content">
           <div className="copyright">
-            <span>Copyright &copy; Soft-Shirt 2024</span>
+            <span>Copyright &copy; Soft-Shirt 2024 || <a id="descargarApp" href="https://expo.dev/artifacts/eas/4NE4kZtXTUUFoE6YvpseE7.apk">Descarga la APP aquí</a></span>
           </div>
         </div>
       </footer>
