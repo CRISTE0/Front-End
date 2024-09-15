@@ -9,9 +9,9 @@ import {
   editImageComprobante,
   subirImageComprobante,
 } from "../../firebase/config";
-
 import { useAuth } from "../../context/AuthProvider";
 import { AdminFooter } from "../../components/Admin/AdminFooter";
+import Loader from "../../components/Loader/loader";
 
 export const Pedidos = () => {
   const url = "http://localhost:3000/api/pedidos";
@@ -52,6 +52,7 @@ export const Pedidos = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+  const [loading, setLoading] = useState(true);
 
   let pedidosTotales;
 
@@ -64,6 +65,7 @@ export const Pedidos = () => {
   }, []);
 
   const getPedidos = async () => {
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
       const respuesta = await axios.get(url);
 
@@ -84,10 +86,13 @@ export const Pedidos = () => {
       getPedidosCliente(); // Llamada a otra función (si es necesaria)
     } catch (error) {
       show_alerta("Error al obtener los pedidos", "error");
+    } finally {
+      setLoading(false); // Mostrar el loader antes de realizar la solicitud
     }
   };
 
   const getPedidosCliente = async () => {
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
       const pedidosFiltrados = pedidosTotales.filter(
         (pedido) => pedido.Cliente.IdCliente == auth.idCliente
@@ -101,10 +106,13 @@ export const Pedidos = () => {
       console.log(error);
 
       show_alerta("Error al obtener los pedidos", "error");
+    } finally {
+      setLoading(false); // Mostrar el loader antes de realizar la solicitud
     }
   };
 
   const getClienteName = (idCliente) => {
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
     const cliente = Clientes.find((prov) => prov.IdCliente === idCliente);
     return cliente ? cliente.NombreApellido : "Cliente no encontrado";
   };
@@ -133,10 +141,13 @@ export const Pedidos = () => {
         message: "Error al obtener los clientes",
         type: "error",
       });
+    } finally {
+      setLoading(false); // Mostrar el loader antes de realizar la solicitud
     }
   };
 
   const getProductos = async () => {
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
       const respuesta = await axios.get("http://localhost:3000/api/productos");
       const productosActivos = respuesta.data.filter(
@@ -148,10 +159,13 @@ export const Pedidos = () => {
         message: "Error al obtener los productos",
         type: "error",
       });
+    } finally {
+      setLoading(false); // Mostrar el loader antes de realizar la solicitud
     }
   };
 
   const getEstadosPedidos = async () => {
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
       const respuesta = await axios.get(
         "http://localhost:3000/api/estadosPedidos"
@@ -163,6 +177,8 @@ export const Pedidos = () => {
         message: "Error al obtener los estados de pedidos",
         type: "error",
       });
+    } finally {
+      setLoading(false); // Mostrar el loader antes de realizar la solicitud
     }
   };
 
@@ -868,6 +884,10 @@ export const Pedidos = () => {
     link.download = `Comprobante ${pedido.Cliente.NombreApellido}.jpg`;
     link.click();
   };
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <>
@@ -1718,7 +1738,7 @@ export const Pedidos = () => {
         </div>
         {/* Fin tabla de compras */}
       </div>
-      <AdminFooter/>
+      <AdminFooter />
     </>
   );
 };
