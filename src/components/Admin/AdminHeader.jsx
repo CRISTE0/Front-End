@@ -21,55 +21,52 @@ export const AdminHeader = ({ children }) => {
 
   const { auth } = useAuth();
 
-
   switch (location.pathname) {
-    case '/admin/Dashboard':
+    case "/admin/Dashboard":
       TituloDinamico = "Dashboard";
       break;
-    case '/admin/Configuracion':
+    case "/admin/Configuracion":
       TituloDinamico = "Gestión de configuración";
       break;
-    case '/admin/Proveedores':
+    case "/admin/Proveedores":
       TituloDinamico = "Gestión de proveedores";
       break;
-    case '/admin/Usuarios':
+    case "/admin/Usuarios":
       TituloDinamico = "Gestión de usuarios";
       break;
-    case '/admin/Insumos':
+    case "/admin/Insumos":
       TituloDinamico = "Gestión de insumos";
       break;
-    case '/admin/Colores':
+    case "/admin/Colores":
       TituloDinamico = "Gestión de colores";
       break;
-    case '/admin/Tallas':
+    case "/admin/Tallas":
       TituloDinamico = "Gestión de tallas";
       break;
-    case '/admin/Compras':
+    case "/admin/Compras":
       TituloDinamico = "Gestión de compras";
       break;
 
-    case '/admin/Productos':
+    case "/admin/Productos":
       TituloDinamico = "Gestión de productos";
       break;
-    
-    case '/admin/Disenios':
+
+    case "/admin/Disenios":
       TituloDinamico = "Gestión de diseños";
       break;
-    
-    case '/admin/Clientes':
+
+    case "/admin/Clientes":
       TituloDinamico = "Gestión de clientes";
       break;
 
-    case '/admin/Ventas':
+    case "/admin/Ventas":
       TituloDinamico = "Gestión de ventas";
       break;
-    
-    case '/admin/Pedidos':
+
+    case "/admin/Pedidos":
       TituloDinamico = "Gestión de pedidos";
       break;
-  
-    }
-
+  }
 
   return (
     <>
@@ -89,9 +86,8 @@ export const AdminHeader = ({ children }) => {
               {/* <!-- Topbar --> */}
               <nav className="navbar navbar-expand navbar-light bg-white topbar mb-1 static-top shadow">
                 {/* <!-- Sidebar Toggle (Topbar) --> */}
-                
-                <h1 className="text-dark">{TituloDinamico}</h1>
 
+                <h1 className="text-dark">{TituloDinamico}</h1>
 
                 <button
                   id="sidebarToggleTop"
@@ -137,11 +133,10 @@ export const AdminHeader = ({ children }) => {
                       aria-labelledby="userDropdown"
                     >
                       {auth.idUsuario && (
-
-                      <Link to={"/admin"} className="dropdown-item">
-                        <i className="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                        Centro Personal
-                      </Link>
+                        <Link to={"/admin"} className="dropdown-item">
+                          <i className="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                          Centro Personal
+                        </Link>
                       )}
 
                       {/* Renderizar solo si es un cliente  */}
@@ -152,13 +147,15 @@ export const AdminHeader = ({ children }) => {
                             Inicio
                           </Link>
 
-                          <Link to={""} className="dropdown-item">
+                          <Link
+                            to={`/ActualizarDatos/${auth.idCliente}`}
+                            className="dropdown-item"
+                          >
                             <i className="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
                             Ajustes
                           </Link>
                         </>
                       )}
-
 
                       <div className="dropdown-divider"></div>
                       <Link className="dropdown-item" onClick={logout}>
