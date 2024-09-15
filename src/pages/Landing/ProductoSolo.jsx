@@ -56,31 +56,37 @@ export const ProductoSolo = () => {
     }
 
     console.log(itemInCart);
-
     console.log(cart);
 
-    setProducto(productData);
+    // Filtrar insumos con cantidad mayor a 0
+    const productoInsumosDisponibles = productData.ProductoInsumos.filter(
+      (insumo) => insumo.CantidadProductoInsumo > 0
+    );
+
+    console.log(productoInsumosDisponibles);
+    
+
+    setProducto({ ...productData, ProductoInsumos: productoInsumosDisponibles });
+
     productoDetalle = productData;
 
     console.log(productoDetalle);
 
-   // Filtrar tallas y colores únicos
+    // Filtrar tallas y colores únicos basados en los insumos disponibles
     const tallas = [
       ...new Set(
-        productData.ProductoInsumos.map((insumo) => insumo.InsumoProd.Talla.Talla)
+        productoInsumosDisponibles.map((insumo) => insumo.InsumoProd.Talla.Talla)
       ),
     ];
     const colores = [
       ...new Set(
-        productData.ProductoInsumos.map((insumo) => insumo.InsumoProd.Color.Color)
+        productoInsumosDisponibles.map((insumo) => insumo.InsumoProd.Color.Color)
       ),
     ];
 
     setTallasDisponibles(tallas);
     setColoresDisponibles(colores);
 
-    // getColor();
-    // getTalla();
   };
 
   // Manejar la selección de la talla
@@ -89,7 +95,7 @@ export const ProductoSolo = () => {
 
     // Filtrar colores disponibles según la talla seleccionada
     const coloresParaTalla = Producto.ProductoInsumos.filter(
-      (insumo) => insumo.InsumoProd.Talla.Talla === talla
+      (insumo) => insumo.InsumoProd.Talla.Talla === talla && insumo.CantidadProductoInsumo > 0
     ).map((insumo) => insumo.InsumoProd.Color.Color);
 
     setColoresDisponibles([...new Set(coloresParaTalla)]);
@@ -144,24 +150,33 @@ export const ProductoSolo = () => {
 
 
 
-  //   Incrementar cantidad del carrito
+  // Incrementar cantidad del carrito
   const incrementarCantidad = (idProductoSeleccionado) => {
-    // Encuentra el índice del producto en el carrito
-    const productIndex = cart.findIndex(
-      (item) => item.IdIns == InsumoSeleccionado.IdInsumo
+    // Filtrar el insumo seleccionado en base a la talla y color seleccionados
+    const insumoSeleccionado = Producto.ProductoInsumos.find(
+      (insumo) =>
+        insumo.InsumoProd.Talla.Talla === TallaSeleccionada &&
+        insumo.InsumoProd.Color.Color === ColorSeleccionado
     );
 
-    console.log(InsumoSeleccionado);
-    
-    // return;
-    
-    // si encuentra el producto
+    // Si no se encuentra un insumo que coincida con la talla y color seleccionados
+    if (!insumoSeleccionado) {
+      show_alerta("Insumo no encontrado para la talla y color seleccionados", "error");
+      return;
+    }
+
+    // Encuentra el índice del producto en el carrito
+    const productIndex = cart.findIndex(
+      (item) => item.IdIns == insumoSeleccionado.InsumoProd.IdInsumo
+    );
+
+    console.log(insumoSeleccionado);
+
+    // Si encuentra el producto en el carrito
     if (productIndex !== -1) {
-
-
-      // validacion de la cantidad disponible
-      if (cart[productIndex].CantidadSeleccionada >= InsumoSeleccionado.CantidadProductoInsumo) {
-        show_alerta("Cantidad maxima del producto alcanzada", "error");
+      // Validación de la cantidad disponible
+      if (cart[productIndex].CantidadSeleccionada >= insumoSeleccionado.CantidadProductoInsumo) {
+        show_alerta("Cantidad máxima del producto alcanzada", "error");
         return;
       }
 
@@ -180,20 +195,27 @@ export const ProductoSolo = () => {
       getProducto();
       triggerRender();
     } else {
-      // Si el producto no existe, agrégalo con una cantidad inicial de 1
-      cart.push({ IdProd: Producto.IdProducto, CantidadSeleccionada: 1, IdIns:InsumoSeleccionado.IdInsumo });
+      // Si el producto no existe en el carrito, agrégalo con una cantidad inicial de 1
+      cart.push({
+        IdProd: Producto.IdProducto,
+        CantidadSeleccionada: 1,
+        IdIns: insumoSeleccionado.InsumoProd.IdInsumo,
+      });
       localStorage.setItem("cart", JSON.stringify(cart));
 
       console.log(JSON.parse(localStorage.getItem("cart")));
 
       getProducto();
       triggerRender();
-
-      // getCantidadProducto(idProductoSeleccionado);
     }
+
+    // Deselecciona los botones de talla y color al agregar al carrito
+    setTallaSeleccionada(null);
+    setColorSeleccionado(null);
 
     // navigate("/Carrito");
   };
+
 
   // Disminuir cantidad del carrito
   const disminuirCantidad = (idProductoSeleccionado, NombreDisenio) => {
@@ -294,16 +316,6 @@ export const ProductoSolo = () => {
       },
     });
   };
-
-  // const botonComprarAhora = () => {
-  //   if (Producto.CantidadSeleccionada == 0) {
-  //     incrementarCantidad();
-  //     navigate("/Carrito");
-  //   } else {
-  //     console.log("vagar");
-  //     navigate("/Carrito");
-  //   }
-  // };
 
   // Funcion para formatear el precio
   const formatCurrency = (value) => {

@@ -333,6 +333,39 @@ export const Catalogo = () => {
     }
   };
 
+
+  // Función simulada para verificar si el producto tiene insumos asociados
+  const getPedidosByProducto = async (idProducto) => {
+    try {
+      let productoEncontrado=[];
+      const response = await axios.get("http://localhost:3000/api/pedidos");
+      // Verifica si el color está asociado a algún insumo
+
+      response.data.forEach((pedido) => {
+        pedido.DetallesPedidosProductos.forEach((detalle) => {
+          if (detalle.IdProducto === idProducto) {
+            console.log(
+              `El producto con ID ${idProducto} está en el pedido con ID ${pedido.IdPedido}`
+            );
+            productoEncontrado.push(detalle.IdProducto)
+            // Aquí puedes agregar la lógica para manejar el producto encontrado
+          }
+        });
+      });
+
+      if (productoEncontrado.length > 0) {
+        return true;
+      }
+
+
+      // return pedidos.length > 0; // Devuelve true si hay al menos un insumo asociado
+    } catch (error) {
+      console.error("Error fetching pedidos:", error);
+      show_alerta({ message: "Error al verificar los pedidos", type: "error" });
+      return false; // Considera que no tiene insumos asociados en caso de error
+    }  
+  };
+
   let detallesInsumosGuardar;
 
   // Función para validar todos los campos
@@ -361,6 +394,7 @@ export const Catalogo = () => {
 
     // Crear un conjunto para verificar duplicados
     const combinaciones = new Set();
+    const filaExistente =[];
     
     // Validar las filas de los detalles de insumos (color, talla, cantidad)
     DetallesInsumos.forEach((detalle, index) => {
@@ -384,14 +418,17 @@ export const Catalogo = () => {
         // Verificar duplicados
         const clave = `${detalle.IdColor}-${detalle.IdTalla}`;
         if (combinaciones.has(clave)) {
-          // errores[`detalle_duplicado_${index}`] = `La combinación de color y talla en la fila ${index + 1} ya existe.`;
-          show_alerta({message:`La combinación de color y talla en la fila ${index + 1} ya existe.`,type:"error"});
-          return;
+          filaExistente.push(clave);
         } else {
           combinaciones.add(clave);
         }
       }
     });
+
+    if (filaExistente.length > 0) {
+      show_alerta({message:`Existen filas repetidas.`,type:"error"});
+      return;
+    }
 
     // Actualiza el estado de errores
     setErrors(errores);
@@ -679,44 +716,6 @@ export const Catalogo = () => {
     setSelectedDisenio(disenio);
   };
 
-  // Función para manejar cambios en el insumo
-  const handleChangeIdInsumo = (e) => {
-    const value = e.target.value;
-
-    const insumo = Insumos.find((i) => i.IdInsumo == value);
-
-    console.log(insumo);
-
-    setSelectedInsumo(insumo);
-    setIdInsumo(value);
-  };
-
-  // Función para manejar cambios en el color del cliente
-  // const handleChangeColorCliente = (e) => {
-  //   const value = e.target.value;
-
-  //   // Filtra las tallas que estan relacionadas con el color seleccionado
-  //   const tallasFiltradas = InsumosCliente
-  //   .filter(insumo => insumo.IdColor === parseInt(value) && insumo.Cantidad > 0 && insumo.Estado === 'Activo')
-  //   .map(insumo => insumo.IdTalla);
-
-  //   // Filtrar las nuevas tallas para el select del cliente
-  //   const nuevasTallasFiltradasCliente = Tallas.filter(talla => tallasFiltradas.includes(talla.IdTalla));
-
-  //   console.log(tallasFiltradas);
-
-  //   setIdColorCliente(value);
-  //   setIdTallaCliente("");
-  //   setTallasCliente(nuevasTallasFiltradasCliente);
-
-  // };
-
-  // Función para manejar cambios en la talla del cliente
-  // const handleChangeTallaCliente = (e) => {
-  //   const value = e.target.value;
-
-  //   setIdTallaCliente(value);
-  // };
 
   // Función para manejar cambios en la referencia
   const handleChangeReferencia = (e) => {
@@ -851,65 +850,54 @@ export const Catalogo = () => {
     }
   };
 
-  const deleteInsumo = (IdProducto, Referencia) => {
+  const deleteProducto = (IdProducto, Referencia) => {
     const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: `¿Seguro de eliminar el producto ${Referencia}?`,
-      icon: "question",
-      text: "No se podrá dar marcha atrás",
-      showCancelButton: true,
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
-      showClass: {
-        popup: "swal2-show",
-        backdrop: "swal2-backdrop-show",
-        icon: "swal2-icon-show",
-      },
-      hideClass: {
-        popup: "swal2-hide",
-        backdrop: "swal2-backdrop-hide",
-        icon: "swal2-icon-hide",
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setIdProducto(IdProducto);
-        enviarSolicitud("DELETE", { IdProducto: IdProducto }).then(() => {
-          // Calcular el índice del insumo eliminado en la lista filtrada
-          const index = filteredproductosAdmin.findIndex(
-            (insumo) => insumo.IdProducto === IdProducto
-          );
 
-          // Determinar la página en la que debería estar el insumo después de la eliminación
-          const newPage =
-            Math.ceil((filteredproductosAdmin.length - 1) / itemsPerPage) || 1;
-
-          // Establecer la nueva página como la página actual
-          setCurrentPage(newPage);
-
-          // Actualizar la lista de productosAdmin eliminando el insumo eliminado
-          setProductosAdmin((prevproductosAdmin) =>
-            prevproductosAdmin.filter(
-              (insumo) => insumo.IdProducto !== IdProducto
-            )
-          );
-
-          show_alerta({
-            message: "El producto fue eliminado correctamente",
-            type: "success",
-          });
-        });
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
+    
+    // Primero, verifica si el color está asociado a un insumo
+    getPedidosByProducto(IdProducto).then((isAssociated) => {
+      if (isAssociated) {
         show_alerta({
-          message: "El producto NO fue eliminado",
-          type: "info",
+          message: `El producto ${Referencia} está asociado a un pedido - venta y no se puede eliminar.`,
+          type: "warning",
         });
-      } else if (
-        result.dismiss === Swal.DismissReason.backdrop ||
-        result.dismiss === Swal.DismissReason.esc
-      ) {
-        show_alerta({
-          message: "El producto NO fue eliminado",
-          type: "info",
+      }else{
+        MySwal.fire({
+          title: `¿Seguro de eliminar el producto ${Referencia}?`,
+          icon: "question",
+          text: "No se podrá dar marcha atrás",
+          showCancelButton: true,
+          confirmButtonText: "Sí, eliminar",
+          cancelButtonText: "Cancelar",
+          showClass: {
+            popup: "swal2-show",
+            backdrop: "swal2-backdrop-show",
+            icon: "swal2-icon-show",
+          },
+          hideClass: {
+            popup: "swal2-hide",
+            backdrop: "swal2-backdrop-hide",
+            icon: "swal2-icon-hide",
+          },
+        }).then((result) => {
+          if (result.isConfirmed) {
+            setIdProducto(IdProducto);
+            enviarSolicitud("DELETE", { IdProducto: IdProducto }).then(() => {
+            });
+          } else if (result.dismiss === Swal.DismissReason.cancel) {
+            show_alerta({
+              message: "El producto NO fue eliminado",
+              type: "info",
+            });
+          } else if (
+            result.dismiss === Swal.DismissReason.backdrop ||
+            result.dismiss === Swal.DismissReason.esc
+          ) {
+            show_alerta({
+              message: "El producto NO fue eliminado",
+              type: "info",
+            });
+          }
         });
       }
     });
@@ -1103,44 +1091,15 @@ export const Catalogo = () => {
 
       const producto = respuestaProducto.data;
 
-      const respuestaInsumo = await axios.get(
-        `http://localhost:3000/api/insumos/${producto.IdInsumo}`
-      );
-
-      const respuestaDisenio = await axios.get(
-        `http://localhost:3000/api/disenios/${producto.IdDisenio}`
-      );
-
-      const insumo = respuestaInsumo.data;
-      const disenio = respuestaDisenio.data;
-
-      const respuestaColorInsumo = await axios.get(
-        `http://localhost:3000/api/colores/${insumo.IdColor}`
-      );
-
-      const respuestaTallaInsumo = await axios.get(
-        `http://localhost:3000/api/tallas/${insumo.IdTalla}`
-      );
-
-      const colorInsumo = respuestaColorInsumo.data;
-      const tallaInsumo = respuestaTallaInsumo.data;
-
+      
       console.log("Detalle de producto:", producto);
-      console.log("Detalle de insumo:", insumo);
-      console.log("Detalle de diseno:", disenio);
-      console.log("Detalle de colorInsumo:", colorInsumo);
-      console.log("Detalle de tallaInsumo:", tallaInsumo);
 
       setProductoSeleccionado(producto);
-      setDisenioSeleccionado(disenio);
-      setInsumoSeleccionado(insumo);
-      setColorDetalle(colorInsumo);
-      setTallaDetalle(tallaInsumo);
 
       $("#modalDetalleProducto").modal("show");
     } catch (error) {
       show_alerta({
-        message: "Error al obtener los detalles del diseño",
+        message: "Error al obtener los detalles del pedido",
         type: "error",
       });
     }
@@ -1454,7 +1413,7 @@ const getColoresDisponibles = (index) => {
                               <img
                                 src={selectedDisenio.ImagenReferencia}
                                 alt={selectedDisenio.NombreDisenio}
-                                style={{ width: "150px", height: "100px" }}
+                                style={{ width: "135px", height: "100px" }}
                               />
                             </span>
                           )}
@@ -1750,226 +1709,6 @@ const getColoresDisponibles = (index) => {
       </div>
       {/* Modal crear producto */}
 
-      {/* Modal crear producto cliente*/}
-      {/* <div
-        className="modal fade"
-        id="modalProductoCliente"
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="modalClienteLabel"
-        aria-hidden="true"
-        data-backdrop="static"
-        data-keyboard="false"
-      >
-        <div className="modal-dialog modal-lg" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="modalClienteLabel">
-                {title}
-              </h5>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              <form id="crearClienteForm">
-                <div className="form-row">
-                  Diseño del Producto cliente
-                  <div className="form-group col-md-5">
-                    <label htmlFor="idDisenio">Diseño de la camiseta</label>
-                    <select
-                      className="form-control"
-                      id="idDisenio"
-                      value={IdDisenio}
-                      onChange={(e) => handleChangeIdDisenio(e)}
-                      required
-                    >
-                      <option value="" disabled>
-                        Seleccione un Diseño
-                      </option>
-                      {DiseniosCliente.map((disenio) => (
-                        <option
-                          key={disenio.IdDisenio}
-                          value={disenio.IdDisenio}
-                        >
-                          {disenio.NombreDisenio}
-                        </option>
-                      ))}
-                    </select>
-
-                    {IdDisenio === "" && (
-                      <p className="text-danger">
-                        Por favor, seleccione un diseño.
-                      </p>
-                    )}
-                  </div>
-
-                  ToolTip imagen de referenciacliente
-                  <div className="col-md-1 mt-4 pt-3">
-                    <i className="tooltipReferenceImage fas fa-info-circle">
-                      {selectedDisenio && (
-                        <span className="tooltiptext">
-                          <img
-                            src={selectedDisenio.ImagenReferencia}
-                            alt={selectedDisenio.NombreDisenio}
-                            style={{ width: "150px", height: "100px" }}
-                          />
-                        </span>
-                      )}
-                    </i>
-                  </div>
-
-                  Color del producto cliente
-                  <div className="form-group col-md-6">
-                    <label htmlFor="idInsumo">Color de la camiseta</label>
-                    <select
-                      className="form-control"
-                      id="idInsumo"
-                      value={IdColorCliente}
-                      onChange={(e) => handleChangeColorCliente(e)}
-                      required
-                    >
-                      <option value="" disabled>
-                        Seleccione un color
-                      </option>
-                      {ColoresCliente.map((insumo) => (
-                        <option key={insumo.IdColor} value={insumo.IdColor}>
-                          {insumo.Color}
-                        </option>
-                      ))}
-                    </select>
-                    {IdColorCliente === "" && (
-                      <p className="text-danger">
-                        Por favor, seleccione un color.
-                      </p>
-                    )}
-                  </div>
-
-                  Talla del producto cliente
-                  <div className="form-group col-md-6">
-                    <label htmlFor="idColor">Talla de la camiseta</label>
-                    <select
-                      className="form-control"
-                      id="idColor"
-                      value={IdTallaCliente}
-                      onChange={(e) => handleChangeTallaCliente(e)}
-                      required
-                    >
-                      <option value="" disabled>
-                        Seleccione una talla
-                      </option>
-                      {TallasCliente.map((talla) => (
-                        <option key={talla.IdTalla} value={talla.IdTalla}>
-                          {talla.Talla}
-                        </option>
-                      ))}
-                    </select>
-                    {IdTallaCliente === "" && (
-                      <p className="text-danger">
-                        Por favor, seleccione una talla.
-                      </p>
-                    )}
-                  </div> */}
-
-                  {/* ToolTip talla del producto*/}
-                  {/* <div className="col-md-1 mt-4 pt-3">
-                    <i className="tooltipReferenceImage fas fa-info-circle">
-                      {selectedInsumo && (
-                        <span className="tooltiptext">
-                          {" "}
-                          {`La talla del insumo es: ${convertTallaIdToName(
-                            selectedInsumo.IdTalla
-                          )}`}{" "}
-                        </span>
-                      )}
-                    </i>
-                  </div> */}
-
-                  {/* Referencia del Producto*/}
-                  {/* <div className="form-group col-md-5 ">
-                    <label htmlFor="Referencia">Referencia del Producto:</label>
-                    <input
-                      type="text"
-                      className={`form-control ${
-                        errors.Referencia ? "is-invalid" : ""
-                      }`}
-                      id="Referencia"
-                      placeholder="Ingrese la referencia del producto"
-                      required
-                      // disabled
-                      value={Referencia}
-                      onChange={handleChangeReferencia}
-                    />
-                    {renderErrorMessage(errors.Referencia)}
-                  </div> */}
-{/* 
-                  Cantidad del producto cliente
-                  <div className="form-group col-md-6">
-                    <label htmlFor="cantidadProducto">Cantidad</label>
-                    <input
-                      type="text"
-                      className={`form-control ${
-                        errors.CantidadCliente ? "is-invalid" : ""
-                      }`}
-                      id="cantidadProducto"
-                      placeholder={"Ingrese la cantidad del producto"}
-                      required
-                      value={Cantidad}
-                      onChange={handleChangeCantidadCliente}
-                    />
-                    {renderErrorMessage(errors.CantidadCliente)}
-                  </div> */}
-
-                  {/* Valor venta del producto */}
-                  {/* <div className="form-group col-md-12">
-                    <label htmlFor="direccionCliente">
-                      Valor de la venta del producto:
-                    </label>
-                    <input
-                      type="text"
-                      className={`form-control ${
-                        errors.ValorVenta ? "is-invalid" : ""
-                      }`}
-                      id="direccionCliente"
-                      placeholder={"Ingrese el valor del producto"}
-                      required
-                      value={ValorVenta}
-                      onChange={handleChangeValorVenta}
-                    />
-                    {renderErrorMessage(errors.ValorVenta)}
-                  </div> */}
-                {/* </div>
-              </form>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-dismiss="modal"
-                id="btnCerrarCliente"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => {
-                  guardarProducto();
-                }}
-              >
-                Guardar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div> */}
-      {/* Modal crear producto cliente*/}
-
 
 
       {/* Inicio modal ver detalle diseño */}
@@ -1987,7 +1726,7 @@ const getColoresDisponibles = (index) => {
           <div className="modal-content">
             <div className="modal-header">
               <h5 className="modal-title" id="ModalDetalleDisenioLabel">
-                Detalle del diseño
+                Detalle del producto
               </h5>
               <button
                 type="button"
@@ -2016,7 +1755,7 @@ const getColoresDisponibles = (index) => {
                               aria-expanded="true"
                               aria-controls="collapseOne"
                             >
-                              Detalles del Producto
+                              Detalles del producto
                             </button>
                           </h2>
                         </div>
@@ -2033,7 +1772,7 @@ const getColoresDisponibles = (index) => {
                                 {/* Nombre del diseño */}
                                 <div className="form-group col-md-6">
                                   <label htmlFor="idDisenio">
-                                    Diseño del Producto:
+                                    Diseño del producto
                                   </label>
                                   <input
                                     className="form-control"
@@ -2046,7 +1785,7 @@ const getColoresDisponibles = (index) => {
                                 </div>
 
                                 {/* Referencia del insumo */}
-                                <div className="form-group col-md-6">
+                                {/* <div className="form-group col-md-6">
                                   <label htmlFor="idInsumo">
                                     Insumo del Producto:
                                   </label>
@@ -2058,12 +1797,12 @@ const getColoresDisponibles = (index) => {
                                     )}
                                     disabled
                                   />
-                                </div>
+                                </div> */}
 
                                 {/* Referencia del producto */}
                                 <div className="form-group col-md-6">
                                   <label htmlFor="Referencia">
-                                    Referencia del Producto:
+                                    Referencia del producto
                                   </label>
                                   <input
                                     type="text"
@@ -2075,7 +1814,7 @@ const getColoresDisponibles = (index) => {
                                 </div>
 
                                 {/* Cantidad del producto */}
-                                <div className="form-group col-md-6">
+                                {/* <div className="form-group col-md-6">
                                   <label htmlFor="nombreCliente">
                                     Cantidad:
                                   </label>
@@ -2086,18 +1825,18 @@ const getColoresDisponibles = (index) => {
                                     value={productoSeleccionado.Cantidad}
                                     disabled
                                   />
-                                </div>
+                                </div> */}
 
                                 {/*Valor de la venta del producto */}
                                 <div className="form-group col-md-12">
                                   <label htmlFor="direccionCliente">
-                                    Valor de la venta del producto:
+                                    Valor de la venta del producto
                                   </label>
                                   <input
                                     type="text"
                                     className="form-control"
                                     id="direccionCliente"
-                                    value={productoSeleccionado.ValorVenta}
+                                    value={formatCurrency(productoSeleccionado.ValorVenta)}
                                     disabled
                                   />
                                 </div>
@@ -2107,106 +1846,104 @@ const getColoresDisponibles = (index) => {
                         )}
                       </div>
 
-                      {/* Acordeon detalles del insumo */}
-                      <div className="card">
-                        <div className="card-header" id="headingTwo">
-                          <h2 className="mb-0">
-                            <button
-                              className="btn btn-link btn-block text-left collapsed"
-                              type="button"
-                              data-toggle="collapse"
-                              data-target="#collapseTwo"
-                              aria-expanded="false"
-                              aria-controls="collapseTwo"
+                      {/* Acordeon detalles de los insumos */}
+
+                      {productoSeleccionado && productoSeleccionado.ProductoInsumos && productoSeleccionado.ProductoInsumos.length > 0 ? (
+                        productoSeleccionado.ProductoInsumos.map((productoInsumo, index) => (
+                          <div className="card" key={productoInsumo.IdProductoInsumo}>
+                            <div className="card-header" id={`heading${index}`}>
+                              <h2 className="mb-0">
+                                <button
+                                  className="btn btn-link btn-block text-left collapsed"
+                                  type="button"
+                                  data-toggle="collapse"
+                                  data-target={`#collapse${index}`}
+                                  aria-expanded="false"
+                                  aria-controls={`collapse${index}`}
+                                >
+                                  Detalles del Insumo #{index + 1}
+                                </button>
+                              </h2>
+                            </div>
+
+                            {/* Mostrar el contenido de cada insumo */}
+                            <div
+                              id={`collapse${index}`}
+                              className="collapse"
+                              aria-labelledby={`heading${index}`}
+                              data-parent="#accordionExample"
                             >
-                              Detalles del Insumo
-                            </button>
-                          </h2>
-                        </div>
+                              <div className="card-body">
+                                <div className="form-row">
+                                  {/* Color del Insumo */}
+                                  <div className="form-group col-md-6">
+                                    <label htmlFor={`colorInsumo${index}`}>Color del insumo</label>
+                                    <input
+                                      className="form-control"
+                                      id={`colorInsumo${index}`}
+                                      value={productoInsumo.InsumoProd.Color.Color}
+                                      disabled
+                                    />
+                                  </div>
 
-                        {insumoSeleccionado && (
-                          <div
-                            id="collapseTwo"
-                            className="collapse"
-                            aria-labelledby="headingTwo"
-                            data-parent="#accordionExample"
-                          >
-                            <div className="card-body">
-                              <div className="form-row">
-                                {/* Color del Insumo */}
-                                <div className="form-group col-md-6">
-                                  <label htmlFor="idColor">
-                                    Color del Insumo:
-                                  </label>
-                                  <input
-                                    className="form-control"
-                                    id="idColor"
-                                    value={ColorDetalle.Color}
-                                    disabled
-                                  />
-                                </div>
+                                  {/* Talla del Insumo */}
+                                  <div className="form-group col-md-6">
+                                    <label htmlFor={`tallaInsumo${index}`}>Talla del insumo</label>
+                                    <input
+                                      className="form-control"
+                                      id={`tallaInsumo${index}`}
+                                      value={productoInsumo.InsumoProd.Talla.Talla}
+                                      disabled
+                                    />
+                                  </div>
 
-                                {/* Talla del insumo */}
-                                <div className="form-group col-md-6">
-                                  <label htmlFor="idTalla">
-                                    Talla del insumo:
-                                  </label>
-                                  <input
-                                    className="form-control"
-                                    id="idTalla"
-                                    value={TallaDetalle.Talla}
-                                    disabled
-                                  />
-                                </div>
+                                  {/* Referencia del Insumo */}
+                                  <div className="form-group col-md-6">
+                                    <label htmlFor={`referenciaInsumo${index}`}>
+                                      Referencia del insumo
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className="form-control"
+                                      id={`referenciaInsumo${index}`}
+                                      value={productoInsumo.InsumoProd.Referencia}
+                                      disabled
+                                    />
+                                  </div>
 
-                                {/* Referencia del insumo */}
-                                <div className="form-group col-md-6">
-                                  <label htmlFor="nroDocumentoCliente">
-                                    Referencia del insumo:
-                                  </label>
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    id="nroDocumentoCliente"
-                                    value={insumoSeleccionado.Referencia}
-                                    disabled
-                                  />
-                                </div>
+                                  {/* Cantidad del Insumo */}
+                                  <div className="form-group col-md-6">
+                                    <label htmlFor={`cantidadInsumo${index}`}>Cantidad</label>
+                                    <input
+                                      type="text"
+                                      className="form-control"
+                                      id={`cantidadInsumo${index}`}
+                                      value={productoInsumo.CantidadProductoInsumo}
+                                      disabled
+                                    />
+                                  </div>
 
-                                {/* Cantidad del insumo */}
-                                <div className="form-group col-md-6">
-                                  <label htmlFor="nombreCliente">
-                                    Cantidad:
-                                  </label>
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    id="nombreCliente"
-                                    value={insumoSeleccionado.Cantidad}
-                                    disabled
-                                  />
-                                </div>
-
-                                {/* Valor de la compra del insumo */}
-                                <div className="form-group col-md-12">
-                                  <label htmlFor="direccionCliente">
-                                    Valor de la compra del insumo:
-                                  </label>
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    id="direccionCliente"
-                                    value={formatCurrency(
-                                      insumoSeleccionado.ValorCompra
-                                    )}
-                                    disabled
-                                  />
+                                  {/* Valor de la compra del Insumo */}
+                                  <div className="form-group col-md-12">
+                                    <label htmlFor={`valorCompraInsumo${index}`}>
+                                      Valor de la compra del insumo:
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className="form-control"
+                                      id={`valorCompraInsumo${index}`}
+                                      value={formatCurrency(productoInsumo.InsumoProd.ValorCompra)}
+                                      disabled
+                                    />
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        )}
-                      </div>
+                        ))
+                      ) : (
+                        <p>No hay insumos asociados a este producto.</p>
+                      )}
 
                       {/* Acordeon detalles del diseño */}
                       <div className="card">
@@ -2220,12 +1957,12 @@ const getColoresDisponibles = (index) => {
                               aria-expanded="false"
                               aria-controls="collapseThree"
                             >
-                              Detalles del Diseño
+                              Detalles del diseño
                             </button>
                           </h2>
                         </div>
 
-                        {disenioSeleccionado && (
+                        {productoSeleccionado && (
                           <div
                             id="collapseThree"
                             className="collapse"
@@ -2237,82 +1974,13 @@ const getColoresDisponibles = (index) => {
                                 {/* Nombre de diseño */}
                                 <div className="form-group col-md-6">
                                   <label htmlFor="nombreDiseño">
-                                    Nombre del Diseño:
+                                    Nombre del diseño
                                   </label>
                                   <input
                                     type="text"
                                     className="form-control"
                                     id="nombreDiseño"
-                                    value={disenioSeleccionado.NombreDisenio}
-                                    disabled
-                                  />
-                                </div>
-
-                                {/* Nombre de fuente*/}
-                                <div className="form-group col-md-6">
-                                  <label htmlFor="nombreFuente">Fuente:</label>
-                                  <input
-                                    className="form-control"
-                                    id="nombreFuente"
-                                    value={disenioSeleccionado.Fuente}
-                                    disabled
-                                  />
-                                </div>
-
-                                {/* Tamaño de fuente*/}
-                                <div className="form-group col-md-6">
-                                  <label htmlFor="tamanioFuente">
-                                    Tamaño de Fuente:
-                                  </label>
-                                  <input
-                                    className="form-control"
-                                    id="tamanioFuente"
-                                    value={disenioSeleccionado.TamanioFuente}
-                                    disabled
-                                  />
-                                </div>
-
-                                {/* Color de fuente*/}
-                                <div className="form-group col-md-6">
-                                  <label htmlFor="colorFuente">
-                                    Color de Fuente:
-                                  </label>
-
-                                  {disenioSeleccionado.ColorFuente !==
-                                  "No aplica" ? (
-                                    <div className="d-flex align-items-center">
-                                      <input
-                                        type="color"
-                                        className="form-control col-md-4"
-                                        id="colorFuente"
-                                        value={disenioSeleccionado.ColorFuente}
-                                        disabled
-                                      />
-
-                                      <span className="ml-3" id="spanColor">
-                                        {disenioSeleccionado.ColorFuente}
-                                      </span>
-                                    </div>
-                                  ) : (
-                                    <input
-                                      type="text"
-                                      className="form-control"
-                                      disabled
-                                      required
-                                      value={"No aplica"}
-                                    />
-                                  )}
-                                </div>
-
-                                {/* Posicion de fuente*/}
-                                <div className="form-group col-md-6">
-                                  <label htmlFor="posicionFuente">
-                                    Posicion de Fuente:
-                                  </label>
-                                  <input
-                                    className="form-control"
-                                    id="posicionFuente"
-                                    value={disenioSeleccionado.PosicionFuente}
+                                    value={productoSeleccionado.Disenio.NombreDisenio}
                                     disabled
                                   />
                                 </div>
@@ -2320,12 +1988,12 @@ const getColoresDisponibles = (index) => {
                                 {/* Tamaño de imagen*/}
                                 <div className="form-group col-md-6">
                                   <label htmlFor="tamanioImagen">
-                                    Tamaño de Imagen:
+                                    Tamaño de imagen
                                   </label>
                                   <input
                                     className="form-control"
                                     id="tamanioImagen"
-                                    value={disenioSeleccionado.TamanioImagen}
+                                    value={productoSeleccionado.Disenio.TamanioImagen}
                                     disabled
                                   />
                                 </div>
@@ -2333,13 +2001,13 @@ const getColoresDisponibles = (index) => {
                                 {/* Posicion de imagen*/}
                                 <div className="form-group col-md-6">
                                   <label htmlFor="posicionImagen">
-                                    Posicion de Imagen:
+                                    Posición de imagen
                                   </label>
 
                                   <input
                                     className="form-control"
                                     id="posicionImagen"
-                                    value={disenioSeleccionado.PosicionImagen}
+                                    value={productoSeleccionado.Disenio.PosicionImagen}
                                     disabled
                                   />
                                 </div>
@@ -2347,14 +2015,14 @@ const getColoresDisponibles = (index) => {
                                 {/* Precio de diseño */}
                                 <div className="form-group col-md-6">
                                   <label htmlFor="precioDiseño">
-                                    Precio del Diseño:
+                                    Precio del diseño
                                   </label>
                                   <input
                                     type="text"
                                     className="form-control"
                                     id="precioDiseño"
                                     value={formatCurrency(
-                                      disenioSeleccionado.PrecioDisenio
+                                      productoSeleccionado.Disenio.PrecioDisenio
                                     )}
                                     disabled
                                   />
@@ -2362,14 +2030,14 @@ const getColoresDisponibles = (index) => {
 
                                 {/* Imagen diseño*/}
                                 <div className="form-group col-md-6">
-                                  <label>Imagen Diseño :</label>
+                                  <label>Imagen diseño </label>
                                   <br />
 
-                                  {disenioSeleccionado.ImagenDisenio !==
+                                  {productoSeleccionado.ImagenDisenio !==
                                   "No aplica" ? (
                                     <div className="container py-5 mx-3">
                                       <img
-                                        src={disenioSeleccionado.ImagenDisenio}
+                                        src={productoSeleccionado.Disenio.ImagenDisenio}
                                         alt="Vista previa imagen del diseño"
                                         style={{
                                           maxWidth: "200px",
@@ -2391,14 +2059,14 @@ const getColoresDisponibles = (index) => {
                                 {/* Imagen referencia*/}
                                 <div className="form-group col-md-6">
                                   <label htmlFor="ImagenDisenioCliente">
-                                    Imagen Referencia :
+                                    Imagen referencia 
                                   </label>
 
                                   <br />
 
                                   <div className="container py-5 mx-3">
                                     <img
-                                      src={disenioSeleccionado.ImagenReferencia}
+                                      src={productoSeleccionado.Disenio.ImagenReferencia}
                                       alt="Vista previa imagen del diseño"
                                       style={{
                                         maxWidth: "200px",
@@ -2494,8 +2162,6 @@ const getColoresDisponibles = (index) => {
                     <tr>
                       <th>Referencia</th>
                       <th>Diseño</th>
-                      <th>Insumo</th>
-                      <th>Cantidad</th>
                       <th>Valor de la Venta</th>
                       <th>Publicación</th>
                       <th>Estado</th>
@@ -2507,8 +2173,6 @@ const getColoresDisponibles = (index) => {
                       <tr key={producto.IdProducto}>
                         <td>{producto.Referencia}</td>
                         <td>{convertDisenioIdToName(producto.IdDisenio)}</td>
-                        <td>{convertInsumoIdToName(producto.IdInsumo)}</td>
-                        <td>{producto.Cantidad}</td>
                         <td>{formatCurrency(producto.ValorVenta)}</td>
                         <td>
                           <label
@@ -2547,21 +2211,11 @@ const getColoresDisponibles = (index) => {
                         </td>
                         <td>
                           <div className="d-flex">
-                            <button
-                              className="btn btn-warning btn-sm mr-2"
-                              title="Editar"
-                              data-toggle="modal"
-                              data-target="#modalCliente"
-                              onClick={() => openModal(2, producto)}
-                              disabled={producto.Estado != "Activo"}
-                            >
-                              <i className="fas fa-sync-alt"></i>
-                            </button>
 
                             <button
                               className="btn btn-danger btn-sm mr-2"
                               onClick={() =>
-                                deleteInsumo(
+                                deleteProducto(
                                   producto.IdProducto,
                                   producto.Referencia
                                 )

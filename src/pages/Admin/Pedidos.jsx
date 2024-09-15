@@ -592,7 +592,7 @@ export const Pedidos = () => {
           console.log(idEstPed);
 
           // return;
-          // Cambiar el estado del pedido a "Cancelado"
+
           await axios.put(`http://localhost:3000/api/pedidos/${idPed}`, {
             Estado: idEstPed,
           });
@@ -602,18 +602,18 @@ export const Pedidos = () => {
           $(".close").click();
 
           show_alerta({
-            message: "La compra fue modificada correctamente",
+            message: "El pedido fue modificado correctamente",
             type: "success",
           });
         } catch (error) {
           show_alerta({
-            message: "Hubo un error al cancelar la compra",
+            message: "Hubo un error al cancelar el pedido",
             type: "error",
           });
         }
       } else {
         show_alerta({
-          message: "La compra NO fue cancelada",
+          message: "El pedido NO fue cancelado",
           type: "info",
         });
       }
@@ -671,7 +671,10 @@ export const Pedidos = () => {
             }
           );
 
-          let message = respuesta.response.message;
+          let message = respuesta.data.message;
+
+          console.log(message);
+
 
           // Actualizar la lista de pedidos
           getPedidos();
@@ -687,8 +690,10 @@ export const Pedidos = () => {
             type: "success",
           });
         } catch (error) {
+          console.log(error);
+          
           show_alerta({
-            message: "Hubo un error al cancelar la compra",
+            message: "Hubo un error al cancelar el pedido",
             type: "error",
           });
         }
@@ -950,221 +955,7 @@ export const Pedidos = () => {
       </div>
       {/* fin modal de editar estado */}
 
-      {/* Inicio modal de crear pedido con su detalle */}
-      <div
-        className="modal fade"
-        id="modalCompras"
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="ModalAñadirCompraLabel"
-        aria-hidden="true"
-        data-backdrop="static"
-        data-keyboard="false"
-      >
-        <div className="modal-dialog modal-lg" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="ModalAñadirCompraLabel">
-                {title}
-              </h5>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-
-            <div className="modal-body">
-              <input type="hidden" id="IdCompra"></input>
-
-              {/* Seleccionar cliente */}
-              <div className="form-group">
-                <label>Cliente:</label>
-                <select
-                  className={`form-control ${
-                    errors.IdCliente ? "is-invalid" : ""
-                  }`}
-                  name="IdCliente"
-                  value={IdCliente}
-                  onChange={handleChange}
-                >
-                  <option value="">Selecciona un cliente</option>
-                  {Clientes.map((cliente) => (
-                    <option key={cliente.IdCliente} value={cliente.IdCliente}>
-                      {cliente.NombreApellido}
-                    </option>
-                  ))}
-                </select>
-                {renderErrorMessage(errors.IdCliente)}
-              </div>
-
-              {/* Fecha */}
-              <div className="form-group">
-                <label>Fecha:</label>
-                <input
-                  type="date"
-                  className={`form-control ${errors.Fecha ? "is-invalid" : ""}`}
-                  id="Fecha"
-                  name="Fecha"
-                  value={Fecha}
-                  onChange={handleChange}
-                />
-                {renderErrorMessage(errors.Fecha)}
-              </div>
-
-              <div className="table-responsive">
-                <table className="table table-bordered">
-                  <thead>
-                    <tr>
-                      <th>Producto</th>
-                      <th>Cantidad</th>
-                      <th>Precio</th>
-                      <th>SubTotal</th>
-                      <th>Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Detalles.map((detalle, index) => (
-                      <tr key={index}>
-                        <td>
-                          <select
-                            className={`form-control ${
-                              errors.Detalles &&
-                              errors.Detalles[index] &&
-                              errors.Detalles[index].IdProducto
-                                ? "is-invalid"
-                                : ""
-                            }`}
-                            name="IdProducto"
-                            value={detalle.IdProducto}
-                            onChange={(e) => handleDetailChange(index, e)}
-                          >
-                            <option value="">Selecciona un producto</option>
-                            {getFilteredProductos(index).map((producto) => (
-                              <option
-                                key={producto.IdProducto}
-                                value={producto.IdProducto}
-                              >
-                                {producto.Referencia}
-                              </option>
-                            ))}
-                          </select>
-
-                          {errors.Detalles &&
-                            errors.Detalles[index] &&
-                            errors.Detalles[index].IdProducto && (
-                              <div className="invalid-feedback">
-                                {errors.Detalles[index].IdProducto}
-                              </div>
-                            )}
-                        </td>
-
-                        <td>
-                          <input
-                            type="number"
-                            className="form-control"
-                            name="cantidad"
-                            placeholder="Cantidad"
-                            value={detalle.cantidad}
-                            onChange={(e) => handleDetailChange(index, e)}
-                          />
-                          {alertas[index] && (
-                            <span style={{ color: "red" }} className="alerta">
-                              {alertas[index]}
-                            </span>
-                          )}
-                        </td>
-
-                        <td>
-                          <input
-                            type="text"
-                            className="form-control"
-                            name="precio"
-                            placeholder="Precio"
-                            value={formatCurrency(detalle.precio)}
-                            onChange={(e) => handleDetailChange(index, e)}
-                            disabled
-                          />
-                        </td>
-
-                        <td>
-                          <input
-                            type="text"
-                            className="form-control"
-                            name="subtotal"
-                            placeholder="Subtotal"
-                            value={formatCurrency(detalle.subtotal)}
-                            disabled
-                          />
-                        </td>
-
-                        <td>
-                          <button
-                            type="button"
-                            className="btn btn-danger"
-                            onClick={() => removeDetail(index)}
-                          >
-                            X
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {errors.Detalles && (
-                <div className="invalid-feedback">{errors.Detalles}</div>
-              )}
-
-              <div className="text-right mb-3">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={addDetail}
-                >
-                  Añadir Detalle
-                </button>
-              </div>
-
-              <div className="form-group">
-                <label>Total:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="Total"
-                  name="Total"
-                  value={formatCurrency(totalCompra)}
-                  disabled
-                />
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button
-                type="button"
-                id="btnCerrar"
-                className="btn btn-secondary "
-                data-dismiss="modal"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => validar()}
-              >
-                Guardar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* fin modal de crear pedido con el detalle */}
-
+   
       {/* Inicio modal ver detalle pedido */}
       <div
         className="modal fade"
@@ -1417,7 +1208,7 @@ export const Pedidos = () => {
                                       )
                                     }
                                   >
-                                    Subir Comprobante :)
+                                    Subir Comprobante
                                   </button>
                                 </div>
                               )}
@@ -1457,7 +1248,7 @@ export const Pedidos = () => {
                                         )
                                       }
                                     >
-                                      Aceptar Comprobante :)
+                                      Aceptar Comprobante
                                     </button>
 
                                     <button
@@ -1484,7 +1275,7 @@ export const Pedidos = () => {
                                         }
                                       }}
                                     >
-                                      Rechazar Comprobante :(
+                                      Rechazar Comprobante
                                     </button>
                                   </div>
                                 )}
@@ -1664,7 +1455,7 @@ export const Pedidos = () => {
                                 className="btn btn-secondary btn-sm mr-2 rounded-icon"
                                 disabled
                               >
-                                <i className="fas fa-times-circle"></i>
+                                <i className="fas fa-sync-alt"></i>
                               </button>
                             ) : (
                               <button
@@ -1674,10 +1465,10 @@ export const Pedidos = () => {
 
                                   cambiarEstadoPedido();
                                 }}
-                                className="btn btn-danger btn-sm mr-2 rounded-icon"
+                                className="btn btn-warning btn-sm mr-2 rounded-icon"
                                 title="Cancelar pedido"
                               >
-                                <i className="fas fa-times-circle"></i>
+                                <i className="fas fa-sync-alt"></i>
                               </button>
                             )}
 

@@ -330,7 +330,7 @@ export const Carrito = () => {
       // Mapeo de los insumos utilizados en el producto
       InsumosUtilizados: producto.ProductoInsumos.map((insumo) => ({
         IdInsumo: insumo.InsumoProd.IdInsumo,
-        CantidadUtilizada: insumo.CantidadProductoInsumo
+        CantidadUtilizada: producto.CantidadSeleccionada
       }))
     }));
   };
@@ -481,8 +481,8 @@ export const Carrito = () => {
                         // min="0" 
                         type="text"
                         className="form-control form-control-dm"
-                        style={{ width: "45px", "textAlign":"center" }}
-                        value={inputValues[item.ProductoInsumos[0].IdInsumo] ?? item.ProductoInsumos[0].CantidadProductoInsumo}
+                        style={{ width: "45px", "textAlign":"center",border:"none" }}
+                        value={inputValues[item.ProductoInsumos[0].IdInsumo] ?? item.CantidadSeleccionada}
                         onChange={(e) =>
                           handleCantidadChange(
                             e,

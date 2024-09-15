@@ -452,15 +452,29 @@ export const Colores = () => {
                     <tr key={color.IdColor}>
                       <td>{color.Color}</td>
                       <td>
-                        <div
+                        {color.Color == "Blanco" ? (
+                          <div
                           style={{
                             backgroundColor: color.Referencia,
+                            border: "1px solid black",
                             width: "20px",
                             height: "20px",
                             display: "inline-block",
                             marginLeft: "5px",
                           }}
                         ></div>
+                        ):(
+                          <div
+                            style={{
+                              backgroundColor: color.Referencia,
+                              width: "20px",
+                              height: "20px",
+                              display: "inline-block",
+                              marginLeft: "5px",
+                            }}
+                          ></div>
+
+                        )}
                       </td>
                       <td>
                         <label className="switch">

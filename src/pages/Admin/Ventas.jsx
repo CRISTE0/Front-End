@@ -441,15 +441,40 @@ export const Ventas = () => {
     setErrors({});
     setTitle("Registrar Venta");
     setShowDetalleField(false); // Ocultar el campo de detalles al abrir el modal
+
+    obtenerFechaActual();
   };
+
+  const obtenerFechaActual = () => {
+    // Obtener la fecha actual
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0'); // Día en formato dd
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Mes en formato mm (enero es 0)
+    const year = today.getFullYear(); // Año en formato aaaa
+
+    // Formatear la fecha como dd-mm-aaaa
+    const formattedDate = `${day}/${month}/${year}`;
+    setFecha(formattedDate); // Establecer la fecha formateada en el estado
+  }
+
+  const getCurrentDateForInput = () => {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0"); // Enero es 0
+    const year = today.getFullYear();
+    return `${year}-${month}-${day}`;
+  };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     console.log(name);
 
     if (name === "IdCliente") {
+      errors.IdCliente= "";
       setIdCliente(value);
     } else if (name === "TipoPago") {
+      errors.TipoPago= "";
       setTipoPago(value);
     } else if (name === "Fecha") {
       setFecha(value);
@@ -464,77 +489,7 @@ export const Ventas = () => {
     return alertas.some((alerta) => alerta !== "");
   };
 
-  const handleDetailChange = (index, e) => {
-    const { name, value } = e.target;
-    const updatedDetalles = [...Detalles];
-    const updatedAlertas = [...alertas];
 
-    console.log(name);
-
-    if (name === "IdProducto") {
-      // Verificar si el producto ya está en los detalles
-      const productoDuplicado = updatedDetalles.some(
-        (detalle, detalleIndex) =>
-          detalle.IdProducto === value && detalleIndex !== index
-      );
-
-      if (productoDuplicado) {
-        show_alerta({
-          message: "Este producto ya está agregado en los detalles",
-          type: "error",
-        });
-        return; // No permitir la selección del producto duplicado
-      }
-
-      // Actualizar el IdProducto en el detalle
-      updatedDetalles[index][name] = value;
-      setDetalles(updatedDetalles);
-
-      // Encontrar el producto seleccionado
-      const selectedProduct = Productos.find(
-        (producto) => producto.IdProducto == value
-      );
-
-      if (selectedProduct) {
-        // Actualizar el precio en el detalle
-        updatedDetalles[index].precio = selectedProduct.ValorVenta;
-        setDetalles(updatedDetalles);
-      }
-    }
-
-    if (name === "cantidad") {
-      // Actualizar la cantidad en el detalle
-      updatedDetalles[index][name] = value;
-      setDetalles(updatedDetalles);
-
-      const selectedProductoId = updatedDetalles[index].IdProducto;
-      const selectedProduct = Productos.find(
-        (producto) => producto.IdProducto == selectedProductoId
-      );
-
-      if (selectedProduct) {
-        // Validar la cantidad
-        if (parseInt(value) > selectedProduct.Cantidad) {
-          updatedAlertas[index] =
-            "La cantidad ingresada es mayor que la cantidad disponible";
-          show_alerta({
-            message:
-              "La cantidad ingresada es mayor que la cantidad disponible",
-            type: "error",
-          });
-        } else {
-          updatedAlertas[index] = "";
-        }
-        setAlertas(updatedAlertas);
-      }
-
-      // Calcular el subtotal
-      const cantidad = parseFloat(updatedDetalles[index].cantidad || 0);
-      const precio = parseFloat(updatedDetalles[index].precio || 0);
-      updatedDetalles[index].subtotal = cantidad * precio;
-      setDetalles(updatedDetalles);
-    }
-  };
 
   const handleChangeIdEstadoPedido = (e) => {
     const value = e.target.value;
@@ -556,23 +511,140 @@ export const Ventas = () => {
     );
   };
 
+
+////////////////////////////////////////////////////////////////////////////
+
   const addDetail = () => {
-    // Crear un nuevo detalle con valores predeterminados
-    const newDetail = {
-      IdProducto: "",
-      cantidad: "",
-      precio: "",
-      subtotal: 0,
-    };
+    setDetalles([
+      ...Detalles,
+      {
+        IdProducto: "",
+        Precio: 0,
+        SubTotal: 0,
+        insumos: [],
+        insumosSeleccionados: [], // Vacío al inicio
+        insumoDisabled: true,
+        cantidadDisabled: true
+      }
+    ]);
+  };
 
-    // Crear una nueva matriz de detalles con el nuevo detalle agregado
-    const updatedDetalles = [...Detalles, newDetail];
 
-    // Establecer los detalles actualizados
-    setDetalles(updatedDetalles);
 
-    // Mostrar el campo de detalles cuando se agrega un detalle
-    setShowDetalleField(true);
+  const handleDetailChange = (index, e) => {
+    const { name, value } = e.target;
+    const detallesActualizados = [...Detalles];
+    const detalleActual = detallesActualizados[index];
+
+    if (name === "IdProducto") {
+      const productoSeleccionado = Productos.find(
+        (producto) => producto.IdProducto === parseInt(value, 10)
+      );
+
+      if (productoSeleccionado) {
+        detalleActual.IdProducto = parseInt(value, 10);
+        detalleActual.precio = productoSeleccionado.ValorVenta; // Asigna el precio del producto
+        detalleActual.insumos = productoSeleccionado.ProductoInsumos.map((insumo) => ({
+          IdInsumo: insumo.IdInsumo,
+          CantidadProductoInsumo: insumo.CantidadProductoInsumo,
+          Referencia: insumo.Insumo.Referencia,
+          CantidadDisponible: insumo.Insumo.Cantidad,
+        }));
+        detalleActual.IdInsumo = ""; // Reinicia el insumo seleccionado
+        detalleActual.cantidad = ""; // Reinicia la cantidad
+        detalleActual.subtotal = 0; // Reinicia el subtotal (cambiado de subTotal a subtotal)
+      } else {
+        detalleActual.IdProducto = "";
+        detalleActual.precio = ""; // Limpia el precio si no hay producto seleccionado
+        detalleActual.insumos = [];
+        detalleActual.IdInsumo = "";
+        detalleActual.cantidad = "";
+        detalleActual.subtotal = 0; // Reinicia el subtotal
+      }
+
+      setDetalles(detallesActualizados);
+      return;
+    }
+
+    if (name === "IdInsumo") {
+      const insumoSeleccionado = detalleActual.insumos.find(
+        (insumo) => insumo.IdInsumo === parseInt(value, 10)
+      );
+
+      if (insumoSeleccionado) {
+        detalleActual.IdInsumo = parseInt(value, 10);
+        detalleActual.cantidad = ""; // Reinicia la cantidad cuando se cambia el insumo
+        detalleActual.subtotal = 0; // Reinicia el subtotal
+      } else {
+        detalleActual.IdInsumo = "";
+        detalleActual.cantidad = "";
+        detalleActual.subtotal = 0;
+      }
+
+      setDetalles(detallesActualizados);
+      return;
+    }
+
+    if (name === "cantidad") {
+      const insumoSeleccionado = detalleActual.insumos.find(
+        (insumo) => insumo.IdInsumo === parseInt(detalleActual.IdInsumo, 10)
+      );
+
+      if (insumoSeleccionado) {
+        const cantidadDisponible = insumoSeleccionado.CantidadProductoInsumo;
+        const cantidadIngresada = parseInt(value, 10);
+
+        if (cantidadIngresada > cantidadDisponible) {
+          alertas[index] = `La cantidad máxima disponible es ${cantidadDisponible}`;
+          detalleActual.cantidad = cantidadDisponible; // Asigna la cantidad máxima disponible
+        } else {
+          alertas[index] = ""; // Limpia la alerta si está dentro del rango
+          detalleActual.cantidad = cantidadIngresada; // Actualiza la cantidad en el estado
+        }
+
+        // Calcula el subtotal (precio del producto * cantidad)
+        detalleActual.subtotal = detalleActual.precio * (detalleActual.cantidad || 0); // Actualiza el subtotal
+      } else {
+        alertas[index] = "Insumo no encontrado"; // Maneja el caso donde no se encuentra el insumo
+        detalleActual.subtotal = 0;
+      }
+
+      setDetalles(detallesActualizados);
+      setAlertas([...alertas]);
+      return;
+    }
+
+    detalleActual[name] = value;
+    setDetalles(detallesActualizados);
+  };
+
+
+
+
+
+  const handleQuantityChange = (index, e) => {
+    const value = parseInt(e.target.value, 10);
+    const insumoId = parseInt(Detalles[index].IdInsumo, 10);
+
+    // Encuentra el insumo asociado al producto seleccionado
+    const insumo = Detalles[index].insumos.find(insumo => insumo.IdInsumo == insumoId);
+
+    console.log(value);
+    console.log(insumoId);
+    console.log(insumo);
+
+
+    // Verifica si el valor ingresado es válido y no supera la cantidad disponible
+    if (!isNaN(value) && value >= 0 && value <= (insumo?.CantidadProductoInsumo || 0)) {
+      // Actualiza el estado con la nueva cantidad
+      const updatedDetalles = [...Detalles];
+      updatedDetalles[index].cantidad = value;
+
+      setDetalles(updatedDetalles);
+    } else {
+      // Si el valor no es válido o excede la cantidad disponible, muestra un error
+      alert('La cantidad ingresada no puede superar la cantidad disponible del insumo.');
+    }
   };
 
   const removeDetail = (index) => {
@@ -675,6 +747,44 @@ export const Ventas = () => {
     }
   };
 
+
+  const formatearDetallesParaBackend = () => {
+    const detallesMap = {};
+
+    Detalles.forEach((detalle) => {
+      const { IdProducto, IdInsumo, cantidad, precio, subtotal, insumos } = detalle;
+
+      // Solo procesar si hay un insumo y cantidad válida
+      if (IdInsumo && cantidad > 0) {
+        // Si el producto ya existe en el map, agregamos los insumos a su lista
+        if (detallesMap[IdProducto]) {
+          const insumoExistente = insumos.find(insumo => insumo.IdInsumo === IdInsumo);
+          detallesMap[IdProducto].InsumosUtilizados.push({
+            IdInsumo: insumoExistente.IdInsumo,
+            CantidadUtilizada: cantidad
+          });
+        } else {
+          // Si no existe el producto, lo agregamos
+          const insumoSeleccionado = insumos.find(insumo => insumo.IdInsumo === IdInsumo);
+          detallesMap[IdProducto] = {
+            IdProducto: IdProducto,
+            Precio: precio,
+            SubTotal: subtotal,
+            InsumosUtilizados: [
+              {
+                IdInsumo: insumoSeleccionado.IdInsumo,
+                CantidadUtilizada: cantidad
+              }
+            ]
+          };
+        }
+      }
+    });
+
+    // Convertimos el map en un array de detalles
+    return Object.values(detallesMap);
+  };
+
   const validar = async () => {
     let errorMessage = "";
 
@@ -695,11 +805,36 @@ export const Ventas = () => {
     if (Detalles.length === 0) {
       errores.Detalles = "Agrega al menos un detalle de compra";
     } else if (
-      Detalles.some((detalle) => !detalle.cantidad || !detalle.precio)
+      Detalles.some((detalle) =>  !detalle.cantidad || !detalle.precio)
     ) {
       errores.Detalles =
         "Ingresa una cantidad y un precio válido para cada detalle";
     }
+
+    
+    // Crear un conjunto para verificar duplicados
+    const combinaciones = new Set();
+
+    const filaExistente =[];
+
+
+    // Validar las filas de los detalles de insumos (color, talla, cantidad)
+    Detalles.forEach((detalle, index) => {
+        // Verificar duplicados
+        const clave = `${detalle.IdProducto}-${detalle.IdInsumo}`;
+        if (combinaciones.has(clave)) {
+          filaExistente.push(clave);
+        } else {
+          combinaciones.add(clave);
+        }
+    });
+
+    
+    if (filaExistente.length > 0) {
+      show_alerta({message:`Existen filas repetidas.`,type:"error"});
+      return;
+    }
+
 
     if (Object.keys(errores).length > 0) {
       // Si hay errores específicos, actualizarlos en el estado
@@ -717,10 +852,15 @@ export const Ventas = () => {
       return;
     }
 
+    const detallesFormateados = formatearDetallesParaBackend();
+
     console.log(Detalles);
-    console.log(Fecha);
-    console.log(Total);
+    console.log(detallesFormateados);
+    console.log(getCurrentDateForInput());
     console.log(TipoPago);
+    console.log(totalCompra);
+
+    // return;
 
     if (TipoPago === "Transferencia") {
       if (!imagenComprobante) {
@@ -740,9 +880,9 @@ export const Ventas = () => {
     enviarSolicitud("POST", {
       IdCliente: IdCliente,
       TipoPago: TipoPago,
-      Fecha: Fecha,
+      Fecha: getCurrentDateForInput(),
       Total: totalCompra,
-      Detalles: Detalles,
+      Detalles: detallesFormateados,
       idImagenComprobante: idImagenComprobante,
       imagenComprobante: url,
       intentos: 3,
@@ -1303,136 +1443,133 @@ export const Ventas = () => {
                             <div className="form-group">
                               <label>Fecha:</label>
                               <input
-                                type="date"
-                                className={`form-control ${
-                                  errors.Fecha ? "is-invalid" : ""
-                                }`}
+                                type="text"
+                                className={"form-control"}
                                 id="Fecha"
                                 name="Fecha"
                                 value={Fecha}
-                                onChange={handleChange}
+                                disabled
+                                // onChange={handleChange}
                               />
                               {renderErrorMessage(errors.Fecha)}
                             </div>
 
+                            {/* Detalles */}
                             <div className="table-responsive">
-                              <table className="table table-bordered">
-                                <thead>
-                                  <tr>
-                                    <th>Producto</th>
-                                    <th>Cantidad</th>
-                                    <th>Precio</th>
-                                    <th>SubTotal</th>
-                                    <th>Acción</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {Detalles.map((detalle, index) => (
-                                    <tr key={index}>
-                                      <td>
-                                        <select
-                                          className={`form-control ${
-                                            errors.Detalles &&
-                                            errors.Detalles[index] &&
-                                            errors.Detalles[index].IdProducto
-                                              ? "is-invalid"
-                                              : ""
-                                          }`}
-                                          name="IdProducto"
-                                          value={detalle.IdProducto}
-                                          onChange={(e) =>
-                                            handleDetailChange(index, e)
-                                          }
-                                        >
-                                          <option value="">
-                                            Selecciona un producto
-                                          </option>
-                                          {getFilteredProductos(index).map(
-                                            (producto) => (
-                                              <option
-                                                key={producto.IdProducto}
-                                                value={producto.IdProducto}
-                                              >
+                                <table className="table table-bordered">
+                                  <thead>
+                                    <tr>
+                                      <th>Producto</th>
+                                      <th>Insumo</th>
+                                      <th>Cantidad</th>
+                                      <th>Precio</th>
+                                      <th>SubTotal</th>
+                                      <th>Acción</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {Detalles.map((detalle, index) => (
+                                      <tr key={index}>
+                                        <td>
+                                          <select
+                                            className={`form-control ${
+                                              errors.Detalles &&
+                                              errors.Detalles[index] &&
+                                              errors.Detalles[index].IdProducto
+                                                ? "is-invalid"
+                                                : ""
+                                            }`}
+                                            name="IdProducto"
+                                            value={detalle.IdProducto || ""}
+                                            onChange={(e) => handleDetailChange(index, e)}
+                                          >
+                                            <option value="">Selecciona un producto</option>
+                                            {Productos.map(producto => (
+                                              <option key={producto.IdProducto} value={producto.IdProducto}>
                                                 {producto.Referencia}
                                               </option>
-                                            )
-                                          )}
-                                        </select>
+                                            ))}
+                                          </select>
 
-                                        {errors.Detalles &&
-                                          errors.Detalles[index] &&
-                                          errors.Detalles[index].IdProducto && (
+                                          {errors.Detalles && errors.Detalles[index] && errors.Detalles[index].IdProducto && (
                                             <div className="invalid-feedback">
-                                              {
-                                                errors.Detalles[index]
-                                                  .IdProducto
-                                              }
+                                              {errors.Detalles[index].IdProducto}
                                             </div>
                                           )}
-                                      </td>
+                                        </td>
 
-                                      <td>
-                                        <input
-                                          type="number"
-                                          className="form-control"
-                                          name="cantidad"
-                                          placeholder="Cantidad"
-                                          value={detalle.cantidad}
-                                          onChange={(e) =>
-                                            handleDetailChange(index, e)
-                                          }
-                                        />
-                                        {alertas[index] && (
-                                          <span
-                                            style={{ color: "red" }}
-                                            className="alerta"
+                                        <td>
+                                          <select
+                                            className="form-control"
+                                            name="IdInsumo"
+                                            value={detalle.IdInsumo || ""}
+                                            onChange={(e) => handleDetailChange(index, e)}
+                                            disabled={!detalle.IdProducto} // Deshabilita si no hay producto seleccionado
                                           >
-                                            {alertas[index]}
-                                          </span>
-                                        )}
-                                      </td>
+                                            <option value="">Selecciona un insumo</option>
+                                            {detalle.insumos
+                                                  .filter(insumo => insumo.CantidadProductoInsumo > 0) // Filtrar insumos con cantidad > 1
+                                                  .map(insumo => (
+                                              <option key={insumo.IdInsumo} value={insumo.IdInsumo}>
+                                                {insumo.Referencia}
+                                              </option>
+                                            ))}
+                                          </select>
+                                        </td>
 
-                                      <td>
-                                        <input
-                                          type="text"
-                                          className="form-control"
-                                          name="precio"
-                                          placeholder="Precio"
-                                          value={formatCurrency(detalle.precio)}
-                                          onChange={(e) =>
-                                            handleDetailChange(index, e)
-                                          }
-                                          disabled
-                                        />
-                                      </td>
-
-                                      <td>
-                                        <input
-                                          type="text"
-                                          className="form-control"
-                                          name="subtotal"
-                                          placeholder="Subtotal"
-                                          value={formatCurrency(
-                                            detalle.subtotal
+                                        <td>
+                                          <input
+                                            type="number"
+                                            className="form-control"
+                                            name="cantidad"
+                                            placeholder="Cantidad"
+                                            value={detalle.cantidad || ""}
+                                            onChange={(e) => handleDetailChange(index, e)}
+                                            disabled={!detalle.IdInsumo} // Deshabilita si no hay insumo seleccionado
+                                          />
+                                          {alertas[index] && (
+                                            <span style={{ color: "red" }} className="alerta">
+                                              {alertas[index]}
+                                            </span>
                                           )}
-                                          disabled
-                                        />
-                                      </td>
+                                        </td>
 
-                                      <td>
-                                        <button
-                                          type="button"
-                                          className="btn btn-danger"
-                                          onClick={() => removeDetail(index)}
-                                        >
-                                          X
-                                        </button>
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
+                                        <td>
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            name="precio"
+                                            placeholder="Precio"
+                                            value={formatCurrency(detalle.precio || "")}
+                                            disabled
+                                          />
+                                        </td>
+
+                                        <td>
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            name="subtotal"
+                                            placeholder="Subtotal"
+                                            value={formatCurrency(detalle.subtotal || "")}
+                                            disabled
+                                          />
+                                        </td>
+
+                                        <td>
+                                          <button
+                                            type="button"
+                                            className="btn btn-danger"
+                                            onClick={() => removeDetail(index)}
+                                          >
+                                            X
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
 
                             {errors.Detalles && (
                               <div className="invalid-feedback">
@@ -1725,6 +1862,7 @@ export const Ventas = () => {
                                   <thead>
                                     <tr>
                                       <th>Producto</th>
+                                      <th>Insumo</th>
                                       <th>Cantidad</th>
                                       <th>Precio</th>
                                     </tr>
@@ -1733,11 +1871,9 @@ export const Ventas = () => {
                                     {pedidoSeleccionado.DetallesPedidosProductos.map(
                                       (detalle, index) => (
                                         <tr key={index}>
-                                          <td>
-                                            {getProductoName(
-                                              detalle.IdProducto
-                                            )}
-                                          </td>
+                                          <td>{detalle.Producto.Referencia}</td>
+                                          <td>{detalle.Insumo.Referencia}</td>
+
                                           <td>{detalle.Cantidad}</td>
                                           <td>
                                             {formatCurrency(detalle.Precio)}
