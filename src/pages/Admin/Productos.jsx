@@ -970,7 +970,7 @@ export const Catalogo = () => {
             );
 
             show_alerta({
-              message: "La publicación del producto cambiada con éxito",
+              message: "Publicación del producto actualizado correctamente",
               type: "success",
             });
           }
@@ -1054,7 +1054,7 @@ export const Catalogo = () => {
               );
 
               show_alerta({
-                message: "Estado del producto cambiado con éxito",
+                message: "Estado del producto actualizado correctamente",
                 type: "success",
               });
             } else {
@@ -1646,74 +1646,6 @@ export const Catalogo = () => {
                     </>
                   ) : (
                     <>
-                      {/* Diseño del Producto */}
-                      {/* <div className="form-group col-md-6">
-                        <label>Diseño del Producto:</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          disabled
-                          value={convertDisenioIdToName(IdDisenio)}
-                        />
-                      </div> */}
-
-                      {/* Insumo del Producto */}
-                      {/* <div className="form-group col-md-6">
-                        <label>Insumo del Producto:</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          disabled
-                          value={convertInsumoIdToName(IdInsumo)}
-                        />
-                      </div> */}
-
-                      {/* Referencia del Producto */}
-                      {/* <div className="form-group col-md-6">
-                        <label>Referencia del Producto:</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          disabled
-                          value={Referencia}
-                        />
-                      </div> */}
-
-                      {/* Cantidad del producto */}
-                      {/* <div className="form-group col-md-6">
-                        <label htmlFor="cantidadProducto">Cantidad:</label>
-                        <input
-                          type="text"
-                          className={`form-control ${
-                            errors.Cantidad ? "is-invalid" : ""
-                          }`}
-                          id="cantidadProducto"
-                          placeholder={
-                            selectedInsumo
-                              ? `La cantidad máxima del insumo es: ${selectedInsumo.Cantidad}`
-                              : "Ingrese la cantidad del insumo"
-                          }
-                          required
-                          value={Cantidad}
-                          onChange={handleChangeCantidad}
-                        />
-                        {errors.Cantidad && (
-                          <div className="invalid-feedback">
-                            {errors.Cantidad}
-                          </div>
-                        )}
-                      </div> */}
-
-                      {/* Referencia del Producto */}
-                      {/* <div className="form-group col-md-12">
-                        <label>Valor de la venta del producto:</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          disabled
-                          value={formatCurrency(ValorVenta)}
-                        />
-                      </div> */}
                     </>
                   )}
                 </div>
@@ -2196,28 +2128,13 @@ export const Catalogo = () => {
             />
 
             {/* Renderizar boton para crear producto admin o cliente */}
-            {auth.idUsuario ? (
+            {auth.idUsuario &&(
               <button
                 type="button"
                 className="btn btn-dark d-flex align-items-center justify-content-center p-0"
                 data-toggle="modal"
                 data-target="#modalCliente"
                 onClick={() => openModal(1, "", "", "", "", "", "")}
-                style={{
-                  width: "175px",
-                  height: "40px",
-                }}
-              >
-                <i className="fas fa-pencil-alt"></i>
-                <span className="d-none d-sm-inline ml-2">Crear Producto</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="btn btn-dark"
-                data-toggle="modal"
-                data-target="#modalProductoCliente"
-                onClick={() => openModal(3, "", "", "", "", "", "")}
                 style={{
                   width: "175px",
                   height: "40px",

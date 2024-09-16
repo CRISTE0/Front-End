@@ -1020,7 +1020,7 @@ export const Pedidos = () => {
                               aria-expanded="true"
                               aria-controls="collapseOne"
                             >
-                              Detalles del Pedido
+                              Detalles del pedido
                             </button>
                           </h2>
                         </div>
@@ -1035,7 +1035,7 @@ export const Pedidos = () => {
                             <div className="card-body">
                               <div className="row mb-3">
                                 <div className="col-md-6">
-                                  <label>Cliente:</label>
+                                  <label>Cliente</label>
                                   <input
                                     type="text"
                                     className="form-control"
@@ -1046,7 +1046,7 @@ export const Pedidos = () => {
                                   />
                                 </div>
                                 <div className="col-md-6">
-                                  <label>Fecha:</label>
+                                  <label>Fecha</label>
                                   <input
                                     type="date"
                                     className="form-control"
@@ -1060,6 +1060,7 @@ export const Pedidos = () => {
                                   <thead>
                                     <tr>
                                       <th>Producto</th>
+                                      <th>Diseño</th>
                                       <th>Talla</th>
                                       <th>Color</th>
                                       <th>Cantidad</th>
@@ -1071,6 +1072,16 @@ export const Pedidos = () => {
                                       (detalle, index) => (
                                         <tr key={index}>
                                           <td>{detalle.Producto.Referencia}</td>
+                                          <td>
+                                          <button
+                                            className={"btn btn-info btn-sm"}
+                                            data-toggle="modal"
+                                            data-target="#modalVerdisenio"
+                                            title="Ver diseño"
+                                          >
+                                            <i className="fas fa-info-circle"></i>
+                                          </button>
+                                          </td>
                                           <td>{detalle.Insumo.Talla.Talla}</td>
                                           <td>{detalle.Insumo.Color.Color}</td>
                                           <td>{detalle.Cantidad}</td>
@@ -1084,7 +1095,7 @@ export const Pedidos = () => {
                                 </table>
                               </div>
                               <div className="form-group">
-                                <label>Total:</label>
+                                <label>Total</label>
                                 <input
                                   type="text"
                                   className="form-control"
@@ -1094,6 +1105,107 @@ export const Pedidos = () => {
                                   disabled
                                 />
                               </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Acordeon detalles del cliente */}
+                      <div className="card">
+                        <div className="card-header" id="headingThree">
+                          <h2 className="mb-0">
+                            <button
+                              className="btn btn-link btn-block text-left"
+                              type="button"
+                              data-toggle="collapse"
+                              data-target="#collapseThree"
+                              aria-expanded="false"
+                              aria-controls="collapseThree"
+                            >
+                              Detalles del cliente
+                            </button>
+                          </h2>
+                        </div>
+
+                        {pedidoSeleccionado && (
+                          <div
+                            id="collapseThree"
+                            className="collapse"
+                            aria-labelledby="headingThree"
+                            data-parent="#accordionExample"
+                          >
+                            <div className="card-body">
+                              <div className="row mb-3">
+                                <div className="col-md-6">
+                                  <label>Tipo de documento</label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={
+                                      pedidoSeleccionado.Cliente.TipoDocumento == "CC" ? "Cedula de ciudadanía" : "Cedula de extranjeria"
+                                    }
+                                    disabled
+                                  />
+                                </div>
+                                <div className="col-md-6">
+                                  <label>Número de documento</label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={pedidoSeleccionado.Cliente.NroDocumento}
+                                    disabled
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="row mb-3">
+                                <div className="col-md-6">
+                                  <label>Nombre y apellido</label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={
+                                      pedidoSeleccionado.Cliente.NombreApellido
+                                    }
+                                    disabled
+                                  />
+                                </div>
+                                <div className="col-md-6">
+                                  <label>Télefono</label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={pedidoSeleccionado.Cliente.Telefono}
+                                    disabled
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="row mb-3">
+                                <div className="col-md-6">
+                                  <label>Direcion de domicilio</label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={
+                                      pedidoSeleccionado.Cliente.Direccion
+                                    }
+                                    disabled
+                                  />
+                                </div>
+                                <div className="col-md-6">
+                                  <label>Correo electrónico</label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    value={pedidoSeleccionado.Cliente.Correo}
+                                    disabled
+                                  />
+                                </div>
+                              </div>
+
+
+
                             </div>
                           </div>
                         )}
@@ -1116,7 +1228,6 @@ export const Pedidos = () => {
                           </h2>
                         </div>
 
-                        {/* {insumoSeleccionado && ( */}
                         <div
                           id="collapseTwo"
                           className="collapse"
@@ -1302,7 +1413,7 @@ export const Pedidos = () => {
                             </div>
                           </div>
                         </div>
-                        {/* )} */}
+
                       </div>
                     </div>
                   </div>
@@ -1323,6 +1434,71 @@ export const Pedidos = () => {
         </div>
       </div>
       {/* Fin modal ver detalle pedido */}
+
+      {/* Inicio modal de ver diseño*/}
+      <div
+        className="modal fade"
+        id="modalVerdisenio"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="ModalVerdisenioLabel"
+        // aria-hidden="true"
+        data-backdrop="static"
+        data-keyboard="false"
+      >
+        <div className="modal-dialog modal-md" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="ModalVerdisenioLabel"> Ver diseño</h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+
+            <div className="modal-body">
+              {/* <input type="text" id="IdCompra" value={IdPedidoActualizar}></input> */}
+
+              <div className="form-row">
+                {/* Seleccionar estado */}
+                <div className="form-group col-md-12">
+
+                  {pedidoSeleccionado && (
+
+                    <>
+                    hola yooooooooooo
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                type="button"
+                id="btnCerrar"
+                className="btn btn-secondary"
+                data-dismiss="modal"
+              >
+                Cerrar
+              </button>
+              {/* <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => cambiarEstadoPedido()}
+              >
+                Actualizar
+              </button> */}
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* fin modal de ver diseño*/}
+
 
       <div className="container-fluid">
         {/* <!-- Page Heading --> */}
@@ -1400,10 +1576,10 @@ export const Pedidos = () => {
                                 data-toggle="modal"
                                 data-target="#modalEstadoPedido"
                                 onClick={() => openModalEstado(pedido)}
-                                className="btn btn-danger btn-sm mr-2 rounded-icon"
+                                className="btn btn-warning btn-sm mr-2 rounded-icon"
                                 title="Editar"
                               >
-                                <i className="fas fa-times-circle"></i>
+                                <i className="fas fa-sync-alt"></i>
                               </button>
                             )}
 

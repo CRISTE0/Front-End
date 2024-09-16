@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import camisetas from "../../assets/img/camisetas";
+import imagenes from "../../assets/img/imagenesHome";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
 import { useAuth } from "../../context/AuthProvider";
@@ -377,40 +377,85 @@ export const Carrito = () => {
         return;
       }
 
-      setIsSubmitting(true);
+      const MySwal = withReactContent(Swal);
+      Swal.fire({
+        title: `¿Seguro que desea confirmar el pago?`,
+        // icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Sí, confirmar pago",
+        cancelButtonText: "Cancelar",
+        html: `<p> Por favor, confirme que desea realizar el pago. Para completar la transacción, escanee el código QR y envíe el monto       correspondiente, guarda el comprobante lo necesitaremos mas adelante.</p>
+              <p>Escanee el código QR para realizar el pago.</p>
+               <img src=${imagenes[9]} alt="Código QR para pago" style="max-width: 200px; margin-top: 10px;" />`
+      }).then(async (result) => { 
+        if (result.isConfirmed) {
+          try {
+            // console.log(parametros);
 
-      let parametros = {
-        IdCliente: auth.idCliente,
-        Detalles: obtenerDetalles(cartItems),
-        TipoPago: "Transferencia",
-        Fecha: obtenerFechaActual(),
-        Total: totalPedido,
-        idImagenComprobante: "0",
-        imagenComprobante: "0",
-        intentos: 3,
-        IdEstadoPedido: 1,
-      };
+            setIsSubmitting(true);
 
-      console.log(parametros);
-      console.log(obtenerFechaActual());
+            let parametros = {
+              IdCliente: auth.idCliente,
+              Detalles: obtenerDetalles(cartItems),
+              TipoPago: "Transferencia",
+              Fecha: obtenerFechaActual(),
+              Total: totalPedido,
+              idImagenComprobante: "0",
+              imagenComprobante: "0",
+              intentos: 3,
+              IdEstadoPedido: 1,
+            };
+      
+            console.log(parametros);
+            console.log(obtenerFechaActual());
+      
+            // return;
+      
+            const respuesta = await axios({
+              method: "POST",
+              url: url,
+              data: parametros,
+            });
+      
+            console.log(respuesta);
+      
 
-      // return;
 
-      const respuesta = await axios({
-        method: "POST",
-        url: url,
-        data: parametros,
+            if (respuesta.status == 200) {
+            
+              show_alerta({
+                message: respuesta.data.message,
+                type: "success",
+              });
+        
+              localStorage.removeItem("cart");
+              navigate("/admin/Pedidos");
+
+            } else {
+              console.log(respuesta.data);
+              show_alerta({
+                message: respuesta.data?.message || "Error desconocido",
+                type: "error",
+              });
+            }
+          } catch (error) {
+            console.error("Error al cambiar el estado del producto:", error);
+            show_alerta({
+              message:
+                error.response?.data?.message ||
+                "Error al intentar cambiar el estado del producto",
+              type: "error",
+            });
+          }
+        } else {
+          show_alerta({
+            message: "No se ha realizado el pedido",
+            type: "info",
+          });
+        }
       });
 
-      console.log(respuesta);
-
-      show_alerta({
-        message: respuesta.data.message,
-        type: "success",
-      });
-
-      // localStorage.removeItem("cart");
-      // navigate("/admin/Pedidos");
+     
     } catch (error) {
       console.log(error);
 

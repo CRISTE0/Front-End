@@ -374,7 +374,7 @@ export const ProductoSolo = () => {
                       {/* Color del producto */}
 
                       {/* Talla del producto */}
-                      <div className="col-12 pb-5">
+                      <div className="col-12 pb-3">
                         {/* <ul className="list-inline pb-1">
                           <li className="list-inline-item">Talla:</li>
                           <li className="font-weight-bold text-dark">

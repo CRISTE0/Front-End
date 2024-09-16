@@ -1182,6 +1182,8 @@ export const Disenios = () => {
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
+            {auth.idUsuario &&(
+
             <button
               type="button"
               className="btn btn-dark d-flex align-items-center justify-content-center p-0"
@@ -1196,6 +1198,8 @@ export const Disenios = () => {
               <i className="fas fa-pencil-alt"></i>
               <span className="d-none d-sm-inline ml-2">Crear Diseño</span>
             </button>
+            )}
+            
           </div>
           <div className="card-body">
             <div className="table-responsive">
