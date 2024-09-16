@@ -9,8 +9,8 @@ import { AdminFooter } from "../../components/Admin/AdminFooter";
 import Loader from "../../components/Loader/loader";
 
 export const Tallas = () => {
-  const url = "http://localhost:3000/api/tallas";
-  const insumosUrl = "http://localhost:3000/api/insumos";
+  const url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/tallas";
+  const insumosUrl = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/insumos";
   const [Tallas, setTallas] = useState([]);
   const [IdTalla, setIdTalla] = useState("");
   const [Talla, setTalla] = useState([]);

@@ -8,7 +8,7 @@ import show_alerta from "../../components/Show_Alerta/show_alerta";
 export const RecuperarContraseñaUsuario = () => {
   const [Correo, setCorreo] = useState("");
   const urlRecuperar =
-    "http://localhost:3000/api/restablecerContraseniaUsuario";
+    "https://softshirt-1c3fad7d72e8.herokuapp.com/api/restablecerContraseniaUsuario";
   const [errors, setErrors] = useState({
     correo: "",
   });

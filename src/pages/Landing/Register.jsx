@@ -5,7 +5,7 @@ import withReactContent from "sweetalert2-react-content";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const Register = () => {
-  const url = "http://localhost:3000/api/clientes";
+  const url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/clientes";
   const [Clientes, setClientes] = useState([]);
   const [IdCliente, setIdCliente] = useState("");
   const [TipoDocumento, setTipoDocumento] = useState("");

@@ -14,7 +14,7 @@ export const Carrito = () => {
   let timeoutId = null;
   const [inputValues, setInputValues] = useState({});
   const { triggerRender } = useAuth();
-  const url = "http://localhost:3000/api/pedidos";
+  const url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos";
   const navigate = useNavigate();
 
   const [showMessage, setShowMessage] = useState(null);
@@ -35,7 +35,7 @@ export const Carrito = () => {
       console.log(auth.idCliente);
 
       let respuesta = await axios.get(
-        `http://localhost:3000/api/clientes/${auth.idCliente}`
+        `https://softshirt-1c3fad7d72e8.herokuapp.com/api/clientes/${auth.idCliente}`
       );
 
       setCliente(respuesta.data);
@@ -60,7 +60,7 @@ export const Carrito = () => {
         cart.map(
           (item) =>
             axios
-              .get(`http://localhost:3000/api/productos/${item.IdProd}`)
+              .get(`https://softshirt-1c3fad7d72e8.herokuapp.com/api/productos/${item.IdProd}`)
               .then((res) => {
                 // Filtrar el ProductoInsumos para mantener solo el insumo con el IdIns seleccionado
                 const insumoSeleccionado = res.data.ProductoInsumos.find(

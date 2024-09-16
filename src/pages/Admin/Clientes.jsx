@@ -9,8 +9,8 @@ import { AdminFooter } from "../../components/Admin/AdminFooter";
 import Loader from "../../components/Loader/loader";
 
 export const Clientes = () => {
-  const url = "http://localhost:3000/api/clientes";
-  const pedidoUrl = "http://localhost:3000/api/pedidos";
+  const url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/clientes";
+  const pedidoUrl = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos";
   const [Clientes, setClientes] = useState([]);
   const [IdCliente, setIdCliente] = useState("");
   const [TipoDocumento, setTipoDocumento] = useState("");

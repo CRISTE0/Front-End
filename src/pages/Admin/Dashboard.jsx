@@ -16,7 +16,7 @@ export const Dashboard = () => {
   useEffect(() => {
     const fetchPedidos = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/pedidos");
+        const response = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos");
         const pedidos = response.data;
         const pedidosFiltrados = pedidos.filter(
           (pedido) => pedido.IdEstadoPedido == 1
@@ -31,7 +31,7 @@ export const Dashboard = () => {
   
     const fetchCompras = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/compras");
+        const response = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/compras");
         const compras = response.data;
         const total = compras.reduce((acc, compra) => acc + compra.Total, 0);
         setTotalCompras(total);
@@ -44,7 +44,7 @@ export const Dashboard = () => {
   
     const fetchGananciaDiaria = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/pedidos");
+        const response = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos");
         const pedidos = response.data;
         const fechaActual = dayjs().format("YYYY-MM-DD");
         const pedidosDelDia = pedidos.filter(
@@ -65,7 +65,7 @@ export const Dashboard = () => {
   
     const fetchGananciaMensual = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/pedidos");
+        const response = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos");
         const pedidos = response.data;
         const mesActual = dayjs().month() + 1;
         const anioActual = dayjs().year();

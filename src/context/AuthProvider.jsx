@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
 // Función para obtener permisos del usuario
 async function fetchUserPermissions(id) {
   try {
-    const url = `http://localhost:3000/api/usuarios/${id}`;
+    const url = `https://softshirt-1c3fad7d72e8.herokuapp.com/api/usuarios/${id}`;
     let respuesta = await axios.get(url);
     return respuesta.data;
   } catch (error) {

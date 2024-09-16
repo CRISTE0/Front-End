@@ -13,7 +13,7 @@ export const LoginAdmin = () => {
   const [Usuario, setUsuario] = useState("");
   const [Contrasenia, setContrasenia] = useState("");
   const [showPassword, setShowPassword] = useState(false); // Estado para controlar la visibilidad de la contraseña
-  const url = "http://localhost:3000/api/authWeb/loginAdmin";
+  const url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/authWeb/loginAdmin";
   
   const {login} = useAuth();
   const navigate = useNavigate();

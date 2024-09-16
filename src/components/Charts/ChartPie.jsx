@@ -51,7 +51,7 @@ export const ChartPie = () => {
       try {
         // Obtener pedidos
         const pedidosResponse = await axios.get(
-          "http://localhost:3000/api/pedidos"
+          "https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos"
         );
         const pedidos = pedidosResponse.data;
 
@@ -90,7 +90,7 @@ export const ChartPie = () => {
           new Set(sortedProductos.map((producto) => producto.idDisenio))
         ); // Obtener IDs únicos de diseños
         const designsResponse = await axios.get(
-          "http://localhost:3000/api/disenios"
+          "https://softshirt-1c3fad7d72e8.herokuapp.com/api/disenios"
         );
         const diseños = designsResponse.data;
 

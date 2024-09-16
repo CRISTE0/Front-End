@@ -84,8 +84,8 @@ export const ChartLine = () => {
     const obtenerDatos = async () => {
       try {
         const [ventasResponse, comprasResponse] = await Promise.all([
-          axios.get("http://localhost:3000/api/pedidos"),
-          axios.get("http://localhost:3000/api/compras"),
+          axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos"),
+          axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/compras"),
         ]);
 
         const ventas = ventasResponse.data;

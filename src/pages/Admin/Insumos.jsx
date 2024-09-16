@@ -9,7 +9,7 @@ import { AdminFooter } from "../../components/Admin/AdminFooter";
 import Loader from "../../components/Loader/loader";
 
 export const Insumos = () => {
-  const url = "http://localhost:3000/api/insumos";
+  const url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/insumos";
   const [Insumos, setInsumos] = useState([]);
   const [Colores, setColores] = useState([]);
   const [Tallas, setTallas] = useState([]);
@@ -57,7 +57,7 @@ export const Insumos = () => {
   const getColores = async () => {
     setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
-      const response = await axios.get("http://localhost:3000/api/colores");
+      const response = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/colores");
       // Filtrar solo los colores activos
       const coloresActivos = response.data.filter(
         (color) => color.Estado === "Activo"
@@ -73,7 +73,7 @@ export const Insumos = () => {
   const getTallas = async () => {
     setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
-      const response = await axios.get("http://localhost:3000/api/tallas");
+      const response = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/tallas");
       // Filtrar solo las tallas activas
       const tallasActivas = response.data.filter(
         (talla) => talla.Estado === "Activo"
@@ -427,7 +427,7 @@ export const Insumos = () => {
       if (result.isConfirmed) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/insumos/${idInsumo}`,
+            `https://softshirt-1c3fad7d72e8.herokuapp.com/api/insumos/${idInsumo}`,
             {
               method: "DELETE",
             }

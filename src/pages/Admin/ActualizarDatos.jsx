@@ -9,7 +9,7 @@ import show_alerta from "../../components/Show_Alerta/show_alerta";
 export const ActualizarDatos = () => {
   const { id } = useParams();
   const navigate = useNavigate()
-  const url = `http://localhost:3000/api/clientes/${id}`;
+  const url = `https://softshirt-1c3fad7d72e8.herokuapp.com/api/clientes/${id}`;
   const [Clientes, setCliente] = useState([]);
   const [IdCliente, setIdCliente] = useState("");
   const [NombreApellido, setNombreApellido] = useState(

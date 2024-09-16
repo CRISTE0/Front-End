@@ -14,7 +14,7 @@ import { AdminFooter } from "../../components/Admin/AdminFooter";
 import Loader from "../../components/Loader/loader";
 
 export const Pedidos = () => {
-  const url = "http://localhost:3000/api/pedidos";
+  const url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos";
   const [pedidos, setPedidos] = useState([]);
   const [pedidosCliente, setPedidosCliente] = useState([]);
   const [IdPedido, setIdPedido] = useState("");
@@ -130,7 +130,7 @@ export const Pedidos = () => {
     return estadoPedido ? estadoPedido.NombreEstado : "";
   };
 
-  const getClientes = async () => {
+  const getClientes = async () => {https://softshirt-1c3fad7d72e8.herokuapp.com
     try {
       const respuesta = await axios.get("http://localhost:3000/api/clientes");
       const clientesActivos = respuesta.data.filter(
@@ -148,7 +148,7 @@ export const Pedidos = () => {
   };
 
   const getProductos = async () => {
-    setLoading(true); // Mostrar el loader antes de realizar la solicitud
+    setLoading(true); // Mostrar el loadehttps://softshirt-1c3fad7d72e8.herokuapp.coma solicitud
     try {
       const respuesta = await axios.get("http://localhost:3000/api/productos");
       const productosActivos = respuesta.data.filter(
@@ -166,7 +166,7 @@ export const Pedidos = () => {
   };
 
   const getEstadosPedidos = async () => {
-    try {
+    try {https://softshirt-1c3fad7d72e8.herokuapp.com
       const respuesta = await axios.get(
         "http://localhost:3000/api/estadosPedidos"
       );
@@ -191,7 +191,7 @@ export const Pedidos = () => {
   // Abre el modal del detalle del pedido
   const handleDetallePedido = async (idPedido) => {
     try {
-      // Realizar la solicitud GET para obtener los detalles del pedido
+      // https://softshirt-1c3fad7d72e8.herokuapp.com GET para obtener los detalles del pedido
       const respuesta = await axios.get(
         `http://localhost:3000/api/pedidos/${idPedido}`
       );
@@ -441,7 +441,7 @@ export const Pedidos = () => {
           pedidoIdImagenComprobante,
           imagenComprobante
         );
-
+https://softshirt-1c3fad7d72e8.herokuapp.com
         await axios.put(
           `http://localhost:3000/api/pedidos/comprobante/${idPed}`,
           {
@@ -455,7 +455,7 @@ export const Pedidos = () => {
         const [idImagenComprobante, url] = await subirImageComprobante(
           imagenComprobante
         );
-
+https://softshirt-1c3fad7d72e8.herokuapp.com
         await axios.put(
           `http://localhost:3000/api/pedidos/comprobante/${idPed}`,
           {
@@ -609,7 +609,7 @@ export const Pedidos = () => {
           console.log(idPed);
           console.log(idEstPed);
 
-          // return;
+          // return;https://softshirt-1c3fad7d72e8.herokuapp.com
 
           await axios.put(`http://localhost:3000/api/pedidos/${idPed}`, {
             Estado: idEstPed,
@@ -642,7 +642,7 @@ export const Pedidos = () => {
     try {
       console.log(idPedido);
 
-      // return;
+      // return;https://softshirt-1c3fad7d72e8.herokuapp.com
       // Cambiar el estado del pedido a "Cancelado"
       await axios.put(`http://localhost:3000/api/pedidos/${idPedido}`, {
         Estado: 4,
@@ -681,7 +681,7 @@ export const Pedidos = () => {
         try {
           console.log(idPedido);
           // console.log(idEstadoPedido);
-
+https://softshirt-1c3fad7d72e8.herokuapp.com
           const respuesta = await axios.put(
             `http://localhost:3000/api/pedidos/${idPedido}`,
             {
@@ -759,7 +759,7 @@ export const Pedidos = () => {
           console.log(intentosActuales);
           console.log(nombreClientePedido);
           console.log(correoClientePedido);
-
+https://softshirt-1c3fad7d72e8.herokuapp.com
           const respuesta = await axios.put(
             `http://localhost:3000/api/pedidos/comprobante/intentos/${idPedido}`,
             {

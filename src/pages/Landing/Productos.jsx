@@ -13,7 +13,7 @@ import show_alerta from "../../components/Show_Alerta/show_alerta";
 import { useAuth } from "../../context/AuthProvider";
 
 export const Productos = () => {
-  const url = "http://localhost:3000/api/productos";
+  const url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/productos";
 
   const [Productos, setProductos] = useState([]);
 

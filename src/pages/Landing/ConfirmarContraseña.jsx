@@ -14,7 +14,7 @@ export const ConfirmarContrasenia = () => {
   const [showPassword, setShowPassword] = useState(false); // Estado para controlar la visibilidad de la contraseña
   const [showPassword2, setShowPassword2] = useState(false);
   const [Correo, setCorreo] = useState(null);
-  const url = "http://localhost:3000/api/enviarContraseniaNuevaCliente";
+  const url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/enviarContraseniaNuevaCliente";
 
   const { cookieParams } = useParams();
 

@@ -10,8 +10,8 @@ import { AdminFooter } from "../../components/Admin/AdminFooter";
 import Loader from "../../components/Loader/loader";
 
 export const Colores = () => {
-  const url = "http://localhost:3000/api/colores";
-  const insumosUrl = "http://localhost:3000/api/insumos";
+  const url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/colores";
+  const insumosUrl = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/insumos";
   const [Colores, setColores] = useState([]);
   const [IdColor, setIdColor] = useState("");
   const [Color, setColor] = useState("");

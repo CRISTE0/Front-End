@@ -5,7 +5,7 @@ export const fetchCartItemsNav = async (auth) => {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const itemDetails = await Promise.all(
       cart.map(item =>
-        axios.get(`http://localhost:3000/api/productos/${item.IdProd}`)
+        axios.get(`https://softshirt-1c3fad7d72e8.herokuapp.com/api/productos/${item.IdProd}`)
           .then(res => ({
             ...res.data,
             CantidadSeleccionada: item.CantidadSeleccionada

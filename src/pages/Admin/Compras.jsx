@@ -11,7 +11,7 @@ import { AdminFooter } from "../../components/Admin/AdminFooter";
 import Loader from "../../components/Loader/loader";
 
 export const Compras = () => {
-  const url = "http://localhost:3000/api/compras";
+  const url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/compras";
   const [Compras, setCompras] = useState([]);
   const [IdCompra, setIdCompra] = useState("");
   const [proveedores, setProveedores] = useState([]);
@@ -277,7 +277,7 @@ export const Compras = () => {
   const getProveedores = async () => {
     setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
-      const respuesta = await axios.get("http://localhost:3000/api/proveedores");
+      const respuesta = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/proveedores");
       const proveedoresActivos = respuesta.data.filter(
         (proveedor) => proveedor.Estado === "Activo"
       );
@@ -296,7 +296,7 @@ export const Compras = () => {
   const getInsumos = async () => {
     setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
-      const respuesta = await axios.get("http://localhost:3000/api/insumos");
+      const respuesta = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/insumos");
       const insumosActivos = respuesta.data.filter(
         (insumo) => insumo.Estado === "Activo"
       );
@@ -323,7 +323,7 @@ export const Compras = () => {
   const handleDetalleCompra = async (idCompra) => {
     try {
       const respuesta = await axios.get(
-        `http://localhost:3000/api/compras/${idCompra}`
+        `https://softshirt-1c3fad7d72e8.herokuapp.com/api/compras/${idCompra}`
       );
       const compra = respuesta.data;
       console.log("Detalle de compra:", compra);
@@ -789,7 +789,7 @@ export const Compras = () => {
       if (result.isConfirmed) {
         try {
           // Cambiar el estado de la compra a "Cancelado"
-          await axios.put(`http://localhost:3000/api/compras/${id}`, {
+          await axios.put(`https://softshirt-1c3fad7d72e8.herokuapp.com/api/compras/${id}`, {
             Estado: "Cancelado",
           });
 

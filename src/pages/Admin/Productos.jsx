@@ -10,7 +10,7 @@ import { AdminFooter } from "../../components/Admin/AdminFooter";
 import Loader from "../../components/Loader/loader";
 
 export const Catalogo = () => {
-  const url = "http://localhost:3000/api/productos";
+  const url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/productos";
   const { auth } = useAuth();
 
   const [productosAdmin, setProductosAdmin] = useState([]);
@@ -124,7 +124,7 @@ export const Catalogo = () => {
   };
 
   const getDisenios = async () => {
-    const respuesta = await axios.get("http://localhost:3000/api/disenios");
+    const respuesta = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/disenios");
     const DiseniosActivos = respuesta.data.filter(
       (disenio) => disenio.Estado === "Activo"
     );
@@ -136,7 +136,7 @@ export const Catalogo = () => {
   };
 
   const getInsumos = async () => {
-    const respuesta = await axios.get("http://localhost:3000/api/insumos");
+    const respuesta = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/insumos");
     const InsumosActivas = respuesta.data.filter(
       (insumo) => insumo.Estado == "Activo" && insumo.Cantidad > 0
     );
@@ -150,7 +150,7 @@ export const Catalogo = () => {
   };
 
   const getTallas = async () => {
-    const respuesta = await axios.get("http://localhost:3000/api/tallas");
+    const respuesta = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/tallas");
     const TallasActivas = respuesta.data.filter(
       (talla) => talla.Estado === "Activo"
     );
@@ -160,7 +160,7 @@ export const Catalogo = () => {
   };
 
   const getColores = async () => {
-    const respuesta = await axios.get("http://localhost:3000/api/colores");
+    const respuesta = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/colores");
     const ColoresActivas = respuesta.data.filter(
       (color) => color.Estado == "Activo"
     );
@@ -342,7 +342,7 @@ export const Catalogo = () => {
       setIdInsumo("");
       setIdColorCliente("");
       setIdTallaCliente("");
-      setReferencia("");
+      setReferencia("");https://softshirt-1c3fad7d72e8.herokuapp.com
       setCantidad("");
       setValorVenta("");
       setOperation(3);
@@ -1104,7 +1104,7 @@ export const Catalogo = () => {
     } catch (error) {
       console.error("Error general:", error);
       show_alerta({
-        message: "Error cambiando el estado del producto",
+        mhttps://softshirt-1c3fad7d72e8.herokuapp.comndo el estado del producto",
         type: "error",
       });
     }

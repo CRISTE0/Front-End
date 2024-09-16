@@ -9,8 +9,8 @@ import { AdminFooter } from "../../components/Admin/AdminFooter";
 import Loader from "../../components/Loader/loader";
 
 export const Proveedores = () => {
-  let url = "http://localhost:3000/api/proveedores";
-  const comprasUrl = "http://localhost:3000/api/compras";
+  let url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/proveedores";
+  const comprasUrl = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/compras";
   const [Proveedores, setProveedores] = useState([]);
   const [IdProveedor, setIdProveedor] = useState("");
   const [TipoDocumento, setTipoDocumento] = useState("");

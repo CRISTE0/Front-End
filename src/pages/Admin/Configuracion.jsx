@@ -9,9 +9,9 @@ import { AdminFooter } from "../../components/Admin/AdminFooter";
 import Loader from "../../components/Loader/loader";
 
 export const Configuracion = () => {
-  let url = "http://localhost:3000/api/roles";
-  let urlPermisos = "http://localhost:3000/api/permisos"; // URL para obtener los permisos
-  let urlUsuarios = "http://localhost:3000/api/usuarios"; // URL para obtener los permisos
+  let url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/roles";
+  let urlPermisos = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/permisos"; // URL para obtener los permisos
+  let urlUsuarios = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/usuarios"; // URL para obtener los permisos
 
   const [Roles, setRoles] = useState([]);
   const [Permisos, setPermisos] = useState([]); // Estado para permisos
