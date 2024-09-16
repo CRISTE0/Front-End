@@ -7,6 +7,7 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
 import { useAuth } from "../../context/AuthProvider";
 import { AdminFooter } from "../../components/Admin/AdminFooter";
+import Loader from "../../components/Loader/loader";
 
 export const Catalogo = () => {
   const url = "http://localhost:3000/api/productos";
@@ -72,6 +73,7 @@ export const Catalogo = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+  const [loading, setLoading] = useState(true);
 
   let productosTotales;
 
@@ -102,6 +104,7 @@ export const Catalogo = () => {
   };
 
   const getProductosCliente = async () => {
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
       const productosFiltrados = productosTotales.filter(
         (producto) => producto.IdUsuario == auth.idCliente
@@ -115,6 +118,8 @@ export const Catalogo = () => {
       console.log(error);
 
       show_alerta("Error al obtener los pedidos", "error");
+    } finally {
+      setLoading(false); // Mostrar el loader antes de realizar la solicitud
     }
   };
 
@@ -333,11 +338,10 @@ export const Catalogo = () => {
     }
   };
 
-
   // Función simulada para verificar si el producto tiene insumos asociados
   const getPedidosByProducto = async (idProducto) => {
     try {
-      let productoEncontrado=[];
+      let productoEncontrado = [];
       const response = await axios.get("http://localhost:3000/api/pedidos");
       // Verifica si el color está asociado a algún insumo
 
@@ -347,7 +351,7 @@ export const Catalogo = () => {
             console.log(
               `El producto con ID ${idProducto} está en el pedido con ID ${pedido.IdPedido}`
             );
-            productoEncontrado.push(detalle.IdProducto)
+            productoEncontrado.push(detalle.IdProducto);
             // Aquí puedes agregar la lógica para manejar el producto encontrado
           }
         });
@@ -357,13 +361,12 @@ export const Catalogo = () => {
         return true;
       }
 
-
       // return pedidos.length > 0; // Devuelve true si hay al menos un insumo asociado
     } catch (error) {
       console.error("Error fetching pedidos:", error);
       show_alerta({ message: "Error al verificar los pedidos", type: "error" });
       return false; // Considera que no tiene insumos asociados en caso de error
-    }  
+    }
   };
 
   let detallesInsumosGuardar;
@@ -377,31 +380,39 @@ export const Catalogo = () => {
     if (!IdDisenio) {
       errores.IdDisenio = "Seleccione un diseño";
     }
-    
+
     if (Referencia === "") {
       errores.Referencia = "Referencia es requerida";
     }
-    
+
     if (ValorVenta === "") {
       errores.ValorVenta = "Valor de venta es requerido";
     }
 
     // Verificar que haya al menos una fila agregada
     if (DetallesInsumos.length === 0) {
-      show_alerta({ message: "Debe agregar al menos una fila de insumos con color, talla y cantidad.", type: "error" });
+      show_alerta({
+        message:
+          "Debe agregar al menos una fila de insumos con color, talla y cantidad.",
+        type: "error",
+      });
       return;
     }
 
     // Crear un conjunto para verificar duplicados
     const combinaciones = new Set();
-    const filaExistente =[];
-    
+    const filaExistente = [];
+
     // Validar las filas de los detalles de insumos (color, talla, cantidad)
     DetallesInsumos.forEach((detalle, index) => {
       if (!detalle.IdColor || !detalle.IdTalla || !detalle.cantidad) {
-        errores[`detalle_${index}`] = `La fila ${index + 1} está incompleta. Por favor, seleccione un color, talla y cantidad.`;
+        errores[`detalle_${index}`] = `La fila ${
+          index + 1
+        } está incompleta. Por favor, seleccione un color, talla y cantidad.`;
       } else if (parseInt(detalle.cantidad) <= 0) {
-        errores[`detalle_cantidad_${index}`] = `La cantidad de la fila ${index + 1} debe ser mayor que 0.`;
+        errores[`detalle_cantidad_${index}`] = `La cantidad de la fila ${
+          index + 1
+        } debe ser mayor que 0.`;
       } else {
         // Verificar si la cantidad supera la cantidad disponible en el insumo
         const insumoSeleccionado = InsumosCliente.find(
@@ -411,10 +422,17 @@ export const Catalogo = () => {
             insumo.Estado === "Activo"
         );
 
-        if (insumoSeleccionado && parseInt(detalle.cantidad) > insumoSeleccionado.Cantidad) {
-          errores[`detalle_cantidad_supera_${index}`] = `La cantidad de la fila ${index + 1} supera la cantidad disponible (${insumoSeleccionado.Cantidad}).`;
+        if (
+          insumoSeleccionado &&
+          parseInt(detalle.cantidad) > insumoSeleccionado.Cantidad
+        ) {
+          errores[
+            `detalle_cantidad_supera_${index}`
+          ] = `La cantidad de la fila ${
+            index + 1
+          } supera la cantidad disponible (${insumoSeleccionado.Cantidad}).`;
         }
-        
+
         // Verificar duplicados
         const clave = `${detalle.IdColor}-${detalle.IdTalla}`;
         if (combinaciones.has(clave)) {
@@ -426,7 +444,7 @@ export const Catalogo = () => {
     });
 
     if (filaExistente.length > 0) {
-      show_alerta({message:`Existen filas repetidas.`,type:"error"});
+      show_alerta({ message: `Existen filas repetidas.`, type: "error" });
       return;
     }
 
@@ -472,7 +490,6 @@ export const Catalogo = () => {
     return true;
   };
 
-
   // Función para guardar producto
 
   const guardarProducto = async () => {
@@ -488,7 +505,6 @@ export const Catalogo = () => {
     }
 
     console.log(detallesInsumosGuardar);
-    
 
     // return;
 
@@ -496,7 +512,6 @@ export const Catalogo = () => {
     const disenioSeleccionado = Disenios.find(
       (disenio) => disenio.IdDisenio == IdDisenio
     );
-
 
     // Validación en el diseño
     if (!disenioSeleccionado) {
@@ -517,7 +532,7 @@ export const Catalogo = () => {
           ValorVenta: ValorVenta,
           Publicacion: "Activo",
           Estado: "Activo",
-          Insumos:detallesInsumosGuardar
+          Insumos: detallesInsumosGuardar,
         });
         show_alerta({
           message: "Producto creado con éxito",
@@ -716,7 +731,6 @@ export const Catalogo = () => {
     setSelectedDisenio(disenio);
   };
 
-
   // Función para manejar cambios en la referencia
   const handleChangeReferencia = (e) => {
     let value = e.target.value.trim();
@@ -805,6 +819,8 @@ export const Catalogo = () => {
         respuesta = await axios.delete(urlRequest);
       }
 
+      setIsSubmitting(true);
+
       const msj = respuesta.data.message;
       show_alerta({
         message: msj,
@@ -847,13 +863,14 @@ export const Catalogo = () => {
         });
       }
       console.log(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const deleteProducto = (IdProducto, Referencia) => {
     const MySwal = withReactContent(Swal);
 
-    
     // Primero, verifica si el color está asociado a un insumo
     getPedidosByProducto(IdProducto).then((isAssociated) => {
       if (isAssociated) {
@@ -861,7 +878,7 @@ export const Catalogo = () => {
           message: `El producto ${Referencia} está asociado a un pedido - venta y no se puede eliminar.`,
           type: "warning",
         });
-      }else{
+      } else {
         MySwal.fire({
           title: `¿Seguro de eliminar el producto ${Referencia}?`,
           icon: "question",
@@ -882,8 +899,9 @@ export const Catalogo = () => {
         }).then((result) => {
           if (result.isConfirmed) {
             setIdProducto(IdProducto);
-            enviarSolicitud("DELETE", { IdProducto: IdProducto }).then(() => {
-            });
+            enviarSolicitud("DELETE", { IdProducto: IdProducto }).then(
+              () => {}
+            );
           } else if (result.dismiss === Swal.DismissReason.cancel) {
             show_alerta({
               message: "El producto NO fue eliminado",
@@ -1091,7 +1109,6 @@ export const Catalogo = () => {
 
       const producto = respuestaProducto.data;
 
-      
       console.log("Detalle de producto:", producto);
 
       setProductoSeleccionado(producto);
@@ -1124,42 +1141,40 @@ export const Catalogo = () => {
     setDetallesInsumos(updatedDetalles);
   };
 
-  
-// Función para manejar cambios en el color
-const handleChangeColorCliente = (index, e) => {
-  const value = e.target.value;
+  // Función para manejar cambios en el color
+  const handleChangeColorCliente = (index, e) => {
+    const value = e.target.value;
 
-  // Actualiza la selección del color
-  const updatedDetalles = [...DetallesInsumos];
-  updatedDetalles[index].IdColor = parseInt(value);
-  updatedDetalles[index].IdTalla = ""; // Reseteamos la talla al cambiar de color
-  setDetallesInsumos(updatedDetalles);
+    // Actualiza la selección del color
+    const updatedDetalles = [...DetallesInsumos];
+    updatedDetalles[index].IdColor = parseInt(value);
+    updatedDetalles[index].IdTalla = ""; // Reseteamos la talla al cambiar de color
+    setDetallesInsumos(updatedDetalles);
 
-  // Filtra las tallas relacionadas con el color seleccionado
-  const tallasFiltradas = InsumosCliente.filter(
-    (insumo) =>
-      insumo.IdColor === parseInt(value) &&
-      insumo.Cantidad > 0 && 
-      insumo.Estado === "Activo"
-  ).map((insumo) => insumo.IdTalla);
+    // Filtra las tallas relacionadas con el color seleccionado
+    const tallasFiltradas = InsumosCliente.filter(
+      (insumo) =>
+        insumo.IdColor === parseInt(value) &&
+        insumo.Cantidad > 0 &&
+        insumo.Estado === "Activo"
+    ).map((insumo) => insumo.IdTalla);
 
-  // Actualiza las tallas disponibles para esa fila
-  setTallasCliente((prevState) => {
-    const newTallasCliente = [...prevState];
-    const nuevasTallasFiltradasCliente = Tallas.filter((talla) =>
-      tallasFiltradas.includes(talla.IdTalla)
-    );
+    // Actualiza las tallas disponibles para esa fila
+    setTallasCliente((prevState) => {
+      const newTallasCliente = [...prevState];
+      const nuevasTallasFiltradasCliente = Tallas.filter((talla) =>
+        tallasFiltradas.includes(talla.IdTalla)
+      );
 
-    newTallasCliente[index] = nuevasTallasFiltradasCliente;
-    return newTallasCliente;
-  });
+      newTallasCliente[index] = nuevasTallasFiltradasCliente;
+      return newTallasCliente;
+    });
 
-  // Mantener los colores que aún tienen tallas disponibles
-  actualizarColoresDisponibles();
-};
-  
+    // Mantener los colores que aún tienen tallas disponibles
+    actualizarColoresDisponibles();
+  };
 
-  // Función para manejar cambios en la talla 
+  // Función para manejar cambios en la talla
   const handleChangeTallaCliente = (index, e) => {
     const value = e.target.value;
 
@@ -1167,7 +1182,6 @@ const handleChangeColorCliente = (index, e) => {
     const updatedDetalles = [...DetallesInsumos];
     updatedDetalles[index].IdTalla = parseInt(value);
     setDetallesInsumos(updatedDetalles);
-
 
     // Mantener los colores que aún tienen tallas disponibles
     actualizarColoresDisponibles();
@@ -1177,7 +1191,10 @@ const handleChangeColorCliente = (index, e) => {
   const actualizarColoresDisponibles = () => {
     const coloresFiltrados = InsumosCliente.filter((insumo) => {
       const tallasDisponibles = InsumosCliente.filter(
-        (i) => i.IdColor === insumo.IdColor && i.Cantidad > 0 && i.Estado === "Activo"
+        (i) =>
+          i.IdColor === insumo.IdColor &&
+          i.Cantidad > 0 &&
+          i.Estado === "Activo"
       ).map((i) => i.IdTalla);
 
       // Verificar si el color aún tiene tallas disponibles
@@ -1191,70 +1208,75 @@ const handleChangeColorCliente = (index, e) => {
   // Función para manejar los cambios en otros campos (como cantidad)
   const handleDetailChange = (index, e) => {
     const { name, value } = e.target;
-  
+
     // Validar solo números
     const regex = /^[0-9\b]+$/;
-    if (name === "cantidad" && (!regex.test(value) && value !== "")) {
+    if (name === "cantidad" && !regex.test(value) && value !== "") {
       return; // Ignora la entrada si no es un número
     }
-  
+
     const detallesActualizados = [...DetallesInsumos];
     detallesActualizados[index] = {
       ...detallesActualizados[index],
       [name]: value,
     };
-  
+
     // Validar que la cantidad no supere la cantidad disponible del insumo seleccionado
-    if (name === "cantidad" && detallesActualizados[index].IdColor && detallesActualizados[index].IdTalla) {
+    if (
+      name === "cantidad" &&
+      detallesActualizados[index].IdColor &&
+      detallesActualizados[index].IdTalla
+    ) {
       const insumoSeleccionado = InsumosCliente.find(
-        insumo =>
+        (insumo) =>
           insumo.IdColor === detallesActualizados[index].IdColor &&
           insumo.IdTalla === detallesActualizados[index].IdTalla &&
           insumo.Estado === "Activo"
       );
-  
+
       if (insumoSeleccionado && parseInt(value) > insumoSeleccionado.Cantidad) {
-        alertas[index] = `La cantidad máxima disponible es ${insumoSeleccionado.Cantidad}`;
+        alertas[
+          index
+        ] = `La cantidad máxima disponible es ${insumoSeleccionado.Cantidad}`;
         detallesActualizados[index].cantidad = insumoSeleccionado.Cantidad; // Asignar la cantidad máxima disponible
       } else {
         alertas[index] = ""; // Limpiar la alerta si está dentro del rango
       }
     }
-  
+
     setDetallesInsumos(detallesActualizados);
     setAlertas([...alertas]); // Actualizar alertas
   };
 
-// Obtener tallas disponibles para el color seleccionado
-const getTallasDisponibles = (index) => {
-  const colorSeleccionado = DetallesInsumos[index].IdColor;
-  if (!colorSeleccionado) return [];
+  // Obtener tallas disponibles para el color seleccionado
+  const getTallasDisponibles = (index) => {
+    const colorSeleccionado = DetallesInsumos[index].IdColor;
+    if (!colorSeleccionado) return [];
 
-  // Filtrar las tallas disponibles para el color seleccionado
-  const tallasDisponibles = InsumosCliente
-    .filter(insumo => insumo.IdColor === colorSeleccionado && insumo.Estado === "Activo")
-    .map(insumo => insumo.IdTalla);
+    // Filtrar las tallas disponibles para el color seleccionado
+    const tallasDisponibles = InsumosCliente.filter(
+      (insumo) =>
+        insumo.IdColor === colorSeleccionado && insumo.Estado === "Activo"
+    ).map((insumo) => insumo.IdTalla);
 
-  return Tallas.filter(talla => tallasDisponibles.includes(talla.IdTalla));
-};
+    return Tallas.filter((talla) => tallasDisponibles.includes(talla.IdTalla));
+  };
 
+  // Obtener colores disponibles, excluyendo los que no tienen tallas disponibles
+  const getColoresDisponibles = (index) => {
+    // Filtrar los colores que tengan al menos una talla disponible y activa
+    const coloresDisponibles = Colores.filter((color) => {
+      const tallasRelacionadas = InsumosCliente.filter(
+        (insumo) =>
+          insumo.IdColor === color.IdColor && insumo.Estado === "Activo"
+      ).map((insumo) => insumo.IdTalla);
 
+      // Verificar si el color tiene al menos una talla activa
+      return tallasRelacionadas.length > 0;
+    });
 
-// Obtener colores disponibles, excluyendo los que no tienen tallas disponibles
-const getColoresDisponibles = (index) => {
-  // Filtrar los colores que tengan al menos una talla disponible y activa
-  const coloresDisponibles = Colores.filter(color => {
-    const tallasRelacionadas = InsumosCliente
-      .filter(insumo => insumo.IdColor === color.IdColor && insumo.Estado === "Activo")
-      .map(insumo => insumo.IdTalla);
-    
-    // Verificar si el color tiene al menos una talla activa
-    return tallasRelacionadas.length > 0;
-  });
-
-  return coloresDisponibles;
-};
-
+    return coloresDisponibles;
+  };
 
   // __________________________________detalle color y tamaño ___________________
 
@@ -1334,6 +1356,10 @@ const getColoresDisponibles = (index) => {
 
     return operation == 1 || operation == 2 ? formatCurrency(total) : total;
   };
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <>
@@ -1420,7 +1446,6 @@ const getColoresDisponibles = (index) => {
                         </i>
                       </div>
 
-
                       {/* Referencia del Producto */}
                       <div className="form-group col-md-6">
                         <label htmlFor="Referencia">
@@ -1443,7 +1468,6 @@ const getColoresDisponibles = (index) => {
                           </div>
                         )}
                       </div>
-
 
                       {/* Valor venta del producto */}
                       <div className="form-group col-md-12">
@@ -1569,13 +1593,25 @@ const getColoresDisponibles = (index) => {
                                     name="cantidad"
                                     placeholder="Cantidad"
                                     value={detalle.cantidad}
-                                    onChange={(e) => handleDetailChange(index, e)}
-                                    disabled={!detalle.IdColor || !detalle.IdTalla} // Deshabilitar si no se ha seleccionado color y talla
+                                    onChange={(e) =>
+                                      handleDetailChange(index, e)
+                                    }
+                                    disabled={
+                                      !detalle.IdColor || !detalle.IdTalla
+                                    } // Deshabilitar si no se ha seleccionado color y talla
                                     min="0"
-                                    onInput={(e) => e.target.value = e.target.value.replace(/[^1-9]/g, '')} // Asegurar que solo se acepten números
+                                    onInput={(e) =>
+                                      (e.target.value = e.target.value.replace(
+                                        /[^1-9]/g,
+                                        ""
+                                      ))
+                                    } // Asegurar que solo se acepten números
                                   />
                                   {alertas[index] && (
-                                    <span style={{ color: "red" }} className="alerta">
+                                    <span
+                                      style={{ color: "red" }}
+                                      className="alerta"
+                                    >
                                       {alertas[index]}
                                     </span>
                                   )}
@@ -1709,8 +1745,6 @@ const getColoresDisponibles = (index) => {
       </div>
       {/* Modal crear producto */}
 
-
-
       {/* Inicio modal ver detalle diseño */}
       <div
         className="modal fade"
@@ -1836,7 +1870,9 @@ const getColoresDisponibles = (index) => {
                                     type="text"
                                     className="form-control"
                                     id="direccionCliente"
-                                    value={formatCurrency(productoSeleccionado.ValorVenta)}
+                                    value={formatCurrency(
+                                      productoSeleccionado.ValorVenta
+                                    )}
                                     disabled
                                   />
                                 </div>
@@ -1848,99 +1884,129 @@ const getColoresDisponibles = (index) => {
 
                       {/* Acordeon detalles de los insumos */}
 
-                      {productoSeleccionado && productoSeleccionado.ProductoInsumos && productoSeleccionado.ProductoInsumos.length > 0 ? (
-                        productoSeleccionado.ProductoInsumos.map((productoInsumo, index) => (
-                          <div className="card" key={productoInsumo.IdProductoInsumo}>
-                            <div className="card-header" id={`heading${index}`}>
-                              <h2 className="mb-0">
-                                <button
-                                  className="btn btn-link btn-block text-left collapsed"
-                                  type="button"
-                                  data-toggle="collapse"
-                                  data-target={`#collapse${index}`}
-                                  aria-expanded="false"
-                                  aria-controls={`collapse${index}`}
-                                >
-                                  Detalles del Insumo #{index + 1}
-                                </button>
-                              </h2>
-                            </div>
-
-                            {/* Mostrar el contenido de cada insumo */}
+                      {productoSeleccionado &&
+                      productoSeleccionado.ProductoInsumos &&
+                      productoSeleccionado.ProductoInsumos.length > 0 ? (
+                        productoSeleccionado.ProductoInsumos.map(
+                          (productoInsumo, index) => (
                             <div
-                              id={`collapse${index}`}
-                              className="collapse"
-                              aria-labelledby={`heading${index}`}
-                              data-parent="#accordionExample"
+                              className="card"
+                              key={productoInsumo.IdProductoInsumo}
                             >
-                              <div className="card-body">
-                                <div className="form-row">
-                                  {/* Color del Insumo */}
-                                  <div className="form-group col-md-6">
-                                    <label htmlFor={`colorInsumo${index}`}>Color del insumo</label>
-                                    <input
-                                      className="form-control"
-                                      id={`colorInsumo${index}`}
-                                      value={productoInsumo.InsumoProd.Color.Color}
-                                      disabled
-                                    />
-                                  </div>
+                              <div
+                                className="card-header"
+                                id={`heading${index}`}
+                              >
+                                <h2 className="mb-0">
+                                  <button
+                                    className="btn btn-link btn-block text-left collapsed"
+                                    type="button"
+                                    data-toggle="collapse"
+                                    data-target={`#collapse${index}`}
+                                    aria-expanded="false"
+                                    aria-controls={`collapse${index}`}
+                                  >
+                                    Detalles del Insumo #{index + 1}
+                                  </button>
+                                </h2>
+                              </div>
 
-                                  {/* Talla del Insumo */}
-                                  <div className="form-group col-md-6">
-                                    <label htmlFor={`tallaInsumo${index}`}>Talla del insumo</label>
-                                    <input
-                                      className="form-control"
-                                      id={`tallaInsumo${index}`}
-                                      value={productoInsumo.InsumoProd.Talla.Talla}
-                                      disabled
-                                    />
-                                  </div>
+                              {/* Mostrar el contenido de cada insumo */}
+                              <div
+                                id={`collapse${index}`}
+                                className="collapse"
+                                aria-labelledby={`heading${index}`}
+                                data-parent="#accordionExample"
+                              >
+                                <div className="card-body">
+                                  <div className="form-row">
+                                    {/* Color del Insumo */}
+                                    <div className="form-group col-md-6">
+                                      <label htmlFor={`colorInsumo${index}`}>
+                                        Color del insumo
+                                      </label>
+                                      <input
+                                        className="form-control"
+                                        id={`colorInsumo${index}`}
+                                        value={
+                                          productoInsumo.InsumoProd.Color.Color
+                                        }
+                                        disabled
+                                      />
+                                    </div>
 
-                                  {/* Referencia del Insumo */}
-                                  <div className="form-group col-md-6">
-                                    <label htmlFor={`referenciaInsumo${index}`}>
-                                      Referencia del insumo
-                                    </label>
-                                    <input
-                                      type="text"
-                                      className="form-control"
-                                      id={`referenciaInsumo${index}`}
-                                      value={productoInsumo.InsumoProd.Referencia}
-                                      disabled
-                                    />
-                                  </div>
+                                    {/* Talla del Insumo */}
+                                    <div className="form-group col-md-6">
+                                      <label htmlFor={`tallaInsumo${index}`}>
+                                        Talla del insumo
+                                      </label>
+                                      <input
+                                        className="form-control"
+                                        id={`tallaInsumo${index}`}
+                                        value={
+                                          productoInsumo.InsumoProd.Talla.Talla
+                                        }
+                                        disabled
+                                      />
+                                    </div>
 
-                                  {/* Cantidad del Insumo */}
-                                  <div className="form-group col-md-6">
-                                    <label htmlFor={`cantidadInsumo${index}`}>Cantidad</label>
-                                    <input
-                                      type="text"
-                                      className="form-control"
-                                      id={`cantidadInsumo${index}`}
-                                      value={productoInsumo.CantidadProductoInsumo}
-                                      disabled
-                                    />
-                                  </div>
+                                    {/* Referencia del Insumo */}
+                                    <div className="form-group col-md-6">
+                                      <label
+                                        htmlFor={`referenciaInsumo${index}`}
+                                      >
+                                        Referencia del insumo
+                                      </label>
+                                      <input
+                                        type="text"
+                                        className="form-control"
+                                        id={`referenciaInsumo${index}`}
+                                        value={
+                                          productoInsumo.InsumoProd.Referencia
+                                        }
+                                        disabled
+                                      />
+                                    </div>
 
-                                  {/* Valor de la compra del Insumo */}
-                                  <div className="form-group col-md-12">
-                                    <label htmlFor={`valorCompraInsumo${index}`}>
-                                      Valor de la compra del insumo:
-                                    </label>
-                                    <input
-                                      type="text"
-                                      className="form-control"
-                                      id={`valorCompraInsumo${index}`}
-                                      value={formatCurrency(productoInsumo.InsumoProd.ValorCompra)}
-                                      disabled
-                                    />
+                                    {/* Cantidad del Insumo */}
+                                    <div className="form-group col-md-6">
+                                      <label htmlFor={`cantidadInsumo${index}`}>
+                                        Cantidad
+                                      </label>
+                                      <input
+                                        type="text"
+                                        className="form-control"
+                                        id={`cantidadInsumo${index}`}
+                                        value={
+                                          productoInsumo.CantidadProductoInsumo
+                                        }
+                                        disabled
+                                      />
+                                    </div>
+
+                                    {/* Valor de la compra del Insumo */}
+                                    <div className="form-group col-md-12">
+                                      <label
+                                        htmlFor={`valorCompraInsumo${index}`}
+                                      >
+                                        Valor de la compra del insumo:
+                                      </label>
+                                      <input
+                                        type="text"
+                                        className="form-control"
+                                        id={`valorCompraInsumo${index}`}
+                                        value={formatCurrency(
+                                          productoInsumo.InsumoProd.ValorCompra
+                                        )}
+                                        disabled
+                                      />
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))
+                          )
+                        )
                       ) : (
                         <p>No hay insumos asociados a este producto.</p>
                       )}
@@ -1980,7 +2046,9 @@ const getColoresDisponibles = (index) => {
                                     type="text"
                                     className="form-control"
                                     id="nombreDiseño"
-                                    value={productoSeleccionado.Disenio.NombreDisenio}
+                                    value={
+                                      productoSeleccionado.Disenio.NombreDisenio
+                                    }
                                     disabled
                                   />
                                 </div>
@@ -1993,7 +2061,9 @@ const getColoresDisponibles = (index) => {
                                   <input
                                     className="form-control"
                                     id="tamanioImagen"
-                                    value={productoSeleccionado.Disenio.TamanioImagen}
+                                    value={
+                                      productoSeleccionado.Disenio.TamanioImagen
+                                    }
                                     disabled
                                   />
                                 </div>
@@ -2007,7 +2077,10 @@ const getColoresDisponibles = (index) => {
                                   <input
                                     className="form-control"
                                     id="posicionImagen"
-                                    value={productoSeleccionado.Disenio.PosicionImagen}
+                                    value={
+                                      productoSeleccionado.Disenio
+                                        .PosicionImagen
+                                    }
                                     disabled
                                   />
                                 </div>
@@ -2037,7 +2110,10 @@ const getColoresDisponibles = (index) => {
                                   "No aplica" ? (
                                     <div className="container py-5 mx-3">
                                       <img
-                                        src={productoSeleccionado.Disenio.ImagenDisenio}
+                                        src={
+                                          productoSeleccionado.Disenio
+                                            .ImagenDisenio
+                                        }
                                         alt="Vista previa imagen del diseño"
                                         style={{
                                           maxWidth: "200px",
@@ -2059,14 +2135,17 @@ const getColoresDisponibles = (index) => {
                                 {/* Imagen referencia*/}
                                 <div className="form-group col-md-6">
                                   <label htmlFor="ImagenDisenioCliente">
-                                    Imagen referencia 
+                                    Imagen referencia
                                   </label>
 
                                   <br />
 
                                   <div className="container py-5 mx-3">
                                     <img
-                                      src={productoSeleccionado.Disenio.ImagenReferencia}
+                                      src={
+                                        productoSeleccionado.Disenio
+                                          .ImagenReferencia
+                                      }
                                       alt="Vista previa imagen del diseño"
                                       style={{
                                         maxWidth: "200px",
@@ -2211,7 +2290,6 @@ const getColoresDisponibles = (index) => {
                         </td>
                         <td>
                           <div className="d-flex">
-
                             <button
                               className="btn btn-danger btn-sm mr-2"
                               onClick={() =>
@@ -2317,7 +2395,7 @@ const getColoresDisponibles = (index) => {
         </div>
         {/* Fin tabla de productosAdmin */}
       </div>
-      <AdminFooter/>
+      <AdminFooter />
     </>
   );
 };

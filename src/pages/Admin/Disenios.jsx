@@ -95,11 +95,11 @@ export const Disenios = () => {
     try {
       const respuesta = await axios.get(url);
       setDisenios(respuesta.data);
-  
+
       diseniosTotales = respuesta.data;
-  
+
       getDiseniosCliente();
-  
+
       console.log(respuesta.data);
     } catch (error) {
       show_alerta({
@@ -109,7 +109,7 @@ export const Disenios = () => {
     } finally {
       setLoading(false); // Ocultar el loader después de obtener los diseños o en caso de error
     }
-  };  
+  };
 
   const getComprasByDisenios = async (IdDisenio) => {
     try {
@@ -552,7 +552,7 @@ export const Disenios = () => {
         respuesta = await axios.delete(urlRequest);
       }
 
-      setIsSubmitting(true)
+      setIsSubmitting(true);
 
       const msj = respuesta.data.message;
       show_alerta({
@@ -596,8 +596,8 @@ export const Disenios = () => {
         });
       }
       console.log(error);
-    }finally {
-      setIsSubmitting(false)
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -1285,12 +1285,11 @@ export const Disenios = () => {
                               onClick={() =>
                                 handleDetalleDisenio(disenio.IdDisenio)
                               }
-                              disabled={disenio.Estado != "Activo"}
                               data-toggle="modal"
                               data-target="#modalDetalleDisenio"
                               title="Detalle"
                             >
-                              <i className="fas fa-eye"></i>
+                              <i className="fas fa-info-circle"></i>
                             </button>
                           </div>
                         </td>
@@ -1371,7 +1370,7 @@ export const Disenios = () => {
                               data-target="#modalDetalleDisenio"
                               title="Detalle"
                             >
-                              <i className="fas fa-eye"></i>
+                              <i className="fas fa-info-circle"></i>
                             </button>
                           </div>
                         </td>

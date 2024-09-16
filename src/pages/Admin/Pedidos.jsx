@@ -112,7 +112,6 @@ export const Pedidos = () => {
   };
 
   const getClienteName = (idCliente) => {
-    setLoading(true); // Mostrar el loader antes de realizar la solicitud
     const cliente = Clientes.find((prov) => prov.IdCliente === idCliente);
     return cliente ? cliente.NombreApellido : "Cliente no encontrado";
   };
@@ -165,7 +164,6 @@ export const Pedidos = () => {
   };
 
   const getEstadosPedidos = async () => {
-    setLoading(true); // Mostrar el loader antes de realizar la solicitud
     try {
       const respuesta = await axios.get(
         "http://localhost:3000/api/estadosPedidos"
@@ -177,8 +175,6 @@ export const Pedidos = () => {
         message: "Error al obtener los estados de pedidos",
         type: "error",
       });
-    } finally {
-      setLoading(false); // Mostrar el loader antes de realizar la solicitud
     }
   };
 
@@ -542,6 +538,8 @@ export const Pedidos = () => {
 
       $(".close").click();
 
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
+
       getPedidos();
       getProductos();
     } catch (error) {
@@ -561,6 +559,8 @@ export const Pedidos = () => {
           type: "error",
         });
       }
+    }finally {
+    setLoading(false); // Mostrar el loader antes de realizar la solicitud
     }
   };
 
