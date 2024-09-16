@@ -6,16 +6,17 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from "../../context/AuthProvider";
 import Cookies from "js-cookie";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const ConfirmarContrasenia = () => {
   const [Contrasenia, setContrasenia] = useState("");
   const [ConfirmarContrasenia, setConfirmarContrasenia] = useState("");
   const [showPassword, setShowPassword] = useState(false); // Estado para controlar la visibilidad de la contraseña
   const [showPassword2, setShowPassword2] = useState(false);
-  const [Correo,setCorreo] =useState(null);
+  const [Correo, setCorreo] = useState(null);
   const url = "http://localhost:3000/api/enviarContraseniaNuevaCliente";
 
-  const {cookieParams} = useParams();
+  const { cookieParams } = useParams();
 
   // const { login } = useAuth();
   const navigate = useNavigate();
@@ -26,51 +27,36 @@ export const ConfirmarContrasenia = () => {
     confirmarcontrasenia: "",
   });
 
-  useEffect(()=>{
+  useEffect(() => {
     validarCookie();
-  })
+  });
 
-  const validarCookie = () =>{
+  const validarCookie = () => {
     let cookie = Cookies.get("RecuperarPass");
 
     if (cookie) {
-
       if (cookie == cookieParams) {
         const decode = jwtDecode(cookie);
-        console.log(decode.Correo); 
-        console.log(cookieParams); 
-  
-        setCorreo(decode.Correo)        
-        
-      }else{
-        show_alerta("El tiempo para recuperar la contraseña a expirado, intentelo de nuevo","error");
-        navigate("/RecuperarCliente")
+        console.log(decode.Correo);
+        console.log(cookieParams);
 
+        setCorreo(decode.Correo);
+      } else {
+        show_alerta({
+          message:
+            "El tiempo para recuperar la contraseña a expirado, intentelo de nuevo",
+          type: "error",
+        });
+        navigate("/RecuperarCliente");
       }
-
-    }else{
-      show_alerta("El tiempo para recuperar la contraseña a expirado, intentelo de nuevo","error");
-      navigate("/RecuperarCliente")
-
+    } else {
+      show_alerta({
+        message:
+          "El tiempo para recuperar la contraseña a expirado, intentelo de nuevo",
+        type: "error",
+      });
+      navigate("/RecuperarCliente");
     }
-  }
-
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
   };
 
   const validateContrasenia = (value, confirmValue) => {
@@ -79,55 +65,56 @@ export const ConfirmarContrasenia = () => {
     } else if (value.length < 8 || value.length > 15) {
       return "La contraseña debe tener entre 8 y 15 caracteres";
     }
-    
+
     if (value !== confirmValue) {
       return "Las contraseñas deben ser iguales";
     }
-  
+
     return "";
   };
-  
+
   const validateConfirmarContrasenia = (value, contrasenia) => {
     if (!value) {
       return "La contraseña es requerida";
     } else if (value.length < 8 || value.length > 15) {
       return "La contraseña debe tener entre 8 y 15 caracteres";
     }
-  
+
     if (value !== contrasenia) {
       return "Las contraseñas deben ser iguales";
     }
-  
+
     return "";
   };
-
 
   const handleChangeContrasenia = (e) => {
     const value = e.target.value.replace(/\s+/g, ""); // Eliminar todos los espacios
     setContrasenia(value);
-  
+
     const errorMessage = validateContrasenia(value, ConfirmarContrasenia);
     setErrors((prevState) => ({
       ...prevState,
       contrasenia: errorMessage,
-      confirmarcontrasenia: validateConfirmarContrasenia(ConfirmarContrasenia, value) // Actualizar también el error de confirmación
+      confirmarcontrasenia: validateConfirmarContrasenia(
+        ConfirmarContrasenia,
+        value
+      ), // Actualizar también el error de confirmación
     }));
   };
-  
+
   const handleChangeConfirmarContrasenia = (e) => {
     const value = e.target.value.replace(/\s+/g, ""); // Eliminar todos los espacios
     setConfirmarContrasenia(value);
-  
+
     const errorMessage = validateConfirmarContrasenia(value, Contrasenia);
     setErrors((prevState) => ({
       ...prevState,
       confirmarcontrasenia: errorMessage,
-      contrasenia: validateContrasenia(Contrasenia, value) // Actualizar también el error de la contraseña
+      contrasenia: validateContrasenia(Contrasenia, value), // Actualizar también el error de la contraseña
     }));
-  }
+  };
 
   const renderErrorMessage = (errorMessage) => {
-    
     return errorMessage ? (
       <div className="invalid-feedback">{errorMessage}</div>
     ) : null;
@@ -139,23 +126,37 @@ export const ConfirmarContrasenia = () => {
     const cleanedConfirmarContrasenia = ConfirmarContrasenia.trim();
 
     if (!cleanedContrasenia) {
-      show_alerta("La contraseña es requerida", "error");
+      show_alerta({
+        message: "La contraseña es requerida", type: "error"
+      });
       return;
     }
     if (Contrasenia.length < 8 || Contrasenia.length > 15) {
-      show_alerta("La contraseña debe tener entre 8 y 15 caracteres", "error");
+      show_alerta({
+        message: "La contraseña debe tener entre 8 y 15 caracteres", type: "error"
+      });
       return;
-    }if (!cleanedConfirmarContrasenia) {
-      show_alerta("La contraseña es requerida", "error");
+    }
+    if (!cleanedConfirmarContrasenia) {
+      show_alerta({
+        message: "La contraseña es requerida", type: "error"
+      });
       return;
     }
     if (ConfirmarContrasenia.length < 8 || ConfirmarContrasenia.length > 15) {
-      show_alerta("La contraseña debe tener entre 8 y 15 caracteres", "error");
+      show_alerta({
+        message: "La contraseña debe tener entre 8 y 15 caracteres", type: "error"
+      });
       return;
     }
 
-    if (Contrasenia != ConfirmarContrasenia || ConfirmarContrasenia != Contrasenia)  {
-      show_alerta("Las contraseñas deben ser iguales", "error");
+    if (
+      Contrasenia != ConfirmarContrasenia ||
+      ConfirmarContrasenia != Contrasenia
+    ) {
+      show_alerta({
+        message: "Las contraseñas deben ser iguales", type: "error"
+      });
       return;
     }
 
@@ -166,21 +167,26 @@ export const ConfirmarContrasenia = () => {
 
       // return;
 
-
       // Lógica para guardar el cliente
       await enviarSolicitud({
         Correo,
-        Contrasenia
+        Contrasenia,
       });
 
       // show_alerta("Operación exitosa", "success");
     } catch (error) {
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({
+          message: error.response.data.message, type: "error"
+        });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({
+          message: "Error en la solicitud", type: "error"
+        });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({
+          message: "Error desconocido", type: "error"
+        });
       }
       console.log(error);
     }
@@ -195,7 +201,9 @@ export const ConfirmarContrasenia = () => {
       const msj = respuesta.data.message;
 
       console.log(respuesta);
-      show_alerta(msj, "success");
+      show_alerta({
+        message:msj, type: "success"
+      });
 
       // const token = respuesta.data.token;
       // setToken(token);
@@ -212,11 +220,17 @@ export const ConfirmarContrasenia = () => {
       // show_alerta("Cliente creado con éxito", "success", { timer: 2000 });
     } catch (error) {
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({
+          message: error.response.data.message, type: "error"
+        });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({
+          message: "Error en la solicitud", type: "error"
+        });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({
+          message: "Error desconocido", type: "error"
+        });
       }
       console.log(error);
     }
@@ -297,7 +311,10 @@ export const ConfirmarContrasenia = () => {
 
             <div className="d-grid text-center">
               <div className="col-12 col-md-3 mx-auto">
-                <button className="btn btn-success" onClick={restablecerContrasenia}>
+                <button
+                  className="btn btn-success"
+                  onClick={restablecerContrasenia}
+                >
                   Actualizar
                 </button>
               </div>

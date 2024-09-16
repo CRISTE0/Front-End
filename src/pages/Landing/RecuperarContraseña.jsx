@@ -3,6 +3,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const RecuperarContraseña = () => {
   const [Correo, setCorreo] = useState("");
@@ -12,24 +13,6 @@ export const RecuperarContraseña = () => {
   const [errors, setErrors] = useState({
     correo: "",
   });
-
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
-  };
 
   const handleChangeCorreo = (e) => {
     const value = e.target.value;
@@ -67,20 +50,29 @@ export const RecuperarContraseña = () => {
 
   const validarCorreo = () => {
     if (!Correo) {
-      show_alerta("Ingresa tu correo electrónico", "error");
+      show_alerta({
+        message: "Ingresa tu correo electrónico",
+        type: "error",
+      });
       return;
     }
     if (/\s/.test(Correo)) {
-      show_alerta("El correo electrónico no puede contener espacios", "error");
+      show_alerta({
+        message: "El correo electrónico no puede contener espacios", type: "error"
+      });
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(Correo)) {
-      show_alerta("Ingresa un correo electrónico válido", "error");
+      show_alerta({
+        message: "Ingresa un correo electrónico válido", type: "error"
+      });
       return;
     }
     const length = Correo.length;
     if (length < 10 || length > 50) {
-      show_alerta("El correo debe tener entre 10 y 50 caracteres", "error");
+      show_alerta({
+        message: "El correo debe tener entre 10 y 50 caracteres", type: "error"
+      });
       return;
     }
     restablecerContrasenia();
@@ -94,14 +86,22 @@ export const RecuperarContraseña = () => {
         { withCredentials: true }
       );
       const msj = respuesta.data.message;
-      show_alerta(msj, "success");
+      show_alerta({
+        message: msj, type: "success"
+      });
     } catch (error) {
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({
+          message: error.response.data.message, type: "error"
+        });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({
+          message: "Error en la solicitud", type: "error"
+        });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({
+          message: "Error desconocido", type: "error"
+        });
         console.log(error);
       }
       console.log(error);
@@ -140,7 +140,7 @@ export const RecuperarContraseña = () => {
               Enviar Email
             </button>
             <div className="my-2 text-center">
-            ¿Tienes cuenta? <Link to="/Login">Inicio de sesión</Link>
+              ¿Tienes cuenta? <Link to="/Login">Inicio de sesión</Link>
             </div>
           </div>
         </div>
