@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const Register = () => {
   const url = "http://localhost:3000/api/clientes";
@@ -30,23 +31,18 @@ export const Register = () => {
   const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
   const [showValPassword, setShowValPassword] = useState(false);
 
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        // Selecciona la barra de progreso y ajusta su estilo
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
+  const getClientes = async () => {
+    try {
+      const response = await axios.get(url); // Asegúrate de usar la URL correcta
+      // Procesa los datos de la respuesta, por ejemplo, actualizando el estado
+      setClientes(response.data);
+    } catch (error) {
+      console.error("Error al obtener los clientes:", error);
+      show_alerta({
+        message: "Error al obtener los clientes",
+        type: "error",
+      });
+    }
   };
 
   // Función para validar el número de documento
@@ -285,89 +281,127 @@ export const Register = () => {
     const cleanedDireccion = Direccion.trim().replace(/\s+/g, " ");
     const cleanedContrasenia = Contrasenia.trim();
 
-    // Validaciones
+    // Validaciones locales
     if (!TipoDocumento) {
-      show_alerta("El tipo documento es necesario", "error");
+      show_alerta({
+        message: "El tipo documento es necesario",
+        type: "error",
+      });
       return;
     }
 
     if (!NroDocumento) {
-      show_alerta("El número de documento es necesario", "error");
+      show_alerta({
+        message: "El número de documento es necesario",
+        type: "error",
+      });
       return;
     }
 
     if (!NombreApellido) {
-      show_alerta("El nombre y apellido son necesarios", "error");
+      show_alerta({
+        message: "El nombre y apellido son necesarios",
+        type: "error",
+      });
       return;
     }
 
     if (!Usuario) {
-      show_alerta("El usuario es necesario", "error");
+      show_alerta({
+        message: "El usuario es necesario",
+        type: "error",
+      });
       return;
     } else if (
       !/^[A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+(?: [A-Za-zñÑáéíóúÁÉÍÓÚ0-9!@#$%^&*(),.?":{}|<>]+)*$/.test(
         Usuario
       )
     ) {
-      show_alerta(
-        "El nombre de usuario puede contener letras, números, caracteres especiales, y un solo espacio entre palabras",
-        "error"
-      );
+      show_alerta({
+        message:
+          "El nombre de usuario puede contener letras, números, caracteres especiales, y un solo espacio entre palabras",
+        type: "error",
+      });
       return;
     }
 
     if (!Telefono) {
-      show_alerta("El teléfono es necesario", "error");
+      show_alerta({
+        message: "El teléfono es necesario",
+        type: "error",
+      });
       return;
     }
 
     if (!Direccion) {
-      show_alerta("La dirección es necesaria", "error");
+      show_alerta({
+        message: "La dirección es necesaria",
+        type: "error",
+      });
       return;
     }
 
     if (!Correo) {
-      show_alerta("El correo es necesario", "error");
+      show_alerta({
+        message: "El correo es necesario",
+        type: "error",
+      });
       return;
     }
 
     if (!cleanedContrasenia) {
-      show_alerta("La contraseña es requerida", "error");
+      show_alerta({
+        message: "La contraseña es requerida",
+        type: "error",
+      });
       return;
     }
 
     try {
+      let response;
+
       if (IdCliente) {
         // Actualizar Cliente
-        await enviarSolicitud("PUT", {
-          IdCliente,
-          TipoDocumento,
-          NroDocumento,
-          NombreApellido: cleanedNombreApellido,
-          Usuario: cleanedUsuario,
-          Telefono,
-          Direccion: cleanedDireccion,
-          Correo,
-          Contrasenia: cleanedContrasenia,
+        response = await enviarSolicitud("PUT", {
+          url: `${url}/${IdCliente}`,
+          data: {
+            TipoDocumento,
+            NroDocumento,
+            NombreApellido: cleanedNombreApellido,
+            Usuario: cleanedUsuario,
+            Telefono,
+            Direccion: cleanedDireccion,
+            Correo,
+            Contrasenia: cleanedContrasenia,
+          },
         });
-        show_alerta("Cliente actualizado exitosamente", "success");
+        show_alerta({
+          message: response.data.message || "Cliente actualizado exitosamente",
+          type: "success",
+        });
       } else {
         // Crear Cliente
-        await enviarSolicitud("POST", {
-          TipoDocumento,
-          NroDocumento,
-          NombreApellido: cleanedNombreApellido,
-          Usuario: cleanedUsuario,
-          Telefono,
-          Direccion: cleanedDireccion,
-          Correo,
-          Contrasenia: cleanedContrasenia,
-          Estado: "Activo",
+        response = await enviarSolicitud("POST", {
+          url: url,
+          data: {
+            TipoDocumento,
+            NroDocumento,
+            NombreApellido: cleanedNombreApellido,
+            Usuario: cleanedUsuario,
+            Telefono,
+            Direccion: cleanedDireccion,
+            Correo,
+            Contrasenia: cleanedContrasenia,
+            Estado: "Activo",
+          },
         });
-        show_alerta("Cliente registrado exitosamente", "success");
+        show_alerta({
+          message: response.data.message || "Cliente registrado exitosamente",
+          type: "success",
+        });
       }
 
-      // Limpiar los campos del formulario directamente aquí
+      // Limpiar los campos del formulario
       setTipoDocumento("");
       setNroDocumento("");
       setNombreApellido("");
@@ -387,58 +421,99 @@ export const Register = () => {
         contrasenia: "",
         valcontrasenia: "",
       });
+
+      // Cerrar el modal y actualizar la lista de clientes
+      document.getElementById("btnCerrarCliente")?.click();
+      getClientes();
     } catch (error) {
       // Manejo de errores en la solicitud
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        if (error.response.data.errors) {
+          // Mostrar errores de validación específicos del backend
+          const erroresBackend = error.response.data.errors;
+          for (const [campo, mensaje] of Object.entries(erroresBackend)) {
+            show_alerta({
+              message: mensaje,
+              type: "error",
+            });
+          }
+        } else {
+          show_alerta({
+            message: error.response.data.message || "Error en la solicitud",
+            type: "error",
+          });
+        }
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({
+          message: "Error en la solicitud",
+          type: "error",
+        });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({
+          message: "Error desconocido",
+          type: "error",
+        });
       }
       console.log(error);
     }
   };
 
-  const enviarSolicitud = async (metodo, parametros) => {
-    console.log(parametros);
+  const enviarSolicitud = async (metodo, { url, data }) => {
+    console.log({ url, data });
+
     let urlRequest =
       metodo === "PUT" || metodo === "DELETE"
-        ? `${url}/${parametros.IdCliente}`
+        ? `${url}/${data.IdCliente}`
         : url;
 
     try {
       let respuesta;
-      if (metodo === "POST") {
-        respuesta = await axios.post(url, parametros);
-      } else if (metodo === "PUT") {
-        respuesta = await axios.put(urlRequest, parametros);
-      } else if (metodo === "DELETE") {
-        respuesta = await axios.delete(urlRequest);
+
+      switch (metodo) {
+        case "POST":
+          respuesta = await axios.post(url, data);
+          break;
+        case "PUT":
+          respuesta = await axios.put(urlRequest, data);
+          break;
+        case "DELETE":
+          respuesta = await axios.delete(urlRequest);
+          break;
+        default:
+          throw new Error("Método no soportado");
       }
 
-      const msj = respuesta.data.message;
-      show_alerta(msj, "success");
-      document.getElementById("btnCerrarCliente").click();
-      getClientes();
-      if (metodo === "POST") {
-        show_alerta("Cliente creado con éxito", "success", { timer: 2000 });
-      } else if (metodo === "PUT") {
-        show_alerta("Cliente actualizado con éxito", "success", {
-          timer: 2000,
-        });
-      } else if (metodo === "DELETE") {
-        show_alerta("Cliente eliminado con éxito", "success", { timer: 2000 });
-      }
+      // Mostrar alerta de éxito (opcional, puedes ajustar esto según sea necesario)
+      const msj = respuesta.data.message || "Operación realizada con éxito";
+      show_alerta({
+        message: msj,
+        type: "success",
+      });
+
+      // Retornar la respuesta para manejarla en la función que llama
+      return respuesta;
     } catch (error) {
+      // Manejo de errores
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({
+          message: error.response.data.message || "Error en la solicitud",
+          type: "error",
+        });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({
+          message: "Error en la solicitud",
+          type: "error",
+        });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({
+          message: "Error desconocido",
+          type: "error",
+        });
       }
       console.log(error);
+
+      // Propagar el error para que pueda ser manejado en la función que llama
+      throw error;
     }
   };
 

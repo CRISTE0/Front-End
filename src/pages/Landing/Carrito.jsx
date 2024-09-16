@@ -3,8 +3,8 @@ import camisetas from "../../assets/img/camisetas";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
 import { useAuth } from "../../context/AuthProvider";
-
-
+import show_alerta from "../../components/Show_Alerta/show_alerta";
+import Loader from "../../components/Loader/loader";
 
 import axios from "axios";
 import { useNavigate } from "react-router";
@@ -17,12 +17,12 @@ export const Carrito = () => {
   const url = "http://localhost:3000/api/pedidos";
   const navigate = useNavigate();
 
-  const [showMessage,setShowMessage] = useState(null);
-
+  const [showMessage, setShowMessage] = useState(null);
 
   // console.log(auth);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [cartItems, setCartItems] = useState([]);
   const [Cliente, setCliente] = useState("");
@@ -30,86 +30,87 @@ export const Carrito = () => {
   // const [totalPedido, setTotalPedido] = useState(null);
 
   const getCliente = async () => {
-    console.log(auth.idCliente);
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
+    try {
+      console.log(auth.idCliente);
 
-    let respuesta = await axios.get(
-      `http://localhost:3000/api/clientes/${auth.idCliente}`
-    );
+      let respuesta = await axios.get(
+        `http://localhost:3000/api/clientes/${auth.idCliente}`
+      );
 
-    setCliente(respuesta.data);
-    // console.log(respuesta);
+      setCliente(respuesta.data);
+      // console.log(respuesta);
+    } catch (error) {
+      console.error("Error al obtener el cliente:", error);
+      show_alerta({
+        message: "Error al cargar los datos del cliente",
+        type: "error",
+      });
+    }finally{
+    setLoading(false); // Mostrar el loader antes de realizar la solicitud
+    }
   };
 
   const fetchCartItems = async () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const itemDetails = await Promise.all(
-      cart.map(
+    setLoading(true); // Mostrar el loader antes de realizar la solicitud
+
+    try {
+      const itemDetails = await Promise.all(
+        cart.map(
+          (item) =>
+            axios
+              .get(`http://localhost:3000/api/productos/${item.IdProd}`)
+              .then((res) => {
+                // Filtrar el ProductoInsumos para mantener solo el insumo con el IdIns seleccionado
+                const insumoSeleccionado = res.data.ProductoInsumos.find(
+                  (insumo) => insumo.IdInsumo == item.IdIns
+                );
+
+                // Devolver el objeto del producto con el insumo seleccionado y la cantidad
+                return {
+                  ...res.data,
+                  ProductoInsumos: insumoSeleccionado
+                    ? [insumoSeleccionado] // Si el insumo fue encontrado, mantenlo en el array
+                    : [], // Si no se encontró, devuelve un array vacío
+                  CantidadSeleccionada: item.CantidadSeleccionada,
+                };
+              })
+              .catch(() => null) // Manejo de error de fetch para cada producto
+        )
+      );
+
+      // Filtra los elementos que no sean null y que tengan Publicacion como 'Activo'
+      const activeItems = itemDetails.filter(
         (item) =>
-          axios
-            .get(`http://localhost:3000/api/productos/${item.IdProd}`)
-            .then((res) => {
-              // Filtrar el ProductoInsumos para mantener solo el insumo con el IdIns seleccionado
-              const insumoSeleccionado = res.data.ProductoInsumos.find(
-                (insumo) => insumo.IdInsumo == item.IdIns
-              );
-    
-              // Devolver el objeto del producto con el insumo seleccionado y la cantidad
-              return {
-                ...res.data,
-                ProductoInsumos: insumoSeleccionado
-                  ? [insumoSeleccionado] // Si el insumo fue encontrado, mantenlo en el array
-                  : [], // Si no se encontró, devuelve un array vacío
-                CantidadSeleccionada: item.CantidadSeleccionada,
-              };
-            })
-            .catch(() => null) // Manejo de error de fetch
-      )
-    );
+          (item && item.Publicacion == "Activo") ||
+          (item.Publicacion == "Inactivo" && item.IdUsuario == auth.idCliente)
+      );
+      setCartItems(activeItems);
 
+      if (activeItems.length == 0) {
+        setShowMessage(true);
+      } else {
+        setShowMessage(false);
+      }
 
-
-    // Filtra los elementos que no sean null y que tengan Publicacion como 'Activo'
-    const activeItems = itemDetails.filter(
-      (item) => item && item.Publicacion == "Activo" ||
-      (item.Publicacion == "Inactivo" && item.IdUsuario == auth.idCliente)
-    );
-    setCartItems(activeItems);
-
-    if (activeItems.length == 0) {
-      setShowMessage(true)
-    }else{
-      setShowMessage(false)
+      console.log(itemDetails);
+      console.log(activeItems);
+    } catch (error) {
+      console.error("Error al obtener los elementos del carrito:", error);
+      show_alerta({
+        message: "Error al cargar los productos del carrito",
+        type: "error",
+      });
+    }finally {
+      setLoading(false); // Mostrar el loader antes de realizar la solicitud
     }
-
-    console.log(itemDetails);
-
-
-    console.log(activeItems);
   };
 
   useEffect(() => {
     getCliente();
     fetchCartItems();
   }, []);
-
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        // Selecciona la barra de progreso y ajusta su estilo
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
-  };
 
   const incrementarCantidad = (
     idInsumoProductoSeleccionado,
@@ -122,26 +123,30 @@ export const Carrito = () => {
       (item) => item.IdIns == idInsumoProductoSeleccionado
     );
 
-
     // si encuentra el producto
     if (productIndex !== -1) {
       if (
         cart[productIndex].CantidadSeleccionada >= cantidadProductoDisponible
       ) {
-        show_alerta("Cantidad máxima del producto alcanzada", "error");
+        show_alerta({
+          message: "Cantidad máxima del producto alcanzada",
+          type: "error",
+        });
         return;
       }
-      
+
       // Incrementa la cantidad del producto en el carrito
       cart[productIndex].CantidadSeleccionada += 1;
-      
-      
-            const newCantidad = cart[productIndex].CantidadSeleccionada;
-            setInputValues(prev => ({...prev, [idInsumoProductoSeleccionado]: newCantidad.toString()}));
-            
+
+      const newCantidad = cart[productIndex].CantidadSeleccionada;
+      setInputValues((prev) => ({
+        ...prev,
+        [idInsumoProductoSeleccionado]: newCantidad.toString(),
+      }));
+
       // Actualiza el carrito en el localStorage
       localStorage.setItem("cart", JSON.stringify(cart));
-      
+
       // Actualiza el estado del carrito en React
       setCartItems((prevCartItems) =>
         prevCartItems.map((item) =>
@@ -170,8 +175,10 @@ export const Carrito = () => {
         cart[productIndex].CantidadSeleccionada -= 1;
 
         const newCantidad = cart[productIndex].CantidadSeleccionada;
-        setInputValues(prev => ({...prev, [idInsumoProductoSeleccionado]: newCantidad.toString()}));
-        
+        setInputValues((prev) => ({
+          ...prev,
+          [idInsumoProductoSeleccionado]: newCantidad.toString(),
+        }));
 
         // Actualiza el carrito en el localStorage
         localStorage.setItem("cart", JSON.stringify(cart));
@@ -187,7 +194,6 @@ export const Carrito = () => {
 
         fetchCartItems();
         triggerRender();
-
 
         console.log(cart);
       } else {
@@ -218,82 +224,106 @@ export const Carrito = () => {
 
             // Actualiza el estado del carrito en React
             setCartItems((prevCartItems) =>
-              prevCartItems.filter((item) => item.id !== idInsumoProductoSeleccionado)
+              prevCartItems.filter(
+                (item) => item.id !== idInsumoProductoSeleccionado
+              )
             );
-           triggerRender();
-
+            triggerRender();
 
             console.log(JSON.parse(localStorage.getItem("cart")));
 
             fetchCartItems();
-            show_alerta("El producto fue eliminado del carrito", "success");
+            show_alerta({
+              message: "El producto fue eliminado del carrito",
+              type: "success",
+            });
           } else if (result.dismiss === Swal.DismissReason.cancel) {
-            show_alerta("El producto NO fue eliminado del carrito", "info");
+            show_alerta({
+              message: "El producto NO fue eliminado del carrito",
+              type: "info",
+            });
           } else if (
             result.dismiss === Swal.DismissReason.backdrop ||
             result.dismiss === Swal.DismissReason.esc
           ) {
-            show_alerta("El producto NO fue eliminado del carrito", "info");
+            show_alerta({
+              message: "El producto NO fue eliminado del carrito",
+              type: "info",
+            });
           }
         });
       }
     }
   };
 
-
-  const handleCantidadChange = (e, idInsumoProductoSeleccionado, cantidadMaxima) => {
+  const handleCantidadChange = (
+    e,
+    idInsumoProductoSeleccionado,
+    cantidadMaxima
+  ) => {
     let newValue = e.target.value;
-    
+
     // Permitir campo vacío o números positivos
-    if (newValue === '' || /^[1-9]\d*$/.test(newValue)) {
-      let numericValue = newValue === '' ? '' : parseInt(newValue, 10);
-      
-      if (numericValue !== '' && numericValue > cantidadMaxima) {
+    if (newValue === "" || /^[1-9]\d*$/.test(newValue)) {
+      let numericValue = newValue === "" ? "" : parseInt(newValue, 10);
+
+      if (numericValue !== "" && numericValue > cantidadMaxima) {
         numericValue = cantidadMaxima;
         newValue = cantidadMaxima.toString();
-        show_alerta("Cantidad máxima del producto alcanzada", "warning");
+        show_alerta({
+          message: "Cantidad máxima del producto alcanzada",
+          type: "warning",
+        });
       }
-      
-      setInputValues(prev => ({...prev, [idInsumoProductoSeleccionado]: newValue}));
-      
-      if (numericValue !== '') {
+
+      setInputValues((prev) => ({
+        ...prev,
+        [idInsumoProductoSeleccionado]: newValue,
+      }));
+
+      if (numericValue !== "") {
         updateCartAndState(idInsumoProductoSeleccionado, numericValue);
       }
     }
   };
-  
+
   const updateCartAndState = (idInsumoProductoSeleccionado, newCantidad) => {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const productIndex = cart.findIndex(item => item.IdIns == idInsumoProductoSeleccionado);
-  
+    const productIndex = cart.findIndex(
+      (item) => item.IdIns == idInsumoProductoSeleccionado
+    );
+
     if (productIndex !== -1) {
       cart[productIndex].CantidadSeleccionada = newCantidad;
       localStorage.setItem("cart", JSON.stringify(cart));
-  
-      setCartItems(prevCartItems =>
-        prevCartItems.map(item =>
+
+      setCartItems((prevCartItems) =>
+        prevCartItems.map((item) =>
           item.ProductoInsumos[0].IdInsumo == idInsumoProductoSeleccionado
             ? { ...item, CantidadSeleccionada: newCantidad }
             : item
         )
       );
-  
+
       fetchCartItems();
       triggerRender();
     }
   };
-  
+
   const handleInputBlur = (idProductoSeleccionado, cantidadMaxima) => {
     const currentValue = inputValues[idProductoSeleccionado];
-    if (currentValue === '' || parseInt(currentValue, 10) < 1) {
-      setInputValues(prev => ({...prev, [idProductoSeleccionado]: '1'}));
+    if (currentValue === "" || parseInt(currentValue, 10) < 1) {
+      setInputValues((prev) => ({ ...prev, [idProductoSeleccionado]: "1" }));
       updateCartAndState(idProductoSeleccionado, 1);
     } else if (parseInt(currentValue, 10) > cantidadMaxima) {
-      setInputValues(prev => ({...prev, [idProductoSeleccionado]: cantidadMaxima.toString()}));
+      setInputValues((prev) => ({
+        ...prev,
+        [idProductoSeleccionado]: cantidadMaxima.toString(),
+      }));
       updateCartAndState(idProductoSeleccionado, cantidadMaxima);
     }
   };
-  
+
   const totalPedido = cartItems.reduce((total, item) => {
     return total + (item.CantidadSeleccionada * item.ValorVenta || 0);
   }, 0);
@@ -330,20 +360,20 @@ export const Carrito = () => {
       // Mapeo de los insumos utilizados en el producto
       InsumosUtilizados: producto.ProductoInsumos.map((insumo) => ({
         IdInsumo: insumo.InsumoProd.IdInsumo,
-        CantidadUtilizada: producto.CantidadSeleccionada
-      }))
+        CantidadUtilizada: producto.CantidadSeleccionada,
+      })),
     }));
   };
-  
-  
 
   console.log(obtenerFechaActual());
 
   const enviarSolicitud = async () => {
     try {
-
       if (cartItems == 0) {
-        show_alerta("Agrega al menos un producto al carrito","warning")
+        show_alerta({
+          message: "Agrega al menos un producto al carrito",
+          type: "warning",
+        });
         return;
       }
 
@@ -352,12 +382,12 @@ export const Carrito = () => {
       let parametros = {
         IdCliente: auth.idCliente,
         Detalles: obtenerDetalles(cartItems),
-        TipoPago:"Transferencia",
+        TipoPago: "Transferencia",
         Fecha: obtenerFechaActual(),
         Total: totalPedido,
-        idImagenComprobante:"0",
-        imagenComprobante:"0",
-        intentos:3,
+        idImagenComprobante: "0",
+        imagenComprobante: "0",
+        intentos: 3,
         IdEstadoPedido: 1,
       };
 
@@ -365,7 +395,6 @@ export const Carrito = () => {
       console.log(obtenerFechaActual());
 
       // return;
-
 
       const respuesta = await axios({
         method: "POST",
@@ -375,26 +404,40 @@ export const Carrito = () => {
 
       console.log(respuesta);
 
-      show_alerta(respuesta.data.message, "success");
-
+      show_alerta({
+        message: respuesta.data.message,
+        type: "success",
+      });
 
       // localStorage.removeItem("cart");
       // navigate("/admin/Pedidos");
-
     } catch (error) {
       console.log(error);
 
       if (error.response) {
-        show_alerta(error.response.data.message, "error");
+        show_alerta({
+          message: error.response.data.message,
+          type: "error",
+        });
       } else if (error.request) {
-        show_alerta("Error en la solicitud", "error");
+        show_alerta({
+          message: "Error en la solicitud",
+          type: "error",
+        });
       } else {
-        show_alerta("Error desconocido", "error");
+        show_alerta({
+          message: "Error desconocido",
+          type: "error",
+        });
       }
-    }finally{
+    } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <>
@@ -404,10 +447,12 @@ export const Carrito = () => {
       >
         <div className="row">
           <div className="col-lg-6">
-
             {/* productos cliente */}
             {cartItems.map((item) => (
-              <div key={`${item.IdProducto}-${item.ProductoInsumos[0].IdInsumo}`} className="card mb-3">
+              <div
+                key={`${item.IdProducto}-${item.ProductoInsumos[0].IdInsumo}`}
+                className="card mb-3"
+              >
                 <div className="card-body">
                   <div className="d-flex justify-content-between">
                     <div className="d-flex flex-row align-items-center">
@@ -423,7 +468,13 @@ export const Carrito = () => {
 
                       <div className="mx-3">
                         {/* nombre producto */}
-                        <h5>{item.Disenio.NombreDisenio} <small style={{fontSize: "11px"}}>{item.ProductoInsumos[0].InsumoProd.Color.Color} - {item.ProductoInsumos[0].InsumoProd.Talla.Talla}</small></h5>
+                        <h5>
+                          {item.Disenio.NombreDisenio}{" "}
+                          <small style={{ fontSize: "11px" }}>
+                            {item.ProductoInsumos[0].InsumoProd.Color.Color} -{" "}
+                            {item.ProductoInsumos[0].InsumoProd.Talla.Talla}
+                          </small>
+                        </h5>
 
                         {/* precio producto */}
                         <p className="small mb-0">
@@ -476,33 +527,45 @@ export const Carrito = () => {
 
                       {/* input cantidad */}
                       <div style={{ width: "auto" }}>
-                      <input
-                        // min="0"
-                        // min="0" 
-                        type="text"
-                        className="form-control form-control-dm"
-                        style={{ width: "45px", "textAlign":"center",border:"none" }}
-                        value={inputValues[item.ProductoInsumos[0].IdInsumo] ?? item.CantidadSeleccionada}
-                        onChange={(e) =>
-                          handleCantidadChange(
-                            e,
-                            item.ProductoInsumos[0].IdInsumo,
-                            item.ProductoInsumos[0].CantidadProductoInsumo,
-                            item.Disenio.NombreDisenio
-                          )
-                        }
-
-                        onBlur={() => handleInputBlur(item.ProductoInsumos[0].IdInsumo, item.ProductoInsumos[0].CantidadProductoInsumo)}
-
-                      />                 
-                      
-                       </div>
+                        <input
+                          // min="0"
+                          // min="0"
+                          type="text"
+                          className="form-control form-control-dm"
+                          style={{
+                            width: "45px",
+                            textAlign: "center",
+                            border: "none",
+                          }}
+                          value={
+                            inputValues[item.ProductoInsumos[0].IdInsumo] ??
+                            item.CantidadSeleccionada
+                          }
+                          onChange={(e) =>
+                            handleCantidadChange(
+                              e,
+                              item.ProductoInsumos[0].IdInsumo,
+                              item.ProductoInsumos[0].CantidadProductoInsumo,
+                              item.Disenio.NombreDisenio
+                            )
+                          }
+                          onBlur={() =>
+                            handleInputBlur(
+                              item.ProductoInsumos[0].IdInsumo,
+                              item.ProductoInsumos[0].CantidadProductoInsumo
+                            )
+                          }
+                        />
+                      </div>
 
                       {/* Aumentar cantidad del producto */}
                       <button
                         className=""
                         onClick={() =>
-                          incrementarCantidad(item.ProductoInsumos[0].IdInsumo, item.ProductoInsumos[0].CantidadProductoInsumo)
+                          incrementarCantidad(
+                            item.ProductoInsumos[0].IdInsumo,
+                            item.ProductoInsumos[0].CantidadProductoInsumo
+                          )
                         }
                         style={{ border: "none", background: "transparent" }}
                       >
@@ -514,23 +577,24 @@ export const Carrito = () => {
               </div>
             ))}
 
-            {showMessage &&(
+            {showMessage && (
               <div className="card mb-3">
-              <div className="card-body">
-                <div className="d-flex justify-content-center">
-                    
+                <div className="card-body">
+                  <div className="d-flex justify-content-center">
                     <div className="mx-3">
                       {/* nombre producto */}
-                      <h4 className="text-dark">Aún no haz agregado productos al carrito :)</h4>
+                      <h4 className="text-dark">
+                        Aún no haz agregado productos al carrito :)
+                      </h4>
 
                       {/* precio producto */}
                       <p className="small mb-0">
                         {/* {formatCurrency(item.ValorVenta)} */}
                       </p>
                     </div>
+                  </div>
                 </div>
               </div>
-            </div>
             )}
           </div>
 

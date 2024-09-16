@@ -10,6 +10,7 @@ import {
 } from "../../firebase/config";
 import { useAuth } from "../../context/AuthProvider";
 import { useNavigate } from "react-router";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 export const Canvas = () => {
   // variables diseñador
   const canvasRef = useRef(null);
@@ -552,36 +553,30 @@ export const Canvas = () => {
   const [title, setTitle] = useState("");
   const navigate = useNavigate();
 
-
   const [isFirstView, setIsFirstView] = useState(true);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-
-  
   const [InsumosCliente, setInsumosCliente] = useState([]);
   const [DiseniosCliente, setDiseniosCliente] = useState([]);
   const [productosAdmin, setProductosAdmin] = useState([]);
-  
-  const [DisenioClientePost, setDisenioClientePost] = useState([]);
 
+  const [DisenioClientePost, setDisenioClientePost] = useState([]);
 
   const [TallasCliente, setTallasCliente] = useState([]);
   const [ColoresCliente, setColoresCliente] = useState([]);
   const [Cantidad, setCantidad] = useState("");
 
-
   const [Tallas, setTallas] = useState([]);
   const [Colores, setColores] = useState([]);
-  
+
   const [IdTallaCliente, setIdTallaCliente] = useState("");
   const [IdColorCliente, setIdColorCliente] = useState("");
   const [IdInsumoCliente, setIdInsumoCliente] = useState("");
 
-
   const [errors, setErrors] = useState({
     NombreDisenio: "",
-    CantidadCliente:0
+    CantidadCliente: 0,
   });
 
   // const[ulrDesign,setulrDesign] = useState("");
@@ -594,10 +589,9 @@ export const Canvas = () => {
 
     setProductosAdmin(respuesta.data);
     console.log(respuesta.data);
-
   };
 
-   // Obtener los insumos que seran usados por el cliente, estos estan activos y con cantidad
+  // Obtener los insumos que seran usados por el cliente, estos estan activos y con cantidad
   const getInsumos = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/insumos");
     const InsumosActivas = respuesta.data.filter(
@@ -605,7 +599,6 @@ export const Canvas = () => {
     );
 
     console.log(InsumosActivas);
-    
 
     setInsumosCliente(InsumosActivas);
 
@@ -615,13 +608,12 @@ export const Canvas = () => {
   const getTallas = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/tallas");
     const TallasActivas = respuesta.data.filter(
-      (talla) => talla.Estado === "Activo" 
+      (talla) => talla.Estado === "Activo"
     );
     console.log(TallasActivas);
 
     setTallas(TallasActivas);
   };
-
 
   const getColores = async () => {
     const respuesta = await axios.get("http://localhost:3000/api/colores");
@@ -634,9 +626,9 @@ export const Canvas = () => {
   };
 
   // const obtenerDiseniosCliente = (disenios) =>{
-    
+
   //   const disenioFiltradosCliente = disenios.filter(disenio => disenio.IdUsuario == auth.idCliente);
-      
+
   //   console.log(disenioFiltradosCliente);
 
   //   setDiseniosCliente(disenioFiltradosCliente);
@@ -653,7 +645,7 @@ export const Canvas = () => {
 
   //   obtenerDiseniosCliente(DiseniosActivos);
 
-  // }; 
+  // };
 
   // abrir modal
   const openModal = (op) => {
@@ -713,12 +705,9 @@ export const Canvas = () => {
 
   // Funcion para generar el valor de venta del producto
   const generarValorVentaCliente = (IdInsumoCliente) => {
-
     console.log("entro valVEntaCli");
     console.log(IdInsumoCliente);
-    
-    
-     
+
     const insumoCliente = InsumosCliente.filter(
       (insumo) => insumo.IdInsumo == IdInsumoCliente
     );
@@ -734,21 +723,16 @@ export const Canvas = () => {
     return Math.round(valorVentaProductoCliente);
   };
 
-
   // Funcion para generar el valor de venta del producto
   const generarValorVentaDisenio = (tamanioImagenDisenio) => {
-    
     if (tamanioImagenDisenio == "Grande") {
       return 18000;
-    }else if (tamanioImagenDisenio == "Mediana"){
+    } else if (tamanioImagenDisenio == "Mediana") {
       return 16000;
-    }else{
+    } else {
       return 12000;
     }
-
-    
   };
-
 
   // Funcion para generar el precio sugerido
   const precioSugerido = (precioDisenio, precionInsumo) => {
@@ -764,7 +748,7 @@ export const Canvas = () => {
     const tallasUnicas = [];
 
     // Filtrar colores y tallas que esten en los insumos para el select del cliente
-    InsumosCliente.forEach(insumo => {
+    InsumosCliente.forEach((insumo) => {
       if (!coloresUnicos.includes(insumo.IdColor)) {
         coloresUnicos.push(insumo.IdColor);
       }
@@ -774,43 +758,44 @@ export const Canvas = () => {
     });
 
     // Filtrar los colores para el select del cliente
-    const coloresFiltrados = Colores.filter(color => coloresUnicos.includes(color.IdColor));
+    const coloresFiltrados = Colores.filter((color) =>
+      coloresUnicos.includes(color.IdColor)
+    );
 
-    
     // Filtrar las tallas para el select del cliente
-    const tallasFiltrados = Tallas.filter(talla => tallasUnicas.includes(talla.IdTalla));
+    const tallasFiltrados = Tallas.filter((talla) =>
+      tallasUnicas.includes(talla.IdTalla)
+    );
 
     console.log(coloresFiltrados);
     console.log(tallasFiltrados);
-    
-
 
     setColoresCliente(coloresFiltrados);
     setTallasCliente(tallasFiltrados);
   };
-
 
   // Función para manejar cambios en el color del cliente
   const handleChangeSelectColorCliente = (e) => {
     const value = e.target.value;
 
     // Filtra las tallas que estan relacionadas con el color seleccionado
-    const tallasFiltradas = InsumosCliente
-    .filter(insumo => insumo.IdColor === parseInt(value) && insumo.Cantidad > 0 && insumo.Estado === 'Activo')
-    .map(insumo => insumo.IdTalla);
-
+    const tallasFiltradas = InsumosCliente.filter(
+      (insumo) =>
+        insumo.IdColor === parseInt(value) &&
+        insumo.Cantidad > 0 &&
+        insumo.Estado === "Activo"
+    ).map((insumo) => insumo.IdTalla);
 
     // Filtrar las nuevas tallas para el select del cliente
-    const nuevasTallasFiltradasCliente = Tallas.filter(talla => tallasFiltradas.includes(talla.IdTalla));
-
+    const nuevasTallasFiltradasCliente = Tallas.filter((talla) =>
+      tallasFiltradas.includes(talla.IdTalla)
+    );
 
     console.log(tallasFiltradas);
-    
 
     setIdColorCliente(value);
     setIdTallaCliente("");
     setTallasCliente(nuevasTallasFiltradasCliente);
-
   };
 
   // Función para manejar cambios en la talla del cliente
@@ -819,8 +804,6 @@ export const Canvas = () => {
 
     setIdTallaCliente(value);
   };
-
-
 
   //Inicio validacion diseño
   const validar = async () => {
@@ -835,27 +818,41 @@ export const Canvas = () => {
       // return;
 
       if (NombreDisenio == "") {
-        show_alerta("Ingresa un nombre para el diseño", "warning");
+        show_alerta({
+          message: "Ingresa un nombre para el diseño",
+          type: "warning",
+        });
         return;
       } else if (
         !/^[A-Za-zñÑáéíóúÁÉÍÓÚ0-9]+( [A-Za-zñÑáéíóúÁÉÍÓÚ0-9]+)*$/.test(
           NombreDisenio
         )
       ) {
-        show_alerta("Ingresa un nombre válido para el diseño", "error");
+        show_alerta({
+          message: "Ingresa un nombre válido para el diseño",
+          type: "error",
+        });
         return;
       } else if (PosicionImagen === "") {
-        show_alerta("Selecciona una posición para la imagen", "warning");
+        show_alerta({
+          message: "Selecciona una posición para la imagen",
+          type: "warning",
+        });
         return;
       } else if (ImagenDisenio === "") {
-        show_alerta("Error del sistema vuelva a intentarlo", "error");
+        show_alerta({
+          message: "Error del sistema vuelva a intentarlo",
+          type: "error",
+        });
         return;
       } else if (ImagenReferencia === "") {
-        show_alerta("Error del sistema vuelva a intentarlo", "warning");
+        show_alerta({
+          message: "Error del sistema vuelva a intentarlo",
+          type: "warning",
+        });
         return;
       } else {
         if (operation == 1) {
-
           const [idDesign, ulrDesign] = await subirImageDesign(ImagenDisenio);
           const [ulrReference, idReference] =
             await subirImageReferenceDiseniador(ImagenReferencia);
@@ -891,31 +888,37 @@ export const Canvas = () => {
   const enviarSolicitud = async (metodo, parametros) => {
     if (metodo === "POST") {
       try {
-
-        const respuesta = await axios({ method: metodo, url: url, data: parametros });
+        const respuesta = await axios({
+          method: metodo,
+          url: url,
+          data: parametros,
+        });
         console.log(respuesta);
- 
+
         let msj = respuesta.data.message;
 
         console.log(respuesta.data.nuevoDisenio);
-        
-        
+
         setDisenioClientePost(respuesta.data.nuevoDisenio);
-        
+
         setIsSubmitting(true);
 
         setIsFirstView(false);
 
         // show_alerta(msj, "success");
-
-
       } catch (error) {
         if (!error.response.data.error) {
           let mensaje = error.response.data.message;
 
-          show_alerta(mensaje, "error");
+          show_alerta({
+            message: mensaje,
+            type: "error",
+          });
         } else {
-          show_alerta(error.response.data.error, "error");
+          show_alerta({
+            message: error.response.data.error,
+            type: "error",
+          });
         }
         console.log(error);
         console.log(error.response.data.error);
@@ -924,94 +927,96 @@ export const Canvas = () => {
   };
   //Fin enviar solicitud creacion
 
-
   const crearProducto = async () => {
-    
     try {
-
       console.log("siuuuuu");
-      
 
-    // crear detalle del insumo
-    const DetallesInsumos = [
-      {
-      IdColor: IdColorCliente,
-      IdTalla: IdTallaCliente,
-      cantidad: Cantidad,
-      },
-    ];
-
-    // converir el color y talla
-    // Si no hay errores, reemplazar IdColor e IdTalla por IdInsumo
-    const nuevosDetallesInsumos = DetallesInsumos.map((detalle) => {
-      const insumoSeleccionado = InsumosCliente.find(
-        (insumo) =>
-          insumo.IdColor === parseInt(detalle.IdColor) &&
-          insumo.IdTalla === parseInt(detalle.IdTalla) &&
-          insumo.Estado === "Activo"
-      );
-
-      if (insumoSeleccionado) {
-        return {
-          IdInsumo: insumoSeleccionado.IdInsumo, // Reemplaza IdColor e IdTalla por IdInsumo
-          cantidad: detalle.cantidad, // Mantiene la cantidad
-        };
-      }
-
-      return detalle; // Si no encuentra el insumo, retorna el detalle sin modificar
-    });
-
-    console.log("siuuuuu222");
-
-
-    console.log(nuevosDetallesInsumos);
-
-    if (nuevosDetallesInsumos.length > 0) {
-      let idInsumoCliente = nuevosDetallesInsumos[0].IdInsumo;
-
-
-      let parametrosProductoCliente = 
+      // crear detalle del insumo
+      const DetallesInsumos = [
         {
-        IdDisenio: DisenioClientePost.IdDisenio,
-        IdUsuario: auth.idCliente,
-        Referencia: generarReferenciaUnica(productosAdmin),
-        ValorVenta: generarValorVentaCliente(idInsumoCliente),
-        Publicacion: "Activo",
-        Estado: "Activo",
-        Insumos: nuevosDetallesInsumos,
-      };
+          IdColor: IdColorCliente,
+          IdTalla: IdTallaCliente,
+          cantidad: Cantidad,
+        },
+      ];
 
-      console.log(parametrosProductoCliente);
+      // converir el color y talla
+      // Si no hay errores, reemplazar IdColor e IdTalla por IdInsumo
+      const nuevosDetallesInsumos = DetallesInsumos.map((detalle) => {
+        const insumoSeleccionado = InsumosCliente.find(
+          (insumo) =>
+            insumo.IdColor === parseInt(detalle.IdColor) &&
+            insumo.IdTalla === parseInt(detalle.IdTalla) &&
+            insumo.Estado === "Activo"
+        );
 
-      // return;
+        if (insumoSeleccionado) {
+          return {
+            IdInsumo: insumoSeleccionado.IdInsumo, // Reemplaza IdColor e IdTalla por IdInsumo
+            cantidad: detalle.cantidad, // Mantiene la cantidad
+          };
+        }
 
-      const respuesta = await axios.post("http://localhost:3000/api/productos", parametrosProductoCliente);
+        return detalle; // Si no encuentra el insumo, retorna el detalle sin modificar
+      });
 
-      console.log(respuesta);
-      
-      let msj = respuesta.data.message;
+      console.log("siuuuuu222");
 
-      show_alerta( respuesta.data.message,"success");
+      console.log(nuevosDetallesInsumos);
 
-      let productoNuevo = respuesta.data.nuevoProducto
+      if (nuevosDetallesInsumos.length > 0) {
+        let idInsumoCliente = nuevosDetallesInsumos[0].IdInsumo;
 
-      console.log(productoNuevo);
-      
-      if (productoNuevo) {
-        // // Si el producto no existe, agrégalo con una cantidad inicial de 1
-        const cart = JSON.parse(localStorage.getItem("cart")) || [];
-        cart.push({ IdProd: productoNuevo.IdProducto, CantidadSeleccionada: 1, IdIns:idInsumoCliente });
-        localStorage.setItem("cart", JSON.stringify(cart));
-  
-        console.log(JSON.parse(localStorage.getItem("cart"))); 
+        let parametrosProductoCliente = {
+          IdDisenio: DisenioClientePost.IdDisenio,
+          IdUsuario: auth.idCliente,
+          Referencia: generarReferenciaUnica(productosAdmin),
+          ValorVenta: generarValorVentaCliente(idInsumoCliente),
+          Publicacion: "Activo",
+          Estado: "Activo",
+          Insumos: nuevosDetallesInsumos,
+        };
 
-        navigate("/carrito");
-      }      
+        console.log(parametrosProductoCliente);
 
-    } else {
-      throw new Error("No se encontraron insumos válidos.");
-    }
-    }catch(error){
+        // return;
+
+        const respuesta = await axios.post(
+          "http://localhost:3000/api/productos",
+          parametrosProductoCliente
+        );
+
+        console.log(respuesta);
+
+        let msj = respuesta.data.message;
+
+        show_alerta({
+          message: respuesta.data.message,
+          type: "success",
+        });
+
+        let productoNuevo = respuesta.data.nuevoProducto;
+
+        console.log(productoNuevo);
+
+        if (productoNuevo) {
+          // // Si el producto no existe, agrégalo con una cantidad inicial de 1
+          const cart = JSON.parse(localStorage.getItem("cart")) || [];
+          cart.push({
+            IdProd: productoNuevo.IdProducto,
+            CantidadSeleccionada: 1,
+            IdIns: idInsumoCliente,
+          });
+          localStorage.setItem("cart", JSON.stringify(cart));
+
+          console.log(JSON.parse(localStorage.getItem("cart")));
+
+          navigate("/carrito");
+        }
+      } else {
+        throw new Error("No se encontraron insumos válidos.");
+      }
+    } catch (error) {
       if (error.response) {
         show_alerta({
           message: error.response.data.message,
@@ -1019,30 +1024,7 @@ export const Canvas = () => {
         });
       }
     }
-
-  }
-
-
-  //Inicio configuracion mensaje de alerta
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        // Selecciona la barra de progreso y ajusta su estilo
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "3.5px";
-        }
-      },
-    });
   };
-  //Fin configuracion mensaje de alerta
 
   //inicio manejo mostrar select tamaño (mediano) imagen
   const handleShowSizeImage = () => {
@@ -1311,141 +1293,142 @@ export const Canvas = () => {
               </button>
             </div>
             <div className="modal-body">
-
               {/* Primera vista del modal */}
               {isFirstView && (
-
-              <div className="form-row">
-                <input
-                  type="hidden"
-                  id="id"
-                  value={IdDisenio}
-                  onChange={(e) => setIdIdDisenio(e.target.value)}
-                ></input>
-
-                {/* Nombre del diseño */}
-                <div className="form-group col-md-12 mb-4">
-                  <label htmlFor="nombreDisenio">Nombre del diseño </label>
-
+                <div className="form-row">
                   <input
-                    type="text"
-                    id="nombreDisenio"
-                    className={`form-control ${
-                      errors.NombreDisenio ? "is-invalid" : ""
-                    }`}
-                    placeholder="Ingresa un nombre para el diseño"
-                    value={NombreDisenio}
-                    onChange={handleChangeNombreDisenio}
-                  />
-
-                  {renderErrorMessage(errors.NombreDisenio)}
-                </div>
-
-                {/* Posicion del diseño */}
-                <div className="form-group col-md-6 mb-4">
-                  <label htmlFor="posicionDiseño">Tamaño del diseño</label>
-
-                  <input
-                    type="text"
-                    id="posicionDiseño"
-                    className="form-control"
-                    disabled
-                    placeholder="Posicion del diseño"
-                    defaultValue={TamanioImagen}
-                    // onChange={handleChangeTalla}
+                    type="hidden"
+                    id="id"
+                    value={IdDisenio}
+                    onChange={(e) => setIdIdDisenio(e.target.value)}
                   ></input>
-                </div>
 
-                {/* Posicion del diseño */}
-                <div className="form-group col-md-6 mb-5">
-                  <label htmlFor="posicionDiseño">Posicion del diseño</label>
+                  {/* Nombre del diseño */}
+                  <div className="form-group col-md-12 mb-4">
+                    <label htmlFor="nombreDisenio">Nombre del diseño </label>
 
-                  <input
-                    type="text"
-                    id="posicionDiseño"
-                    className="form-control"
-                    disabled
-                    placeholder="Posicion del diseño"
-                    defaultValue={PosicionImagen}
-                    // onChange={handleChangeTalla}
-                  ></input>
-                </div>
-
-                {/* Imagen del diseño */}
-                <div className="input-group mb-3">
-                  {imagenDisenio && (
-                    <img
-                      src={imagenDisenio}
-                      alt="Vista previa imagen del diseño"
-                      style={{ maxWidth: "200px", display: "block" }}
+                    <input
+                      type="text"
+                      id="nombreDisenio"
+                      className={`form-control ${
+                        errors.NombreDisenio ? "is-invalid" : ""
+                      }`}
+                      placeholder="Ingresa un nombre para el diseño"
+                      value={NombreDisenio}
+                      onChange={handleChangeNombreDisenio}
                     />
-                  )}
 
-                  <div className="text-dark mx-2">
-                    <p>Tamaño del diseño</p>
-
-                    <div id="sizesDesign"></div>
+                    {renderErrorMessage(errors.NombreDisenio)}
                   </div>
 
-                  <div className=" mx-1">
-                    <i className="tooltipSizesShirt fas fa-info-circle">
-                      <span className="tooltiptext">
-                        Según el tamaño elegido, se mostrará el ancho y largo
-                        que tendrá el diseño.
-                      </span>
-                    </i>
-                  </div>
-                </div>
+                  {/* Posicion del diseño */}
+                  <div className="form-group col-md-6 mb-4">
+                    <label htmlFor="posicionDiseño">Tamaño del diseño</label>
 
-                {/* Imagen de referencia */}
-                <div className="input-group mb-3">
-                  {ImagenReferencia && (
-                    <img
-                      src={ImagenReferencia}
-                      alt="Vista previa de la imagen"
-                      style={{ maxWidth: "200px", display: "block" }}
-                    />
-                  )}
-
-                  <div className="mx-2">
-                    <select
-                      name=""
+                    <input
+                      type="text"
+                      id="posicionDiseño"
                       className="form-control"
-                      id="selectSizes"
-                      defaultValue={""}
-                      onChange={insertTableMeasures}
-                    >
-                      <option value="" disabled>
-                        Guía de tallas
-                      </option>
-                      <option value="XXS">XXS</option>
-                      <option value="XS">XS</option>
-                      <option value="S">S</option>
-                      <option value="M">M</option>
-                      <option value="L">L</option>
-                      <option value="XL">XL</option>
-                      <option value="XXL">XXL</option>
-                    </select>
-
-                    <div id="tableSizesShirt" className="my-3 text-dark"></div>
+                      disabled
+                      placeholder="Posicion del diseño"
+                      defaultValue={TamanioImagen}
+                      // onChange={handleChangeTalla}
+                    ></input>
                   </div>
 
-                  <div className=" mx-2">
-                    <i className="tooltipSizesShirt fas fa-info-circle">
-                      <span className="tooltiptext">
-                        Según la opción, se mostrará el tamaño de cada camiseta
-                        (solo referencia, no es necesario elegir alguna).
-                      </span>
-                    </i>
+                  {/* Posicion del diseño */}
+                  <div className="form-group col-md-6 mb-5">
+                    <label htmlFor="posicionDiseño">Posicion del diseño</label>
+
+                    <input
+                      type="text"
+                      id="posicionDiseño"
+                      className="form-control"
+                      disabled
+                      placeholder="Posicion del diseño"
+                      defaultValue={PosicionImagen}
+                      // onChange={handleChangeTalla}
+                    ></input>
+                  </div>
+
+                  {/* Imagen del diseño */}
+                  <div className="input-group mb-3">
+                    {imagenDisenio && (
+                      <img
+                        src={imagenDisenio}
+                        alt="Vista previa imagen del diseño"
+                        style={{ maxWidth: "200px", display: "block" }}
+                      />
+                    )}
+
+                    <div className="text-dark mx-2">
+                      <p>Tamaño del diseño</p>
+
+                      <div id="sizesDesign"></div>
+                    </div>
+
+                    <div className=" mx-1">
+                      <i className="tooltipSizesShirt fas fa-info-circle">
+                        <span className="tooltiptext">
+                          Según el tamaño elegido, se mostrará el ancho y largo
+                          que tendrá el diseño.
+                        </span>
+                      </i>
+                    </div>
+                  </div>
+
+                  {/* Imagen de referencia */}
+                  <div className="input-group mb-3">
+                    {ImagenReferencia && (
+                      <img
+                        src={ImagenReferencia}
+                        alt="Vista previa de la imagen"
+                        style={{ maxWidth: "200px", display: "block" }}
+                      />
+                    )}
+
+                    <div className="mx-2">
+                      <select
+                        name=""
+                        className="form-control"
+                        id="selectSizes"
+                        defaultValue={""}
+                        onChange={insertTableMeasures}
+                      >
+                        <option value="" disabled>
+                          Guía de tallas
+                        </option>
+                        <option value="XXS">XXS</option>
+                        <option value="XS">XS</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                        <option value="XXL">XXL</option>
+                      </select>
+
+                      <div
+                        id="tableSizesShirt"
+                        className="my-3 text-dark"
+                      ></div>
+                    </div>
+
+                    <div className=" mx-2">
+                      <i className="tooltipSizesShirt fas fa-info-circle">
+                        <span className="tooltiptext">
+                          Según la opción, se mostrará el tamaño de cada
+                          camiseta (solo referencia, no es necesario elegir
+                          alguna).
+                        </span>
+                      </i>
+                    </div>
                   </div>
                 </div>
-              </div>
               )}
 
-               {/* Segunda vista del modal */}
+              {/* Segunda vista del modal */}
               {!isFirstView && (
                 <div className="form-row">
-
                   {/* Color del producto cliente*/}
                   <div className="form-group col-md-6">
                     <label htmlFor="idInsumo">Color de la camiseta</label>
@@ -1517,8 +1500,6 @@ export const Canvas = () => {
                 </div>
               )}
 
-
-
               <div className="modal-footer bg-white">
                 <div className="text-right">
                   <button
@@ -1531,14 +1512,19 @@ export const Canvas = () => {
                   </button>
 
                   {isFirstView ? (
-                  <button onClick={() => validar()} className="btn btn-success">
-                    <i className="fa-solid fa-floppy-disk"></i> Guardar
-                  </button>
-
-                  ):(
-                    <button onClick={() => crearProducto()} className="btn btn-primary">
-                    Finalizar
-                  </button>
+                    <button
+                      onClick={() => validar()}
+                      className="btn btn-success"
+                    >
+                      <i className="fa-solid fa-floppy-disk"></i> Guardar
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => crearProducto()}
+                      className="btn btn-primary"
+                    >
+                      Finalizar
+                    </button>
                   )}
                 </div>
               </div>
