@@ -132,7 +132,7 @@ export const Pedidos = () => {
 
   const getClientes = async () => {https://softshirt-1c3fad7d72e8.herokuapp.com
     try {
-      const respuesta = await axios.get("http://localhost:3000/api/clientes");
+      const respuesta = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/clientes");
       const clientesActivos = respuesta.data.filter(
         (cliente) => cliente.Estado === "Activo"
       );
@@ -150,7 +150,7 @@ export const Pedidos = () => {
   const getProductos = async () => {
     setLoading(true); // Mostrar el loadehttps://softshirt-1c3fad7d72e8.herokuapp.coma solicitud
     try {
-      const respuesta = await axios.get("http://localhost:3000/api/productos");
+      const respuesta = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/productos");
       const productosActivos = respuesta.data.filter(
         (producto) => producto.Estado === "Activo"
       );
@@ -168,7 +168,7 @@ export const Pedidos = () => {
   const getEstadosPedidos = async () => {
     try {
       const respuesta = await axios.get(
-        "http://localhost:3000/api/estadosPedidos"
+        "https://softshirt-1c3fad7d72e8.herokuapp.com/api/estadosPedidos"
       );
 
       setEstadosPedidos(respuesta.data);
@@ -193,7 +193,7 @@ export const Pedidos = () => {
     try {
       // https://softshirt-1c3fad7d72e8.herokuapp.com GET para obtener los detalles del pedido
       const respuesta = await axios.get(
-        `http://localhost:3000/api/pedidos/${idPedido}`
+        `https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos/${idPedido}`
       );
 
       // Obtener los detalles del pedido de la respuesta
@@ -443,7 +443,7 @@ export const Pedidos = () => {
         );
 https://softshirt-1c3fad7d72e8.herokuapp.com
         await axios.put(
-          `http://localhost:3000/api/pedidos/comprobante/${idPed}`,
+          `https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos/comprobante/${idPed}`,
           {
             idImagenComprobante: pedidoIdImagenComprobante,
             imagenComprobante: url,
@@ -457,7 +457,7 @@ https://softshirt-1c3fad7d72e8.herokuapp.com
         );
 https://softshirt-1c3fad7d72e8.herokuapp.com
         await axios.put(
-          `http://localhost:3000/api/pedidos/comprobante/${idPed}`,
+          `https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos/comprobante/${idPed}`,
           {
             idImagenComprobante: idImagenComprobante,
             imagenComprobante: url,
@@ -611,7 +611,7 @@ https://softshirt-1c3fad7d72e8.herokuapp.com
 
           // return;https://softshirt-1c3fad7d72e8.herokuapp.com
 
-          await axios.put(`http://localhost:3000/api/pedidos/${idPed}`, {
+          await axios.put(`https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos/${idPed}`, {
             Estado: idEstPed,
           });
 
@@ -644,7 +644,7 @@ https://softshirt-1c3fad7d72e8.herokuapp.com
 
       // return;https://softshirt-1c3fad7d72e8.herokuapp.com
       // Cambiar el estado del pedido a "Cancelado"
-      await axios.put(`http://localhost:3000/api/pedidos/${idPedido}`, {
+      await axios.put(`https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos/${idPedido}`, {
         Estado: 4,
       });
 
@@ -683,7 +683,7 @@ https://softshirt-1c3fad7d72e8.herokuapp.com
           // console.log(idEstadoPedido);
 // https://softshirt-1c3fad7d72e8.herokuapp.com
           const respuesta = await axios.put(
-            `http://localhost:3000/api/pedidos/${idPedido}`,
+            `https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos/${idPedido}`,
             {
               Estado: 2,
             }
@@ -761,7 +761,7 @@ https://softshirt-1c3fad7d72e8.herokuapp.com
           console.log(correoClientePedido);
 // https://softshirt-1c3fad7d72e8.herokuapp.com
           const respuesta = await axios.put(
-            `http://localhost:3000/api/pedidos/comprobante/intentos/${idPedido}`,
+            `https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos/comprobante/intentos/${idPedido}`,
             {
               intentos: intentosActuales,
               nombreCliente: nombreClientePedido,

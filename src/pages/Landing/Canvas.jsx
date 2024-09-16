@@ -455,7 +455,7 @@ export const Canvas = () => {
   // Fin diseñador
 
   // Inicio creacion diseño
-  const url = "http://localhost:3000/api/disenios";
+  const url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/disenios";
   const { auth } = useAuth();
   const [IdDisenio, setIdIdDisenio] = useState("");
   const [NombreDisenio, setNombreDisenio] = useState("");
@@ -497,7 +497,7 @@ export const Canvas = () => {
   // const[ulrReference,setulrReference] = useState("");
 
   const getProductosAdmin = async () => {
-    const respuesta = await axios.get("http://localhost:3000/api/productos");
+    const respuesta = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/productos");
 
     // productosTotales = respuesta.data;
 
@@ -507,7 +507,7 @@ export const Canvas = () => {
 
   // Obtener los insumos que seran usados por el cliente, estos estan activos y con cantidad
   const getInsumos = async () => {
-    const respuesta = await axios.get("http://localhost:3000/api/insumos");
+    const respuesta = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/insumos");
     const InsumosActivas = respuesta.data.filter(
       (insumo) => insumo.Estado == "Activo" && insumo.Cantidad >= 3
     );
@@ -520,7 +520,7 @@ export const Canvas = () => {
   };
 
   const getTallas = async () => {
-    const respuesta = await axios.get("http://localhost:3000/api/tallas");
+    const respuesta = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/tallas");
     const TallasActivas = respuesta.data.filter(
       (talla) => talla.Estado === "Activo"
     );
@@ -530,7 +530,7 @@ export const Canvas = () => {
   };
 
   const getColores = async () => {
-    const respuesta = await axios.get("http://localhost:3000/api/colores");
+    const respuesta = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/colores");
     const ColoresActivas = respuesta.data.filter(
       (color) => color.Estado == "Activo"
     );
@@ -549,7 +549,7 @@ export const Canvas = () => {
   // }
 
   // const getDisenios = async () => {
-  //   const respuesta = await axios.get("http://localhost:3000/api/disenios");
+  //   const respuesta = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/disenios");
   //   const DiseniosActivos = respuesta.data.filter(
   //     (disenio) => disenio.Estado === "Activo"
   //   );
@@ -896,7 +896,7 @@ export const Canvas = () => {
         // return;
 
         const respuesta = await axios.post(
-          "http://localhost:3000/api/productos",
+          "https://softshirt-1c3fad7d72e8.herokuapp.com/api/productos",
           parametrosProductoCliente
         );
 
