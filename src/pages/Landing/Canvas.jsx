@@ -583,7 +583,7 @@ export const Canvas = () => {
     const numeros = "0123456789";
 
     // Generar tres letras aleatorias
-    let parteLetras = "";https://softshirt-1c3fad7d72e8.herokuapp.com
+    let parteLetras = "";
     for (let i = 0; i < 3; i++) {
       parteLetras += letras.charAt(Math.floor(Math.random() * letras.length));
     }
@@ -593,7 +593,7 @@ export const Canvas = () => {
     for (let i = 0; i < 3; i++) {
       parteNumeros += numeros.charAt(
         Math.floor(Math.random() * numeros.length)
-      );https://softshirt-1c3fad7d72e8.herokuapp.com
+      );
     }
 
     // Combinar las partes
@@ -606,7 +606,7 @@ export const Canvas = () => {
   };
 
   // Función principal para generar una referencia única
-  const generarReferenciaUnica = (produhttps://softshirt-1c3fad7d72e8.herokuapp.com
+  const generarReferenciaUnica = (productos)=> {
     console.log("entro REfUni");
 
     let nuevaReferencia;
@@ -616,7 +616,7 @@ export const Canvas = () => {
 
     return nuevaReferencia;
   };
-https://softshirt-1c3fad7d72e8.herokuapp.com
+// https://softshirt-1c3fad7d72e8.herokuapp.com
   // Funcion para generar el valor de venta del producto
   const generarValorVentaCliente = (IdInsumoCliente) => {
     console.log("entro valVEntaCli");
@@ -635,7 +635,7 @@ https://softshirt-1c3fad7d72e8.herokuapp.com
     console.log(valorVentaProductoCliente);
 
     return Math.round(valorVentaProductoCliente);
-  };https://softshirt-1c3fad7d72e8.herokuapp.com
+  };
 
   // Funcion para generar el valor de venta del producto
   const generarValorVentaDisenio = (tamanioImagenDisenio) => {
@@ -982,7 +982,7 @@ https://softshirt-1c3fad7d72e8.herokuapp.com
           setShowImageSize(false);
           console.log("image size select false");
         }
-      }, 30https://softshirt-1c3fad7d72e8.herokuapp.com
+      }, 30)
     }
     // else{
     //   console.log("else vacio show size image");

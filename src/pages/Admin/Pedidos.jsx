@@ -166,7 +166,7 @@ export const Pedidos = () => {
   };
 
   const getEstadosPedidos = async () => {
-    try {https://softshirt-1c3fad7d72e8.herokuapp.com
+    try {
       const respuesta = await axios.get(
         "http://localhost:3000/api/estadosPedidos"
       );
@@ -681,7 +681,7 @@ https://softshirt-1c3fad7d72e8.herokuapp.com
         try {
           console.log(idPedido);
           // console.log(idEstadoPedido);
-https://softshirt-1c3fad7d72e8.herokuapp.com
+// https://softshirt-1c3fad7d72e8.herokuapp.com
           const respuesta = await axios.put(
             `http://localhost:3000/api/pedidos/${idPedido}`,
             {
@@ -759,7 +759,7 @@ https://softshirt-1c3fad7d72e8.herokuapp.com
           console.log(intentosActuales);
           console.log(nombreClientePedido);
           console.log(correoClientePedido);
-https://softshirt-1c3fad7d72e8.herokuapp.com
+// https://softshirt-1c3fad7d72e8.herokuapp.com
           const respuesta = await axios.put(
             `http://localhost:3000/api/pedidos/comprobante/intentos/${idPedido}`,
             {

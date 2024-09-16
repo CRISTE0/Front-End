@@ -1104,7 +1104,7 @@ export const Catalogo = () => {
     } catch (error) {
       console.error("Error general:", error);
       show_alerta({
-        mhttps://softshirt-1c3fad7d72e8.herokuapp.comndo el estado del producto",
+        message:"//softshirt-1c3fad7d72e8.herokuapp.comndo el estado del producto",
         type: "error",
       });
     }
