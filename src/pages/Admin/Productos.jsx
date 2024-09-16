@@ -363,7 +363,7 @@ export const Catalogo = () => {
   const getPedidosByProducto = async (idProducto) => {
     try {
       let productoEncontrado = [];
-      const response = await axios.get("http://localhost:3000/api/pedidos");
+      const response = await axios.get("https://softshirt-1c3fad7d72e8.herokuapp.com/api/pedidos");
       // Verifica si el color está asociado a algún insumo
 
       response.data.forEach((pedido) => {
@@ -1125,7 +1125,7 @@ export const Catalogo = () => {
   const handleDetalleProducto = async (idProducto) => {
     try {
       const respuestaProducto = await axios.get(
-        `http://localhost:3000/api/productos/${idProducto}`
+        `https://softshirt-1c3fad7d72e8.herokuapp.com/api/productos/${idProducto}`
       );
 
       const producto = respuestaProducto.data;
