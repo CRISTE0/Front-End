@@ -230,25 +230,46 @@ export const Catalogo = () => {
   const AgregarProductoCarrito = (ProductoS) => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    // Si el producto no existe, agrégalo con una cantidad inicial de 1
-    cart.push({ IdProd: ProductoS.IdProducto, CantidadSeleccionada: 1 });
-    localStorage.setItem("cart", JSON.stringify(cart));
 
-    show_alerta({
-      message: "Producto agregado al carrito correctamente",
-      type: "success",
-    });
-    console.log(JSON.parse(localStorage.getItem("cart")));
-
-    getProductosAdmin();
-  };
-
-  const validarProductoClienteCarrito = (idProductoCliente) => {
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    console.log(ProductoS);
+    
 
     const productoClienteEncontrado = cart.find(
-      (item) => item.IdProd == idProductoCliente
+      (item) => item.IdProd == ProductoS.IdProducto
     );
+
+    if (productoClienteEncontrado) {
+      show_alerta({message:"El producto ya esta en el carrito",type:"warning"})
+      return;
+    }else{
+  
+      // Si el producto no existe, agrégalo con una cantidad inicial de 1
+      cart.push({ IdProd: ProductoS.IdProducto, IdIns:ProductoS.ProductoInsumos[0].IdInsumo, CantidadSeleccionada: 1 });
+      localStorage.setItem("cart", JSON.stringify(cart));
+  
+      show_alerta({
+        message: "Producto agregado al carrito correctamente",
+        type: "success",
+      });
+      console.log(JSON.parse(localStorage.getItem("cart")));
+  
+      getProductosAdmin();
+
+    }
+  };
+
+  const validarProductoClienteCarrito = (idProductoInsumoCliente) => {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    console.log(`lo que se manda ${idProductoInsumoCliente}`);
+    
+    // return
+    const productoClienteEncontrado = cart.find(
+      (item) => item.IdIns == idProductoInsumoCliente
+    );
+
+    console.log(productoClienteEncontrado);
+    
 
     return !productoClienteEncontrado;
   };
@@ -2249,8 +2270,6 @@ export const Catalogo = () => {
                     <tr>
                       <th>Referencia</th>
                       <th>Diseño</th>
-                      <th>Insumo</th>
-                      <th>Cantidad</th>
                       <th>Valor de la Venta</th>
                       {/* <th>Publicación</th>
                   <th>Estado</th> */}
@@ -2262,16 +2281,13 @@ export const Catalogo = () => {
                       <tr key={producto.IdProducto}>
                         <td>{producto.Referencia}</td>
                         <td>{convertDisenioIdToName(producto.IdDisenio)}</td>
-                        <td>{convertInsumoIdToName(producto.IdInsumo)}</td>
-                        <td>{producto.Cantidad}</td>
                         <td>{formatCurrency(producto.ValorVenta)}</td>
 
                         <td>
                           <div className="d-flex">
-                            {validarProductoClienteCarrito(
-                              producto.IdProducto
-                            ) &&
-                              producto.Cantidad != 0 && (
+                            {validarProductoClienteCarrito(producto.IdProducto) &&
+
+                              producto.ProductoInsumos[0].CantidadProductoInsumo != 0 && (
                                 <button
                                   className="btn btn-success btn-sm mr-2"
                                   onClick={() =>
@@ -2288,7 +2304,7 @@ export const Catalogo = () => {
                               onClick={() =>
                                 handleDetalleProducto(producto.IdProducto)
                               }
-                              disabled={producto.Estado != "Activo"}
+                              
                               data-toggle="modal"
                               data-target="#modalDetalleProducto"
                               title="Detalle"

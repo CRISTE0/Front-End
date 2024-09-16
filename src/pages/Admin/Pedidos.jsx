@@ -45,6 +45,7 @@ export const Pedidos = () => {
   const [Productos, setProductos] = useState([]);
   const [showDetalleField, setShowDetalleField] = useState(false);
   const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
+  const [ImagenDisenioPedido, setImagenDisenioPedido] = useState(null);
   const [operation, setOperation] = useState(1);
   const [title, setTitle] = useState("");
   const [errors, setErrors] = useState({});
@@ -54,6 +55,7 @@ export const Pedidos = () => {
   const itemsPerPage = 4;
   const [loading, setLoading] = useState(true);
 
+  // let ImagenDisenioPedido;
   let pedidosTotales;
 
   useEffect(() => {
@@ -1074,6 +1076,12 @@ export const Pedidos = () => {
                                           <td>{detalle.Producto.Referencia}</td>
                                           <td>
                                           <button
+                                            onClick={() =>{
+                                              setImagenDisenioPedido(detalle.Producto.Disenio.ImagenReferencia);
+
+                                              console.log(ImagenDisenioPedido);
+                                              
+                                            }}
                                             className={"btn btn-info btn-sm"}
                                             data-toggle="modal"
                                             data-target="#modalVerdisenio"
@@ -1468,9 +1476,26 @@ export const Pedidos = () => {
                 <div className="form-group col-md-12">
 
                   {pedidoSeleccionado && (
-
                     <>
-                    hola yooooooooooo
+
+                      <div className="container">
+                        <label style={{display:"block"}}>Imagen de referencia</label>
+
+                        <div className="d-flex justify-content-center py-4 mx-3">
+                          <img
+                            src={ImagenDisenioPedido}
+                            alt="Vista previa imagen del diseño"
+                            style={{
+                              width: "170px",
+                              height: "150px",
+                              display: "block",
+                              border: "1px solid black",
+                            }}
+                          />
+                        </div>
+                      </div>
+
+
                     </>
                   )}
                 </div>

@@ -87,92 +87,6 @@ export const Canvas = () => {
     };
     // Fin dibujar elementos
 
-    // const resizeBufferCanvas = function () {
-    //   bufferCanvas.width = canvas.width;
-    //   bufferCanvas.height = canvas.height;
-    // };
-
-    // window.addEventListener("resize", resizeBufferCanvas);
-
-    // const addTextButton = addTextButtonRef.current;
-    // addTextButton.addEventListener("click", addText);
-
-    // const getEventCoordinates = function (event) {
-    //   let x, y;
-    //   if (event.pageX || event.pageY) {
-    //     x = event.pageX;
-    //     y = event.pageY;
-    //   } else {
-    //     x = event.touches[0].clientX;
-    //     y = event.touches[0].clientY;
-    //   }
-    //   x -= canvas.offsetLeft;
-    //   y -= canvas.offsetTop;
-    //   return { x: x, y: y };
-    //   };
-
-    //   let selectedElement = null;
-
-    // const startDrag = function (event) {
-    //   const { x, y } = getEventCoordinates(event);
-    //   selectedElement = null;
-
-    //   let cursorStyle = "default";
-
-    //   for (let i = elements.length - 1; i >= 0; i--) {
-    //     const element = elements[i];
-    //     if (element.type === "text") {
-    //       const textWidth = bufferContext.measureText(element.text).width;
-    //       const textHeight = parseInt(element.font);
-    //       if (
-    //         x >= element.x &&
-    //         x <= element.x + textWidth &&
-    //         y >= element.y - textHeight &&
-    //         y <= element.y
-    //         ) {
-    //           selectedElement = element;
-    //           cursorStyle = "move";
-    //           break;
-    //           }
-    //           } else if (element.type === "image") {
-    //             if (
-    //               x >= element.x &&
-    //               x <= element.x + element.width &&
-    //               y >= element.y &&
-    //               y <= element.y + element.height
-    //       ) {
-    //         selectedElement = element;
-    //         cursorStyle = "move";
-    //         break;
-    //       }
-    //     }
-    //   }
-
-    //   canvas.style.cursor = cursorStyle;
-    // };
-
-    // const drag = function (event) {
-    //   if (selectedElement) {
-    //     const { x, y } = getEventCoordinates(event);
-    //     selectedElement.x = x;
-    //     selectedElement.y = y;
-    //     drawElements();
-    //   }
-    // };
-
-    // const endDrag = function () {
-    //   selectedElement = null;
-    //   canvas.style.cursor = "default";
-    //   };
-
-    // canvas.addEventListener("mousedown", startDrag);
-    // // canvas.addEventListener("touchstart", startDrag);
-    // canvas.addEventListener("mousemove", drag);
-    // // canvas.addEventListener("touchmove", drag);
-    // canvas.addEventListener("mouseup", endDrag);
-    // // canvas.addEventListener("touchend", endDrag);
-
-    //   // drawElementsVisible();
 
     const resizeBufferCanvas = () => {
       bufferCanvas.width = canvas.width;
@@ -1010,6 +924,9 @@ export const Canvas = () => {
           localStorage.setItem("cart", JSON.stringify(cart));
 
           console.log(JSON.parse(localStorage.getItem("cart")));
+
+          $(".close").click();
+
 
           navigate("/carrito");
         }
