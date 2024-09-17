@@ -40,6 +40,8 @@ export const Catalogo = () => {
   const [ColoresCliente, setColoresCliente] = useState([]);
 
   const [Referencia, setReferencia] = useState("");
+  const [IsSubmitting, setIsSubmitting] = useState(null);
+  
   const [Cantidad, setCantidad] = useState("");
   const [CantidadAnterior, setCantidadAnterior] = useState("");
   const [ValorVenta, setValorVenta] = useState("");
@@ -1104,7 +1106,7 @@ export const Catalogo = () => {
     } catch (error) {
       console.error("Error general:", error);
       show_alerta({
-        message:"//softshirt-1c3fad7d72e8.herokuapp.comndo el estado del producto",
+        message:"Error cambiando el estado del producto",
         type: "error",
       });
     }
@@ -2189,7 +2191,7 @@ export const Catalogo = () => {
                     {currentproductosAdmin.map((producto) => (
                       <tr key={producto.IdProducto}>
                         <td>{producto.Referencia}</td>
-                        <td>{convertDisenioIdToName(producto.IdDisenio)}</td>
+                        <td>{producto.Disenio.NombreDisenio}</td>
                         <td>{formatCurrency(producto.ValorVenta)}</td>
                         <td>
                           <label
@@ -2280,7 +2282,7 @@ export const Catalogo = () => {
                     {currentproductosAdmin.map((producto) => (
                       <tr key={producto.IdProducto}>
                         <td>{producto.Referencia}</td>
-                        <td>{convertDisenioIdToName(producto.IdDisenio)}</td>
+                        <td>{producto.Disenio.NombreDisenio}</td>
                         <td>{formatCurrency(producto.ValorVenta)}</td>
 
                         <td>

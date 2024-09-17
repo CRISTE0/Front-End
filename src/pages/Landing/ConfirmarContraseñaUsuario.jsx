@@ -209,22 +209,10 @@ export const ConfirmarContraseniaUsuario = () => {
       show_alerta({
         message: msj, type: "success"
       });
-
+      
       navigate("/admin/login");
-
-      // const token = respuesta.data.token;
-      // setToken(token);
-
-      // const decoded = jwtDecode(token);
-      // login(decoded, token);
-
-      // navigate("/");
-
-      // console.log(decoded);
-      // console.log(decoded.idCliente);
-      // console.log(decoded.nombre);
-
-      // show_alerta("Cliente creado con éxito", "success", { timer: 2000 });
+      Cookies.remove("RecuperarPass");
+      
     } catch (error) {
       if (error.response) {
         show_alerta({

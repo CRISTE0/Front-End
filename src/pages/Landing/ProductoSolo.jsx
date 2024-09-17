@@ -370,17 +370,13 @@ export const ProductoSolo = () => {
                   </p>
 
                   <div>
+                    {auth.idCliente &&(
+
                     <div className="row">
                       {/* Color del producto */}
 
                       {/* Talla del producto */}
                       <div className="col-12 pb-3">
-                        {/* <ul className="list-inline pb-1">
-                          <li className="list-inline-item">Talla:</li>
-                          <li className="font-weight-bold text-dark">
-                            {TallaProducto.Talla}{" "}
-                          </li>
-                        </ul> */}
 
                         <h6>Selecciona una talla:</h6>
                         {TallasDisponibles.map((talla, index) => (
@@ -396,19 +392,9 @@ export const ProductoSolo = () => {
                           {talla}
                         </button>
                       ))}
-
-
                       </div>
 
                       <div className="col-12 pb-5">
-                        {/* <ul className="list-inline ">
-                          <li className="list-inline-item">Color:</li>
-
-                          <li className="font-weight-bold text-dark">
-                            {ColorProducto.Color}
-                          </li>
-                        </ul> */}
-
                         <h6>Selecciona un color:</h6>
                         {ColoresDisponibles.map((color, index) => (
                           <button
@@ -424,81 +410,11 @@ export const ProductoSolo = () => {
                             {color}
                           </button>
                         ))}
-
                       </div>
-
-                      {/* Cantidad del producto */}
-                      {/* <div className="col-12">
-                        <ul className="list-inline pb-3">
-                          {Producto.CantidadSeleccionada > 0 && (
-                            <li className="list-inline-item text-right">
-                              Cantidad :
-                            </li>
-                          )}
-
-                          <div className="d-flex flex-row align-items-center mt-2">
-
-                            {Producto.CantidadSeleccionada == 1 && (
-                              <button
-                                className="mr-3"
-                                onClick={() =>
-                                  disminuirCantidad(
-                                    Producto.IdProducto,
-                                    Producto.Disenio.NombreDisenio
-                                  )
-                                }
-                                style={{
-                                  width: "30px",
-                                  border: "none",
-                                  background: "transparent",
-                                }}
-                              >
-                                <i className="fas fa-trash-alt"></i>
-                              </button>
-                            )}
-
-                            {Producto.CantidadSeleccionada > 1 && (
-                              <button
-                                className="mr-3"
-                                onClick={() =>
-                                  disminuirCantidad(Producto.IdProducto)
-                                }
-                                style={{
-                                  width: "30px",
-                                  color: "black",
-                                  border: "none",
-                                  background: "transparent",
-                                }}
-                              >
-                                <i className="fas fa-minus-circle"></i>
-                              </button>
-                            )}
-
-                            {Producto.CantidadSeleccionada > 0 && (
-                              <>
-                                <div style={{ width: "40px" }}>
-                                  <h5 className="mb-0">
-                                    {Producto.CantidadSeleccionada}
-                                  </h5>
-                                </div>
-
-
-                                <button
-                                  className=""
-                                  onClick={() => incrementarCantidad()}
-                                  style={{
-                                    border: "none",
-                                    background: "transparent",
-                                  }}
-                                >
-                                  <i className="fas fa-plus-circle"></i>
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </ul>
-                      </div> */}
+                      
                     </div>
+                    )}
+
 
                     {/* Detalles de la camiseta */}
                     <section>
@@ -634,18 +550,9 @@ export const ProductoSolo = () => {
                     </section>
 
                     <div className="d-flex justify-content-around m-4">
-                      {/* <div className="">
-                        <button
-                          className="btn btn-success btn-md"
-                          disabled={!TallaSeleccionada || !ColorSeleccionado}
+                      
 
-                          onClick={() => botonComprarAhora()}
-                        >
-                          Comprar ahora
-                        </button>
-                      </div> */}
-
-                      {/* {Producto.CantidadSeleccionada == 0 && ( */}
+                      {auth.idCliente && (
                         <div className="">
                           <button
                             className="btn btn-success btn-md"
@@ -658,7 +565,7 @@ export const ProductoSolo = () => {
                             Agrega al carrito
                           </button>
                         </div>
-                       {/* )} */}
+                      )} 
                     </div>
                   </div>
                 </div>

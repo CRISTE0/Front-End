@@ -205,19 +205,11 @@ export const ConfirmarContrasenia = () => {
         message:msj, type: "success"
       });
 
-      // const token = respuesta.data.token;
-      // setToken(token);
+      navigate("/login");
+      Cookies.remove("RecuperarPass");
 
-      // const decoded = jwtDecode(token);
-      // login(decoded, token);
 
-      // navigate("/");
 
-      // console.log(decoded);
-      // console.log(decoded.idCliente);
-      // console.log(decoded.nombre);
-
-      // show_alerta("Cliente creado con éxito", "success", { timer: 2000 });
     } catch (error) {
       if (error.response) {
         show_alerta({
