@@ -8,8 +8,8 @@ const PrivateRoute = ({ requiredPermissions = [] }) => {
 
   // Si el usaurio no esta logueado lo redirigira al login del admin o del cliente
   if (!auth.token) {
-    // const loginPath = location.pathname.startsWith('/admin') ? '/admin/Login' : '/Login';
-    return <Navigate to={"/login"} state={{ from: location }} replace />;
+    const loginPath = location.pathname.startsWith('/admin') ? '/admin/Login' : '/Login';
+    return <Navigate to={loginPath} state={{ from: location }} replace />;
   }
 
   if (auth.idCliente && requiredPermissions.length > 0 && 

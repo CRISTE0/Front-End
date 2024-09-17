@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { AdminFooter } from "./AdminFooter";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SideBar } from "./SideBar";
 import { useAuth } from "../../context/AuthProvider";
 import { useLocation } from "react-router-dom";
 
 export const AdminHeader = ({ children }) => {
   const location = useLocation();
-
+  const navigate = useNavigate();
   const [isActive, setIsActive] = useState(false);
   // const [TituloDinamico, setTituloDinamico] = useState(null);
 
@@ -158,10 +158,19 @@ export const AdminHeader = ({ children }) => {
                       )}
 
                       <div className="dropdown-divider"></div>
-                      <Link className="dropdown-item" onClick={logout}>
-                        <i className="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                        Cerrar Sesión
-                      </Link>
+                      {auth.idUsuario ? (
+                        <Link className="dropdown-item"  to={"/admin/login"} onClick={logout}>
+                          <i className="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                          Cerrar Sesión
+                        </Link>
+                      ):(  
+                        <Link className="dropdown-item"  to={"/login"} onClick={logout}>
+                          <i className="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                          Cerrar Sesión
+                        </Link>
+  
+                      )}
+                      
                     </div>
                   </li>
                 </ul>
