@@ -363,7 +363,7 @@ export const Configuracion = () => {
               </button>
             </div>
             <div className="modal-body">
-              <form>
+              <div>
                 <div className="form-group">
                   <input
                     type="hidden"
@@ -372,9 +372,9 @@ export const Configuracion = () => {
                     onChange={(e) => setIdRol(e.target.value)}
                   />
                 </div>
-                <form>
+                <div>
                   <div className="form-group">
-                    <label htmlFor="nombre">Nombre del Rol:</label>
+                    <label htmlFor="nombre">Nombre del rol</label>
                     <input
                       type="text"
                       className={`form-control ${
@@ -389,10 +389,10 @@ export const Configuracion = () => {
                       <div className="invalid-feedback">{errors.nombreRol}</div>
                     )}
                   </div>
-                </form>
+                </div>
 
                 <div className="form-group">
-                  <label>Permisos:</label>
+                  <label>Permisos</label>
                   <div className="row">
                     {permisosFiltrados.map((permiso) => (
                       <div
@@ -423,7 +423,7 @@ export const Configuracion = () => {
                     ))}
                   </div>
                 </div>
-              </form>
+              </div>
             </div>
             <div className="modal-footer">
               <button
@@ -479,7 +479,7 @@ export const Configuracion = () => {
               {detailRol && (
                 <form>
                   <div className="form-group">
-                    <label htmlFor="nombre">Nombre del rol:</label>
+                    <label htmlFor="nombre">Nombre del rol</label>
                     <input
                       type="text"
                       className="form-control"
@@ -489,7 +489,7 @@ export const Configuracion = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Permisos:</label>
+                    <label>Permisos</label>
                     <div className="d-flex flex-wrap">
                       {detailRol.Permisos.map((permiso) => (
                         <div key={permiso.IdPermiso} className="mr-3 mb-2">

@@ -363,7 +363,7 @@ export const ActualizarDatos = () => {
                     {/* Tipo Documento */}
                     <div className="mb-3">
                       <label htmlFor="tipoDocumento" className="form-label">
-                        Tipo Documento
+                        Tipo de documento
                       </label>
                       <select
                         className="form-control"
@@ -373,7 +373,7 @@ export const ActualizarDatos = () => {
                         onChange={(e) => handleChangeTipoDocumento(e)}
                         required
                       >
-                        <option value="">
+                        <option disabled value="">
                           Seleccione un tipo de documento
                         </option>
                         <option value="CC">Cédula</option>
@@ -384,7 +384,7 @@ export const ActualizarDatos = () => {
                     {/* Número de Documento */}
                     <div className="mb-3">
                       <label htmlFor="nroDocumento" className="form-label">
-                        Número de Documento
+                        Número de documento
                       </label>
                       <input
                         type="text"
@@ -404,7 +404,7 @@ export const ActualizarDatos = () => {
                     {/* Nombre y Apellido */}
                     <div className="mb-3">
                       <label htmlFor="nombreApellido" className="form-label">
-                        Nombre y Apellido
+                        Nombre y apellido
                       </label>
                       <input
                         type="text"
@@ -424,7 +424,7 @@ export const ActualizarDatos = () => {
                     {/* Nombre de Usuario */}
                     <div className="mb-4">
                       <label htmlFor="nombreUsuario" className="form-label">
-                        Nombre de Usuario
+                        Nombre de usuario
                       </label>
                       <input
                         type="text"
@@ -487,7 +487,7 @@ export const ActualizarDatos = () => {
                     {/* Correo Electrónico */}
                     <div className="mb-3">
                       <label htmlFor="correo" className="form-label">
-                        Correo Electrónico
+                        Correo electrónico
                       </label>
                       <input
                         type="text"

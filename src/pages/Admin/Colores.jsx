@@ -365,7 +365,7 @@ export const Colores = () => {
             <div className="modal-body">
               <input type="hidden" id="Color"></input>
               <div className="form-group">
-                <label htmlFor="color">Color:</label>
+                <label htmlFor="color">Color</label>
                 <input
                   type="text"
                   className={`form-control ${
@@ -380,7 +380,7 @@ export const Colores = () => {
                 />
                 {renderErrorMessage(errors.colores)}
               </div>
-              <label>Selecciona la referencia del color:</label>
+              <label>Selecciona la referencia del color</label>
               <div className="input-group mb-3 d-flex justify-content-center">
                 <ChromePicker
                   color={Referencia}

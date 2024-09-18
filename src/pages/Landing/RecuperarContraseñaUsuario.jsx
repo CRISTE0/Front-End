@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import axios from "axios";
@@ -7,6 +7,8 @@ import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const RecuperarContraseñaUsuario = () => {
   const [Correo, setCorreo] = useState("");
+  const navigate = useNavigate();
+
   const urlRecuperar =
     "https://softshirt-1c3fad7d72e8.herokuapp.com/api/restablecerContraseniaUsuario";
   const [errors, setErrors] = useState({
@@ -87,7 +89,15 @@ export const RecuperarContraseñaUsuario = () => {
         { Correo },
         { withCredentials: true }
       );
+      
+
       const msj = respuesta.data.message;
+      const token= respuesta.data.token;
+
+      
+
+      localStorage.setItem('RecuperarPass', token); 
+      navigate("/");
       show_alerta({
         message: msj,
         type: "success",
@@ -121,13 +131,13 @@ export const RecuperarContraseñaUsuario = () => {
       >
         <div className="row w-100">
           <div className="col-12 col-md-6 mx-auto">
-            <div className="p-4 bg-white rounded shadow">
+            <div className="p-5 bg-white rounded shadow">
               <div className="col-12 text-center">
-                <h2 className="fw-bold my-5">Recuperar Contraseña</h2>
+                <h2 className="fw-bold mb-5">Recuperar contraseña</h2>
               </div>
               <div className="mb-3 text-center">
-                <label htmlFor="correo" className="form-label">
-                  Correo del Usuario
+                <label htmlFor="Correo" className="form-label">
+                  Correo del usuario
                 </label>
                 <div className="col-12">
                   <input
@@ -136,7 +146,7 @@ export const RecuperarContraseñaUsuario = () => {
                       errors.correo ? "is-invalid" : ""
                     }`}
                     id="Correo"
-                    placeholder="Correo del Usuario"
+                    placeholder="Correo del usuario"
                     onChange={handleChangeCorreo}
                   />
                   {renderErrorMessage(errors.correo)}
@@ -149,8 +159,12 @@ export const RecuperarContraseñaUsuario = () => {
                     className="btn btn-primary  my-3"
                     onClick={validarCorreo}
                   >
-                    Enviar Email
+                    Enviar email
                   </button>
+
+                  <div className="my-2 text-center">
+                    ¿Tienes cuenta? <Link to="/admin/Login">Inicio de sesión</Link>
+                  </div>
                 </div>
               </div>
             </div>

@@ -12,14 +12,19 @@ import Loader from "../../components/Loader/loader";
 
 export const Compras = () => {
   const url = "https://softshirt-1c3fad7d72e8.herokuapp.com/api/compras";
+
+  // Obtener la fecha actual formateada en 'YYYY-MM-DD'
+  const obtenerFechaActual = () => {
+    const currentDate = new Date();
+    return currentDate.toISOString().split("T")[0]; // Formato 'YYYY-MM-DD'
+  };
+  
   const [Compras, setCompras] = useState([]);
   const [IdCompra, setIdCompra] = useState("");
   const [proveedores, setProveedores] = useState([]);
   const [IdProveedor, setIdProveedor] = useState("");
-  const [Fecha, setFecha] = useState(() => {
-    const currentDate = new Date();
-    return currentDate.toISOString().split("T")[0];
-  });
+  const [Fecha, setFecha] = useState(obtenerFechaActual()); 
+
   const [Total, setTotal] = useState("");
   const [Detalles, setDetalles] = useState([]);
   const [Insumos, setInsumos] = useState([]);
@@ -44,20 +49,20 @@ export const Compras = () => {
     getProveedores();
   }, []);
 
-  const handleFechaInicioChange = (e) => {
-    const selectedFechaInicio = e.target.value;
-    setFechaInicio(selectedFechaInicio);
-    // Habilitar fecha final si se ha seleccionado una fecha de inicio
-    setIsFechaFinalDisabled(!selectedFechaInicio);
-    // Limpiar la fecha final si la fecha de inicio se borra
-    if (!selectedFechaInicio) {
-      setFechaFinal("");
-    }
-  };
+  // const handleFechaInicioChange = (e) => {
+  //   const selectedFechaInicio = e.target.value;
+  //   setFechaInicio(selectedFechaInicio);
+  //   // Habilitar fecha final si se ha seleccionado una fecha de inicio
+  //   setIsFechaFinalDisabled(!selectedFechaInicio);
+  //   // Limpiar la fecha final si la fecha de inicio se borra
+  //   if (!selectedFechaInicio) {
+  //     setFechaFinal("");
+  //   }
+  // };
 
-  const handleFechaFinalChange = (e) => {
-    setFechaFinal(e.target.value);
-  };
+  // const handleFechaFinalChange = (e) => {
+  //   setFechaFinal(e.target.value);
+  // };
 
   const handleGenerateReport = () => {
     const fechaInicio = document.getElementById("fechaInicio").value;
@@ -378,7 +383,7 @@ export const Compras = () => {
   const openModal = () => {
     setIdCompra(""); // Resetear el IdCompra al abrir el modal para indicar una nueva compra
     setIdProveedor("");
-    setFecha("");
+    // setFecha("");
     setTotal("");
     setDetalles([]);
     setOperation(1); // Indicar que es una operación de creación
@@ -391,11 +396,11 @@ export const Compras = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === "IdProveedor") {
+    if (name == "IdProveedor") {
       setIdProveedor(value);
-    } else if (name === "Fecha") {
+    } else if (name == "Fecha") {
       handleFechaChange(value);
-    } else if (name === "Total") {
+    } else if (name == "Total") {
       setTotal(value);
     }
   };
@@ -815,6 +820,12 @@ export const Compras = () => {
     });
   };
 
+
+  const formatearFecha = (fechaISO) => {
+    const [year, month, day] = fechaISO.split("-");
+    return `${day}/${month}/${year}`;
+  };
+
   const handleSearchTermChange = (newSearchTerm) => {
     setSearchTerm(newSearchTerm);
     setCurrentPage(1); // Reset current page when changing the search term
@@ -872,7 +883,7 @@ export const Compras = () => {
               <div className="row">
                 <div className="col-md-6">
                   <div className="form-group">
-                    <label>Proveedor:</label>
+                    <label>Proveedor</label>
                     <select
                       className={`form-control ${
                         errors.IdProveedor ? "is-invalid" : ""
@@ -900,7 +911,7 @@ export const Compras = () => {
                 </div>
                 <div className="col-md-6">
                   <div className="form-group">
-                    <label>Fecha:</label>
+                    <label>Fecha</label>
                     <input
                       type="date"
                       className={`form-control ${
@@ -913,10 +924,10 @@ export const Compras = () => {
                       min={formattedMinDate} // Mínimo: 7 días atrás
                       max={maxDate} // Máximo: hoy
                     />
-                    <small>
+                    {/* <small>
                       Selecciona una fecha dentro de los últimos 7 días,
                       incluyendo hoy.
-                    </small>
+                    </small> */}
                     {renderErrorMessage(errors.Fecha)}
                   </div>
                 </div>
@@ -1054,7 +1065,7 @@ export const Compras = () => {
                 </button>
               </div>
               <div className="form-group">
-                <label>Total:</label>
+                <label>Total</label>
                 <input
                   type="text"
                   className="form-control"
@@ -1144,8 +1155,7 @@ export const Compras = () => {
                         <tr>
                           <th>Insumo</th>
                           <th>Cantidad</th>
-                          <th>Precio</th>{" "}
-                          {/* Mostrar el precio ingresado en la compra */}
+                          <th>Precio</th>
                           <th>SubTotal</th>
                         </tr>
                       </thead>
@@ -1155,12 +1165,10 @@ export const Compras = () => {
                             <tr key={index}>
                               <td>{getInsumoName(detalle.IdInsumo)}</td>
                               <td>{detalle.Cantidad}</td>
-                              <td>{formatPrice(detalle.Precio)}</td>{" "}
-                              {/* Precio del insumo tal como se ingresó */}
+                              <td>{formatPrice(detalle.Precio)}</td>
                               <td>
                                 {formatPrice(detalle.Cantidad * detalle.Precio)}
-                              </td>{" "}
-                              {/* Subtotal calculado */}
+                              </td>
                             </tr>
                           )
                         )}
@@ -1191,7 +1199,6 @@ export const Compras = () => {
           </div>
         </div>
       </div>
-
       {/* Fin modal ver detalle compra */}
 
       {/* Modal para la fecha y generar el reporte */}
@@ -1337,7 +1344,7 @@ export const Compras = () => {
                       }
                     >
                       <td>{getProveedorName(compra.IdProveedor)}</td>
-                      <td>{compra.Fecha}</td>
+                      <td>{formatearFecha(compra.Fecha)}</td>
                       <td>{formatPrice(compra.Total)}</td>
                       <td>
                         <div className="d-flex">

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 
 import { Link } from "react-router-dom";
 
-import imagenesProductos from "../../assets/img/camisetas";
 import axios from "axios";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";

@@ -781,7 +781,7 @@ export const Disenios = () => {
                 <div className="form-row">
                   {/* Nombre de diseño */}
                   <div className="form-group col-md-6">
-                    <label htmlFor="nombreDiseño">Nombre del Diseño:</label>
+                    <label htmlFor="nombreDiseño">Nombre del diseño</label>
                     <input
                       type="text"
                       className={`form-control ${
@@ -798,7 +798,7 @@ export const Disenios = () => {
 
                   {/* Tamaño de imagen*/}
                   <div className="form-group col-md-6">
-                    <label htmlFor="tamanioImagen">Tamaño de Imagen:</label>
+                    <label htmlFor="tamanioImagen">Tamaño de imagen</label>
                     <select
                       className="form-control"
                       id="tamanioImagen"
@@ -823,7 +823,7 @@ export const Disenios = () => {
 
                   {/* Posicion de imagen*/}
                   <div className="form-group col-md-6">
-                    <label htmlFor="posicionImagen">Posicion de Imagen:</label>
+                    <label htmlFor="posicionImagen">Posición de imagen</label>
 
                     <select
                       className="form-control"
@@ -851,7 +851,7 @@ export const Disenios = () => {
 
                   {/* Precio de diseño */}
                   <div className="form-group col-md-6">
-                    <label htmlFor="precioDiseño">Precio del Diseño:</label>
+                    <label htmlFor="precioDiseño">Precio del diseño</label>
                     <input
                       type="text"
                       className={`form-control ${
@@ -868,7 +868,7 @@ export const Disenios = () => {
 
                   {/* Imagen diseño*/}
                   <div className="form-group col-md-6">
-                    <label>Imagen Diseño :</label>
+                    <label>Imagen del diseño </label>
                     <br />
 
                     {/* {renderInputDisenio && ( */}
@@ -927,7 +927,7 @@ export const Disenios = () => {
                   {/* Imagen referencia*/}
                   <div className="form-group col-md-6">
                     <label htmlFor="ImagenDisenioCliente">
-                      Imagen Referencia :
+                      Imagen de referencia 
                     </label>
 
                     <br />
@@ -1045,7 +1045,7 @@ export const Disenios = () => {
                         {/* Nombre de diseño detalle*/}
                         <div className="form-group col-md-6">
                           <label htmlFor="nombreDiseño">
-                            Nombre del Diseño:
+                            Nombre del diseño
                           </label>
                           <input
                             type="text"
@@ -1059,7 +1059,7 @@ export const Disenios = () => {
                         {/* Tamaño de imagen detalle*/}
                         <div className="form-group col-md-6">
                           <label htmlFor="tamanioImagen">
-                            Tamaño de Imagen:
+                            Tamaño de imagen
                           </label>
                           <input
                             type="text"
@@ -1073,7 +1073,7 @@ export const Disenios = () => {
                         {/* Posicion de imagen detalle*/}
                         <div className="form-group col-md-6">
                           <label htmlFor="posicionImagen">
-                            Posicion de Imagen:
+                            Posición de la imagen
                           </label>
 
                           <input
@@ -1088,7 +1088,7 @@ export const Disenios = () => {
                         {/* Precio de diseño detalle*/}
                         <div className="form-group col-md-6">
                           <label htmlFor="precioDiseño">
-                            Precio del Diseño:
+                            Precio del diseño
                           </label>
                           <input
                             type="text"
@@ -1103,7 +1103,7 @@ export const Disenios = () => {
 
                         {/* Imagen diseño detalle*/}
                         <div className="form-group col-md-6">
-                          <label>Imagen Diseño :</label>
+                          <label>Imagen del diseño </label>
 
                           {disenioSeleccionado.ImagenDisenio !==
                             "No aplica" && (
@@ -1134,7 +1134,7 @@ export const Disenios = () => {
 
                         {/* Imagen referencia detalle*/}
                         <div className="form-group col-md-6">
-                          <label>Imagen Referencia :</label>
+                          <label>Imagen de referencia </label>
 
                           <div className="container py-4 mx-3">
                             <img

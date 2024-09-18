@@ -1416,7 +1416,7 @@ export const Ventas = () => {
                             <div className="form-row">
                               {/* Seleccionar cliente */}
                               <div className="form-group col-md-6">
-                                <label>Cliente:</label>
+                                <label>Cliente</label>
                                 <select
                                   className={`form-control ${
                                     errors.IdCliente ? "is-invalid" : ""
@@ -1442,7 +1442,7 @@ export const Ventas = () => {
 
                               {/* Seleccionar tipo de pago */}
                               <div className="form-group col-md-6">
-                                <label>Método de pago:</label>
+                                <label>Método de pago</label>
                                 <select
                                   className={`form-control ${
                                     errors.TipoPago ? "is-invalid" : ""
@@ -1465,7 +1465,7 @@ export const Ventas = () => {
 
                             {/* Fecha */}
                             <div className="form-group">
-                              <label>Fecha:</label>
+                              <label>Fecha</label>
                               <input
                                 type="text"
                                 className={"form-control"}
@@ -1644,7 +1644,7 @@ export const Ventas = () => {
                             </div>
 
                             <div className="form-group">
-                              <label>Total:</label>
+                              <label>Total</label>
                               <input
                                 type="text"
                                 className="form-control"
@@ -1773,23 +1773,6 @@ export const Ventas = () => {
                                   </div>
                                 )}
 
-                                {/* Boton enviar comprobante */}
-                                {/* {showComprobanteButton && (
-                                  <div className="d-flex justify-content-center align-items-center pt-4">
-                                    <button
-                                      type="button"
-                                      className="btn btn-primary"
-                                      onClick={() =>
-                                        enviarComprobante(
-                                          pedidoSeleccionado.IdPedido,
-                                          pedidoSeleccionado.IdImagenComprobante
-                                        )
-                                      }
-                                    >
-                                      Subir Comprobante
-                                    </button>
-                                  </div>
-                                )} */}
                               </div>
                             </div>
                           </div>
@@ -1941,7 +1924,7 @@ export const Ventas = () => {
                                 </table>
                               </div>
                               <div className="form-group">
-                                <label>Total:</label>
+                                <label>Total</label>
                                 <input
                                   type="text"
                                   className="form-control"

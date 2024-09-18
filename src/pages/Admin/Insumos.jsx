@@ -619,7 +619,7 @@ export const Insumos = () => {
               <form id="crearClienteForm">
                 <div className="form-row">
                   <div className="form-group col-md-6">
-                    <label htmlFor="idColor">Color del Insumo:</label>
+                    <label htmlFor="idColor">Color del insumo</label>
                     <select
                       className="form-control"
                       id="idColor"
@@ -627,7 +627,7 @@ export const Insumos = () => {
                       onChange={(e) => handleChangeIdColor(e)}
                       required
                     >
-                      <option value="">Seleccione un color</option>
+                      <option disabled value="">Seleccione un color</option>
                       {Colores.map((color) => (
                         <option key={color.IdColor} value={color.IdColor}>
                           {color.Color}
@@ -641,7 +641,7 @@ export const Insumos = () => {
                     )}
                   </div>
                   <div className="form-group col-md-6">
-                    <label htmlFor="idTalla">Talla del insumo:</label>
+                    <label htmlFor="idTalla">Talla del insumo</label>
                     <select
                       className="form-control"
                       id="idTalla"
@@ -649,7 +649,7 @@ export const Insumos = () => {
                       onChange={(e) => handleChangeIdTalla(e)}
                       required
                     >
-                      <option value="">Seleccione una talla</option>
+                      <option disabled value="">Seleccione una talla</option>
                       {Tallas.map((talla) => (
                         <option key={talla.IdTalla} value={talla.IdTalla}>
                           {talla.Talla}
@@ -666,7 +666,7 @@ export const Insumos = () => {
 
                 <div className="form-row">
                   <div className="form-group col-md-6">
-                    <label htmlFor="referencia">Referencia del insumo:</label>
+                    <label htmlFor="referencia">Referencia del insumo</label>
                     <input
                       type="text"
                       className={`form-control ${
@@ -687,7 +687,7 @@ export const Insumos = () => {
                   </div>
 
                   <div className="form-group col-md-6">
-                    <label htmlFor="nombreCliente">Cantidad:</label>
+                    <label htmlFor="nombreCliente">Cantidad</label>
                     <input
                       type="text"
                       className={`form-control ${
@@ -707,7 +707,7 @@ export const Insumos = () => {
                 <div className="form-row">
                   <div className="form-group col-md-12">
                     <label htmlFor="direccionCliente">
-                      Valor de la compra del insumo:
+                      Valor de la compra del insumo
                     </label>
                     <input
                       type="text"

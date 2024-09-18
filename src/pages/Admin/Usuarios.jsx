@@ -360,8 +360,13 @@ export const Usuarios = () => {
       setUsuarioSeleccionado(usuario);
       // Mostrar el modal de detalles de usuario
       const modal = new bootstrap.Modal(
-        document.getElementById("modalDetalleUsuario")
+        document.getElementById("modalDetalleUsuario"),
+        {
+          backdrop: "static",
+          keyboard: false,
+        }
       );
+
       modal.show();
     } catch (error) {
       // Manejar errores
@@ -531,7 +536,7 @@ export const Usuarios = () => {
               <form id="crearUsuarioForm">
                 <div className="form-row">
                   <div className="form-group col-md-6">
-                    <label htmlFor="usuario">Nombre de Usuario:</label>
+                    <label htmlFor="usuario">Nombre de usuario</label>
                     <input
                       type="text"
                       id="usuario"
@@ -546,7 +551,7 @@ export const Usuarios = () => {
                   </div>
 
                   <div className="form-group col-md-6">
-                    <label htmlFor="correo">Correo Electrónico:</label>
+                    <label htmlFor="correo">Correo electrónico</label>
                     <input
                       type="email"
                       id="correo"
@@ -562,7 +567,7 @@ export const Usuarios = () => {
 
                   {operation === 1 && (
                     <div className="form-group col-md-6">
-                      <label htmlFor="contraseniaNuevo">Contraseña:</label>
+                      <label htmlFor="contraseniaNuevo">Contraseña</label>
                       <div className="d-flex align-items-center">
                         <input
                           type={showPassword ? "text" : "password"}
@@ -596,7 +601,7 @@ export const Usuarios = () => {
                   )}
 
                   <div className="form-group col-md-6">
-                    <label htmlFor="rol">Rol:</label>
+                    <label htmlFor="rol">Rol</label>
                     {operation === 1 ? (
                       <select
                         id="rol"
@@ -606,7 +611,7 @@ export const Usuarios = () => {
                         value={IdRol}
                         onChange={handleChangeRol}
                       >
-                        <option value="">Selecciona un rol</option>
+                        <option disabled >Selecciona un rol</option>
                         {roles2.map((rol) => (
                           <option key={rol.IdRol} value={rol.IdRol}>
                             {rol.NombreRol}
@@ -616,7 +621,7 @@ export const Usuarios = () => {
                     ) : (
                       <input
                         type="text"
-                        id="rol"
+                        id="rolDetalle"
                         className="form-control"
                         value={getRolName(IdRol)} // Mostrar el nombre del rol basado en el IdRol
                         readOnly
@@ -649,13 +654,90 @@ export const Usuarios = () => {
       </div>
       {/* Fin modal crear/editar usuario */}
 
-      {/* Inicio de usuarios */}
-      <div className="container-fluid">
-        {/* Page Heading */}
-        <div className="d-flex align-items-center justify-content-between">
-          {/* <h1 className="h3 mb-3 text-center text-dark">Gestión de Usuarios</h1> */}
-        </div>
 
+      {/* Modal para detalles de usuario */}
+      <div
+        className="modal fade"
+        id="modalDetalleUsuario"
+        tabIndex="-1"
+        role="dialog"
+        aria-labelledby="modalDetalleUsuarioLabel"
+        aria-hidden="true"
+        data-backdrop="static"  
+        data-keyboard="false"  
+      >
+        <div className="modal-dialog modal-lg" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="modalDetalleUsuarioLabel">
+                Detalles del Usuario
+              </h5>
+              <button
+                type="button"
+                className="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div className="modal-body">
+            <div className="form-row">
+
+              {usuarioSeleccionado && (
+                <>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="usuario">Nombre de usuario</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="usuario"
+                      value={usuarioSeleccionado.Usuario}
+                      disabled
+                    />
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="correo">Correo electrónico</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      id="correo"
+                      value={usuarioSeleccionado.Correo}
+                      disabled
+                    />
+                  </div>
+                  <div className="form-group col-md-6">
+                    <label htmlFor="rol">Rol</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="rol"
+                      value={getRolName(usuarioSeleccionado.IdRol)}
+                      disabled
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-dismiss="modal"
+                id="btnCerrarDetalle"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+      {/* Modal para detalles de usuario */}
+
+
+
+      <div className="container-fluid">
         {/* Tabla Usuarios */}
         <div className="card shadow mb-4">
           <div className="card-header py-1 d-flex justify-content-between align-items-center">
@@ -738,6 +820,7 @@ export const Usuarios = () => {
                           >
                             <i className="fas fa-trash-alt"></i>
                           </button>
+
                           <button
                             className="btn btn-info btn-sm mr-2"
                             title="Detalle"
@@ -764,84 +847,10 @@ export const Usuarios = () => {
             />
           </div>
         </div>
-
         {/* Fin tabla usuarios */}
       </div>
-      {/* Modal para detalles de usuario */}
-      <div
-        className="modal fade"
-        id="modalDetalleUsuario"
-        tabIndex="-1"
-        role="dialog"
-        aria-labelledby="modalDetalleUsuarioLabel"
-        aria-hidden="true"
-        data-backdrop="static"
-        data-keyboard="false"
-      >
-        <div className="modal-dialog modal-l" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="modalDetalleUsuarioLabel">
-                Detalles del Usuario
-              </h5>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              {usuarioSeleccionado && (
-                <>
-                  <div className="mb-2">
-                    <label htmlFor="usuario">Usuario:</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="usuario"
-                      value={usuarioSeleccionado.Usuario}
-                      disabled
-                    />
-                  </div>
-                  <div className="mb-2">
-                    <label htmlFor="correo">Correo:</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="correo"
-                      value={usuarioSeleccionado.Correo}
-                      disabled
-                    />
-                  </div>
-                  <div className="mb-2">
-                    <label htmlFor="rol">Rol:</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="rol"
-                      value={getRolName(usuarioSeleccionado.IdRol)}
-                      disabled
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-dismiss="modal"
-                id="btnCerrarDetalle"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      
+
       <AdminFooter />
     </>
   );

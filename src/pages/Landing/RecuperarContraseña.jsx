@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import show_alerta from "../../components/Show_Alerta/show_alerta";
 
 export const RecuperarContraseña = () => {
   const [Correo, setCorreo] = useState("");
+  const navigate = useNavigate();
+
   const urlRecuperar =
     "https://softshirt-1c3fad7d72e8.herokuapp.com/api/restablecerContraseniaCliente";
 
@@ -85,7 +87,13 @@ export const RecuperarContraseña = () => {
         { Correo },
         { withCredentials: true }
       );
+      console.log(respuesta);
+      
       const msj = respuesta.data.message;
+      const token= respuesta.data.token;
+
+      localStorage.setItem('RecuperarPass', token); // Guardar el token en localStorage
+      navigate("/");
       show_alerta({
         message: msj, type: "success"
       });
@@ -116,7 +124,7 @@ export const RecuperarContraseña = () => {
       >
         <div className="card p-4 shadow-lg w-100" style={{ maxWidth: "400px" }}>
           <div className="text-center">
-            <h2 className="fw-bold mb-5">Recuperar Contraseña</h2>
+            <h2 className="fw-bold mb-5">Recuperar contraseña</h2>
           </div>
           <div className="mb-3 text-center">
             <label htmlFor="correo" className="form-label">

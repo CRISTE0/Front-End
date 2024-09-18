@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import imagenesLanding from "../../assets/img/imagenesHome";
 import { useAuth } from "../../context/AuthProvider";
+import show_alerta from "../../components/Show_Alerta/show_alerta";
 export const ProductoSolo = () => {
   const { id } = useParams();
   const [Producto, setProducto] = useState([]);
@@ -144,11 +145,6 @@ export const ProductoSolo = () => {
     getProducto();
   }, [id]);
 
-  // if (!TallaProducto) {
-  //   return <h1>Loading...</h1>;
-  // }
-
-
 
   // Incrementar cantidad del carrito
   const incrementarCantidad = (idProductoSeleccionado) => {
@@ -161,7 +157,7 @@ export const ProductoSolo = () => {
 
     // Si no se encuentra un insumo que coincida con la talla y color seleccionados
     if (!insumoSeleccionado) {
-      show_alerta("Insumo no encontrado para la talla y color seleccionados", "error");
+      show_alerta({message:"Insumo no encontrado para la talla y color seleccionados", type:"error"});
       return;
     }
 
@@ -176,7 +172,7 @@ export const ProductoSolo = () => {
     if (productIndex !== -1) {
       // Validación de la cantidad disponible
       if (cart[productIndex].CantidadSeleccionada >= insumoSeleccionado.CantidadProductoInsumo) {
-        show_alerta("Cantidad máxima del producto alcanzada", "error");
+        show_alerta({message: "Cantidad máxima del producto alcanzada", type:"error"});
         return;
       }
 
@@ -192,8 +188,11 @@ export const ProductoSolo = () => {
         CantidadSeleccionada: prevProducto.CantidadSeleccionada + 1,
       }));
 
+
       getProducto();
       triggerRender();
+      show_alerta({message:"Producto agregado al carrito correctamente ", type:"success"});
+    
     } else {
       // Si el producto no existe en el carrito, agrégalo con una cantidad inicial de 1
       cart.push({
@@ -204,6 +203,9 @@ export const ProductoSolo = () => {
       localStorage.setItem("cart", JSON.stringify(cart));
 
       console.log(JSON.parse(localStorage.getItem("cart")));
+
+      show_alerta({message:"Producto agregado al carrito correctamente ", type:"success"});
+
 
       getProducto();
       triggerRender();
@@ -216,106 +218,6 @@ export const ProductoSolo = () => {
     // navigate("/Carrito");
   };
 
-
-  // Disminuir cantidad del carrito
-  const disminuirCantidad = (idProductoSeleccionado, NombreDisenio) => {
-    // let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-    // Encuentra el índice del producto en el carrito
-    const productIndex = cart.findIndex(
-      (item) => item.IdProd == idProductoSeleccionado
-    );
-
-    if (productIndex !== -1) {
-      if (cart[productIndex].CantidadSeleccionada > 1) {
-        // Reduce la cantidad del producto si es mayor que 1
-        cart[productIndex].CantidadSeleccionada -= 1;
-
-        // Actualiza el carrito en el localStorage
-        localStorage.setItem("cart", JSON.stringify(cart));
-
-        // Actualiza el estado del producto
-        setProducto((prevProducto) => ({
-          ...prevProducto,
-          CantidadSeleccionada: prevProducto.CantidadSeleccionada - 1,
-        }));
-
-        getProducto();
-        triggerRender();
-
-        console.log(cart);
-      } else {
-        const MySwal = withReactContent(Swal);
-        MySwal.fire({
-          title: `¿Seguro de eliminar el producto ${NombreDisenio} del carrito  ?`,
-          icon: "question",
-          text: "No se podrá dar marcha atrás",
-          showCancelButton: true,
-          confirmButtonText: "Sí, eliminar",
-          cancelButtonText: "Cancelar",
-          showClass: {
-            popup: "swal2-show",
-            backdrop: "swal2-backdrop-show",
-            icon: "swal2-icon-show",
-          },
-          hideClass: {
-            popup: "swal2-hide",
-            backdrop: "swal2-backdrop-hide",
-            icon: "swal2-icon-hide",
-          },
-        }).then((result) => {
-          // Si se confirma eliminar el producto
-          if (result.isConfirmed) {
-            // Elimina el producto del carrito si la cantidad es 1 y se intenta reducir más
-            cart.splice(productIndex, 1);
-            localStorage.setItem("cart", JSON.stringify(cart));
-
-            // Actualiza el estado del carrito en React
-            // setCartItems(prevCartItems => prevCartItems.filter(item => item.id !== idProductoSeleccionado));
-
-            setProducto((prevProducto) => ({
-              ...prevProducto,
-              CantidadSeleccionada: (prevProducto.CantidadSeleccionada = 0),
-            }));
-
-            console.log(JSON.parse(localStorage.getItem("cart")));
-
-            getProducto();
-            triggerRender();
-
-            show_alerta("El producto fue eliminado del carrito", "success");
-          } else if (result.dismiss === Swal.DismissReason.cancel) {
-            show_alerta("El producto NO fue eliminado del carrito", "info");
-          } else if (
-            result.dismiss === Swal.DismissReason.backdrop ||
-            result.dismiss === Swal.DismissReason.esc
-          ) {
-            show_alerta("El producto NO fue eliminado del carrito", "info");
-          }
-        });
-      }
-    }
-  };
-
-  // Funcion de alerta
-  const show_alerta = (message, type) => {
-    const MySwal = withReactContent(Swal);
-    MySwal.fire({
-      title: message,
-      icon: type,
-      timer: 2000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: () => {
-        // Selecciona la barra de progreso y ajusta su estilo
-        const progressBar = MySwal.getTimerProgressBar();
-        if (progressBar) {
-          progressBar.style.backgroundColor = "black";
-          progressBar.style.height = "6px";
-        }
-      },
-    });
-  };
 
   // Funcion para formatear el precio
   const formatCurrency = (value) => {

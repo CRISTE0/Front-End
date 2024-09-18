@@ -1538,18 +1538,6 @@ https://softshirt-1c3fad7d72e8.herokuapp.com
               searchTerm={searchTerm}
               onSearchTermChange={handleSearchTermChange}
             />
-            {/* <button
-              type="button"
-              className="btn btn-dark"
-              data-toggle="modal"
-              data-target="#modalCompras"
-              onClick={() => Clientes.length > 0 && openModal(1)}
-              style={{
-                width: "165px"
-              }}
-            >
-              <i className="fas fa-pencil-alt"></i> Añadir Pedido
-            </button> */}
           </div>
           <div className="card-body">
             <div className="table-responsive">

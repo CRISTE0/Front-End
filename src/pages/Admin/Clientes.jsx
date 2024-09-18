@@ -701,7 +701,7 @@ export const Clientes = () => {
                 <div className="form-row">
                   <div className="form-group col-md-6">
                     <label htmlFor="tipoDocumentoCliente">
-                      Tipo de Documento:
+                      Tipo de documento
                     </label>
                     <select
                       className="form-control"
@@ -710,7 +710,7 @@ export const Clientes = () => {
                       onChange={(e) => handleChangeTipoDocumento(e)}
                       required
                     >
-                      <option value="">Seleccione un tipo de documento</option>
+                      <option disabled value="">Seleccione un tipo de documento</option>
                       <option value="CC">Cédula</option>
                       <option value="CE">Cédula de Extranjería</option>
                     </select>
@@ -723,7 +723,7 @@ export const Clientes = () => {
                   </div>
                   <div className="form-group col-md-6">
                     <label htmlFor="nroDocumentoCliente">
-                      Número de Documento:
+                      Número de documento
                     </label>
                     <input
                       type="text"
@@ -740,7 +740,7 @@ export const Clientes = () => {
                   </div>
                   <div className="form-group col-md-6">
                     <label htmlFor="nombreCliente">
-                      Nombre y apellido del cliente:
+                      Nombre y apellido del cliente
                     </label>
                     <input
                       type="text"
@@ -756,7 +756,7 @@ export const Clientes = () => {
                     {renderErrorMessage(errors.nombreApellido)}
                   </div>
                   <div className="form-group col-md-6">
-                    <label htmlFor="nombreUsuario">Nombre de Usuario:</label>
+                    <label htmlFor="nombreUsuario">Nombre de usuario</label>
                     <input
                       type="text"
                       className={`form-control ${
@@ -771,7 +771,7 @@ export const Clientes = () => {
                     {renderErrorMessage(errors.usuario)}
                   </div>
                   <div className="form-group col-md-6">
-                    <label htmlFor="telefonoCliente">Teléfono:</label>
+                    <label htmlFor="telefonoCliente">Teléfono</label>
                     <input
                       type="text"
                       className={`form-control ${
@@ -786,7 +786,7 @@ export const Clientes = () => {
                     {renderErrorMessage(errors.telefono)}
                   </div>
                   <div className="form-group col-md-6">
-                    <label htmlFor="direccionCliente">Dirección:</label>
+                    <label htmlFor="direccionCliente">Dirección</label>
                     <input
                       type="text"
                       className={`form-control ${
@@ -801,7 +801,7 @@ export const Clientes = () => {
                     {renderErrorMessage(errors.direccion)}
                   </div>
                   <div className="form-group col-md-6">
-                    <label htmlFor="correoCliente">Correo Electrónico:</label>
+                    <label htmlFor="correoCliente">Correo electrónico</label>
                     <input
                       type="text"
                       className={`form-control ${
@@ -818,7 +818,7 @@ export const Clientes = () => {
 
                   {operation === 1 && (
                     <div className="form-group col-md-6">
-                      <label htmlFor="contraseniaCliente">Contraseña :</label>
+                      <label htmlFor="contraseniaCliente">Contraseña</label>
                       <div className="input-group">
                         <input
                           type={showPassword ? "text" : "password"}

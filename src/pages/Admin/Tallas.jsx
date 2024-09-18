@@ -378,7 +378,7 @@ export const Tallas = () => {
               />
 
               <div className="form-group">
-                <label htmlFor="talla">Talla:</label>
+                <label htmlFor="talla">Talla</label>
                 <input
                   type="text"
                   id="talla"

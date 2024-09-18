@@ -637,7 +637,7 @@ export const Proveedores = () => {
                       onChange={(e) => handleChangeTipoDocumento(e)}
                       required
                     >
-                      <option value="">Seleccione un tipo de documento</option>
+                      <option disabled value="">Seleccione un tipo de documento</option>
                       <option value="CC">Cédula</option>
                       <option value="CE">Cédula de Extranjería</option>
                       <option value="NIT">NIT</option>
@@ -654,7 +654,7 @@ export const Proveedores = () => {
 
                   <div className="form-group col-md-6">
                     <label htmlFor="nroDocumentoProveedor">
-                      Número de Documento:
+                      Número de documento
                     </label>
                     <input
                       type="text"
@@ -671,7 +671,7 @@ export const Proveedores = () => {
                   </div>
                   <div className="form-group col-md-6">
                     <label htmlFor="nombreProveedor">
-                      {NombreApellidoLabel}:
+                      {NombreApellidoLabel}
                     </label>
                     <input
                       type="text"
@@ -687,7 +687,7 @@ export const Proveedores = () => {
                     {renderErrorMessage(errors.nombreApellido)}
                   </div>
                   <div className="form-group col-md-6">
-                    <label htmlFor="contactoProveedor">Contacto:</label>
+                    <label htmlFor="contactoProveedor">Contacto</label>
                     <input
                       type="text"
                       className={`form-control ${
@@ -706,7 +706,7 @@ export const Proveedores = () => {
                 </div>
                 <div className="form-row">
                   <div className="form-group col-md-6">
-                    <label htmlFor="telefonoProveedor">Teléfono:</label>
+                    <label htmlFor="telefonoProveedor">Teléfono</label>
                     <input
                       type="text"
                       className={`form-control ${
@@ -721,7 +721,7 @@ export const Proveedores = () => {
                     {renderErrorMessage(errors.telefono)}
                   </div>
                   <div className="form-group col-md-6">
-                    <label htmlFor="direccionCliente">Dirección:</label>
+                    <label htmlFor="direccionCliente">Dirección</label>
                     <input
                       type="text"
                       className={`form-control ${
@@ -738,7 +738,7 @@ export const Proveedores = () => {
                 </div>
                 <div className="form-row">
                   <div className="form-group col-md-12">
-                    <label htmlFor="correoProveedor">Correo Electrónico:</label>
+                    <label htmlFor="correoProveedor">Correo electrónico</label>
                     <input
                       type="email"
                       className={`form-control ${

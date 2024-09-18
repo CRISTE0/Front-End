@@ -32,11 +32,13 @@ export const ConfirmarContraseniaUsuario = () => {
   });
 
   const validarCookie = () => {
-    let cookie = Cookies.get("RecuperarPass");
+    const token = localStorage.getItem('RecuperarPass');
 
-    if (cookie) {
-      if (cookie == cookieParams) {
-        const decode = jwtDecode(cookie);
+    // let cookie = Cookies.get("RecuperarPass");
+
+    if (token) {
+      if (token == cookieParams) {
+        const decode = jwtDecode(token);
         console.log(decode.Correo);
         console.log(cookieParams);
 
@@ -47,7 +49,7 @@ export const ConfirmarContraseniaUsuario = () => {
             "El tiempo para recuperar la contraseña a expirado, intentelo de nuevo",
           type: "error",
         });
-        navigate("/RecuperarCliente");
+        navigate("/RecuperarUsuario");
       }
     } else {
       show_alerta({
@@ -55,7 +57,7 @@ export const ConfirmarContraseniaUsuario = () => {
           "El tiempo para recuperar la contraseña a expirado, intentelo de nuevo",
         type: "error",
       });
-      navigate("/RecuperarCliente");
+      navigate("/RecuperarUsuario");
     }
   };
 
@@ -210,8 +212,8 @@ export const ConfirmarContraseniaUsuario = () => {
         message: msj, type: "success"
       });
       
-      navigate("/admin/login");
-      Cookies.remove("RecuperarPass");
+      navigate("/admin/Login");
+      localStorage.removeItem("RecuperarPass");
       
     } catch (error) {
       if (error.response) {

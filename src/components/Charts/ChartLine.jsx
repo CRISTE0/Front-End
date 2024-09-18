@@ -11,6 +11,8 @@ import {
   Tooltip,
   Legend,
   Filler,
+  BarController,  // Registrar BarController
+  LineController, // Registrar LineController
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels"; // Importar el plugin
 import axios from "axios";
@@ -26,7 +28,9 @@ ChartJS.register(
   Tooltip,
   Legend,
   Filler,
-  ChartDataLabels // Registrar el plugin
+  ChartDataLabels, // Registrar el plugin
+  BarController,  // Añadir BarController
+  LineController  // Añadir LineController
 );
 
 // Datos y configuración del gráfico

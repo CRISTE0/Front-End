@@ -1424,7 +1424,7 @@ export const Catalogo = () => {
                     <>
                       {/* Diseño del Producto */}
                       <div className="form-group col-md-5">
-                        <label htmlFor="idDisenio">Diseño del Producto:</label>
+                        <label htmlFor="idDisenio">Diseño del producto</label>
                         <select
                           className={`form-control ${
                             errors.IdDisenio ? "is-invalid" : ""
@@ -1472,7 +1472,7 @@ export const Catalogo = () => {
                       {/* Referencia del Producto */}
                       <div className="form-group col-md-6">
                         <label htmlFor="Referencia">
-                          Referencia del Producto:
+                          Referencia del producto
                         </label>
                         <input
                           type="text"
@@ -1495,7 +1495,7 @@ export const Catalogo = () => {
                       {/* Valor venta del producto */}
                       <div className="form-group col-md-12">
                         <label htmlFor="direccionCliente">
-                          Valor de la venta del producto:
+                          Valor de la venta del producto
                         </label>
                         <input
                           type="text"

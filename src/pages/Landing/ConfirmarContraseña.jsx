@@ -32,11 +32,13 @@ export const ConfirmarContrasenia = () => {
   });
 
   const validarCookie = () => {
-    let cookie = Cookies.get("RecuperarPass");
 
-    if (cookie) {
-      if (cookie == cookieParams) {
-        const decode = jwtDecode(cookie);
+    const token = localStorage.getItem('RecuperarPass');
+
+
+    if (token) {
+      if (token == cookieParams) {
+        const decode = jwtDecode(token);
         console.log(decode.Correo);
         console.log(cookieParams);
 
@@ -206,9 +208,7 @@ export const ConfirmarContrasenia = () => {
       });
 
       navigate("/login");
-      Cookies.remove("RecuperarPass");
-
-
+      localStorage.removeItem("RecuperarPass");
 
     } catch (error) {
       if (error.response) {
