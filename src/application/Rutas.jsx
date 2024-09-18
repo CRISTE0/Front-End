@@ -56,12 +56,12 @@ export const Rutas = () => {
 
         <Route path="/RecuperarCliente" Component={()=> <LandingLayout> <RecuperarContraseña /> </LandingLayout> } />
 
-        <Route path="/ConfirmarConstraseña/:cookieParams" Component={()=> <LandingLayout> <ConfirmarContrasenia /> </LandingLayout> } />
+        <Route path="/ConfirmarConstrasenia/:cookieParams" Component={()=> <LandingLayout> <ConfirmarContrasenia /> </LandingLayout> } />
 
 
         <Route path="/RecuperarUsuario" Component={()=> <LandingLayout> <RecuperarContraseñaUsuario /> </LandingLayout> } />
 
-        <Route path="/ConfirmarConstraseñaUsuario/:cookieParams" Component={()=> <LandingLayout> <ConfirmarContraseniaUsuario /> </LandingLayout> } />
+        <Route path="/ConfirmarConstraseniaUsuario/:cookieParams" Component={()=> <LandingLayout> <ConfirmarContraseniaUsuario /> </LandingLayout> } />
 
         <Route path="/ActualizarDatos/:id" element={ <ActualizarDatos />  } />
 
