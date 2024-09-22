@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Cookies from "js-cookie";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, HashRouter } from "react-router-dom";
 import {Inicio} from "../pages/Landing/Inicio";
 import {Productos} from "../pages/Landing/Productos";
 import {Contactenos} from "../pages/Landing/Contactenos";
@@ -40,28 +40,28 @@ export const Rutas = () => {
 
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         {/* Rutas públicas */}
-        <Route exat path="/" Component={()=> <LandingLayout> <Inicio /> </LandingLayout> } />
-        <Route path="/Productos" Component={()=> <LandingLayout> <Productos /> </LandingLayout>  } />
-        <Route path="/Contactenos" Component={()=> <LandingLayout> <Contactenos /> </LandingLayout> } />
-        <Route path="/Diseniador" Component={()=> <LandingLayout> <Diseniador /> </LandingLayout> } />
+        <Route exat path="/" element={ <LandingLayout> <Inicio /> </LandingLayout> } />
+        <Route path="/Productos" element={ <LandingLayout> <Productos /> </LandingLayout>  } />
+        <Route path="/Contactenos" element={ <LandingLayout> <Contactenos /> </LandingLayout> } />
+        <Route path="/Diseniador" element={ <LandingLayout> <Diseniador /> </LandingLayout> } />
 
 
-        <Route path="/Register" Component={()=> <LandingLayout> <Register /> </LandingLayout> } />
-        <Route path="/RecuperarContraseña" Component={()=> <LandingLayout> <RecuperarContraseña /> </LandingLayout> } />        
-        <Route path="/ProductoSolo/:id" Component={()=> <LandingLayout> <ProductoSolo /> </LandingLayout>  } />
+        <Route path="/Register" element={ <LandingLayout> <Register /> </LandingLayout> } />
+        <Route path="/RecuperarContraseña" element={ <LandingLayout> <RecuperarContraseña /> </LandingLayout> } />        
+        <Route path="/ProductoSolo/:id" element={ <LandingLayout> <ProductoSolo /> </LandingLayout>  } />
 
 
-        <Route path="/RecuperarCliente" Component={()=> <LandingLayout> <RecuperarContraseña /> </LandingLayout> } />
+        <Route path="/RecuperarCliente" element={ <LandingLayout> <RecuperarContraseña /> </LandingLayout> } />
 
-        <Route path="/ConfirmarConstrasenia/:cookieParams" Component={()=> <LandingLayout> <ConfirmarContrasenia /> </LandingLayout> } />
+        <Route path="/ConfirmarConstrasenia/:cookieParams" element={()=> <LandingLayout> <ConfirmarContrasenia /> </LandingLayout> } />
 
 
-        <Route path="/RecuperarUsuario" Component={()=> <LandingLayout> <RecuperarContraseñaUsuario /> </LandingLayout> } />
+        <Route path="/RecuperarUsuario" element={ <LandingLayout> <RecuperarContraseñaUsuario /> </LandingLayout> } />
 
-        <Route path="/ConfirmarConstraseniaUsuario/:cookieParams" Component={()=> <LandingLayout> <ConfirmarContraseniaUsuario /> </LandingLayout> } />
+        <Route path="/ConfirmarConstraseniaUsuario/:cookieParams" element={ <LandingLayout> <ConfirmarContraseniaUsuario /> </LandingLayout> } />
 
         <Route path="/ActualizarDatos/:id" element={ <ActualizarDatos />  } />
 
@@ -71,12 +71,12 @@ export const Rutas = () => {
         </Route> */}
 
         <Route element={<PublicRoute />}> 
-          <Route path="/Login" Component={()=> <LandingLayout> <Login /> </LandingLayout> } />
+          <Route path="/Login" element={ <LandingLayout> <Login /> </LandingLayout> } />
         </Route>
 
 
         <Route element={<PublicRoute/>}> 
-        <Route path="/admin/Login" Component={()=> <LandingLayout> < LoginAdmin/> </LandingLayout> } />
+        <Route path="/admin/Login" element={ <LandingLayout> < LoginAdmin/> </LandingLayout> } />
         </Route>
 
 
@@ -85,80 +85,80 @@ export const Rutas = () => {
 
 
         <Route element={<PrivateRoute requiredPermissions={["Carrito"]}/>}> 
-          <Route path="/Carrito" Component={()=> <LandingLayout> <Carrito /> </LandingLayout>  } />
+          <Route path="/Carrito" element={ <LandingLayout> <Carrito /> </LandingLayout>  } />
         </Route>
 
         {/* cuando la ruta sea solo admin, lo rediriga a algun permiso que tenga el usuario  */}
         <Route element={<PrivateRoute requiredPermissions={["siu"]}/>}> 
-          <Route path="/admin" Component={()=> <AdminLayout> <Dashboard /> </AdminLayout>  } />
+          <Route path="/admin" element={ <AdminLayout> <Dashboard /> </AdminLayout>  } />
         </Route>        
 
         <Route element={<PrivateRoute requiredPermissions={["Dashboard"]}/>}> 
-          <Route path="/admin/Dashboard" Component={()=> <AdminLayout> <Dashboard /> </AdminLayout>  } />
+          <Route path="/admin/Dashboard" element={ <AdminLayout> <Dashboard /> </AdminLayout>  } />
         </Route>
 
         <Route element={<PrivateRoute requiredPermissions={["Configuración"]}/>}> 
-          <Route path="/admin/Configuracion" Component={()=> <AdminLayout> <Configuracion /> </AdminLayout> } />
+          <Route path="/admin/Configuracion" element={ <AdminLayout> <Configuracion /> </AdminLayout> } />
         </Route>
 
         
         <Route element={<PrivateRoute requiredPermissions={["Usuarios"]}/>}> 
-          <Route path="/admin/Usuarios" Component={()=> <AdminLayout> <Usuarios /> </AdminLayout> } />
+          <Route path="/admin/Usuarios" element={ <AdminLayout> <Usuarios /> </AdminLayout> } />
         </Route>
 
 
         <Route element={<PrivateRoute requiredPermissions={["Proveedores"]}/>}> 
-          <Route path="/admin/Proveedores" Component={()=> <AdminLayout> <Proveedores /> </AdminLayout> } />
+          <Route path="/admin/Proveedores" element={ <AdminLayout> <Proveedores /> </AdminLayout> } />
         </Route>
 
         <Route element={<PrivateRoute requiredPermissions={["Insumos"]}/>}> 
-          <Route path="/admin/Insumos" Component={()=> <AdminLayout> <Insumos /> </AdminLayout> } />
+          <Route path="/admin/Insumos" element={ <AdminLayout> <Insumos /> </AdminLayout> } />
         </Route>
 
         <Route element={<PrivateRoute requiredPermissions={["Tallas"]}/>}> 
-          <Route path="/admin/Tallas" Component={()=> <AdminLayout> <Tallas /> </AdminLayout> } />
+          <Route path="/admin/Tallas" element={ <AdminLayout> <Tallas /> </AdminLayout> } />
         </Route>
 
         <Route element={<PrivateRoute requiredPermissions={["Colores"]}/>}> 
-          <Route path="/admin/Colores" Component={()=> <AdminLayout> <Colores /> </AdminLayout> } />
+          <Route path="/admin/Colores" element={ <AdminLayout> <Colores /> </AdminLayout> } />
         </Route>
 
         <Route element={<PrivateRoute requiredPermissions={["Compras"]}/>}> 
-          <Route path="/admin/Compras" Component={()=> <AdminLayout> <Compras /> </AdminLayout> } />
+          <Route path="/admin/Compras" element={ <AdminLayout> <Compras /> </AdminLayout> } />
         </Route>
 
         <Route element={<PrivateRoute requiredPermissions={["Productos"]}/>}> 
-          <Route path="/admin/Productos" Component={()=> <AdminLayout> <Catalogo /> </AdminLayout> } />
+          <Route path="/admin/Productos" element={ <AdminLayout> <Catalogo /> </AdminLayout> } />
         </Route>
 
 
         
         <Route element={<PrivateRoute requiredPermissions={["Diseños"]}/>}> 
-          <Route path="/admin/Disenios" Component={()=> <AdminLayout> <Disenios /> </AdminLayout> } />
+          <Route path="/admin/Disenios" element={ <AdminLayout> <Disenios /> </AdminLayout> } />
         </Route>
 
         
         <Route element={<PrivateRoute requiredPermissions={["Clientes"]}/>}> 
-          <Route path="/admin/Clientes" Component={()=> <AdminLayout> <Clientes /> </AdminLayout> } />
+          <Route path="/admin/Clientes" element={ <AdminLayout> <Clientes /> </AdminLayout> } />
         </Route>
 
         
         <Route element={<PrivateRoute requiredPermissions={["Ventas"]}/>}> 
-          <Route path="/admin/Ventas" Component={()=> <AdminLayout> <Ventas /> </AdminLayout> } />
+          <Route path="/admin/Ventas" element={ <AdminLayout> <Ventas /> </AdminLayout> } />
         </Route>
 
         
         <Route element={<PrivateRoute requiredPermissions={["Pedidos"]}/>}> 
-          <Route path="/admin/Pedidos" Component={()=> <AdminLayout> <Pedidos /> </AdminLayout> } />
+          <Route path="/admin/Pedidos" element={ <AdminLayout> <Pedidos /> </AdminLayout> } />
         </Route>
 
 
 
         <Route path="*" element={<Pages404 />} />
-        <Route path="/unauthorized" Component={() => <h1>pa onde papi, 🐸 HP</h1>} />
+        <Route path="/unauthorized" element={ <h1>pa onde papi, 🐸 HP</h1>} />
         
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 };
 
